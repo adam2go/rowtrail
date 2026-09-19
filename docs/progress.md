@@ -41,10 +41,13 @@ budgets, timeouts, true cancellation, idempotency, read-only SQL, corrupt result
 files, coordinator/worker crashes, empty results/CSV headers, partial results,
 event replay, source invalidation and refresh. No tests call a model.
 
-`cargo fmt --check`, Clippy with warnings denied, workspace compilation/test
-harnesses, dependency boundaries, MCP cross-entry consumption, and the SDK example
-pass locally. Platform CI status is available in the repository Actions tab;
-The first independent Linux/macOS run passed; the final error handling and caller-directory regression changes are being revalidated.
+`cargo fmt --check`, Clippy with warnings denied, workspace tests (including two
+error-type checks), dependency boundaries, MCP cross-entry consumption, and the
+SDK precision example pass on **Ubuntu 24.04 x86_64 and macOS 14 arm64** in
+[the final CI run](https://github.com/adam2go/rowtrail/actions/runs/35459097860). Each platform passes all 27 end-to-end checks.
+Both package checksums were verified after download; the macOS CI archive was
+also extracted and executed locally. Artifact hashes and provenance are in
+[release-verification.json](release-verification.json).
 
 The five-repeat initial comparison is recorded in `benchmarks/baseline.json`.
 RowTrail's median is about 379 ms versus 14 ms for persistent DuckDB and 5 ms for

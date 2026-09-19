@@ -1,5 +1,7 @@
 # RowTrail
 
+[![Build and verify](https://github.com/adam2go/rowtrail/actions/workflows/ci.yml/badge.svg)](https://github.com/adam2go/rowtrail/actions/workflows/ci.yml)
+
 [简体中文](README.zh-CN.md) · [Releases](https://github.com/adam2go/rowtrail/releases)
 
 **Let every step of an agent's data exploration continue.**
