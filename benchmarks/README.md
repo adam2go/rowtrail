@@ -61,3 +61,17 @@ operations and recovery, not only successful queries. CI uploads separate
 platform traces and package metadata. Whole-process resource profiling and
 Agent interaction-cost distributions are incomplete; engine pool limits must
 not be confused with an RSS guarantee.
+
+## Client distribution and discovery
+
+The final local arm64 macOS build measures 3,468,496 bytes for `rowtrail` and
+99,652,256 bytes for `rowtrail-runtime`; the pair plus license notices compresses
+to about 35.2 MB. Help and schema discovery do not start the runtime. Ten fresh
+process samples with warm OS cache measured about 4 ms median wall time, including
+the `/usr/bin/time` wrapper, and below 8 MB peak client RSS. These are local
+measurements, not promises for other machines or the sizes of CI-built packages.
+See `client-startup-macos.json`. For a single sample on macOS:
+
+```sh
+/usr/bin/time -l target/release/rowtrail schema query
+```

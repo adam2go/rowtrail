@@ -39,6 +39,14 @@ rowtrail export res_ID --revision 2 --format parquet --output ./result.parquet
 示例中的 ID 和 revision 要替换成实际返回值。便宜查询直接返回结果观察；耗时查询返回
 真实后台任务。关闭提交命令不会停止计算，`rowtrail job cancel job_ID` 才会取消。
 
+如果想直接运行完整示例，无需手动替换 ID：
+
+```sh
+python3 examples/explore.py /tmp/rowtrail-data/many.parquet --rowtrail ./target/release/rowtrail
+```
+
+这个可选示例使用 Python，自动传递固定结果引用，并输出两个分支的原始数据/结果读取计数。
+
 ## 接入 Agent
 
 CLI、MCP 和 Rust SDK 共用请求结构、任务状态与持久结果。

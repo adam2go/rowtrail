@@ -78,6 +78,15 @@ Exports include a `.rowtrail.json` sidecar with source quality and type metadata
 CSV input can use `--schema schema.json` for precise types such as Decimal. The
 test [fixture manifest](tests/fixtures/manifest.json) shows the schema format.
 
+For a runnable workflow that passes fixed references between operations and
+reports the original/result read counts, use the [composition example](examples/explore.py):
+
+```sh
+python3 examples/explore.py /tmp/rowtrail-data/many.parquet --rowtrail ./target/release/rowtrail
+```
+
+Python is only needed for this optional example.
+
 ## CLI, MCP, and Rust client
 
 All entries use the same request types, durable jobs, and result store.
