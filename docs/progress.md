@@ -20,7 +20,8 @@ delivery. It is not the complete M2B–M6 local product.
   while retaining an idle worker for the next job.
 - Source/result read counters, result-write accounting, engine pool/spill budgets,
   physical scan reservations (including export), bounded serialized observations
-  and errors. Error envelopes reserve a minimum 512-byte budget; truncated error
+  and errors. Shared-runtime clients resolve relative paths in their own working
+  directories. Error envelopes reserve a minimum 512-byte budget; truncated error
   text and identifiers are explicitly flagged.
 - Best-effort source version checks and transitive invalidation. Refresh makes a
   new manifest. Partial input quality propagates through derived queries and
@@ -33,7 +34,7 @@ delivery. It is not the complete M2B–M6 local product.
 
 ## Evidence
 
-The local release binaries pass 26 deterministic end-to-end checks. These cover
+The local release binaries pass 27 deterministic end-to-end checks. These cover
 hand-calculated CSV/four-row-group Parquet S1, branching saved results in S2, a
 16,384-row integer reference, worker reuse, precision/pagination, query and export
 budgets, timeouts, true cancellation, idempotency, read-only SQL, corrupt result
@@ -43,10 +44,10 @@ event replay, source invalidation and refresh. No tests call a model.
 `cargo fmt --check`, Clippy with warnings denied, workspace compilation/test
 harnesses, dependency boundaries, MCP cross-entry consumption, and the SDK example
 pass locally. Platform CI status is available in the repository Actions tab;
-The first independent Linux/macOS run passed; the final error-budget and error-classification regression changes are being revalidated.
+The first independent Linux/macOS run passed; the final error handling and caller-directory regression changes are being revalidated.
 
 The five-repeat initial comparison is recorded in `benchmarks/baseline.json`.
-RowTrail's median is about 345 ms versus 13 ms for persistent DuckDB and 5 ms for
+RowTrail's median is about 379 ms versus 14 ms for persistent DuckDB and 5 ms for
 persistent direct DataFusion on this small workload. No stable performance or
 Agent-adoption advantage is claimed. See `benchmarks/README.md` for boundaries.
 

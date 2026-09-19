@@ -99,6 +99,9 @@ rowtrail events --job job_ID --follow --jsonl
 rowtrail job cancel job_ID
 ```
 
+Relative source and export paths resolve in the calling client’s working directory.
+The local wire protocol requires absolute paths.
+
 Complex requests can be passed as JSON with `query --request query.json` or
 `call METHOD --request -`. An optional `--idempotency-key KEY` makes retried
 creation requests refer to the same job. Reusing the key for a different

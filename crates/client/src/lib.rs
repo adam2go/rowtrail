@@ -113,6 +113,21 @@ impl Client {
         )
     }
     pub async fn call(&self, request: &Request) -> Result<Response> {
+        // A shared coordinator's cwd is unrelated to later callers' working directories.
+        let mut request = request.clone();
+        let field = match request.method.as_str() {
+            "open" => Some("source"),
+            "export" => Some("destination"),
+            _ => None,
+        };
+        if let Some(field) = field
+            && let Some(path) = request
+                .params
+                .get(field)
+                .and_then(serde_json::Value::as_str)
+        {
+            request.params[field] = serde_json::to_value(std::path::absolute(path)?)?;
+        }
         let mut stream = self.connect().await?;
         ensure!(
             stream.peer_cred()?.uid() == unsafe { libc::geteuid() },
@@ -128,7 +143,7 @@ impl Client {
             hello.ok && hello.api_version == API_VERSION,
             "PROTOCOL_VERSION_MISMATCH"
         );
-        send(&mut stream, request).await?;
+        send(&mut stream, &request).await?;
         tokio::time::timeout(Duration::from_secs(65), receive(&mut stream)).await?
     }
 }

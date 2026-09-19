@@ -157,6 +157,10 @@ pub fn parse_type(value: &str) -> Result<DataType> {
 
 pub fn open(p: &OpenParams) -> Result<Manifest> {
     ensure!(
+        Path::new(&p.source).is_absolute(),
+        "INVALID_ARGUMENT: protocol source paths must be absolute"
+    );
+    ensure!(
         p.infer_rows > 0 && p.infer_rows <= 10000,
         "INVALID_ARGUMENT: infer_rows must be 1..10000"
     );

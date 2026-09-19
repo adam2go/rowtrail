@@ -14,14 +14,14 @@ workspace=base/'workspace'
 data=base/'data'
 traces=[]
 checks=[]
-def call(method,params,key=None,ok=True):
+def call(method,params,key=None,ok=True,cwd=None):
     request={'api_version':'1','request_id':f'test-{len(traces)}','method':method,'params':params}
     if key:request['idempotency_key']=key
     started=time.perf_counter()
-    proc=subprocess.run([str(bindir/'rowtrail'),'--workspace',str(workspace),'call',method],input=json.dumps(request),text=True,capture_output=True,timeout=65)
+    proc=subprocess.run([str(bindir/'rowtrail'),'--workspace',str(workspace),'call',method],input=json.dumps(request),text=True,capture_output=True,timeout=65,cwd=cwd)
     try: response=json.loads(proc.stdout)
     except Exception:raise AssertionError((proc.returncode,proc.stdout,proc.stderr))
-    traces.append({'request':request,'response':response,'wall_ms':(time.perf_counter()-started)*1000,'exit':proc.returncode})
+    traces.append({'request':request,'caller_cwd':str(cwd or root),'response':response,'wall_ms':(time.perf_counter()-started)*1000,'exit':proc.returncode})
     if ok:assert response['ok'],response
     return response.get('result') if response['ok'] else response
 def wait(result,timeout=30):
@@ -57,6 +57,17 @@ try:
     schema=call('inspect',{'ref':csv['dataset_ref'],'columns':['id','amount'],'checks':['schema']})
     assert [c['type'] for c in schema['fields']]==['Int64','Decimal128(20, 2)']
     check('bounded open / explicit Decimal schema / idempotent open')
+    directories=[]
+    for name,value in [('caller-a',1),('caller-b',2)]:
+        directory=base/name;directory.mkdir();directories.append(directory)
+        (directory/'same.csv').write_text(f'value\n{value}\n')
+        relative=call('open',{'source':'same.csv'},cwd=directory)
+        _,relative_sum=query({'t':binding(relative)},'SELECT SUM(value) FROM t')
+        assert read(relative_sum)['rows']==[[str(value)]]
+    relative_export=wait(call('export',{**rb(relative_sum),'format':'parquet','destination':'relative.parquet'},cwd=directories[1]))
+    assert relative_export['job']['state']=='completed' and (directories[1]/'relative.parquet').is_file()
+    check('relative paths resolve in each caller directory, independently of coordinator cwd')
+
     final=None
     for source in (csv,parquet):
         _,final=query({'t':binding(source)},'SELECT region, SUM(amount) total, COUNT(*) n FROM t GROUP BY region ORDER BY region NULLS LAST')
