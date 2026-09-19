@@ -73,23 +73,6 @@ fn stage_part(spec: &JobSpec, batch: &RecordBatch, seq: u64, remaining: u64) -> 
         schema: batch.schema().as_ref().clone(),
     })
 }
-fn classify(e: &anyhow::Error) -> String {
-    let s = format!("{e:#}");
-    [
-        "SOURCE_CHANGED",
-        "RESOURCE_EXHAUSTED",
-        "PROTOCOL_FRAME_TOO_LARGE",
-        "SCHEMA_CONFLICT",
-        "UNSUPPORTED_OPERATION",
-        "CANCELLED",
-        "BUDGET_EXHAUSTED",
-    ]
-    .into_iter()
-    .find(|code| s.contains(code))
-    .unwrap_or("SQL_ERROR")
-    .into()
-}
-
 pub async fn run(token: &str) -> Result<()> {
     // The native watchdog remains responsive even when a CPU-heavy future does not yield.
     let parent = unsafe { libc::getppid() };
@@ -185,7 +168,7 @@ async fn execute_job(
         Ok(metrics) => message(&WorkerMessage::Completed { metrics }).await?,
         Err(e) => {
             message(&WorkerMessage::Failed {
-                code: classify(&e),
+                code: crate::errors::code(&e, "SQL_ERROR").into(),
                 message: format!("{e:#}"),
                 metrics: json!({"elapsed_ms":started.elapsed().as_secs_f64()*1000.0,"io":counters.value()}),
             })

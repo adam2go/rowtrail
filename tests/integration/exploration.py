@@ -113,6 +113,13 @@ try:
     for sql in ['DELETE FROM t','CREATE TABLE x AS SELECT * FROM t',"SELECT * FROM read_csv('/etc/passwd')"]:
         _,denied=query({'t':binding(csv)},sql,success=False);assert denied['job']['state']=='failed',denied
     check('read-only SQL and explicit source access enforcement')
+    for column in ['SOURCE_CHANGED','RESOURCE_EXHAUSTED']:
+        _,reserved=query({'t':binding(csv)},f'SELECT "{column}" FROM t',success=False)
+        assert reserved['job']['state']=='failed' and reserved['job']['error']['code']=='SQL_ERROR',reserved
+    _,still_valid=query({'t':binding(csv)},'SELECT COUNT(*) FROM t')
+    assert read(still_valid)['rows']==[['8']]
+    check('SQL identifiers cannot impersonate resource errors or invalidate valid sources')
+
     started=time.perf_counter()
     long=call('query',{'bindings':{'t':binding(many)},'sql':'SELECT COUNT(*) FROM t a CROSS JOIN t b WHERE a.id+b.id>0','execution':{'wait_ms':0,'run_timeout_ms':30000}})
     assert time.perf_counter()-started<2
@@ -142,6 +149,16 @@ try:
     inspected=call('inspect',{'ref':ids['job']['result_ref'],'checks':['schema']})
     assert inspected['revision']==ids['readable_revision'] and inspected['fields'][0]['type']=='Int64'
     check('serialized observation budgets and result schema inspection')
+    malformed=call('open',{'source':str(data/'small.csv'),'invalid_'+'字'*6000:True},ok=False)
+    assert malformed['error']['code']=='INVALID_ARGUMENT' and malformed['error']['details']['message_truncated']
+    assert len(json.dumps(traces[-1]['response'],ensure_ascii=False,separators=(',',':')).encode())<=8192
+    raw={'api_version':'1','request_id':'\0'*128,'method':'open','params':{'source':'missing.csv','output':{'max_bytes':1},'invalid':True}}
+    malformed_control=subprocess.run([str(bindir/'rowtrail'),'--workspace',str(workspace),'call','open'],input=json.dumps(raw),text=True,capture_output=True,timeout=5)
+    control_error=json.loads(malformed_control.stdout)
+    assert not control_error['ok'] and control_error['error']['details']['request_id_truncated']
+    assert len(malformed_control.stdout.encode())<=513
+    check('large Unicode validation errors obey output budgets and signal truncation')
+
 
     events=call('events',{'job_ids':[filtered['job']['id']],'limit':100,'max_bytes':65536})
     duplicate=call('events',{'job_ids':[filtered['job']['id']],'limit':100,'max_bytes':65536})

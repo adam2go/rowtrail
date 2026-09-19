@@ -73,7 +73,7 @@ fn remember(c: &rusqlite::Connection, req: &Request, v: &Value) -> Result<()> {
     Ok(())
 }
 pub fn capabilities() -> Value {
-    json!({"api_version":"1","formats":["csv","tsv","parquet"],"source":"local","sql":"DataFusion 55.0.0 read-only SELECT; explicit bindings","analysis":[],"entries":["cli","mcp_stdio","rust_sdk"],"native_tasks":false,"automatic_resume":false,"source_consistency":"best_effort","result_storage":"immutable Arrow IPC files","max_frame_bytes":FRAME_LIMIT,"max_output_bytes":FRAME_LIMIT-512,"max_output_rows":10000,"max_manifest_files":128,"max_directory_entries":4096,"default_parallel_jobs":1,"cancellation":"cooperative signal with forced worker termination after 300ms","engine_memory_limit":"MemoryPool; not RSS hard limit","scan_limit":"byte reservation before local reads","result_retention":"until workspace removal; release and automatic GC not implemented","event_retention":"until workspace removal; no event pruning yet","unsupported":["Windows","remote","sampling","native_tasks","automatic_resume","union_by_name","prepare","binary_inline","RSS_hard_limit"]})
+    json!({"api_version":"1","formats":["csv","tsv","parquet"],"source":"local","sql":"DataFusion 55.0.0 read-only SELECT; explicit bindings","analysis":[],"entries":["cli","mcp_stdio","rust_sdk"],"native_tasks":false,"automatic_resume":false,"source_consistency":"best_effort","result_storage":"immutable Arrow IPC files","max_frame_bytes":FRAME_LIMIT,"minimum_error_budget_bytes":512,"max_output_bytes":FRAME_LIMIT-512,"max_output_rows":10000,"max_manifest_files":128,"max_directory_entries":4096,"default_parallel_jobs":1,"cancellation":"cooperative signal with forced worker termination after 300ms","engine_memory_limit":"MemoryPool; not RSS hard limit","scan_limit":"byte reservation before local reads","result_retention":"until workspace removal; release and automatic GC not implemented","event_retention":"until workspace removal; no event pruning yet","unsupported":["Windows","remote","sampling","native_tasks","automatic_resume","union_by_name","prepare","binary_inline","RSS_hard_limit"]})
 }
 fn validate_execution(e: &Execution) -> Result<()> {
     ensure!(
@@ -95,7 +95,79 @@ fn validate_execution(e: &Execution) -> Result<()> {
     Ok(())
 }
 
+fn output_limit(req: &Request) -> usize {
+    ((match req.method.as_str() {
+        "query" => req
+            .params
+            .pointer("/execution/output/max_bytes")
+            .and_then(Value::as_u64)
+            .unwrap_or(8192),
+        "open" => req
+            .params
+            .pointer("/output/max_bytes")
+            .and_then(Value::as_u64)
+            .unwrap_or(8192),
+        "read" => req
+            .params
+            .get("max_bytes")
+            .and_then(Value::as_u64)
+            .unwrap_or(8192),
+        "inspect" => req
+            .params
+            .pointer("/budget/max_bytes")
+            .and_then(Value::as_u64)
+            .unwrap_or(8192),
+        "events" => req
+            .params
+            .get("max_bytes")
+            .and_then(Value::as_u64)
+            .unwrap_or(8192),
+        _ => 65536,
+    }) as usize)
+        .min(FRAME_LIMIT - 512)
+}
+
 pub async fn dispatch(db: Arc<Db>, req: Request) -> Response {
+    // An error needs a small envelope even when the requested observation cannot fit.
+    let limit = output_limit(&req).clamp(512, FRAME_LIMIT - 512);
+    let mut response = dispatch_inner(db, req).await;
+    if let Some(error) = response.error.as_mut()
+        && response.request_id.len() > 128
+    {
+        let mut end = 128;
+        while !response.request_id.is_char_boundary(end) {
+            end -= 1;
+        }
+        response.request_id.truncate(end);
+        error.details["request_id_truncated"] = json!(true);
+    }
+    while serde_json::to_vec(&response).is_ok_and(|v| v.len() > limit) {
+        let Some(error) = response.error.as_mut() else {
+            break;
+        };
+        if error.message.is_empty() {
+            error.details = json!({"message_truncated":true});
+            if response.request_id.len() > 32 {
+                let mut end = 32;
+                while !response.request_id.is_char_boundary(end) {
+                    end -= 1;
+                }
+                response.request_id.truncate(end);
+                error.details["request_id_truncated"] = json!(true);
+            }
+        } else {
+            let mut end = error.message.len() / 2;
+            while !error.message.is_char_boundary(end) {
+                end -= 1;
+            }
+            error.message.truncate(end);
+            error.details["message_truncated"] = json!(true);
+        }
+    }
+    response
+}
+
+async fn dispatch_inner(db: Arc<Db>, req: Request) -> Response {
     if req.api_version != API_VERSION {
         return Response::failure(
             &req,
@@ -111,34 +183,7 @@ pub async fn dispatch(db: Arc<Db>, req: Request) -> Response {
     let outcome = handle(db, &req).await;
     match outcome {
         Ok(mut v) => {
-            let limit = match req.method.as_str() {
-                "query" => req
-                    .params
-                    .pointer("/execution/output/max_bytes")
-                    .and_then(Value::as_u64)
-                    .unwrap_or(8192),
-                "open" => req
-                    .params
-                    .pointer("/output/max_bytes")
-                    .and_then(Value::as_u64)
-                    .unwrap_or(8192),
-                "read" => req
-                    .params
-                    .get("max_bytes")
-                    .and_then(Value::as_u64)
-                    .unwrap_or(8192),
-                "inspect" => req
-                    .params
-                    .pointer("/budget/max_bytes")
-                    .and_then(Value::as_u64)
-                    .unwrap_or(8192),
-                "events" => req
-                    .params
-                    .get("max_bytes")
-                    .and_then(Value::as_u64)
-                    .unwrap_or(8192),
-                _ => 65536,
-            } as usize;
+            let limit = output_limit(&req);
             let fits = |value: &Value| {
                 serde_json::to_vec(&Response::success(&req, value.clone()))
                     .is_ok_and(|b| b.len() <= limit)
@@ -162,24 +207,7 @@ pub async fn dispatch(db: Arc<Db>, req: Request) -> Response {
         }
         Err(e) => {
             let message = format!("{e:#}");
-            let code = [
-                "IDEMPOTENCY_CONFLICT",
-                "SOURCE_CHANGED",
-                "RESULT_CORRUPT",
-                "RESULT_UNAVAILABLE",
-                "RESULT_NOT_READY",
-                "OBJECT_NOT_FOUND",
-                "OUTPUT_BUDGET_TOO_SMALL",
-                "INVALID_CURSOR",
-                "INVALID_ARGUMENT",
-                "SCHEMA_CONFLICT",
-                "SOURCE_DISCOVERY_LIMIT",
-                "UNSUPPORTED_OPERATION",
-                "RESOURCE_EXHAUSTED",
-            ]
-            .into_iter()
-            .find(|s| message.contains(s))
-            .unwrap_or("INTERNAL_ERROR");
+            let code = crate::errors::code(&e, "INTERNAL_ERROR");
             Response::failure(&req, ApiError::new(code, message))
         }
     }

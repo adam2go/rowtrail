@@ -31,9 +31,9 @@ and the final return to original input. Units are milliseconds.
 
 | Backend | Minimum | Median | Maximum |
 |---|---:|---:|---:|
-| rowtrail | 347.30 | 353.55 | 363.35 |
-| duckdb | 9.43 | 12.83 | 25.69 |
-| datafusion | 4.90 | 5.47 | 5.60 |
+| rowtrail | 329.92 | 344.74 | 372.85 |
+| duckdb | 10.06 | 12.84 | 25.63 |
+| datafusion | 4.80 | 5.34 | 5.52 |
 
 RowTrail pays for CLI invocations, its coordinator/worker protocol, immutable
 result files, fsync, SQLite commits, source validation, and bounded observations.
@@ -55,7 +55,7 @@ spill experiment and initial artifact measurements are in `m0.json`; those
 minimal-probe sizes are not the final package sizes. The initial dependency
 feature graph is `m0-dependency-features.txt`.
 
-`traces/macos-local.json` contains the 24 release-binary integration checks and
+`traces/macos-local.json` contains the 26 release-binary integration checks and
 request/response traces with local paths removed. These include failed/rejected
 operations and recovery, not only successful queries. CI uploads separate
 platform traces and package metadata. Whole-process resource profiling and
@@ -65,7 +65,7 @@ not be confused with an RSS guarantee.
 ## Client distribution and discovery
 
 The final local arm64 macOS build measures 3,468,496 bytes for `rowtrail` and
-99,652,256 bytes for `rowtrail-runtime`; the pair plus license notices compresses
+99,685,264 bytes for `rowtrail-runtime`; the pair plus license notices compresses
 to about 35.2 MB. Help and schema discovery do not start the runtime. Ten fresh
 process samples with warm OS cache measured about 4 ms median wall time, including
 the `/usr/bin/time` wrapper, and below 8 MB peak client RSS. These are local

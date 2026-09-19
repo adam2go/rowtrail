@@ -2,6 +2,7 @@ mod api;
 mod coordinator;
 mod db;
 mod engine;
+mod errors;
 mod model;
 mod probe;
 mod results;
