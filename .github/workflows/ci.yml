@@ -1,0 +1,43 @@
+name: Build and verify
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-14]
+    runs-on: ${{ matrix.os }}
+    env:
+      CARGO_BUILD_JOBS: 2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87
+        with:
+          toolchain: 1.94.0
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - run: cargo fmt --check
+      - run: cargo clippy --locked --workspace --all-targets -- -D warnings
+      - run: python3 scripts/check_boundaries.py
+      - run: cargo test --locked -p rowtrail-contracts -p rowtrail-client
+      - run: cargo build --release --locked
+      - run: python3 tests/integration/exploration.py --bin-dir target/release
+      - run: python3 scripts/mcp_probe.py target/release/rowtrail
+      - run: cargo run --locked -p rowtrail-client --example query -- /tmp/rowtrail-sdk
+        env:
+          ROWTRAIL_RUNTIME: ${{ github.workspace }}/target/release/rowtrail-runtime
+      - run: python3 scripts/package.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-${{ matrix.os }}
+          path: dist/
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: verification-${{ matrix.os }}
+          path: benchmarks/local/

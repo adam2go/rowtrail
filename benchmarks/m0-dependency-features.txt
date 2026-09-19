@@ -1,0 +1,2321 @@
+rowtrail-cli v0.1.0 (<repo>/crates/cli)
+├── anyhow feature "default"
+│   ├── anyhow v1.0.104
+│   └── anyhow feature "std"
+│       └── anyhow v1.0.104
+├── clap feature "default"
+│   ├── clap v4.6.7
+│   │   ├── clap_builder v4.6.7
+│   │   │   ├── anstream feature "default"
+│   │   │   │   ├── anstream v1.0.0
+│   │   │   │   │   ├── anstyle feature "default"
+│   │   │   │   │   │   ├── anstyle v1.0.14
+│   │   │   │   │   │   └── anstyle feature "std"
+│   │   │   │   │   │       └── anstyle v1.0.14
+│   │   │   │   │   ├── anstyle-parse feature "default"
+│   │   │   │   │   │   ├── anstyle-parse v1.0.0
+│   │   │   │   │   │   │   └── utf8parse feature "default"
+│   │   │   │   │   │   │       └── utf8parse v0.2.2
+│   │   │   │   │   │   └── anstyle-parse feature "utf8"
+│   │   │   │   │   │       └── anstyle-parse v1.0.0 (*)
+│   │   │   │   │   ├── utf8parse feature "default" (*)
+│   │   │   │   │   ├── anstyle-query feature "default"
+│   │   │   │   │   │   └── anstyle-query v1.1.5
+│   │   │   │   │   ├── colorchoice feature "default"
+│   │   │   │   │   │   └── colorchoice v1.0.5
+│   │   │   │   │   └── is_terminal_polyfill feature "default"
+│   │   │   │   │       └── is_terminal_polyfill v1.70.2
+│   │   │   │   ├── anstream feature "auto"
+│   │   │   │   │   └── anstream v1.0.0 (*)
+│   │   │   │   └── anstream feature "wincon"
+│   │   │   │       └── anstream v1.0.0 (*)
+│   │   │   ├── anstyle feature "default" (*)
+│   │   │   ├── clap_lex feature "default"
+│   │   │   │   └── clap_lex v1.1.1
+│   │   │   └── strsim feature "default"
+│   │   │       └── strsim v0.11.1
+│   │   └── clap_derive feature "default"
+│   │       └── clap_derive v4.6.7 (proc-macro)
+│   │           ├── heck feature "default"
+│   │           │   └── heck v0.5.0
+│   │           ├── proc-macro2 feature "default"
+│   │           │   ├── proc-macro2 v1.0.107
+│   │           │   │   └── unicode-ident feature "default"
+│   │           │   │       └── unicode-ident v1.0.26
+│   │           │   └── proc-macro2 feature "proc-macro"
+│   │           │       └── proc-macro2 v1.0.107 (*)
+│   │           ├── quote feature "default"
+│   │           │   ├── quote v1.0.47
+│   │           │   │   └── proc-macro2 v1.0.107 (*)
+│   │           │   └── quote feature "proc-macro"
+│   │           │       ├── quote v1.0.47 (*)
+│   │           │       └── proc-macro2 feature "proc-macro" (*)
+│   │           ├── syn feature "default"
+│   │           │   ├── syn v3.0.6
+│   │           │   │   ├── proc-macro2 v1.0.107 (*)
+│   │           │   │   ├── quote v1.0.47 (*)
+│   │           │   │   └── unicode-ident feature "default" (*)
+│   │           │   ├── syn feature "clone-impls"
+│   │           │   │   └── syn v3.0.6 (*)
+│   │           │   ├── syn feature "derive"
+│   │           │   │   └── syn v3.0.6 (*)
+│   │           │   ├── syn feature "parsing"
+│   │           │   │   └── syn v3.0.6 (*)
+│   │           │   ├── syn feature "printing"
+│   │           │   │   └── syn v3.0.6 (*)
+│   │           │   └── syn feature "proc-macro"
+│   │           │       ├── syn v3.0.6 (*)
+│   │           │       ├── proc-macro2 feature "proc-macro" (*)
+│   │           │       └── quote feature "proc-macro" (*)
+│   │           └── syn feature "full"
+│   │               └── syn v3.0.6 (*)
+│   ├── clap feature "color"
+│   │   ├── clap v4.6.7 (*)
+│   │   └── clap_builder feature "color"
+│   │       └── clap_builder v4.6.7 (*)
+│   ├── clap feature "error-context"
+│   │   ├── clap v4.6.7 (*)
+│   │   └── clap_builder feature "error-context"
+│   │       └── clap_builder v4.6.7 (*)
+│   ├── clap feature "help"
+│   │   ├── clap v4.6.7 (*)
+│   │   └── clap_builder feature "help"
+│   │       └── clap_builder v4.6.7 (*)
+│   ├── clap feature "std"
+│   │   ├── clap v4.6.7 (*)
+│   │   └── clap_builder feature "std"
+│   │       ├── clap_builder v4.6.7 (*)
+│   │       └── anstyle feature "std" (*)
+│   ├── clap feature "suggestions"
+│   │   ├── clap v4.6.7 (*)
+│   │   └── clap_builder feature "suggestions"
+│   │       ├── clap_builder v4.6.7 (*)
+│   │       └── clap_builder feature "error-context" (*)
+│   └── clap feature "usage"
+│       ├── clap v4.6.7 (*)
+│       └── clap_builder feature "usage"
+│           └── clap_builder v4.6.7 (*)
+├── clap feature "derive"
+│   └── clap v4.6.7 (*)
+├── rmcp feature "server"
+│   ├── rmcp v3.4.0
+│   │   ├── chrono feature "now"
+│   │   │   ├── chrono v0.4.45
+│   │   │   │   ├── num-traits v0.2.19
+│   │   │   │   │   └── libm feature "default"
+│   │   │   │   │       ├── libm v0.2.16
+│   │   │   │   │       └── libm feature "arch"
+│   │   │   │   │           └── libm v0.2.16
+│   │   │   │   │   [build-dependencies]
+│   │   │   │   │   └── autocfg feature "default"
+│   │   │   │   │       └── autocfg v1.5.1
+│   │   │   │   ├── serde v1.0.229
+│   │   │   │   │   ├── serde_core feature "result"
+│   │   │   │   │   │   └── serde_core v1.0.229
+│   │   │   │   │   └── serde_derive feature "default"
+│   │   │   │   │       └── serde_derive v1.0.229 (proc-macro)
+│   │   │   │   │           ├── proc-macro2 feature "proc-macro" (*)
+│   │   │   │   │           ├── quote feature "proc-macro" (*)
+│   │   │   │   │           ├── syn feature "clone-impls" (*)
+│   │   │   │   │           ├── syn feature "derive" (*)
+│   │   │   │   │           ├── syn feature "parsing" (*)
+│   │   │   │   │           ├── syn feature "printing" (*)
+│   │   │   │   │           └── syn feature "proc-macro" (*)
+│   │   │   │   ├── iana-time-zone feature "default"
+│   │   │   │   │   └── iana-time-zone v0.1.65
+│   │   │   │   │       └── core-foundation-sys feature "default"
+│   │   │   │   │           ├── core-foundation-sys v0.8.7
+│   │   │   │   │           └── core-foundation-sys feature "link"
+│   │   │   │   │               └── core-foundation-sys v0.8.7
+│   │   │   │   └── iana-time-zone feature "fallback"
+│   │   │   │       └── iana-time-zone v0.1.65 (*)
+│   │   │   └── chrono feature "std"
+│   │   │       ├── chrono v0.4.45 (*)
+│   │   │       └── chrono feature "alloc"
+│   │   │           └── chrono v0.4.45 (*)
+│   │   ├── chrono feature "serde"
+│   │   │   └── chrono v0.4.45 (*)
+│   │   ├── serde feature "default"
+│   │   │   ├── serde v1.0.229 (*)
+│   │   │   └── serde feature "std"
+│   │   │       ├── serde v1.0.229 (*)
+│   │   │       └── serde_core feature "std"
+│   │   │           └── serde_core v1.0.229
+│   │   ├── serde feature "derive"
+│   │   │   ├── serde v1.0.229 (*)
+│   │   │   └── serde feature "serde_derive"
+│   │   │       └── serde v1.0.229 (*)
+│   │   ├── serde feature "rc"
+│   │   │   ├── serde v1.0.229 (*)
+│   │   │   └── serde_core feature "rc"
+│   │   │       └── serde_core v1.0.229
+│   │   ├── futures feature "default"
+│   │   │   ├── futures v0.3.34
+│   │   │   │   ├── futures-core v0.3.34
+│   │   │   │   ├── futures-executor v0.3.34
+│   │   │   │   │   ├── futures-core v0.3.34
+│   │   │   │   │   ├── futures-task v0.3.34
+│   │   │   │   │   └── futures-util v0.3.34
+│   │   │   │   │       ├── futures-core v0.3.34
+│   │   │   │   │       ├── futures-macro v0.3.34 (proc-macro)
+│   │   │   │   │       │   ├── proc-macro2 feature "default" (*)
+│   │   │   │   │       │   ├── quote feature "default" (*)
+│   │   │   │   │       │   ├── syn feature "default" (*)
+│   │   │   │   │       │   └── syn feature "full" (*)
+│   │   │   │   │       ├── futures-sink v0.3.34
+│   │   │   │   │       ├── futures-task v0.3.34
+│   │   │   │   │       ├── slab v0.4.12
+│   │   │   │   │       ├── futures-channel feature "std"
+│   │   │   │   │       │   ├── futures-channel v0.3.34
+│   │   │   │   │       │   │   ├── futures-core v0.3.34
+│   │   │   │   │       │   │   └── futures-sink v0.3.34
+│   │   │   │   │       │   ├── futures-channel feature "alloc"
+│   │   │   │   │       │   │   ├── futures-channel v0.3.34 (*)
+│   │   │   │   │       │   │   └── futures-core feature "alloc"
+│   │   │   │   │       │   │       └── futures-core v0.3.34
+│   │   │   │   │       │   └── futures-core feature "std"
+│   │   │   │   │       │       ├── futures-core v0.3.34
+│   │   │   │   │       │       └── futures-core feature "alloc" (*)
+│   │   │   │   │       ├── futures-io feature "std"
+│   │   │   │   │       │   └── futures-io v0.3.34
+│   │   │   │   │       ├── memchr feature "default"
+│   │   │   │   │       │   ├── memchr v2.8.3
+│   │   │   │   │       │   └── memchr feature "std"
+│   │   │   │   │       │       ├── memchr v2.8.3
+│   │   │   │   │       │       └── memchr feature "alloc"
+│   │   │   │   │       │           └── memchr v2.8.3
+│   │   │   │   │       └── pin-project-lite feature "default"
+│   │   │   │   │           └── pin-project-lite v0.2.17
+│   │   │   │   ├── futures-io v0.3.34
+│   │   │   │   ├── futures-sink v0.3.34
+│   │   │   │   ├── futures-task v0.3.34
+│   │   │   │   ├── futures-channel feature "sink"
+│   │   │   │   │   ├── futures-channel v0.3.34 (*)
+│   │   │   │   │   └── futures-channel feature "futures-sink"
+│   │   │   │   │       └── futures-channel v0.3.34 (*)
+│   │   │   │   └── futures-util feature "sink"
+│   │   │   │       ├── futures-util v0.3.34 (*)
+│   │   │   │       └── futures-util feature "futures-sink"
+│   │   │   │           └── futures-util v0.3.34 (*)
+│   │   │   ├── futures feature "async-await"
+│   │   │   │   ├── futures v0.3.34 (*)
+│   │   │   │   ├── futures-util feature "async-await"
+│   │   │   │   │   └── futures-util v0.3.34 (*)
+│   │   │   │   └── futures-util feature "async-await-macro"
+│   │   │   │       ├── futures-util v0.3.34 (*)
+│   │   │   │       ├── futures-util feature "async-await" (*)
+│   │   │   │       └── futures-util feature "futures-macro"
+│   │   │   │           └── futures-util v0.3.34 (*)
+│   │   │   ├── futures feature "executor"
+│   │   │   │   ├── futures v0.3.34 (*)
+│   │   │   │   ├── futures feature "futures-executor"
+│   │   │   │   │   └── futures v0.3.34 (*)
+│   │   │   │   ├── futures feature "std"
+│   │   │   │   │   ├── futures v0.3.34 (*)
+│   │   │   │   │   ├── futures feature "alloc"
+│   │   │   │   │   │   ├── futures v0.3.34 (*)
+│   │   │   │   │   │   ├── futures-channel feature "alloc" (*)
+│   │   │   │   │   │   ├── futures-core feature "alloc" (*)
+│   │   │   │   │   │   ├── futures-sink feature "alloc"
+│   │   │   │   │   │   │   └── futures-sink v0.3.34
+│   │   │   │   │   │   ├── futures-task feature "alloc"
+│   │   │   │   │   │   │   └── futures-task v0.3.34
+│   │   │   │   │   │   └── futures-util feature "alloc"
+│   │   │   │   │   │       ├── futures-util v0.3.34 (*)
+│   │   │   │   │   │       ├── futures-core feature "alloc" (*)
+│   │   │   │   │   │       ├── futures-task feature "alloc" (*)
+│   │   │   │   │   │       └── futures-util feature "slab"
+│   │   │   │   │   │           └── futures-util v0.3.34 (*)
+│   │   │   │   │   ├── futures-core feature "std" (*)
+│   │   │   │   │   ├── futures-sink feature "std"
+│   │   │   │   │   │   ├── futures-sink v0.3.34
+│   │   │   │   │   │   └── futures-sink feature "alloc" (*)
+│   │   │   │   │   ├── futures-task feature "std"
+│   │   │   │   │   │   ├── futures-task v0.3.34
+│   │   │   │   │   │   └── futures-task feature "alloc" (*)
+│   │   │   │   │   ├── futures-util feature "channel"
+│   │   │   │   │   │   ├── futures-util v0.3.34 (*)
+│   │   │   │   │   │   ├── futures-util feature "futures-channel"
+│   │   │   │   │   │   │   └── futures-util v0.3.34 (*)
+│   │   │   │   │   │   └── futures-util feature "std"
+│   │   │   │   │   │       ├── futures-util v0.3.34 (*)
+│   │   │   │   │   │       ├── futures-core feature "std" (*)
+│   │   │   │   │   │       ├── futures-task feature "std" (*)
+│   │   │   │   │   │       ├── futures-util feature "alloc" (*)
+│   │   │   │   │   │       ├── futures-util feature "slab" (*)
+│   │   │   │   │   │       └── slab feature "std"
+│   │   │   │   │   │           └── slab v0.4.12
+│   │   │   │   │   ├── futures-util feature "io"
+│   │   │   │   │   │   ├── futures-util v0.3.34 (*)
+│   │   │   │   │   │   ├── futures-util feature "futures-io"
+│   │   │   │   │   │   │   └── futures-util v0.3.34 (*)
+│   │   │   │   │   │   ├── futures-util feature "memchr"
+│   │   │   │   │   │   │   └── futures-util v0.3.34 (*)
+│   │   │   │   │   │   └── futures-util feature "std" (*)
+│   │   │   │   │   ├── futures-util feature "std" (*)
+│   │   │   │   │   └── futures-io feature "std" (*)
+│   │   │   │   └── futures-executor feature "std"
+│   │   │   │       ├── futures-executor v0.3.34 (*)
+│   │   │   │       ├── futures-core feature "std" (*)
+│   │   │   │       ├── futures-task feature "std" (*)
+│   │   │   │       └── futures-util feature "std" (*)
+│   │   │   └── futures feature "std" (*)
+│   │   ├── pin-project-lite feature "default" (*)
+│   │   ├── indexmap feature "default"
+│   │   │   ├── indexmap v2.14.2
+│   │   │   │   ├── equivalent v1.0.2
+│   │   │   │   ├── hashbrown v0.17.1
+│   │   │   │   │   ├── equivalent v1.0.2
+│   │   │   │   │   ├── foldhash v0.2.0
+│   │   │   │   │   └── allocator-api2 feature "alloc"
+│   │   │   │   │       └── allocator-api2 v0.2.21
+│   │   │   │   └── serde_core v1.0.229
+│   │   │   └── indexmap feature "std"
+│   │   │       └── indexmap v2.14.2 (*)
+│   │   ├── indexmap feature "serde"
+│   │   │   └── indexmap v2.14.2 (*)
+│   │   ├── pastey feature "default"
+│   │   │   └── pastey v0.2.3 (proc-macro)
+│   │   ├── schemars feature "chrono04"
+│   │   │   └── schemars v1.2.2
+│   │   │       ├── chrono v0.4.45 (*)
+│   │   │       ├── serde feature "alloc"
+│   │   │       │   ├── serde v1.0.229 (*)
+│   │   │       │   └── serde_core feature "alloc"
+│   │   │       │       └── serde_core v1.0.229
+│   │   │       ├── dyn-clone feature "default"
+│   │   │       │   └── dyn-clone v1.0.20
+│   │   │       ├── ref-cast feature "default"
+│   │   │       │   └── ref-cast v1.0.27
+│   │   │       │       └── ref-cast-impl feature "default"
+│   │   │       │           └── ref-cast-impl v1.0.27 (proc-macro)
+│   │   │       │               ├── proc-macro2 feature "default" (*)
+│   │   │       │               ├── quote feature "default" (*)
+│   │   │       │               └── syn feature "default" (*)
+│   │   │       ├── schemars_derive feature "default"
+│   │   │       │   └── schemars_derive v1.2.2 (proc-macro)
+│   │   │       │       ├── proc-macro2 feature "default" (*)
+│   │   │       │       ├── quote feature "default" (*)
+│   │   │       │       ├── syn feature "default" (*)
+│   │   │       │       └── serde_derive_internals feature "default"
+│   │   │       │           └── serde_derive_internals v0.30.0
+│   │   │       │               ├── proc-macro2 v1.0.107 (*)
+│   │   │       │               ├── quote v1.0.47 (*)
+│   │   │       │               ├── syn feature "clone-impls" (*)
+│   │   │       │               ├── syn feature "derive" (*)
+│   │   │       │               ├── syn feature "parsing" (*)
+│   │   │       │               └── syn feature "printing" (*)
+│   │   │       └── serde_json feature "alloc"
+│   │   │           ├── serde_json v1.0.151
+│   │   │           │   ├── memchr v2.8.3
+│   │   │           │   ├── serde_core v1.0.229
+│   │   │           │   ├── indexmap feature "default" (*)
+│   │   │           │   ├── itoa feature "default"
+│   │   │           │   │   └── itoa v1.0.18
+│   │   │           │   └── zmij feature "default"
+│   │   │           │       └── zmij v1.0.23
+│   │   │           └── serde_core feature "alloc" (*)
+│   │   ├── schemars feature "default"
+│   │   │   ├── schemars v1.2.2 (*)
+│   │   │   ├── schemars feature "derive"
+│   │   │   │   ├── schemars v1.2.2 (*)
+│   │   │   │   └── schemars feature "schemars_derive"
+│   │   │   │       └── schemars v1.2.2 (*)
+│   │   │   └── schemars feature "std"
+│   │   │       └── schemars v1.2.2 (*)
+│   │   ├── serde_json feature "default"
+│   │   │   ├── serde_json v1.0.151 (*)
+│   │   │   └── serde_json feature "std"
+│   │   │       ├── serde_json v1.0.151 (*)
+│   │   │       ├── serde_core feature "std" (*)
+│   │   │       └── memchr feature "std" (*)
+│   │   ├── thiserror feature "default"
+│   │   │   ├── thiserror v2.0.20
+│   │   │   │   └── thiserror-impl feature "default"
+│   │   │   │       └── thiserror-impl v2.0.20 (proc-macro)
+│   │   │   │           ├── proc-macro2 feature "default" (*)
+│   │   │   │           ├── quote feature "default" (*)
+│   │   │   │           └── syn feature "default" (*)
+│   │   │   └── thiserror feature "std"
+│   │   │       └── thiserror v2.0.20 (*)
+│   │   ├── tokio feature "default"
+│   │   │   └── tokio v1.53.1
+│   │   │       ├── mio v1.2.3
+│   │   │       │   └── libc feature "default"
+│   │   │       │       ├── libc v0.2.189
+│   │   │       │       └── libc feature "std"
+│   │   │       │           └── libc v0.2.189
+│   │   │       ├── pin-project-lite feature "default" (*)
+│   │   │       ├── bytes feature "default"
+│   │   │       │   ├── bytes v1.12.1
+│   │   │       │   └── bytes feature "std"
+│   │   │       │       └── bytes v1.12.1
+│   │   │       ├── libc feature "default" (*)
+│   │   │       ├── signal-hook-registry feature "default"
+│   │   │       │   └── signal-hook-registry v1.4.8
+│   │   │       │       ├── libc feature "default" (*)
+│   │   │       │       └── errno feature "default"
+│   │   │       │           ├── errno v0.3.14
+│   │   │       │           │   └── libc v0.2.189
+│   │   │       │           └── errno feature "std"
+│   │   │       │               ├── errno v0.3.14 (*)
+│   │   │       │               └── libc feature "std" (*)
+│   │   │       ├── socket2 feature "all"
+│   │   │       │   └── socket2 v0.6.5
+│   │   │       │       └── libc feature "default" (*)
+│   │   │       ├── socket2 feature "default"
+│   │   │       │   └── socket2 v0.6.5 (*)
+│   │   │       └── tokio-macros feature "default"
+│   │   │           └── tokio-macros v2.7.2 (proc-macro)
+│   │   │               ├── proc-macro2 feature "default" (*)
+│   │   │               ├── quote feature "default" (*)
+│   │   │               ├── syn feature "default" (*)
+│   │   │               └── syn feature "full" (*)
+│   │   ├── tokio feature "macros"
+│   │   │   ├── tokio v1.53.1 (*)
+│   │   │   └── tokio feature "tokio-macros"
+│   │   │       └── tokio v1.53.1 (*)
+│   │   ├── tokio feature "rt"
+│   │   │   └── tokio v1.53.1 (*)
+│   │   ├── tokio feature "sync"
+│   │   │   └── tokio v1.53.1 (*)
+│   │   ├── tokio feature "time"
+│   │   │   └── tokio v1.53.1 (*)
+│   │   ├── tokio-util feature "default"
+│   │   │   └── tokio-util v0.7.19
+│   │   │       ├── futures-core feature "default"
+│   │   │       │   ├── futures-core v0.3.34
+│   │   │       │   └── futures-core feature "std" (*)
+│   │   │       ├── futures-sink feature "default"
+│   │   │       │   ├── futures-sink v0.3.34
+│   │   │       │   └── futures-sink feature "std" (*)
+│   │   │       ├── pin-project-lite feature "default" (*)
+│   │   │       ├── tokio feature "default" (*)
+│   │   │       ├── tokio feature "sync" (*)
+│   │   │       ├── bytes feature "default" (*)
+│   │   │       └── libc feature "default" (*)
+│   │   ├── tracing feature "default"
+│   │   │   ├── tracing v0.1.44
+│   │   │   │   ├── tracing-core v0.1.36
+│   │   │   │   │   └── once_cell feature "default"
+│   │   │   │   │       ├── once_cell v1.21.4
+│   │   │   │   │       └── once_cell feature "std"
+│   │   │   │   │           ├── once_cell v1.21.4
+│   │   │   │   │           └── once_cell feature "alloc"
+│   │   │   │   │               ├── once_cell v1.21.4
+│   │   │   │   │               └── once_cell feature "race"
+│   │   │   │   │                   └── once_cell v1.21.4
+│   │   │   │   ├── pin-project-lite feature "default" (*)
+│   │   │   │   └── tracing-attributes feature "default"
+│   │   │   │       └── tracing-attributes v0.1.31 (proc-macro)
+│   │   │   │           ├── proc-macro2 feature "default" (*)
+│   │   │   │           ├── quote feature "default" (*)
+│   │   │   │           ├── syn feature "clone-impls"
+│   │   │   │           │   └── syn v2.0.119
+│   │   │   │           │       ├── proc-macro2 v1.0.107 (*)
+│   │   │   │           │       ├── quote v1.0.47 (*)
+│   │   │   │           │       └── unicode-ident feature "default" (*)
+│   │   │   │           ├── syn feature "extra-traits"
+│   │   │   │           │   └── syn v2.0.119 (*)
+│   │   │   │           ├── syn feature "full"
+│   │   │   │           │   └── syn v2.0.119 (*)
+│   │   │   │           ├── syn feature "parsing"
+│   │   │   │           │   └── syn v2.0.119 (*)
+│   │   │   │           ├── syn feature "printing"
+│   │   │   │           │   └── syn v2.0.119 (*)
+│   │   │   │           ├── syn feature "proc-macro"
+│   │   │   │           │   ├── syn v2.0.119 (*)
+│   │   │   │           │   ├── proc-macro2 feature "proc-macro" (*)
+│   │   │   │           │   └── quote feature "proc-macro" (*)
+│   │   │   │           └── syn feature "visit-mut"
+│   │   │   │               └── syn v2.0.119 (*)
+│   │   │   ├── tracing feature "attributes"
+│   │   │   │   ├── tracing v0.1.44 (*)
+│   │   │   │   └── tracing feature "tracing-attributes"
+│   │   │   │       └── tracing v0.1.44 (*)
+│   │   │   └── tracing feature "std"
+│   │   │       ├── tracing v0.1.44 (*)
+│   │   │       └── tracing-core feature "std"
+│   │   │           ├── tracing-core v0.1.36 (*)
+│   │   │           └── tracing-core feature "once_cell"
+│   │   │               └── tracing-core v0.1.36 (*)
+│   │   ├── uuid feature "default"
+│   │   │   ├── uuid v1.26.1
+│   │   │   │   └── getrandom feature "default"
+│   │   │   │       └── getrandom v0.4.3
+│   │   │   │           ├── libc v0.2.189
+│   │   │   │           └── cfg-if feature "default"
+│   │   │   │               └── cfg-if v1.0.5
+│   │   │   └── uuid feature "std"
+│   │   │       └── uuid v1.26.1 (*)
+│   │   └── uuid feature "v4"
+│   │       ├── uuid v1.26.1 (*)
+│   │       └── uuid feature "rng"
+│   │           └── uuid v1.26.1 (*)
+│   ├── rmcp feature "schemars"
+│   │   └── rmcp v3.4.0 (*)
+│   ├── rmcp feature "transport-async-rw"
+│   │   ├── rmcp v3.4.0 (*)
+│   │   ├── tokio feature "io-util"
+│   │   │   ├── tokio v1.53.1 (*)
+│   │   │   └── tokio feature "bytes"
+│   │   │       └── tokio v1.53.1 (*)
+│   │   └── tokio-util feature "codec"
+│   │       ├── tokio-util v0.7.19 (*)
+│   │       └── tokio-util feature "libc"
+│   │           └── tokio-util v0.7.19 (*)
+│   └── rmcp feature "uuid"
+│       └── rmcp v3.4.0 (*)
+├── rmcp feature "transport-io"
+│   ├── rmcp v3.4.0 (*)
+│   ├── rmcp feature "transport-async-rw" (*)
+│   └── tokio feature "io-std"
+│       └── tokio v1.53.1 (*)
+├── schemars feature "default" (*)
+├── serde_json feature "default" (*)
+├── tokio feature "default" (*)
+├── tokio feature "io-std" (*)
+├── tokio feature "io-util" (*)
+├── tokio feature "macros" (*)
+├── tokio feature "net"
+│   ├── tokio v1.53.1 (*)
+│   ├── tokio feature "libc"
+│   │   └── tokio v1.53.1 (*)
+│   ├── tokio feature "mio"
+│   │   └── tokio v1.53.1 (*)
+│   ├── tokio feature "socket2"
+│   │   └── tokio v1.53.1 (*)
+│   ├── mio feature "net"
+│   │   └── mio v1.2.3 (*)
+│   ├── mio feature "os-ext"
+│   │   ├── mio v1.2.3 (*)
+│   │   └── mio feature "os-poll"
+│   │       └── mio v1.2.3 (*)
+│   └── mio feature "os-poll" (*)
+├── tokio feature "process"
+│   ├── tokio v1.53.1 (*)
+│   ├── tokio feature "bytes" (*)
+│   ├── tokio feature "libc" (*)
+│   ├── tokio feature "mio" (*)
+│   ├── tokio feature "signal-hook-registry"
+│   │   └── tokio v1.53.1 (*)
+│   ├── mio feature "net" (*)
+│   ├── mio feature "os-ext" (*)
+│   └── mio feature "os-poll" (*)
+├── tokio feature "rt-multi-thread"
+│   ├── tokio v1.53.1 (*)
+│   └── tokio feature "rt" (*)
+├── tokio feature "signal"
+│   ├── tokio v1.53.1 (*)
+│   ├── tokio feature "libc" (*)
+│   ├── tokio feature "mio" (*)
+│   ├── tokio feature "signal-hook-registry" (*)
+│   ├── mio feature "net" (*)
+│   ├── mio feature "os-ext" (*)
+│   └── mio feature "os-poll" (*)
+├── tokio feature "sync" (*)
+├── tokio feature "time" (*)
+├── rowtrail-client feature "default" (command-line)
+│   └── rowtrail-client v0.1.0 (<repo>/crates/client)
+│       ├── anyhow feature "default" (*)
+│       ├── serde_json feature "default" (*)
+│       ├── tokio feature "default" (*)
+│       ├── tokio feature "io-std" (*)
+│       ├── tokio feature "io-util" (*)
+│       ├── tokio feature "macros" (*)
+│       ├── tokio feature "net" (*)
+│       ├── tokio feature "process" (*)
+│       ├── tokio feature "rt-multi-thread" (*)
+│       ├── tokio feature "signal" (*)
+│       ├── tokio feature "sync" (*)
+│       ├── tokio feature "time" (*)
+│       ├── hex feature "default"
+│       │   ├── hex v0.4.3
+│       │   └── hex feature "std"
+│       │       ├── hex v0.4.3
+│       │       └── hex feature "alloc"
+│       │           └── hex v0.4.3
+│       ├── rowtrail-contracts feature "default" (command-line)
+│       │   └── rowtrail-contracts v0.1.0 (<repo>/crates/contracts)
+│       │       ├── serde feature "default" (*)
+│       │       ├── serde feature "derive" (*)
+│       │       ├── schemars feature "default" (*)
+│       │       ├── serde_json feature "default" (*)
+│       │       ├── uuid feature "default" (*)
+│       │       └── uuid feature "v4" (*)
+│       └── sha2 feature "default"
+│           ├── sha2 v0.10.9
+│           │   ├── cfg-if feature "default" (*)
+│           │   ├── cpufeatures feature "default"
+│           │   │   └── cpufeatures v0.2.17
+│           │   │       └── libc v0.2.189
+│           │   └── digest feature "default"
+│           │       ├── digest v0.10.7
+│           │       │   ├── block-buffer feature "default"
+│           │       │   │   └── block-buffer v0.10.4
+│           │       │   │       └── generic-array feature "default"
+│           │       │   │           └── generic-array v0.14.7
+│           │       │   │               └── typenum feature "default"
+│           │       │   │                   └── typenum v1.20.1
+│           │       │   │               [build-dependencies]
+│           │       │   │               └── version_check feature "default"
+│           │       │   │                   └── version_check v0.9.5
+│           │       │   └── crypto-common feature "default"
+│           │       │       └── crypto-common v0.1.7
+│           │       │           ├── generic-array feature "default" (*)
+│           │       │           ├── generic-array feature "more_lengths"
+│           │       │           │   └── generic-array v0.14.7 (*)
+│           │       │           └── typenum feature "default" (*)
+│           │       └── digest feature "core-api"
+│           │           ├── digest v0.10.7 (*)
+│           │           └── digest feature "block-buffer"
+│           │               └── digest v0.10.7 (*)
+│           └── sha2 feature "std"
+│               ├── sha2 v0.10.9 (*)
+│               └── digest feature "std"
+│                   ├── digest v0.10.7 (*)
+│                   ├── digest feature "alloc"
+│                   │   └── digest v0.10.7 (*)
+│                   └── crypto-common feature "std"
+│                       └── crypto-common v0.1.7 (*)
+└── rowtrail-contracts feature "default" (command-line) (*)
+
+rowtrail-client v0.1.0 (<repo>/crates/client) (*)
+
+rowtrail-contracts v0.1.0 (<repo>/crates/contracts) (*)
+
+rowtrail-runtime v0.1.0 (<repo>/crates/runtime)
+├── arrow-buffer v59.2.0
+│   ├── half v2.7.1
+│   │   ├── num-traits feature "libm"
+│   │   │   └── num-traits v0.2.19 (*)
+│   │   ├── cfg-if feature "default" (*)
+│   │   ├── zerocopy feature "derive"
+│   │   │   ├── zerocopy v0.8.57
+│   │   │   │   └── zerocopy-derive feature "default"
+│   │   │   │       └── zerocopy-derive v0.8.57 (proc-macro)
+│   │   │   │           ├── proc-macro2 feature "default" (*)
+│   │   │   │           ├── quote feature "default" (*)
+│   │   │   │           ├── syn feature "default"
+│   │   │   │           │   ├── syn v2.0.119 (*)
+│   │   │   │           │   ├── syn feature "clone-impls" (*)
+│   │   │   │           │   ├── syn feature "derive"
+│   │   │   │           │   │   └── syn v2.0.119 (*)
+│   │   │   │           │   ├── syn feature "parsing" (*)
+│   │   │   │           │   ├── syn feature "printing" (*)
+│   │   │   │           │   └── syn feature "proc-macro" (*)
+│   │   │   │           └── syn feature "full" (*)
+│   │   │   └── zerocopy feature "zerocopy-derive"
+│   │   │       └── zerocopy v0.8.57 (*)
+│   │   └── zerocopy feature "simd"
+│   │       └── zerocopy v0.8.57 (*)
+│   ├── num-traits feature "std"
+│   │   └── num-traits v0.2.19 (*)
+│   ├── bytes feature "default" (*)
+│   └── num-bigint feature "std"
+│       ├── num-bigint v0.5.1
+│       │   ├── num-traits feature "i128"
+│       │   │   └── num-traits v0.2.19 (*)
+│       │   └── num-integer feature "i128"
+│       │       └── num-integer v0.1.47
+│       │           └── num-traits feature "i128" (*)
+│       ├── num-traits feature "std" (*)
+│       └── num-integer feature "std"
+│           ├── num-integer v0.1.47 (*)
+│           └── num-traits feature "std" (*)
+├── datafusion-catalog v55.0.0
+│   ├── datafusion-common v55.0.0
+│   │   ├── chrono v0.4.45 (*)
+│   │   ├── half v2.7.1 (*)
+│   │   ├── object_store v0.13.2
+│   │   │   ├── chrono feature "clock"
+│   │   │   │   ├── chrono v0.4.45 (*)
+│   │   │   │   ├── chrono feature "iana-time-zone"
+│   │   │   │   │   └── chrono v0.4.45 (*)
+│   │   │   │   ├── chrono feature "now" (*)
+│   │   │   │   └── chrono feature "winapi"
+│   │   │   │       ├── chrono v0.4.45 (*)
+│   │   │   │       └── chrono feature "windows-link"
+│   │   │   │           └── chrono v0.4.45 (*)
+│   │   │   ├── futures-core feature "default" (*)
+│   │   │   ├── futures-util feature "default"
+│   │   │   │   ├── futures-util v0.3.34 (*)
+│   │   │   │   ├── futures-util feature "async-await" (*)
+│   │   │   │   ├── futures-util feature "async-await-macro" (*)
+│   │   │   │   └── futures-util feature "std" (*)
+│   │   │   ├── futures-util feature "sink" (*)
+│   │   │   ├── thiserror feature "default" (*)
+│   │   │   ├── tokio feature "default" (*)
+│   │   │   ├── tokio feature "io-util" (*)
+│   │   │   ├── tokio feature "macros" (*)
+│   │   │   ├── tokio feature "rt" (*)
+│   │   │   ├── tokio feature "sync" (*)
+│   │   │   ├── tokio feature "time" (*)
+│   │   │   ├── bytes feature "default" (*)
+│   │   │   ├── tracing feature "default" (*)
+│   │   │   ├── async-trait feature "default"
+│   │   │   │   └── async-trait v0.1.92 (proc-macro)
+│   │   │   │       ├── proc-macro2 feature "default" (*)
+│   │   │   │       ├── quote feature "default" (*)
+│   │   │   │       ├── syn feature "clone-impls" (*)
+│   │   │   │       ├── syn feature "full" (*)
+│   │   │   │       ├── syn feature "parsing" (*)
+│   │   │   │       ├── syn feature "printing" (*)
+│   │   │   │       ├── syn feature "proc-macro" (*)
+│   │   │   │       └── syn feature "visit-mut"
+│   │   │   │           └── syn v3.0.6 (*)
+│   │   │   ├── http feature "default"
+│   │   │   │   ├── http v1.5.0
+│   │   │   │   │   ├── itoa feature "default" (*)
+│   │   │   │   │   └── bytes feature "default" (*)
+│   │   │   │   └── http feature "std"
+│   │   │   │       └── http v1.5.0 (*)
+│   │   │   ├── humantime feature "default"
+│   │   │   │   └── humantime v2.4.0
+│   │   │   ├── itertools feature "default"
+│   │   │   │   ├── itertools v0.14.0
+│   │   │   │   │   └── either v1.18.0
+│   │   │   │   └── itertools feature "use_std"
+│   │   │   │       ├── itertools v0.14.0 (*)
+│   │   │   │       ├── either feature "use_std"
+│   │   │   │       │   ├── either v1.18.0
+│   │   │   │       │   └── either feature "std"
+│   │   │   │       │       └── either v1.18.0
+│   │   │   │       └── itertools feature "use_alloc"
+│   │   │   │           └── itertools v0.14.0 (*)
+│   │   │   ├── parking_lot feature "default"
+│   │   │   │   └── parking_lot v0.12.5
+│   │   │   │       ├── lock_api feature "default"
+│   │   │   │       │   ├── lock_api v0.4.14
+│   │   │   │       │   │   └── scopeguard v1.2.0
+│   │   │   │       │   └── lock_api feature "atomic_usize"
+│   │   │   │       │       └── lock_api v0.4.14 (*)
+│   │   │   │       └── parking_lot_core feature "default"
+│   │   │   │           └── parking_lot_core v0.9.12
+│   │   │   │               ├── libc feature "default" (*)
+│   │   │   │               ├── cfg-if feature "default" (*)
+│   │   │   │               └── smallvec feature "default"
+│   │   │   │                   └── smallvec v1.16.1
+│   │   │   ├── percent-encoding feature "default"
+│   │   │   │   ├── percent-encoding v2.3.2
+│   │   │   │   └── percent-encoding feature "std"
+│   │   │   │       ├── percent-encoding v2.3.2
+│   │   │   │       └── percent-encoding feature "alloc"
+│   │   │   │           └── percent-encoding v2.3.2
+│   │   │   ├── url feature "default"
+│   │   │   │   ├── url v2.5.8
+│   │   │   │   │   ├── percent-encoding feature "alloc" (*)
+│   │   │   │   │   ├── form_urlencoded feature "alloc"
+│   │   │   │   │   │   ├── form_urlencoded v1.2.2
+│   │   │   │   │   │   │   └── percent-encoding v2.3.2
+│   │   │   │   │   │   └── percent-encoding feature "alloc" (*)
+│   │   │   │   │   ├── idna feature "alloc"
+│   │   │   │   │   │   └── idna v1.1.0
+│   │   │   │   │   │       ├── smallvec feature "const_generics"
+│   │   │   │   │   │       │   └── smallvec v1.16.1
+│   │   │   │   │   │       ├── smallvec feature "default" (*)
+│   │   │   │   │   │       ├── idna_adapter feature "default"
+│   │   │   │   │   │       │   └── idna_adapter v1.2.2
+│   │   │   │   │   │       │       ├── icu_normalizer v2.3.0
+│   │   │   │   │   │       │       │   ├── icu_collections v2.3.0
+│   │   │   │   │   │       │       │   │   ├── displaydoc v0.2.7 (proc-macro)
+│   │   │   │   │   │       │       │   │   │   ├── proc-macro2 feature "default" (*)
+│   │   │   │   │   │       │       │   │   │   ├── quote feature "default" (*)
+│   │   │   │   │   │       │       │   │   │   └── syn feature "default" (*)
+│   │   │   │   │   │       │       │   │   ├── utf8_iter v1.0.4
+│   │   │   │   │   │       │       │   │   ├── potential_utf feature "zerovec"
+│   │   │   │   │   │       │       │   │   │   └── potential_utf v0.1.6
+│   │   │   │   │   │       │       │   │   │       └── zerovec v0.11.8
+│   │   │   │   │   │       │       │   │   │           ├── yoke v0.8.3
+│   │   │   │   │   │       │       │   │   │           │   ├── stable_deref_trait v1.2.1
+│   │   │   │   │   │       │       │   │   │           │   ├── yoke-derive v0.8.3 (proc-macro)
+│   │   │   │   │   │       │       │   │   │           │   │   ├── proc-macro2 feature "default" (*)
+│   │   │   │   │   │       │       │   │   │           │   │   ├── quote feature "default" (*)
+│   │   │   │   │   │       │       │   │   │           │   │   ├── syn feature "default" (*)
+│   │   │   │   │   │       │       │   │   │           │   │   ├── syn feature "fold"
+│   │   │   │   │   │       │       │   │   │           │   │   │   └── syn v3.0.6 (*)
+│   │   │   │   │   │       │       │   │   │           │   │   ├── syn feature "visit"
+│   │   │   │   │   │       │       │   │   │           │   │   │   └── syn v3.0.6 (*)
+│   │   │   │   │   │       │       │   │   │           │   │   └── synstructure feature "default"
+│   │   │   │   │   │       │       │   │   │           │   │       ├── synstructure v0.14.0
+│   │   │   │   │   │       │       │   │   │           │   │       │   ├── proc-macro2 v1.0.107 (*)
+│   │   │   │   │   │       │       │   │   │           │   │       │   ├── quote v1.0.47 (*)
+│   │   │   │   │   │       │       │   │   │           │   │       │   ├── syn feature "clone-impls" (*)
+│   │   │   │   │   │       │       │   │   │           │   │       │   ├── syn feature "derive" (*)
+│   │   │   │   │   │       │       │   │   │           │   │       │   ├── syn feature "extra-traits"
+│   │   │   │   │   │       │       │   │   │           │   │       │   │   └── syn v3.0.6 (*)
+│   │   │   │   │   │       │       │   │   │           │   │       │   ├── syn feature "parsing" (*)
+│   │   │   │   │   │       │       │   │   │           │   │       │   ├── syn feature "printing" (*)
+│   │   │   │   │   │       │       │   │   │           │   │       │   └── syn feature "visit" (*)
+│   │   │   │   │   │       │       │   │   │           │   │       └── synstructure feature "proc-macro"
+│   │   │   │   │   │       │       │   │   │           │   │           ├── synstructure v0.14.0 (*)
+│   │   │   │   │   │       │       │   │   │           │   │           ├── proc-macro2 feature "proc-macro" (*)
+│   │   │   │   │   │       │       │   │   │           │   │           ├── quote feature "proc-macro" (*)
+│   │   │   │   │   │       │       │   │   │           │   │           └── syn feature "proc-macro" (*)
+│   │   │   │   │   │       │       │   │   │           │   └── zerofrom v0.1.8
+│   │   │   │   │   │       │       │   │   │           │       └── zerofrom-derive v0.1.8 (proc-macro)
+│   │   │   │   │   │       │       │   │   │           │           ├── proc-macro2 feature "default" (*)
+│   │   │   │   │   │       │       │   │   │           │           ├── quote feature "default" (*)
+│   │   │   │   │   │       │       │   │   │           │           ├── syn feature "default" (*)
+│   │   │   │   │   │       │       │   │   │           │           ├── syn feature "fold" (*)
+│   │   │   │   │   │       │       │   │   │           │           ├── syn feature "visit" (*)
+│   │   │   │   │   │       │       │   │   │           │           └── synstructure feature "default" (*)
+│   │   │   │   │   │       │       │   │   │           ├── zerofrom v0.1.8 (*)
+│   │   │   │   │   │       │       │   │   │           └── zerovec-derive v0.11.6 (proc-macro)
+│   │   │   │   │   │       │       │   │   │               ├── proc-macro2 feature "default" (*)
+│   │   │   │   │   │       │       │   │   │               ├── quote feature "default" (*)
+│   │   │   │   │   │       │       │   │   │               ├── syn feature "default" (*)
+│   │   │   │   │   │       │       │   │   │               └── syn feature "extra-traits" (*)
+│   │   │   │   │   │       │       │   │   ├── zerovec feature "derive"
+│   │   │   │   │   │       │       │   │   │   └── zerovec v0.11.8 (*)
+│   │   │   │   │   │       │       │   │   ├── zerovec feature "yoke"
+│   │   │   │   │   │       │       │   │   │   └── zerovec v0.11.8 (*)
+│   │   │   │   │   │       │       │   │   ├── yoke feature "derive"
+│   │   │   │   │   │       │       │   │   │   ├── yoke v0.8.3 (*)
+│   │   │   │   │   │       │       │   │   │   ├── yoke feature "zerofrom"
+│   │   │   │   │   │       │       │   │   │   │   └── yoke v0.8.3 (*)
+│   │   │   │   │   │       │       │   │   │   └── zerofrom feature "derive"
+│   │   │   │   │   │       │       │   │   │       └── zerofrom v0.1.8 (*)
+│   │   │   │   │   │       │       │   │   └── zerofrom feature "derive" (*)
+│   │   │   │   │   │       │       │   ├── icu_normalizer_data v2.3.0
+│   │   │   │   │   │       │       │   ├── icu_provider v2.3.1
+│   │   │   │   │   │       │       │   │   ├── displaydoc v0.2.7 (proc-macro) (*)
+│   │   │   │   │   │       │       │   │   ├── icu_locale_core v2.3.0
+│   │   │   │   │   │       │       │   │   │   ├── displaydoc v0.2.7 (proc-macro) (*)
+│   │   │   │   │   │       │       │   │   │   ├── litemap v0.8.3
+│   │   │   │   │   │       │       │   │   │   ├── tinystr v0.8.4
+│   │   │   │   │   │       │       │   │   │   │   ├── displaydoc v0.2.7 (proc-macro) (*)
+│   │   │   │   │   │       │       │   │   │   │   └── zerovec v0.11.8 (*)
+│   │   │   │   │   │       │       │   │   │   ├── writeable v0.6.4
+│   │   │   │   │   │       │       │   │   │   └── zerovec v0.11.8 (*)
+│   │   │   │   │   │       │       │   │   ├── writeable v0.6.4
+│   │   │   │   │   │       │       │   │   ├── zerotrie v0.2.5
+│   │   │   │   │   │       │       │   │   │   ├── displaydoc v0.2.7 (proc-macro) (*)
+│   │   │   │   │   │       │       │   │   │   ├── zerofrom v0.1.8 (*)
+│   │   │   │   │   │       │       │   │   │   └── yoke feature "derive" (*)
+│   │   │   │   │   │       │       │   │   ├── zerovec feature "derive" (*)
+│   │   │   │   │   │       │       │   │   ├── yoke feature "derive" (*)
+│   │   │   │   │   │       │       │   │   └── zerofrom feature "derive" (*)
+│   │   │   │   │   │       │       │   ├── smallvec v1.16.1
+│   │   │   │   │   │       │       │   └── zerovec v0.11.8 (*)
+│   │   │   │   │   │       │       └── icu_properties v2.3.0
+│   │   │   │   │   │       │           ├── displaydoc v0.2.7 (proc-macro) (*)
+│   │   │   │   │   │       │           ├── icu_collections v2.3.0 (*)
+│   │   │   │   │   │       │           ├── icu_properties_data v2.3.0
+│   │   │   │   │   │       │           ├── icu_provider v2.3.1 (*)
+│   │   │   │   │   │       │           ├── zerovec feature "derive" (*)
+│   │   │   │   │   │       │           ├── zerovec feature "yoke" (*)
+│   │   │   │   │   │       │           ├── icu_locale_core feature "zerovec"
+│   │   │   │   │   │       │           │   ├── icu_locale_core v2.3.0 (*)
+│   │   │   │   │   │       │           │   └── tinystr feature "zerovec"
+│   │   │   │   │   │       │           │       └── tinystr v0.8.4 (*)
+│   │   │   │   │   │       │           ├── zerotrie feature "yoke"
+│   │   │   │   │   │       │           │   └── zerotrie v0.2.5 (*)
+│   │   │   │   │   │       │           └── zerotrie feature "zerofrom"
+│   │   │   │   │   │       │               └── zerotrie v0.2.5 (*)
+│   │   │   │   │   │       └── utf8_iter feature "default"
+│   │   │   │   │   │           └── utf8_iter v1.0.4
+│   │   │   │   │   └── idna feature "compiled_data"
+│   │   │   │   │       ├── idna v1.1.0 (*)
+│   │   │   │   │       └── idna_adapter feature "compiled_data"
+│   │   │   │   │           ├── idna_adapter v1.2.2 (*)
+│   │   │   │   │           ├── icu_normalizer feature "compiled_data"
+│   │   │   │   │           │   ├── icu_normalizer v2.3.0 (*)
+│   │   │   │   │           │   └── icu_provider feature "baked"
+│   │   │   │   │           │       └── icu_provider v2.3.1 (*)
+│   │   │   │   │           └── icu_properties feature "compiled_data"
+│   │   │   │   │               ├── icu_properties v2.3.0 (*)
+│   │   │   │   │               └── icu_provider feature "baked" (*)
+│   │   │   │   └── url feature "std"
+│   │   │   │       ├── url v2.5.8 (*)
+│   │   │   │       ├── percent-encoding feature "std" (*)
+│   │   │   │       ├── form_urlencoded feature "std"
+│   │   │   │       │   ├── form_urlencoded v1.2.2 (*)
+│   │   │   │       │   ├── percent-encoding feature "std" (*)
+│   │   │   │       │   └── form_urlencoded feature "alloc" (*)
+│   │   │   │       └── idna feature "std"
+│   │   │   │           ├── idna v1.1.0 (*)
+│   │   │   │           └── idna feature "alloc" (*)
+│   │   │   └── walkdir feature "default"
+│   │   │       └── walkdir v2.5.0
+│   │   │           └── same-file feature "default"
+│   │   │               └── same-file v1.0.6
+│   │   ├── num-traits feature "default"
+│   │   │   ├── num-traits v0.2.19 (*)
+│   │   │   └── num-traits feature "std" (*)
+│   │   ├── indexmap feature "default" (*)
+│   │   ├── hashbrown feature "default"
+│   │   │   ├── hashbrown v0.17.1 (*)
+│   │   │   ├── hashbrown feature "allocator-api2"
+│   │   │   │   └── hashbrown v0.17.1 (*)
+│   │   │   ├── hashbrown feature "default-hasher"
+│   │   │   │   └── hashbrown v0.17.1 (*)
+│   │   │   ├── hashbrown feature "equivalent"
+│   │   │   │   └── hashbrown v0.17.1 (*)
+│   │   │   ├── hashbrown feature "inline-more"
+│   │   │   │   └── hashbrown v0.17.1 (*)
+│   │   │   └── hashbrown feature "raw-entry"
+│   │   │       └── hashbrown v0.17.1 (*)
+│   │   ├── foldhash feature "default"
+│   │   │   ├── foldhash v0.2.0
+│   │   │   └── foldhash feature "std"
+│   │   │       └── foldhash v0.2.0
+│   │   ├── tokio feature "default" (*)
+│   │   ├── tokio feature "macros" (*)
+│   │   ├── tokio feature "rt" (*)
+│   │   ├── tokio feature "sync" (*)
+│   │   ├── libc feature "default" (*)
+│   │   ├── uuid feature "default" (*)
+│   │   ├── uuid feature "v4" (*)
+│   │   ├── arrow feature "chrono-tz"
+│   │   │   ├── arrow v59.2.0
+│   │   │   │   ├── arrow-arith feature "default"
+│   │   │   │   │   └── arrow-arith v59.2.0
+│   │   │   │   │       ├── chrono feature "clock" (*)
+│   │   │   │   │       ├── num-traits feature "std" (*)
+│   │   │   │   │       ├── arrow-array feature "default"
+│   │   │   │   │       │   └── arrow-array v59.2.0
+│   │   │   │   │       │       ├── hashbrown v0.17.1 (*)
+│   │   │   │   │       │       ├── chrono feature "clock" (*)
+│   │   │   │   │       │       ├── num-traits feature "std" (*)
+│   │   │   │   │       │       ├── ahash feature "runtime-rng"
+│   │   │   │   │       │       │   ├── ahash v0.8.12
+│   │   │   │   │       │       │   │   ├── once_cell feature "alloc" (*)
+│   │   │   │   │       │       │   │   ├── cfg-if feature "default" (*)
+│   │   │   │   │       │       │   │   ├── getrandom feature "default"
+│   │   │   │   │       │       │   │   │   └── getrandom v0.3.4
+│   │   │   │   │       │       │   │   │       ├── libc v0.2.189
+│   │   │   │   │       │       │   │   │       └── cfg-if feature "default" (*)
+│   │   │   │   │       │       │   │   └── zerocopy feature "simd" (*)
+│   │   │   │   │       │       │   │   [build-dependencies]
+│   │   │   │   │       │       │   │   └── version_check feature "default" (*)
+│   │   │   │   │       │       │   └── ahash feature "getrandom"
+│   │   │   │   │       │       │       └── ahash v0.8.12 (*)
+│   │   │   │   │       │       ├── arrow-buffer feature "default"
+│   │   │   │   │       │       │   └── arrow-buffer v59.2.0 (*)
+│   │   │   │   │       │       ├── half feature "num-traits"
+│   │   │   │   │       │       │   └── half v2.7.1 (*)
+│   │   │   │   │       │       ├── num-integer feature "std" (*)
+│   │   │   │   │       │       ├── arrow-data feature "default"
+│   │   │   │   │       │       │   └── arrow-data v59.2.0
+│   │   │   │   │       │       │       ├── half v2.7.1 (*)
+│   │   │   │   │       │       │       ├── num-traits feature "std" (*)
+│   │   │   │   │       │       │       ├── arrow-buffer feature "default" (*)
+│   │   │   │   │       │       │       ├── num-integer feature "std" (*)
+│   │   │   │   │       │       │       └── arrow-schema feature "default"
+│   │   │   │   │       │       │           └── arrow-schema v59.2.0
+│   │   │   │   │       │       │               ├── serde feature "derive" (*)
+│   │   │   │   │       │       │               ├── serde_core feature "rc" (*)
+│   │   │   │   │       │       │               ├── serde_core feature "std" (*)
+│   │   │   │   │       │       │               └── serde_json feature "default" (*)
+│   │   │   │   │       │       ├── arrow-schema feature "default" (*)
+│   │   │   │   │       │       ├── chrono-tz feature "default"
+│   │   │   │   │       │       │   ├── chrono-tz v0.10.4
+│   │   │   │   │       │       │   │   ├── chrono v0.4.45 (*)
+│   │   │   │   │       │       │   │   └── phf v0.12.1
+│   │   │   │   │       │       │   │       └── phf_shared v0.12.1
+│   │   │   │   │       │       │   │           └── siphasher feature "default"
+│   │   │   │   │       │       │   │               ├── siphasher v1.0.3
+│   │   │   │   │       │       │   │               └── siphasher feature "std"
+│   │   │   │   │       │       │   │                   └── siphasher v1.0.3
+│   │   │   │   │       │       │   └── chrono-tz feature "std"
+│   │   │   │   │       │       │       └── chrono-tz v0.10.4 (*)
+│   │   │   │   │       │       └── num-complex feature "std"
+│   │   │   │   │       │           ├── num-complex v0.4.6
+│   │   │   │   │       │           │   └── num-traits feature "i128" (*)
+│   │   │   │   │       │           └── num-traits feature "std" (*)
+│   │   │   │   │       ├── arrow-buffer feature "default" (*)
+│   │   │   │   │       ├── arrow-data feature "default" (*)
+│   │   │   │   │       └── arrow-schema feature "default" (*)
+│   │   │   │   ├── arrow-array feature "default" (*)
+│   │   │   │   ├── arrow-buffer feature "default" (*)
+│   │   │   │   ├── arrow-data feature "default" (*)
+│   │   │   │   ├── arrow-schema feature "default" (*)
+│   │   │   │   ├── arrow-cast feature "default"
+│   │   │   │   │   └── arrow-cast v59.2.0
+│   │   │   │   │       ├── comfy-table v7.2.2
+│   │   │   │   │       │   ├── unicode-segmentation feature "default"
+│   │   │   │   │       │   │   └── unicode-segmentation v1.13.3
+│   │   │   │   │       │   └── unicode-width feature "default"
+│   │   │   │   │       │       ├── unicode-width v0.2.2
+│   │   │   │   │       │       └── unicode-width feature "cjk"
+│   │   │   │   │       │           └── unicode-width v0.2.2
+│   │   │   │   │       ├── half v2.7.1 (*)
+│   │   │   │   │       ├── chrono feature "clock" (*)
+│   │   │   │   │       ├── num-traits feature "std" (*)
+│   │   │   │   │       ├── arrow-array feature "default" (*)
+│   │   │   │   │       ├── arrow-buffer feature "default" (*)
+│   │   │   │   │       ├── arrow-data feature "default" (*)
+│   │   │   │   │       ├── arrow-schema feature "default" (*)
+│   │   │   │   │       ├── arrow-ord feature "default"
+│   │   │   │   │       │   └── arrow-ord v59.2.0
+│   │   │   │   │       │       ├── arrow-array feature "default" (*)
+│   │   │   │   │       │       ├── arrow-buffer feature "default" (*)
+│   │   │   │   │       │       ├── arrow-data feature "default" (*)
+│   │   │   │   │       │       ├── arrow-schema feature "default" (*)
+│   │   │   │   │       │       └── arrow-select feature "default"
+│   │   │   │   │       │           └── arrow-select v59.2.0
+│   │   │   │   │       │               ├── ahash v0.8.12 (*)
+│   │   │   │   │       │               ├── num-traits feature "std" (*)
+│   │   │   │   │       │               ├── arrow-array feature "default" (*)
+│   │   │   │   │       │               ├── arrow-buffer feature "default" (*)
+│   │   │   │   │       │               ├── arrow-data feature "default" (*)
+│   │   │   │   │       │               └── arrow-schema feature "default" (*)
+│   │   │   │   │       ├── arrow-select feature "default" (*)
+│   │   │   │   │       ├── atoi feature "default"
+│   │   │   │   │       │   ├── atoi v2.0.0
+│   │   │   │   │       │   │   └── num-traits v0.2.19 (*)
+│   │   │   │   │       │   └── atoi feature "std"
+│   │   │   │   │       │       ├── atoi v2.0.0 (*)
+│   │   │   │   │       │       └── num-traits feature "std" (*)
+│   │   │   │   │       ├── base64 feature "default"
+│   │   │   │   │       │   ├── base64 v0.23.1
+│   │   │   │   │       │   ├── base64 feature "simd-unsafe"
+│   │   │   │   │       │   │   └── base64 v0.23.1
+│   │   │   │   │       │   └── base64 feature "std"
+│   │   │   │   │       │       ├── base64 v0.23.1
+│   │   │   │   │       │       └── base64 feature "alloc"
+│   │   │   │   │       │           └── base64 v0.23.1
+│   │   │   │   │       ├── lexical-core feature "parse-floats"
+│   │   │   │   │       │   ├── lexical-core v1.0.6
+│   │   │   │   │       │   │   ├── lexical-parse-float v1.0.6
+│   │   │   │   │       │   │   │   ├── lexical-parse-integer v1.0.6
+│   │   │   │   │       │   │   │   │   └── lexical-util feature "parse-integers"
+│   │   │   │   │       │   │   │   │       └── lexical-util v1.0.7
+│   │   │   │   │       │   │   │   └── lexical-util feature "parse-floats"
+│   │   │   │   │       │   │   │       └── lexical-util v1.0.7
+│   │   │   │   │       │   │   ├── lexical-parse-integer v1.0.6 (*)
+│   │   │   │   │       │   │   ├── lexical-util v1.0.7
+│   │   │   │   │       │   │   ├── lexical-write-float v1.0.6
+│   │   │   │   │       │   │   │   ├── lexical-write-integer v1.0.6
+│   │   │   │   │       │   │   │   │   └── lexical-util feature "write-integers"
+│   │   │   │   │       │   │   │   │       └── lexical-util v1.0.7
+│   │   │   │   │       │   │   │   └── lexical-util feature "write-floats"
+│   │   │   │   │       │   │   │       └── lexical-util v1.0.7
+│   │   │   │   │       │   │   └── lexical-write-integer v1.0.6 (*)
+│   │   │   │   │       │   └── lexical-core feature "lexical-parse-float"
+│   │   │   │   │       │       └── lexical-core v1.0.6 (*)
+│   │   │   │   │       ├── lexical-core feature "parse-integers"
+│   │   │   │   │       │   ├── lexical-core v1.0.6 (*)
+│   │   │   │   │       │   └── lexical-core feature "lexical-parse-integer"
+│   │   │   │   │       │       └── lexical-core v1.0.6 (*)
+│   │   │   │   │       ├── lexical-core feature "write-floats"
+│   │   │   │   │       │   ├── lexical-core v1.0.6 (*)
+│   │   │   │   │       │   └── lexical-core feature "lexical-write-float"
+│   │   │   │   │       │       └── lexical-core v1.0.6 (*)
+│   │   │   │   │       ├── lexical-core feature "write-integers"
+│   │   │   │   │       │   ├── lexical-core v1.0.6 (*)
+│   │   │   │   │       │   └── lexical-core feature "lexical-write-integer"
+│   │   │   │   │       │       └── lexical-core v1.0.6 (*)
+│   │   │   │   │       └── ryu feature "default"
+│   │   │   │   │           └── ryu v1.0.23
+│   │   │   │   ├── arrow-ord feature "default" (*)
+│   │   │   │   ├── arrow-select feature "default" (*)
+│   │   │   │   ├── arrow-csv feature "default"
+│   │   │   │   │   └── arrow-csv v59.2.0
+│   │   │   │   │       ├── csv v1.4.0
+│   │   │   │   │       │   ├── serde_core feature "default"
+│   │   │   │   │       │   │   ├── serde_core v1.0.229
+│   │   │   │   │       │   │   ├── serde_core feature "result" (*)
+│   │   │   │   │       │   │   └── serde_core feature "std" (*)
+│   │   │   │   │       │   ├── itoa feature "default" (*)
+│   │   │   │   │       │   ├── ryu feature "default" (*)
+│   │   │   │   │       │   └── csv-core feature "default"
+│   │   │   │   │       │       └── csv-core v0.1.13
+│   │   │   │   │       │           └── memchr v2.8.3
+│   │   │   │   │       ├── chrono feature "clock" (*)
+│   │   │   │   │       ├── arrow-array feature "default" (*)
+│   │   │   │   │       ├── arrow-schema feature "default" (*)
+│   │   │   │   │       ├── arrow-cast feature "default" (*)
+│   │   │   │   │       ├── csv-core feature "default" (*)
+│   │   │   │   │       ├── regex feature "perf"
+│   │   │   │   │       │   ├── regex v1.13.1
+│   │   │   │   │       │   │   ├── aho-corasick v1.1.5
+│   │   │   │   │       │   │   │   └── memchr v2.8.3
+│   │   │   │   │       │   │   ├── memchr v2.8.3
+│   │   │   │   │       │   │   ├── regex-syntax v0.8.11
+│   │   │   │   │       │   │   ├── regex-automata feature "alloc"
+│   │   │   │   │       │   │   │   └── regex-automata v0.4.18
+│   │   │   │   │       │   │   │       ├── aho-corasick v1.1.5 (*)
+│   │   │   │   │       │   │   │       ├── memchr v2.8.3
+│   │   │   │   │       │   │   │       └── regex-syntax v0.8.11
+│   │   │   │   │       │   │   ├── regex-automata feature "meta"
+│   │   │   │   │       │   │   │   ├── regex-automata v0.4.18 (*)
+│   │   │   │   │       │   │   │   ├── regex-automata feature "nfa-pikevm"
+│   │   │   │   │       │   │   │   │   ├── regex-automata v0.4.18 (*)
+│   │   │   │   │       │   │   │   │   └── regex-automata feature "nfa-thompson"
+│   │   │   │   │       │   │   │   │       ├── regex-automata v0.4.18 (*)
+│   │   │   │   │       │   │   │   │       └── regex-automata feature "alloc" (*)
+│   │   │   │   │       │   │   │   └── regex-automata feature "syntax"
+│   │   │   │   │       │   │   │       ├── regex-automata v0.4.18 (*)
+│   │   │   │   │       │   │   │       └── regex-automata feature "alloc" (*)
+│   │   │   │   │       │   │   ├── regex-automata feature "nfa-pikevm" (*)
+│   │   │   │   │       │   │   └── regex-automata feature "syntax" (*)
+│   │   │   │   │       │   ├── regex feature "perf-backtrack"
+│   │   │   │   │       │   │   ├── regex v1.13.1 (*)
+│   │   │   │   │       │   │   └── regex-automata feature "nfa-backtrack"
+│   │   │   │   │       │   │       ├── regex-automata v0.4.18 (*)
+│   │   │   │   │       │   │       └── regex-automata feature "nfa-thompson" (*)
+│   │   │   │   │       │   ├── regex feature "perf-cache"
+│   │   │   │   │       │   │   └── regex v1.13.1 (*)
+│   │   │   │   │       │   ├── regex feature "perf-dfa"
+│   │   │   │   │       │   │   ├── regex v1.13.1 (*)
+│   │   │   │   │       │   │   └── regex-automata feature "hybrid"
+│   │   │   │   │       │   │       ├── regex-automata v0.4.18 (*)
+│   │   │   │   │       │   │       ├── regex-automata feature "alloc" (*)
+│   │   │   │   │       │   │       └── regex-automata feature "nfa-thompson" (*)
+│   │   │   │   │       │   ├── regex feature "perf-inline"
+│   │   │   │   │       │   │   ├── regex v1.13.1 (*)
+│   │   │   │   │       │   │   └── regex-automata feature "perf-inline"
+│   │   │   │   │       │   │       └── regex-automata v0.4.18 (*)
+│   │   │   │   │       │   ├── regex feature "perf-literal"
+│   │   │   │   │       │   │   ├── regex v1.13.1 (*)
+│   │   │   │   │       │   │   └── regex-automata feature "perf-literal"
+│   │   │   │   │       │   │       ├── regex-automata v0.4.18 (*)
+│   │   │   │   │       │   │       ├── regex-automata feature "perf-literal-multisubstring"
+│   │   │   │   │       │   │       │   └── regex-automata v0.4.18 (*)
+│   │   │   │   │       │   │       └── regex-automata feature "perf-literal-substring"
+│   │   │   │   │       │   │           ├── regex-automata v0.4.18 (*)
+│   │   │   │   │       │   │           └── aho-corasick feature "perf-literal"
+│   │   │   │   │       │   │               └── aho-corasick v1.1.5 (*)
+│   │   │   │   │       │   └── regex feature "perf-onepass"
+│   │   │   │   │       │       ├── regex v1.13.1 (*)
+│   │   │   │   │       │       └── regex-automata feature "dfa-onepass"
+│   │   │   │   │       │           ├── regex-automata v0.4.18 (*)
+│   │   │   │   │       │           └── regex-automata feature "nfa-thompson" (*)
+│   │   │   │   │       ├── regex feature "std"
+│   │   │   │   │       │   ├── regex v1.13.1 (*)
+│   │   │   │   │       │   ├── memchr feature "std" (*)
+│   │   │   │   │       │   ├── aho-corasick feature "std"
+│   │   │   │   │       │   │   ├── aho-corasick v1.1.5 (*)
+│   │   │   │   │       │   │   └── memchr feature "std" (*)
+│   │   │   │   │       │   ├── regex-automata feature "std"
+│   │   │   │   │       │   │   ├── regex-automata v0.4.18 (*)
+│   │   │   │   │       │   │   ├── memchr feature "std" (*)
+│   │   │   │   │       │   │   ├── aho-corasick feature "std" (*)
+│   │   │   │   │       │   │   ├── regex-automata feature "alloc" (*)
+│   │   │   │   │       │   │   └── regex-syntax feature "std"
+│   │   │   │   │       │   │       └── regex-syntax v0.8.11
+│   │   │   │   │       │   └── regex-syntax feature "std" (*)
+│   │   │   │   │       └── regex feature "unicode"
+│   │   │   │   │           ├── regex v1.13.1 (*)
+│   │   │   │   │           ├── regex feature "unicode-age"
+│   │   │   │   │           │   ├── regex v1.13.1 (*)
+│   │   │   │   │           │   ├── regex-automata feature "unicode-age"
+│   │   │   │   │           │   │   ├── regex-automata v0.4.18 (*)
+│   │   │   │   │           │   │   └── regex-syntax feature "unicode-age"
+│   │   │   │   │           │   │       └── regex-syntax v0.8.11
+│   │   │   │   │           │   └── regex-syntax feature "unicode-age" (*)
+│   │   │   │   │           ├── regex feature "unicode-bool"
+│   │   │   │   │           │   ├── regex v1.13.1 (*)
+│   │   │   │   │           │   ├── regex-automata feature "unicode-bool"
+│   │   │   │   │           │   │   ├── regex-automata v0.4.18 (*)
+│   │   │   │   │           │   │   └── regex-syntax feature "unicode-bool"
+│   │   │   │   │           │   │       └── regex-syntax v0.8.11
+│   │   │   │   │           │   └── regex-syntax feature "unicode-bool" (*)
+│   │   │   │   │           ├── regex feature "unicode-case"
+│   │   │   │   │           │   ├── regex v1.13.1 (*)
+│   │   │   │   │           │   ├── regex-automata feature "unicode-case"
+│   │   │   │   │           │   │   ├── regex-automata v0.4.18 (*)
+│   │   │   │   │           │   │   └── regex-syntax feature "unicode-case"
+│   │   │   │   │           │   │       └── regex-syntax v0.8.11
+│   │   │   │   │           │   └── regex-syntax feature "unicode-case" (*)
+│   │   │   │   │           ├── regex feature "unicode-gencat"
+│   │   │   │   │           │   ├── regex v1.13.1 (*)
+│   │   │   │   │           │   ├── regex-automata feature "unicode-gencat"
+│   │   │   │   │           │   │   ├── regex-automata v0.4.18 (*)
+│   │   │   │   │           │   │   └── regex-syntax feature "unicode-gencat"
+│   │   │   │   │           │   │       └── regex-syntax v0.8.11
+│   │   │   │   │           │   └── regex-syntax feature "unicode-gencat" (*)
+│   │   │   │   │           ├── regex feature "unicode-perl"
+│   │   │   │   │           │   ├── regex v1.13.1 (*)
+│   │   │   │   │           │   ├── regex-automata feature "unicode-perl"
+│   │   │   │   │           │   │   ├── regex-automata v0.4.18 (*)
+│   │   │   │   │           │   │   └── regex-syntax feature "unicode-perl"
+│   │   │   │   │           │   │       └── regex-syntax v0.8.11
+│   │   │   │   │           │   ├── regex-automata feature "unicode-word-boundary"
+│   │   │   │   │           │   │   └── regex-automata v0.4.18 (*)
+│   │   │   │   │           │   └── regex-syntax feature "unicode-perl" (*)
+│   │   │   │   │           ├── regex feature "unicode-script"
+│   │   │   │   │           │   ├── regex v1.13.1 (*)
+│   │   │   │   │           │   ├── regex-automata feature "unicode-script"
+│   │   │   │   │           │   │   ├── regex-automata v0.4.18 (*)
+│   │   │   │   │           │   │   └── regex-syntax feature "unicode-script"
+│   │   │   │   │           │   │       └── regex-syntax v0.8.11
+│   │   │   │   │           │   └── regex-syntax feature "unicode-script" (*)
+│   │   │   │   │           ├── regex feature "unicode-segment"
+│   │   │   │   │           │   ├── regex v1.13.1 (*)
+│   │   │   │   │           │   ├── regex-automata feature "unicode-segment"
+│   │   │   │   │           │   │   ├── regex-automata v0.4.18 (*)
+│   │   │   │   │           │   │   └── regex-syntax feature "unicode-segment"
+│   │   │   │   │           │   │       └── regex-syntax v0.8.11
+│   │   │   │   │           │   └── regex-syntax feature "unicode-segment" (*)
+│   │   │   │   │           ├── regex-automata feature "unicode"
+│   │   │   │   │           │   ├── regex-automata v0.4.18 (*)
+│   │   │   │   │           │   ├── regex-automata feature "unicode-age" (*)
+│   │   │   │   │           │   ├── regex-automata feature "unicode-bool" (*)
+│   │   │   │   │           │   ├── regex-automata feature "unicode-case" (*)
+│   │   │   │   │           │   ├── regex-automata feature "unicode-gencat" (*)
+│   │   │   │   │           │   ├── regex-automata feature "unicode-perl" (*)
+│   │   │   │   │           │   ├── regex-automata feature "unicode-script" (*)
+│   │   │   │   │           │   ├── regex-automata feature "unicode-segment" (*)
+│   │   │   │   │           │   ├── regex-automata feature "unicode-word-boundary" (*)
+│   │   │   │   │           │   └── regex-syntax feature "unicode"
+│   │   │   │   │           │       ├── regex-syntax v0.8.11
+│   │   │   │   │           │       ├── regex-syntax feature "unicode-age" (*)
+│   │   │   │   │           │       ├── regex-syntax feature "unicode-bool" (*)
+│   │   │   │   │           │       ├── regex-syntax feature "unicode-case" (*)
+│   │   │   │   │           │       ├── regex-syntax feature "unicode-gencat" (*)
+│   │   │   │   │           │       ├── regex-syntax feature "unicode-perl" (*)
+│   │   │   │   │           │       ├── regex-syntax feature "unicode-script" (*)
+│   │   │   │   │           │       └── regex-syntax feature "unicode-segment" (*)
+│   │   │   │   │           └── regex-syntax feature "unicode" (*)
+│   │   │   │   ├── arrow-ipc feature "default"
+│   │   │   │   │   └── arrow-ipc v59.2.0
+│   │   │   │   │       ├── flatbuffers v25.12.19
+│   │   │   │   │       │   └── bitflags feature "default"
+│   │   │   │   │       │       └── bitflags v2.13.2
+│   │   │   │   │       │   [build-dependencies]
+│   │   │   │   │       │   └── rustc_version feature "default"
+│   │   │   │   │       │       └── rustc_version v0.4.1
+│   │   │   │   │       │           └── semver feature "default"
+│   │   │   │   │       │               ├── semver v1.0.28
+│   │   │   │   │       │               └── semver feature "std"
+│   │   │   │   │       │                   └── semver v1.0.28
+│   │   │   │   │       ├── zstd v0.13.3
+│   │   │   │   │       │   └── zstd-safe feature "std"
+│   │   │   │   │       │       ├── zstd-safe v7.3.0
+│   │   │   │   │       │       │   └── zstd-sys v2.1.0+zstd.1.5.7
+│   │   │   │   │       │       │       [build-dependencies]
+│   │   │   │   │       │       │       ├── cc feature "default"
+│   │   │   │   │       │       │       │   └── cc v1.4.7
+│   │   │   │   │       │       │       │       ├── jobserver v0.1.35
+│   │   │   │   │       │       │       │       │   └── libc feature "default" (*)
+│   │   │   │   │       │       │       │       ├── libc v0.2.189
+│   │   │   │   │       │       │       │       ├── find-msvc-tools feature "default"
+│   │   │   │   │       │       │       │       │   └── find-msvc-tools v0.1.13
+│   │   │   │   │       │       │       │       └── shlex feature "default"
+│   │   │   │   │       │       │       │           ├── shlex v2.0.1
+│   │   │   │   │       │       │       │           └── shlex feature "std"
+│   │   │   │   │       │       │       │               └── shlex v2.0.1
+│   │   │   │   │       │       │       ├── cc feature "parallel"
+│   │   │   │   │       │       │       │   └── cc v1.4.7 (*)
+│   │   │   │   │       │       │       └── pkg-config feature "default"
+│   │   │   │   │       │       │           └── pkg-config v0.3.34
+│   │   │   │   │       │       └── zstd-sys feature "std"
+│   │   │   │   │       │           └── zstd-sys v2.1.0+zstd.1.5.7 (*)
+│   │   │   │   │       ├── arrow-array feature "default" (*)
+│   │   │   │   │       ├── arrow-buffer feature "default" (*)
+│   │   │   │   │       ├── arrow-data feature "default" (*)
+│   │   │   │   │       ├── arrow-schema feature "default" (*)
+│   │   │   │   │       ├── arrow-select feature "default" (*)
+│   │   │   │   │       ├── lz4_flex feature "frame"
+│   │   │   │   │       │   ├── lz4_flex v0.14.0
+│   │   │   │   │       │   │   └── twox-hash feature "xxhash32"
+│   │   │   │   │       │   │       └── twox-hash v2.1.4
+│   │   │   │   │       │   └── lz4_flex feature "std"
+│   │   │   │   │       │       ├── lz4_flex v0.14.0 (*)
+│   │   │   │   │       │       └── lz4_flex feature "alloc"
+│   │   │   │   │       │           └── lz4_flex v0.14.0 (*)
+│   │   │   │   │       └── lz4_flex feature "std" (*)
+│   │   │   │   ├── arrow-json feature "default"
+│   │   │   │   │   └── arrow-json v59.2.0
+│   │   │   │   │       ├── half v2.7.1 (*)
+│   │   │   │   │       ├── lexical-core v1.0.6 (*)
+│   │   │   │   │       ├── serde_core v1.0.229
+│   │   │   │   │       ├── simdutf8 v0.1.5
+│   │   │   │   │       ├── chrono feature "clock" (*)
+│   │   │   │   │       ├── num-traits feature "std" (*)
+│   │   │   │   │       ├── memchr feature "default" (*)
+│   │   │   │   │       ├── indexmap feature "std" (*)
+│   │   │   │   │       ├── serde_json feature "std" (*)
+│   │   │   │   │       ├── itoa feature "default" (*)
+│   │   │   │   │       ├── arrow-array feature "default" (*)
+│   │   │   │   │       ├── arrow-buffer feature "default" (*)
+│   │   │   │   │       ├── arrow-schema feature "default" (*)
+│   │   │   │   │       ├── arrow-cast feature "default" (*)
+│   │   │   │   │       ├── arrow-ord feature "default" (*)
+│   │   │   │   │       ├── arrow-select feature "default" (*)
+│   │   │   │   │       └── ryu feature "default" (*)
+│   │   │   │   ├── arrow-row feature "default"
+│   │   │   │   │   └── arrow-row v59.2.0
+│   │   │   │   │       ├── half v2.7.1 (*)
+│   │   │   │   │       ├── arrow-array feature "default" (*)
+│   │   │   │   │       ├── arrow-buffer feature "default" (*)
+│   │   │   │   │       ├── arrow-data feature "default" (*)
+│   │   │   │   │       └── arrow-schema feature "default" (*)
+│   │   │   │   └── arrow-string feature "default"
+│   │   │   │       └── arrow-string v59.2.0
+│   │   │   │           ├── num-traits feature "std" (*)
+│   │   │   │           ├── memchr feature "default" (*)
+│   │   │   │           ├── arrow-array feature "default" (*)
+│   │   │   │           ├── arrow-buffer feature "default" (*)
+│   │   │   │           ├── arrow-data feature "default" (*)
+│   │   │   │           ├── arrow-schema feature "default" (*)
+│   │   │   │           ├── arrow-select feature "default" (*)
+│   │   │   │           ├── regex feature "perf" (*)
+│   │   │   │           ├── regex feature "std" (*)
+│   │   │   │           ├── regex feature "unicode" (*)
+│   │   │   │           └── regex-syntax feature "unicode" (*)
+│   │   │   └── arrow-array feature "chrono-tz"
+│   │   │       └── arrow-array v59.2.0 (*)
+│   │   ├── arrow feature "default"
+│   │   │   ├── arrow v59.2.0 (*)
+│   │   │   ├── arrow feature "csv"
+│   │   │   │   ├── arrow v59.2.0 (*)
+│   │   │   │   └── arrow feature "arrow-csv"
+│   │   │   │       └── arrow v59.2.0 (*)
+│   │   │   ├── arrow feature "ipc"
+│   │   │   │   ├── arrow v59.2.0 (*)
+│   │   │   │   └── arrow feature "arrow-ipc"
+│   │   │   │       └── arrow v59.2.0 (*)
+│   │   │   └── arrow feature "json"
+│   │   │       ├── arrow v59.2.0 (*)
+│   │   │       └── arrow feature "arrow-json"
+│   │   │           └── arrow v59.2.0 (*)
+│   │   ├── arrow feature "prettyprint"
+│   │   │   ├── arrow v59.2.0 (*)
+│   │   │   └── arrow-cast feature "prettyprint"
+│   │   │       ├── arrow-cast v59.2.0 (*)
+│   │   │       └── arrow-cast feature "comfy-table"
+│   │   │           └── arrow-cast v59.2.0 (*)
+│   │   ├── arrow-schema feature "canonical_extension_types"
+│   │   │   └── arrow-schema v59.2.0 (*)
+│   │   ├── arrow-ipc feature "lz4"
+│   │   │   ├── arrow-ipc v59.2.0 (*)
+│   │   │   └── arrow-ipc feature "lz4_flex"
+│   │   │       └── arrow-ipc v59.2.0 (*)
+│   │   ├── arrow-ipc feature "zstd"
+│   │   │   └── arrow-ipc v59.2.0 (*)
+│   │   ├── itertools feature "default"
+│   │   │   ├── itertools v0.15.0
+│   │   │   │   └── either v1.18.0
+│   │   │   └── itertools feature "use_std"
+│   │   │       ├── itertools v0.15.0 (*)
+│   │   │       ├── itertools feature "use_alloc"
+│   │   │       │   └── itertools v0.15.0 (*)
+│   │   │       └── either feature "use_std" (*)
+│   │   ├── log feature "default"
+│   │   │   └── log v0.4.34
+│   │   ├── parquet feature "arrow"
+│   │   │   ├── parquet v59.2.0
+│   │   │   │   ├── flate2 v1.1.10
+│   │   │   │   │   └── zlib-rs feature "rust-allocator"
+│   │   │   │   │       └── zlib-rs v0.6.8
+│   │   │   │   ├── hashbrown v0.17.1 (*)
+│   │   │   │   ├── num-bigint v0.5.1 (*)
+│   │   │   │   ├── seq-macro v0.3.6 (proc-macro)
+│   │   │   │   ├── simdutf8 v0.1.5
+│   │   │   │   ├── snap v1.1.2
+│   │   │   │   ├── zstd v0.13.3 (*)
+│   │   │   │   ├── chrono feature "clock" (*)
+│   │   │   │   ├── num-traits feature "std" (*)
+│   │   │   │   ├── futures feature "std" (*)
+│   │   │   │   ├── tokio feature "io-util" (*)
+│   │   │   │   ├── tokio feature "macros" (*)
+│   │   │   │   ├── tokio feature "rt" (*)
+│   │   │   │   ├── bytes feature "std" (*)
+│   │   │   │   ├── arrow-array feature "default" (*)
+│   │   │   │   ├── ahash feature "runtime-rng" (*)
+│   │   │   │   ├── arrow-buffer feature "default" (*)
+│   │   │   │   ├── half feature "num-traits" (*)
+│   │   │   │   ├── num-integer feature "std" (*)
+│   │   │   │   ├── arrow-data feature "default" (*)
+│   │   │   │   ├── arrow-schema feature "default" (*)
+│   │   │   │   ├── arrow-select feature "default" (*)
+│   │   │   │   ├── base64 feature "std" (*)
+│   │   │   │   ├── arrow-ipc feature "default" (*)
+│   │   │   │   ├── lz4_flex feature "frame" (*)
+│   │   │   │   ├── lz4_flex feature "std" (*)
+│   │   │   │   ├── twox-hash feature "xxhash64"
+│   │   │   │   │   └── twox-hash v2.1.4
+│   │   │   │   ├── object_store feature "tokio"
+│   │   │   │   │   └── object_store v0.13.2 (*)
+│   │   │   │   └── brotli feature "std"
+│   │   │   │       ├── brotli v8.0.4
+│   │   │   │       │   ├── brotli-decompressor v5.0.3
+│   │   │   │       │   │   ├── alloc-no-stdlib feature "default"
+│   │   │   │       │   │   │   └── alloc-no-stdlib v2.0.4
+│   │   │   │       │   │   └── alloc-stdlib feature "default"
+│   │   │   │       │   │       └── alloc-stdlib v0.2.4
+│   │   │   │       │   │           └── alloc-no-stdlib feature "default" (*)
+│   │   │   │       │   ├── alloc-no-stdlib feature "default" (*)
+│   │   │   │       │   └── alloc-stdlib feature "default" (*)
+│   │   │   │       ├── brotli feature "alloc-stdlib"
+│   │   │   │       │   └── brotli v8.0.4 (*)
+│   │   │   │       └── brotli-decompressor feature "std"
+│   │   │   │           ├── brotli-decompressor v5.0.3 (*)
+│   │   │   │           └── brotli-decompressor feature "alloc-stdlib"
+│   │   │   │               └── brotli-decompressor v5.0.3 (*)
+│   │   │   ├── parquet feature "arrow-array"
+│   │   │   │   └── parquet v59.2.0 (*)
+│   │   │   ├── parquet feature "arrow-buffer"
+│   │   │   │   └── parquet v59.2.0 (*)
+│   │   │   ├── parquet feature "arrow-data"
+│   │   │   │   └── parquet v59.2.0 (*)
+│   │   │   ├── parquet feature "arrow-ipc"
+│   │   │   │   └── parquet v59.2.0 (*)
+│   │   │   ├── parquet feature "arrow-schema"
+│   │   │   │   └── parquet v59.2.0 (*)
+│   │   │   ├── parquet feature "arrow-select"
+│   │   │   │   └── parquet v59.2.0 (*)
+│   │   │   └── parquet feature "base64"
+│   │   │       └── parquet v59.2.0 (*)
+│   │   ├── parquet feature "async"
+│   │   │   ├── parquet v59.2.0 (*)
+│   │   │   ├── parquet feature "futures"
+│   │   │   │   └── parquet v59.2.0 (*)
+│   │   │   └── parquet feature "tokio"
+│   │   │       └── parquet v59.2.0 (*)
+│   │   ├── parquet feature "default"
+│   │   │   ├── parquet v59.2.0 (*)
+│   │   │   ├── parquet feature "arrow" (*)
+│   │   │   ├── parquet feature "base64" (*)
+│   │   │   ├── parquet feature "brotli"
+│   │   │   │   └── parquet v59.2.0 (*)
+│   │   │   ├── parquet feature "flate2-zlib-rs"
+│   │   │   │   ├── parquet v59.2.0 (*)
+│   │   │   │   ├── parquet feature "flate2"
+│   │   │   │   │   └── parquet v59.2.0 (*)
+│   │   │   │   └── flate2 feature "zlib-rs"
+│   │   │   │       ├── flate2 v1.1.10 (*)
+│   │   │   │       └── flate2 feature "any_zlib"
+│   │   │   │           ├── flate2 v1.1.10 (*)
+│   │   │   │           └── flate2 feature "any_impl"
+│   │   │   │               └── flate2 v1.1.10 (*)
+│   │   │   ├── parquet feature "lz4"
+│   │   │   │   ├── parquet v59.2.0 (*)
+│   │   │   │   └── parquet feature "lz4_flex"
+│   │   │   │       └── parquet v59.2.0 (*)
+│   │   │   ├── parquet feature "simdutf8"
+│   │   │   │   └── parquet v59.2.0 (*)
+│   │   │   ├── parquet feature "snap"
+│   │   │   │   └── parquet v59.2.0 (*)
+│   │   │   └── parquet feature "zstd"
+│   │   │       └── parquet v59.2.0 (*)
+│   │   ├── parquet feature "object_store"
+│   │   │   ├── parquet v59.2.0 (*)
+│   │   │   └── parquet feature "async" (*)
+│   │   ├── recursive feature "default"
+│   │   │   └── recursive v0.1.1
+│   │   │       ├── recursive-proc-macro-impl feature "default"
+│   │   │       │   └── recursive-proc-macro-impl v0.1.1 (proc-macro)
+│   │   │       │       ├── quote feature "default" (*)
+│   │   │       │       ├── syn feature "default" (*)
+│   │   │       │       └── syn feature "full" (*)
+│   │   │       └── stacker feature "default"
+│   │   │           └── stacker v0.1.25
+│   │   │               ├── libc feature "default" (*)
+│   │   │               ├── cfg-if feature "default" (*)
+│   │   │               └── psm feature "default"
+│   │   │                   └── psm v0.1.32
+│   │   │                       [build-dependencies]
+│   │   │                       ├── cc feature "default" (*)
+│   │   │                       └── ar_archive_writer feature "default"
+│   │   │                           └── ar_archive_writer v0.5.3
+│   │   │                               ├── object feature "read"
+│   │   │                               │   ├── object v0.39.1
+│   │   │                               │   │   └── memchr v2.8.3
+│   │   │                               │   ├── object feature "archive"
+│   │   │                               │   │   └── object v0.39.1 (*)
+│   │   │                               │   ├── object feature "coff"
+│   │   │                               │   │   └── object v0.39.1 (*)
+│   │   │                               │   ├── object feature "elf"
+│   │   │                               │   │   └── object v0.39.1 (*)
+│   │   │                               │   ├── object feature "macho"
+│   │   │                               │   │   └── object v0.39.1 (*)
+│   │   │                               │   ├── object feature "pe"
+│   │   │                               │   │   ├── object v0.39.1 (*)
+│   │   │                               │   │   └── object feature "coff" (*)
+│   │   │                               │   ├── object feature "read_core"
+│   │   │                               │   │   └── object v0.39.1 (*)
+│   │   │                               │   └── object feature "xcoff"
+│   │   │                               │       └── object v0.39.1 (*)
+│   │   │                               └── object feature "std"
+│   │   │                                   ├── object v0.39.1 (*)
+│   │   │                                   └── memchr feature "std"
+│   │   │                                       ├── memchr v2.8.3
+│   │   │                                       └── memchr feature "alloc"
+│   │   │                                           └── memchr v2.8.3
+│   │   │               [build-dependencies]
+│   │   │               └── cc feature "default" (*)
+│   │   ├── sqlparser feature "std"
+│   │   │   └── sqlparser v0.62.0
+│   │   │       ├── log feature "default" (*)
+│   │   │       ├── recursive feature "default" (*)
+│   │   │       └── sqlparser_derive feature "default"
+│   │   │           └── sqlparser_derive v0.5.0 (proc-macro)
+│   │   │               ├── proc-macro2 feature "default" (*)
+│   │   │               ├── quote feature "default" (*)
+│   │   │               ├── syn feature "clone-impls" (*)
+│   │   │               ├── syn feature "derive" (*)
+│   │   │               ├── syn feature "full" (*)
+│   │   │               ├── syn feature "parsing" (*)
+│   │   │               ├── syn feature "printing" (*)
+│   │   │               └── syn feature "proc-macro" (*)
+│   │   └── sqlparser feature "visitor"
+│   │       ├── sqlparser v0.62.0 (*)
+│   │       └── sqlparser feature "sqlparser_derive"
+│   │           └── sqlparser v0.62.0 (*)
+│   ├── datafusion-datasource v55.0.0
+│   │   ├── chrono v0.4.45 (*)
+│   │   ├── datafusion-execution v55.0.0
+│   │   │   ├── arrow-buffer v59.2.0 (*)
+│   │   │   ├── datafusion-common v55.0.0 (*)
+│   │   │   ├── datafusion-expr v55.0.0
+│   │   │   │   ├── chrono v0.4.45 (*)
+│   │   │   │   ├── datafusion-common v55.0.0 (*)
+│   │   │   │   ├── datafusion-physical-expr-common v55.0.0
+│   │   │   │   │   ├── chrono v0.4.45 (*)
+│   │   │   │   │   ├── datafusion-common v55.0.0 (*)
+│   │   │   │   │   ├── indexmap feature "default" (*)
+│   │   │   │   │   ├── hashbrown feature "default" (*)
+│   │   │   │   │   ├── arrow feature "chrono-tz" (*)
+│   │   │   │   │   ├── arrow feature "default" (*)
+│   │   │   │   │   ├── arrow feature "prettyprint" (*)
+│   │   │   │   │   ├── itertools feature "default" (*)
+│   │   │   │   │   ├── parking_lot feature "default" (*)
+│   │   │   │   │   ├── datafusion-expr-common feature "default"
+│   │   │   │   │   │   └── datafusion-expr-common v55.0.0
+│   │   │   │   │   │       ├── datafusion-common v55.0.0 (*)
+│   │   │   │   │   │       ├── indexmap feature "default" (*)
+│   │   │   │   │   │       ├── arrow feature "chrono-tz" (*)
+│   │   │   │   │   │       ├── arrow feature "default" (*)
+│   │   │   │   │   │       ├── arrow feature "prettyprint" (*)
+│   │   │   │   │   │       └── itertools feature "default" (*)
+│   │   │   │   │   └── pin-project feature "default"
+│   │   │   │   │       └── pin-project v1.1.13
+│   │   │   │   │           └── pin-project-internal feature "default"
+│   │   │   │   │               └── pin-project-internal v1.1.13 (proc-macro)
+│   │   │   │   │                   ├── proc-macro2 feature "default" (*)
+│   │   │   │   │                   ├── quote feature "default" (*)
+│   │   │   │   │                   ├── syn feature "clone-impls" (*)
+│   │   │   │   │                   ├── syn feature "full" (*)
+│   │   │   │   │                   ├── syn feature "parsing" (*)
+│   │   │   │   │                   ├── syn feature "printing" (*)
+│   │   │   │   │                   ├── syn feature "proc-macro" (*)
+│   │   │   │   │                   └── syn feature "visit-mut" (*)
+│   │   │   │   ├── indexmap feature "default" (*)
+│   │   │   │   ├── serde_json feature "default" (*)
+│   │   │   │   ├── arrow feature "canonical_extension_types"
+│   │   │   │   │   ├── arrow v59.2.0 (*)
+│   │   │   │   │   └── arrow-schema feature "canonical_extension_types" (*)
+│   │   │   │   ├── arrow feature "chrono-tz" (*)
+│   │   │   │   ├── arrow feature "default" (*)
+│   │   │   │   ├── arrow feature "prettyprint" (*)
+│   │   │   │   ├── arrow-schema feature "canonical_extension_types" (*)
+│   │   │   │   ├── async-trait feature "default" (*)
+│   │   │   │   ├── itertools feature "default" (*)
+│   │   │   │   ├── recursive feature "default" (*)
+│   │   │   │   ├── sqlparser feature "std" (*)
+│   │   │   │   ├── sqlparser feature "visitor" (*)
+│   │   │   │   ├── datafusion-doc feature "default"
+│   │   │   │   │   └── datafusion-doc v55.0.0
+│   │   │   │   ├── datafusion-expr-common feature "default" (*)
+│   │   │   │   ├── datafusion-functions-aggregate-common feature "default"
+│   │   │   │   │   └── datafusion-functions-aggregate-common v55.0.0
+│   │   │   │   │       ├── datafusion-common v55.0.0 (*)
+│   │   │   │   │       ├── datafusion-physical-expr-common v55.0.0 (*)
+│   │   │   │   │       ├── arrow feature "chrono-tz" (*)
+│   │   │   │   │       ├── arrow feature "default" (*)
+│   │   │   │   │       ├── arrow feature "prettyprint" (*)
+│   │   │   │   │       └── datafusion-expr-common feature "default" (*)
+│   │   │   │   └── datafusion-functions-window-common feature "default"
+│   │   │   │       └── datafusion-functions-window-common v55.0.0
+│   │   │   │           ├── datafusion-common v55.0.0 (*)
+│   │   │   │           └── datafusion-physical-expr-common v55.0.0 (*)
+│   │   │   ├── datafusion-physical-expr-common v55.0.0 (*)
+│   │   │   ├── futures feature "default" (*)
+│   │   │   ├── pin-project-lite feature "default" (*)
+│   │   │   ├── tokio feature "default" (*)
+│   │   │   ├── tokio feature "fs"
+│   │   │   │   └── tokio v1.53.1 (*)
+│   │   │   ├── tokio feature "macros" (*)
+│   │   │   ├── tokio feature "rt" (*)
+│   │   │   ├── tokio feature "sync" (*)
+│   │   │   ├── bytes feature "default" (*)
+│   │   │   ├── tokio-util feature "default" (*)
+│   │   │   ├── tokio-util feature "io"
+│   │   │   │   └── tokio-util v0.7.19 (*)
+│   │   │   ├── arrow feature "chrono-tz" (*)
+│   │   │   ├── arrow feature "default" (*)
+│   │   │   ├── arrow feature "prettyprint" (*)
+│   │   │   ├── async-trait feature "default" (*)
+│   │   │   ├── dashmap feature "default"
+│   │   │   │   └── dashmap v6.2.1
+│   │   │   │       ├── once_cell feature "default" (*)
+│   │   │   │       ├── cfg-if feature "default" (*)
+│   │   │   │       ├── crossbeam-utils feature "default"
+│   │   │   │       │   ├── crossbeam-utils v0.8.23
+│   │   │   │       │   └── crossbeam-utils feature "std"
+│   │   │   │       │       └── crossbeam-utils v0.8.23
+│   │   │   │       ├── hashbrown feature "raw"
+│   │   │   │       │   └── hashbrown v0.14.5
+│   │   │   │       ├── lock_api feature "default" (*)
+│   │   │   │       └── parking_lot_core feature "default" (*)
+│   │   │   ├── log feature "default" (*)
+│   │   │   ├── object_store feature "fs"
+│   │   │   │   ├── object_store v0.13.2 (*)
+│   │   │   │   ├── object_store feature "tokio" (*)
+│   │   │   │   └── object_store feature "walkdir"
+│   │   │   │       └── object_store v0.13.2 (*)
+│   │   │   ├── parking_lot feature "default" (*)
+│   │   │   ├── url feature "default" (*)
+│   │   │   ├── rand feature "default"
+│   │   │   │   ├── rand v0.9.5
+│   │   │   │   │   ├── rand_chacha v0.9.0
+│   │   │   │   │   │   ├── ppv-lite86 feature "simd"
+│   │   │   │   │   │   │   └── ppv-lite86 v0.2.21
+│   │   │   │   │   │   │       ├── zerocopy feature "default"
+│   │   │   │   │   │   │       │   └── zerocopy v0.8.57 (*)
+│   │   │   │   │   │   │       └── zerocopy feature "simd" (*)
+│   │   │   │   │   │   └── rand_core feature "default"
+│   │   │   │   │   │       └── rand_core v0.9.5
+│   │   │   │   │   │           └── getrandom feature "default" (*)
+│   │   │   │   │   └── rand_core v0.9.5 (*)
+│   │   │   │   ├── rand feature "os_rng"
+│   │   │   │   │   ├── rand v0.9.5 (*)
+│   │   │   │   │   └── rand_core feature "os_rng"
+│   │   │   │   │       └── rand_core v0.9.5 (*)
+│   │   │   │   ├── rand feature "small_rng"
+│   │   │   │   │   └── rand v0.9.5 (*)
+│   │   │   │   ├── rand feature "std"
+│   │   │   │   │   ├── rand v0.9.5 (*)
+│   │   │   │   │   ├── rand feature "alloc"
+│   │   │   │   │   │   └── rand v0.9.5 (*)
+│   │   │   │   │   ├── rand_chacha feature "std"
+│   │   │   │   │   │   ├── rand_chacha v0.9.0 (*)
+│   │   │   │   │   │   ├── ppv-lite86 feature "std"
+│   │   │   │   │   │   │   └── ppv-lite86 v0.2.21 (*)
+│   │   │   │   │   │   └── rand_core feature "std"
+│   │   │   │   │   │       ├── rand_core v0.9.5 (*)
+│   │   │   │   │   │       └── getrandom feature "std"
+│   │   │   │   │   │           └── getrandom v0.3.4 (*)
+│   │   │   │   │   └── rand_core feature "std" (*)
+│   │   │   │   ├── rand feature "std_rng"
+│   │   │   │   │   └── rand v0.9.5 (*)
+│   │   │   │   └── rand feature "thread_rng"
+│   │   │   │       ├── rand v0.9.5 (*)
+│   │   │   │       ├── rand feature "os_rng" (*)
+│   │   │   │       ├── rand feature "std" (*)
+│   │   │   │       └── rand feature "std_rng" (*)
+│   │   │   └── tempfile feature "default"
+│   │   │       ├── tempfile v3.27.0
+│   │   │       │   ├── getrandom v0.4.3 (*)
+│   │   │       │   ├── once_cell feature "std" (*)
+│   │   │       │   ├── fastrand feature "default"
+│   │   │       │   │   ├── fastrand v2.5.0
+│   │   │       │   │   └── fastrand feature "std"
+│   │   │       │   │       ├── fastrand v2.5.0
+│   │   │       │   │       └── fastrand feature "alloc"
+│   │   │       │   │           └── fastrand v2.5.0
+│   │   │       │   ├── rustix feature "default"
+│   │   │       │   │   ├── rustix v1.1.5
+│   │   │       │   │   │   ├── bitflags v2.13.2
+│   │   │       │   │   │   ├── errno v0.3.14 (*)
+│   │   │       │   │   │   └── libc v0.2.189
+│   │   │       │   │   └── rustix feature "std"
+│   │   │       │   │       ├── rustix v1.1.5 (*)
+│   │   │       │   │       ├── libc feature "std" (*)
+│   │   │       │   │       ├── errno feature "std" (*)
+│   │   │       │   │       ├── bitflags feature "std"
+│   │   │       │   │       │   └── bitflags v2.13.2
+│   │   │       │   │       └── rustix feature "alloc"
+│   │   │       │   │           └── rustix v1.1.5 (*)
+│   │   │       │   └── rustix feature "fs"
+│   │   │       │       └── rustix v1.1.5 (*)
+│   │   │       └── tempfile feature "getrandom"
+│   │   │           └── tempfile v3.27.0 (*)
+│   │   ├── datafusion-expr v55.0.0 (*)
+│   │   ├── datafusion-physical-expr v55.0.0
+│   │   │   ├── datafusion-common v55.0.0 (*)
+│   │   │   ├── datafusion-expr v55.0.0 (*)
+│   │   │   ├── datafusion-physical-expr-common v55.0.0 (*)
+│   │   │   ├── half v2.7.1 (*)
+│   │   │   ├── indexmap feature "default" (*)
+│   │   │   ├── hashbrown feature "default" (*)
+│   │   │   ├── tokio feature "default" (*)
+│   │   │   ├── tokio feature "macros" (*)
+│   │   │   ├── tokio feature "rt" (*)
+│   │   │   ├── tokio feature "sync" (*)
+│   │   │   ├── arrow feature "chrono-tz" (*)
+│   │   │   ├── arrow feature "default" (*)
+│   │   │   ├── arrow feature "prettyprint" (*)
+│   │   │   ├── itertools feature "default" (*)
+│   │   │   ├── itertools feature "use_std" (*)
+│   │   │   ├── parking_lot feature "default" (*)
+│   │   │   ├── recursive feature "default" (*)
+│   │   │   ├── datafusion-expr-common feature "default" (*)
+│   │   │   ├── datafusion-functions-aggregate-common feature "default" (*)
+│   │   │   └── petgraph feature "default"
+│   │   │       ├── petgraph v0.8.3
+│   │   │       │   ├── fixedbitset v0.5.7
+│   │   │       │   ├── indexmap v2.14.2 (*)
+│   │   │       │   ├── hashbrown feature "default-hasher"
+│   │   │       │   │   └── hashbrown v0.15.5
+│   │   │       │   │       └── foldhash v0.1.5
+│   │   │       │   └── hashbrown feature "inline-more"
+│   │   │       │       └── hashbrown v0.15.5 (*)
+│   │   │       ├── petgraph feature "graphmap"
+│   │   │       │   └── petgraph v0.8.3 (*)
+│   │   │       ├── petgraph feature "matrix_graph"
+│   │   │       │   └── petgraph v0.8.3 (*)
+│   │   │       ├── petgraph feature "stable_graph"
+│   │   │       │   └── petgraph v0.8.3 (*)
+│   │   │       └── petgraph feature "std"
+│   │   │           ├── petgraph v0.8.3 (*)
+│   │   │           └── indexmap feature "std" (*)
+│   │   ├── datafusion-physical-expr-adapter v55.0.0
+│   │   │   ├── datafusion-common v55.0.0 (*)
+│   │   │   ├── datafusion-expr v55.0.0 (*)
+│   │   │   ├── datafusion-physical-expr v55.0.0 (*)
+│   │   │   ├── datafusion-physical-expr-common v55.0.0 (*)
+│   │   │   ├── arrow feature "chrono-tz" (*)
+│   │   │   ├── arrow feature "default" (*)
+│   │   │   ├── arrow feature "prettyprint" (*)
+│   │   │   ├── itertools feature "default" (*)
+│   │   │   └── datafusion-functions feature "default"
+│   │   │       ├── datafusion-functions v55.0.0
+│   │   │       │   ├── arrow-buffer v59.2.0 (*)
+│   │   │       │   ├── chrono v0.4.45 (*)
+│   │   │       │   ├── datafusion-common v55.0.0 (*)
+│   │   │       │   ├── datafusion-execution v55.0.0 (*)
+│   │   │       │   ├── datafusion-expr v55.0.0 (*)
+│   │   │       │   ├── datafusion-physical-expr-common v55.0.0 (*)
+│   │   │       │   ├── num-traits feature "default" (*)
+│   │   │       │   ├── memchr feature "default" (*)
+│   │   │       │   ├── uuid feature "default" (*)
+│   │   │       │   ├── uuid feature "v4" (*)
+│   │   │       │   ├── hex feature "default" (*)
+│   │   │       │   ├── arrow feature "chrono-tz" (*)
+│   │   │       │   ├── arrow feature "default" (*)
+│   │   │       │   ├── arrow feature "prettyprint" (*)
+│   │   │       │   ├── chrono-tz feature "default" (*)
+│   │   │       │   ├── base64 feature "default" (*)
+│   │   │       │   ├── regex feature "default"
+│   │   │       │   │   ├── regex v1.13.1 (*)
+│   │   │       │   │   ├── regex feature "perf" (*)
+│   │   │       │   │   ├── regex feature "std" (*)
+│   │   │       │   │   ├── regex feature "unicode" (*)
+│   │   │       │   │   └── regex-syntax feature "default"
+│   │   │       │   │       ├── regex-syntax v0.8.11
+│   │   │       │   │       ├── regex-syntax feature "std" (*)
+│   │   │       │   │       └── regex-syntax feature "unicode" (*)
+│   │   │       │   ├── itertools feature "default" (*)
+│   │   │       │   ├── log feature "default" (*)
+│   │   │       │   ├── datafusion-doc feature "default" (*)
+│   │   │       │   ├── datafusion-expr-common feature "default" (*)
+│   │   │       │   ├── rand feature "default" (*)
+│   │   │       │   └── datafusion-macros feature "default"
+│   │   │       │       └── datafusion-macros v55.0.0 (proc-macro)
+│   │   │       │           ├── quote feature "default" (*)
+│   │   │       │           ├── syn feature "default" (*)
+│   │   │       │           ├── syn feature "full" (*)
+│   │   │       │           └── datafusion-doc feature "default" (*)
+│   │   │       ├── datafusion-functions feature "datetime_expressions"
+│   │   │       │   ├── datafusion-functions v55.0.0 (*)
+│   │   │       │   └── datafusion-functions feature "chrono-tz"
+│   │   │       │       └── datafusion-functions v55.0.0 (*)
+│   │   │       ├── datafusion-functions feature "encoding_expressions"
+│   │   │       │   ├── datafusion-functions v55.0.0 (*)
+│   │   │       │   ├── datafusion-functions feature "base64"
+│   │   │       │   │   └── datafusion-functions v55.0.0 (*)
+│   │   │       │   └── datafusion-functions feature "hex"
+│   │   │       │       └── datafusion-functions v55.0.0 (*)
+│   │   │       ├── datafusion-functions feature "math_expressions"
+│   │   │       │   └── datafusion-functions v55.0.0 (*)
+│   │   │       ├── datafusion-functions feature "regex_expressions"
+│   │   │       │   ├── datafusion-functions v55.0.0 (*)
+│   │   │       │   └── datafusion-functions feature "regex"
+│   │   │       │       └── datafusion-functions v55.0.0 (*)
+│   │   │       ├── datafusion-functions feature "string_expressions"
+│   │   │       │   ├── datafusion-functions v55.0.0 (*)
+│   │   │       │   └── datafusion-functions feature "uuid"
+│   │   │       │       └── datafusion-functions v55.0.0 (*)
+│   │   │       └── datafusion-functions feature "unicode_expressions"
+│   │   │           └── datafusion-functions v55.0.0 (*)
+│   │   ├── datafusion-physical-expr-common v55.0.0 (*)
+│   │   ├── object_store v0.13.2 (*)
+│   │   ├── futures feature "default" (*)
+│   │   ├── tokio feature "default" (*)
+│   │   ├── tokio feature "macros" (*)
+│   │   ├── tokio feature "rt" (*)
+│   │   ├── tokio feature "sync" (*)
+│   │   ├── bytes feature "default" (*)
+│   │   ├── arrow feature "chrono-tz" (*)
+│   │   ├── arrow feature "default" (*)
+│   │   ├── arrow feature "prettyprint" (*)
+│   │   ├── async-trait feature "default" (*)
+│   │   ├── datafusion-common feature "object_store"
+│   │   │   └── datafusion-common v55.0.0 (*)
+│   │   ├── itertools feature "default" (*)
+│   │   ├── log feature "default" (*)
+│   │   ├── parking_lot feature "default" (*)
+│   │   ├── url feature "default" (*)
+│   │   ├── datafusion-common-runtime feature "default"
+│   │   │   └── datafusion-common-runtime v55.0.0
+│   │   │       ├── futures feature "default" (*)
+│   │   │       ├── tokio feature "default" (*)
+│   │   │       ├── tokio feature "macros" (*)
+│   │   │       ├── tokio feature "rt" (*)
+│   │   │       ├── tokio feature "sync" (*)
+│   │   │       └── log feature "default" (*)
+│   │   ├── rand feature "default" (*)
+│   │   ├── datafusion-physical-plan feature "default"
+│   │   │   └── datafusion-physical-plan v55.0.0
+│   │   │       ├── arrow-data v59.2.0 (*)
+│   │   │       ├── arrow-ord v59.2.0 (*)
+│   │   │       ├── arrow-schema v59.2.0 (*)
+│   │   │       ├── datafusion-common v55.0.0 (*)
+│   │   │       ├── datafusion-execution v55.0.0 (*)
+│   │   │       ├── datafusion-expr v55.0.0 (*)
+│   │   │       ├── datafusion-physical-expr-common v55.0.0 (*)
+│   │   │       ├── half v2.7.1 (*)
+│   │   │       ├── num-traits feature "default" (*)
+│   │   │       ├── futures feature "default" (*)
+│   │   │       ├── pin-project-lite feature "default" (*)
+│   │   │       ├── indexmap feature "default" (*)
+│   │   │       ├── hashbrown feature "default" (*)
+│   │   │       ├── serde_json feature "default" (*)
+│   │   │       ├── serde_json feature "preserve_order"
+│   │   │       │   ├── serde_json v1.0.151 (*)
+│   │   │       │   ├── serde_json feature "indexmap"
+│   │   │       │   │   └── serde_json v1.0.151 (*)
+│   │   │       │   └── serde_json feature "std" (*)
+│   │   │       ├── tokio feature "default" (*)
+│   │   │       ├── tokio feature "macros" (*)
+│   │   │       ├── tokio feature "rt" (*)
+│   │   │       ├── tokio feature "sync" (*)
+│   │   │       ├── bytes feature "default" (*)
+│   │   │       ├── arrow feature "chrono-tz" (*)
+│   │   │       ├── arrow feature "default" (*)
+│   │   │       ├── arrow feature "prettyprint" (*)
+│   │   │       ├── arrow-ipc feature "lz4" (*)
+│   │   │       ├── arrow-ipc feature "zstd" (*)
+│   │   │       ├── async-trait feature "default" (*)
+│   │   │       ├── itertools feature "default" (*)
+│   │   │       ├── itertools feature "use_std" (*)
+│   │   │       ├── log feature "default" (*)
+│   │   │       ├── parking_lot feature "default" (*)
+│   │   │       ├── datafusion-common-runtime feature "default" (*)
+│   │   │       ├── datafusion-functions-aggregate-common feature "default" (*)
+│   │   │       ├── datafusion-functions-window-common feature "default" (*)
+│   │   │       ├── datafusion-physical-expr feature "default"
+│   │   │       │   └── datafusion-physical-expr v55.0.0 (*)
+│   │   │       └── datafusion-functions feature "default" (*)
+│   │   ├── datafusion-session feature "default"
+│   │   │   └── datafusion-session v55.0.0
+│   │   │       ├── arrow-schema v59.2.0 (*)
+│   │   │       ├── datafusion-common v55.0.0 (*)
+│   │   │       ├── datafusion-execution v55.0.0 (*)
+│   │   │       ├── datafusion-expr v55.0.0 (*)
+│   │   │       ├── async-trait feature "default" (*)
+│   │   │       ├── parking_lot feature "default" (*)
+│   │   │       └── datafusion-physical-plan feature "default" (*)
+│   │   └── glob feature "default"
+│   │       └── glob v0.3.4
+│   ├── datafusion-execution v55.0.0 (*)
+│   ├── datafusion-expr v55.0.0 (*)
+│   ├── datafusion-physical-expr v55.0.0 (*)
+│   ├── object_store v0.13.2 (*)
+│   ├── futures feature "default" (*)
+│   ├── tokio feature "default" (*)
+│   ├── tokio feature "macros" (*)
+│   ├── tokio feature "rt" (*)
+│   ├── tokio feature "sync" (*)
+│   ├── arrow feature "chrono-tz" (*)
+│   ├── arrow feature "default" (*)
+│   ├── arrow feature "prettyprint" (*)
+│   ├── async-trait feature "default" (*)
+│   ├── dashmap feature "default" (*)
+│   ├── itertools feature "default" (*)
+│   ├── log feature "default" (*)
+│   ├── parking_lot feature "default" (*)
+│   ├── datafusion-common-runtime feature "default" (*)
+│   ├── datafusion-physical-plan feature "default" (*)
+│   └── datafusion-session feature "default" (*)
+├── datafusion-catalog-listing v55.0.0
+│   ├── datafusion-datasource v55.0.0 (*)
+│   ├── datafusion-execution v55.0.0 (*)
+│   ├── datafusion-expr v55.0.0 (*)
+│   ├── datafusion-physical-expr v55.0.0 (*)
+│   ├── datafusion-physical-expr-adapter v55.0.0 (*)
+│   ├── datafusion-physical-expr-common v55.0.0 (*)
+│   ├── object_store v0.13.2 (*)
+│   ├── futures feature "default" (*)
+│   ├── arrow feature "chrono-tz" (*)
+│   ├── arrow feature "default" (*)
+│   ├── arrow feature "prettyprint" (*)
+│   ├── async-trait feature "default" (*)
+│   ├── datafusion-catalog feature "default"
+│   │   └── datafusion-catalog v55.0.0 (*)
+│   ├── datafusion-common feature "object_store" (*)
+│   ├── itertools feature "default" (*)
+│   ├── log feature "default" (*)
+│   ├── percent-encoding feature "default" (*)
+│   └── datafusion-physical-plan feature "default" (*)
+├── datafusion-common v55.0.0 (*)
+├── datafusion-common-runtime v55.0.0 (*)
+├── datafusion-datasource v55.0.0 (*)
+├── datafusion-datasource-arrow v55.0.0
+│   ├── datafusion-datasource v55.0.0 (*)
+│   ├── datafusion-execution v55.0.0 (*)
+│   ├── datafusion-expr v55.0.0 (*)
+│   ├── datafusion-physical-expr-common v55.0.0 (*)
+│   ├── object_store v0.13.2 (*)
+│   ├── futures feature "default" (*)
+│   ├── tokio feature "default" (*)
+│   ├── tokio feature "macros" (*)
+│   ├── tokio feature "rt" (*)
+│   ├── tokio feature "sync" (*)
+│   ├── bytes feature "default" (*)
+│   ├── arrow feature "chrono-tz" (*)
+│   ├── arrow feature "default" (*)
+│   ├── arrow feature "prettyprint" (*)
+│   ├── arrow-ipc feature "lz4" (*)
+│   ├── arrow-ipc feature "zstd" (*)
+│   ├── async-trait feature "default" (*)
+│   ├── datafusion-common feature "object_store" (*)
+│   ├── itertools feature "default" (*)
+│   ├── datafusion-common-runtime feature "default" (*)
+│   ├── datafusion-physical-plan feature "default" (*)
+│   └── datafusion-session feature "default" (*)
+├── datafusion-datasource-csv v55.0.0
+│   ├── datafusion-datasource v55.0.0 (*)
+│   ├── datafusion-execution v55.0.0 (*)
+│   ├── datafusion-expr v55.0.0 (*)
+│   ├── datafusion-physical-expr-common v55.0.0 (*)
+│   ├── object_store v0.13.2 (*)
+│   ├── futures feature "default" (*)
+│   ├── tokio feature "default" (*)
+│   ├── tokio feature "macros" (*)
+│   ├── tokio feature "rt" (*)
+│   ├── tokio feature "sync" (*)
+│   ├── bytes feature "default" (*)
+│   ├── arrow feature "chrono-tz" (*)
+│   ├── arrow feature "default" (*)
+│   ├── arrow feature "prettyprint" (*)
+│   ├── regex feature "default" (*)
+│   ├── async-trait feature "default" (*)
+│   ├── datafusion-common feature "object_store" (*)
+│   ├── datafusion-common-runtime feature "default" (*)
+│   ├── datafusion-physical-plan feature "default" (*)
+│   └── datafusion-session feature "default" (*)
+├── datafusion-datasource-json v55.0.0
+│   ├── datafusion-datasource v55.0.0 (*)
+│   ├── datafusion-execution v55.0.0 (*)
+│   ├── datafusion-expr v55.0.0 (*)
+│   ├── datafusion-physical-expr-common v55.0.0 (*)
+│   ├── object_store v0.13.2 (*)
+│   ├── futures feature "default" (*)
+│   ├── tokio feature "default" (*)
+│   ├── tokio feature "macros" (*)
+│   ├── tokio feature "rt" (*)
+│   ├── tokio feature "sync" (*)
+│   ├── bytes feature "default" (*)
+│   ├── arrow feature "chrono-tz" (*)
+│   ├── arrow feature "default" (*)
+│   ├── arrow feature "prettyprint" (*)
+│   ├── async-trait feature "default" (*)
+│   ├── datafusion-common feature "object_store" (*)
+│   ├── datafusion-common-runtime feature "default" (*)
+│   ├── datafusion-physical-plan feature "default" (*)
+│   ├── datafusion-session feature "default" (*)
+│   ├── tokio-stream feature "default"
+│   │   ├── tokio-stream v0.1.19
+│   │   │   ├── futures-core feature "default" (*)
+│   │   │   ├── pin-project-lite feature "default" (*)
+│   │   │   ├── tokio feature "default" (*)
+│   │   │   ├── tokio feature "sync" (*)
+│   │   │   └── tokio-util feature "default" (*)
+│   │   └── tokio-stream feature "time"
+│   │       ├── tokio-stream v0.1.19 (*)
+│   │       └── tokio feature "time" (*)
+│   └── tokio-stream feature "sync"
+│       ├── tokio-stream v0.1.19 (*)
+│       ├── tokio feature "sync" (*)
+│       └── tokio-stream feature "tokio-util"
+│           └── tokio-stream v0.1.19 (*)
+├── datafusion-datasource-parquet v55.0.0
+│   ├── arrow-schema v59.2.0 (*)
+│   ├── datafusion-datasource v55.0.0 (*)
+│   ├── datafusion-execution v55.0.0 (*)
+│   ├── datafusion-expr v55.0.0 (*)
+│   ├── datafusion-physical-expr v55.0.0 (*)
+│   ├── datafusion-physical-expr-adapter v55.0.0 (*)
+│   ├── datafusion-physical-expr-common v55.0.0 (*)
+│   ├── object_store v0.13.2 (*)
+│   ├── futures feature "default" (*)
+│   ├── tokio feature "default" (*)
+│   ├── tokio feature "macros" (*)
+│   ├── tokio feature "rt" (*)
+│   ├── tokio feature "sync" (*)
+│   ├── bytes feature "default" (*)
+│   ├── arrow feature "chrono-tz" (*)
+│   ├── arrow feature "default" (*)
+│   ├── arrow feature "prettyprint" (*)
+│   ├── async-trait feature "default" (*)
+│   ├── datafusion-common feature "object_store" (*)
+│   ├── datafusion-common feature "parquet"
+│   │   └── datafusion-common v55.0.0 (*)
+│   ├── itertools feature "default" (*)
+│   ├── log feature "default" (*)
+│   ├── parking_lot feature "default" (*)
+│   ├── parquet feature "arrow" (*)
+│   ├── parquet feature "async" (*)
+│   ├── parquet feature "object_store" (*)
+│   ├── datafusion-common-runtime feature "default" (*)
+│   ├── datafusion-functions-aggregate-common feature "default" (*)
+│   ├── datafusion-functions feature "default" (*)
+│   ├── datafusion-physical-plan feature "default" (*)
+│   ├── datafusion-session feature "default" (*)
+│   └── datafusion-pruning feature "default"
+│       └── datafusion-pruning v55.0.0
+│           ├── datafusion-datasource v55.0.0 (*)
+│           ├── datafusion-physical-expr v55.0.0 (*)
+│           ├── datafusion-physical-expr-common v55.0.0 (*)
+│           ├── arrow feature "chrono-tz" (*)
+│           ├── arrow feature "default" (*)
+│           ├── arrow feature "prettyprint" (*)
+│           ├── datafusion-common feature "default"
+│           │   └── datafusion-common v55.0.0 (*)
+│           ├── log feature "default" (*)
+│           ├── datafusion-expr-common feature "default" (*)
+│           └── datafusion-physical-plan feature "default" (*)
+├── datafusion-doc v55.0.0
+├── datafusion-execution v55.0.0 (*)
+├── datafusion-expr v55.0.0 (*)
+├── datafusion-expr-common v55.0.0 (*)
+├── datafusion-functions v55.0.0 (*)
+├── datafusion-functions-aggregate v55.0.0
+│   ├── datafusion-common v55.0.0 (*)
+│   ├── datafusion-execution v55.0.0 (*)
+│   ├── datafusion-expr v55.0.0 (*)
+│   ├── datafusion-physical-expr v55.0.0 (*)
+│   ├── datafusion-physical-expr-common v55.0.0 (*)
+│   ├── half v2.7.1 (*)
+│   ├── num-traits feature "default" (*)
+│   ├── hashbrown feature "default" (*)
+│   ├── arrow feature "chrono-tz" (*)
+│   ├── arrow feature "default" (*)
+│   ├── arrow feature "prettyprint" (*)
+│   ├── log feature "default" (*)
+│   ├── datafusion-doc feature "default" (*)
+│   ├── datafusion-functions-aggregate-common feature "default" (*)
+│   └── datafusion-macros feature "default" (*)
+├── datafusion-functions-aggregate-common v55.0.0 (*)
+├── datafusion-functions-nested v55.0.0
+│   ├── arrow-ord v59.2.0 (*)
+│   ├── datafusion-common v55.0.0 (*)
+│   ├── datafusion-execution v55.0.0 (*)
+│   ├── datafusion-expr v55.0.0 (*)
+│   ├── datafusion-physical-expr-common v55.0.0 (*)
+│   ├── memchr feature "default" (*)
+│   ├── hashbrown feature "default" (*)
+│   ├── itoa feature "default" (*)
+│   ├── arrow feature "chrono-tz" (*)
+│   ├── arrow feature "default" (*)
+│   ├── arrow feature "prettyprint" (*)
+│   ├── itertools feature "default" (*)
+│   ├── itertools feature "use_std" (*)
+│   ├── log feature "default" (*)
+│   ├── datafusion-doc feature "default" (*)
+│   ├── datafusion-expr-common feature "default" (*)
+│   ├── datafusion-functions-aggregate-common feature "default" (*)
+│   ├── datafusion-functions feature "default" (*)
+│   ├── datafusion-macros feature "default" (*)
+│   └── datafusion-functions-aggregate feature "default"
+│       └── datafusion-functions-aggregate v55.0.0 (*)
+├── datafusion-functions-table v55.0.0
+│   ├── datafusion-common v55.0.0 (*)
+│   ├── datafusion-expr v55.0.0 (*)
+│   ├── datafusion-physical-expr v55.0.0 (*)
+│   ├── arrow feature "chrono-tz" (*)
+│   ├── arrow feature "default" (*)
+│   ├── arrow feature "prettyprint" (*)
+│   ├── async-trait feature "default" (*)
+│   ├── datafusion-catalog feature "default" (*)
+│   ├── parking_lot feature "default" (*)
+│   └── datafusion-physical-plan feature "default" (*)
+├── datafusion-functions-window v55.0.0
+│   ├── datafusion-common v55.0.0 (*)
+│   ├── datafusion-expr v55.0.0 (*)
+│   ├── datafusion-physical-expr v55.0.0 (*)
+│   ├── datafusion-physical-expr-common v55.0.0 (*)
+│   ├── arrow feature "chrono-tz" (*)
+│   ├── arrow feature "default" (*)
+│   ├── arrow feature "prettyprint" (*)
+│   ├── log feature "default" (*)
+│   ├── datafusion-doc feature "default" (*)
+│   ├── datafusion-functions-window-common feature "default" (*)
+│   └── datafusion-macros feature "default" (*)
+├── datafusion-functions-window-common v55.0.0 (*)
+├── datafusion-macros v55.0.0 (proc-macro) (*)
+├── datafusion-optimizer v55.0.0
+│   ├── chrono v0.4.45 (*)
+│   ├── datafusion-expr v55.0.0 (*)
+│   ├── datafusion-physical-expr v55.0.0 (*)
+│   ├── indexmap feature "default" (*)
+│   ├── arrow feature "chrono-tz" (*)
+│   ├── arrow feature "default" (*)
+│   ├── arrow feature "prettyprint" (*)
+│   ├── regex feature "default" (*)
+│   ├── regex-syntax feature "default" (*)
+│   ├── datafusion-common feature "default" (*)
+│   ├── itertools feature "default" (*)
+│   ├── log feature "default" (*)
+│   ├── recursive feature "default" (*)
+│   └── datafusion-expr-common feature "default" (*)
+├── datafusion-physical-expr v55.0.0 (*)
+├── datafusion-physical-expr-adapter v55.0.0 (*)
+├── datafusion-physical-expr-common v55.0.0 (*)
+├── datafusion-physical-optimizer v55.0.0
+│   ├── datafusion-common v55.0.0 (*)
+│   ├── datafusion-execution v55.0.0 (*)
+│   ├── datafusion-expr v55.0.0 (*)
+│   ├── datafusion-physical-expr v55.0.0 (*)
+│   ├── datafusion-physical-expr-common v55.0.0 (*)
+│   ├── arrow feature "chrono-tz" (*)
+│   ├── arrow feature "default" (*)
+│   ├── arrow feature "prettyprint" (*)
+│   ├── itertools feature "default" (*)
+│   ├── recursive feature "default" (*)
+│   ├── datafusion-expr-common feature "default" (*)
+│   ├── datafusion-physical-plan feature "default" (*)
+│   ├── datafusion-session feature "default" (*)
+│   └── datafusion-pruning feature "default" (*)
+├── datafusion-physical-plan v55.0.0 (*)
+├── datafusion-pruning v55.0.0 (*)
+├── datafusion-session v55.0.0 (*)
+├── datafusion-sql v55.0.0
+│   ├── chrono v0.4.45 (*)
+│   ├── indexmap feature "default" (*)
+│   ├── arrow feature "chrono-tz" (*)
+│   ├── arrow feature "default" (*)
+│   ├── arrow feature "prettyprint" (*)
+│   ├── regex feature "default" (*)
+│   ├── datafusion-common feature "sql"
+│   │   ├── datafusion-common v55.0.0 (*)
+│   │   └── datafusion-common feature "sqlparser"
+│   │       └── datafusion-common v55.0.0 (*)
+│   ├── log feature "default" (*)
+│   ├── recursive feature "default" (*)
+│   ├── stacker feature "default" (*)
+│   ├── sqlparser feature "std" (*)
+│   ├── sqlparser feature "visitor" (*)
+│   ├── datafusion-expr feature "sql"
+│   │   ├── datafusion-expr v55.0.0 (*)
+│   │   └── datafusion-expr feature "sqlparser"
+│   │       └── datafusion-expr v55.0.0 (*)
+│   ├── bigdecimal feature "default"
+│   │   ├── bigdecimal v0.4.10
+│   │   │   ├── num-bigint v0.4.8
+│   │   │   │   ├── num-traits feature "i128" (*)
+│   │   │   │   └── num-integer feature "i128" (*)
+│   │   │   ├── num-integer v0.1.47 (*)
+│   │   │   ├── num-traits v0.2.19 (*)
+│   │   │   └── libm feature "default" (*)
+│   │   │   [build-dependencies]
+│   │   │   └── autocfg feature "default" (*)
+│   │   └── bigdecimal feature "std"
+│   │       ├── bigdecimal v0.4.10 (*)
+│   │       ├── num-traits feature "std" (*)
+│   │       ├── num-integer feature "std" (*)
+│   │       └── num-bigint feature "std"
+│   │           ├── num-bigint v0.4.8 (*)
+│   │           ├── num-traits feature "std" (*)
+│   │           └── num-integer feature "std" (*)
+│   └── datafusion-functions-nested feature "sql"
+│       ├── datafusion-functions-nested v55.0.0 (*)
+│       └── datafusion-expr feature "sql" (*)
+├── object_store v0.13.2 (*)
+├── anyhow feature "default" (*)
+├── clap feature "default" (*)
+├── clap feature "derive" (*)
+├── serde feature "default" (*)
+├── serde feature "derive" (*)
+├── futures feature "default" (*)
+├── serde_json feature "default" (*)
+├── tokio feature "default" (*)
+├── tokio feature "io-std" (*)
+├── tokio feature "io-util" (*)
+├── tokio feature "macros" (*)
+├── tokio feature "net" (*)
+├── tokio feature "process" (*)
+├── tokio feature "rt-multi-thread" (*)
+├── tokio feature "signal" (*)
+├── tokio feature "sync" (*)
+├── tokio feature "time" (*)
+├── bytes feature "default" (*)
+├── libc feature "default" (*)
+├── uuid feature "default" (*)
+├── uuid feature "v4" (*)
+├── rowtrail-client feature "default" (command-line) (*)
+├── hex feature "default" (*)
+├── rowtrail-contracts feature "default" (command-line) (*)
+├── sha2 feature "default" (*)
+├── arrow feature "csv" (*)
+├── arrow feature "ipc" (*)
+├── arrow feature "json" (*)
+├── arrow-schema feature "default" (*)
+├── arrow-schema feature "serde"
+│   └── arrow-schema v59.2.0 (*)
+├── csv feature "default"
+│   └── csv v1.4.0 (*)
+├── async-trait feature "default" (*)
+├── datafusion feature "datetime_expressions"
+│   ├── datafusion v55.0.0
+│   │   ├── chrono v0.4.45 (*)
+│   │   ├── datafusion-datasource v55.0.0 (*)
+│   │   ├── datafusion-datasource-arrow v55.0.0 (*)
+│   │   ├── datafusion-datasource-csv v55.0.0 (*)
+│   │   ├── datafusion-datasource-json v55.0.0 (*)
+│   │   ├── datafusion-datasource-parquet v55.0.0 (*)
+│   │   ├── datafusion-execution v55.0.0 (*)
+│   │   ├── datafusion-expr v55.0.0 (*)
+│   │   ├── datafusion-optimizer v55.0.0 (*)
+│   │   ├── datafusion-physical-expr v55.0.0 (*)
+│   │   ├── datafusion-physical-expr-adapter v55.0.0 (*)
+│   │   ├── datafusion-physical-expr-common v55.0.0 (*)
+│   │   ├── object_store v0.13.2 (*)
+│   │   ├── futures feature "default" (*)
+│   │   ├── indexmap feature "default" (*)
+│   │   ├── tokio feature "default" (*)
+│   │   ├── tokio feature "macros" (*)
+│   │   ├── tokio feature "rt" (*)
+│   │   ├── tokio feature "sync" (*)
+│   │   ├── uuid feature "default" (*)
+│   │   ├── uuid feature "js"
+│   │   │   └── uuid v1.26.1 (*)
+│   │   ├── uuid feature "v4" (*)
+│   │   ├── arrow feature "chrono-tz" (*)
+│   │   ├── arrow feature "default" (*)
+│   │   ├── arrow feature "prettyprint" (*)
+│   │   ├── arrow-schema feature "canonical_extension_types" (*)
+│   │   ├── async-trait feature "default" (*)
+│   │   ├── datafusion-catalog feature "default" (*)
+│   │   ├── datafusion-common feature "object_store" (*)
+│   │   ├── itertools feature "default" (*)
+│   │   ├── log feature "default" (*)
+│   │   ├── parking_lot feature "default" (*)
+│   │   ├── url feature "default" (*)
+│   │   ├── parquet feature "arrow" (*)
+│   │   ├── parquet feature "async" (*)
+│   │   ├── parquet feature "default" (*)
+│   │   ├── parquet feature "object_store" (*)
+│   │   ├── sqlparser feature "std" (*)
+│   │   ├── sqlparser feature "visitor" (*)
+│   │   ├── datafusion-common-runtime feature "default" (*)
+│   │   ├── datafusion-expr-common feature "default" (*)
+│   │   ├── tempfile feature "default" (*)
+│   │   ├── datafusion-functions feature "default" (*)
+│   │   ├── datafusion-physical-plan feature "default" (*)
+│   │   ├── datafusion-session feature "default" (*)
+│   │   ├── datafusion-catalog-listing feature "default"
+│   │   │   └── datafusion-catalog-listing v55.0.0 (*)
+│   │   ├── datafusion-functions-aggregate feature "default" (*)
+│   │   ├── datafusion-functions-table feature "default"
+│   │   │   └── datafusion-functions-table v55.0.0 (*)
+│   │   ├── datafusion-functions-window feature "default"
+│   │   │   └── datafusion-functions-window v55.0.0 (*)
+│   │   ├── datafusion-physical-optimizer feature "default"
+│   │   │   └── datafusion-physical-optimizer v55.0.0 (*)
+│   │   └── datafusion-sql feature "default"
+│   │       ├── datafusion-sql v55.0.0 (*)
+│   │       ├── datafusion-sql feature "unicode_expressions"
+│   │       │   └── datafusion-sql v55.0.0 (*)
+│   │       └── datafusion-sql feature "unparser"
+│   │           └── datafusion-sql v55.0.0 (*)
+│   └── datafusion-functions feature "datetime_expressions" (*)
+├── datafusion feature "math_expressions"
+│   ├── datafusion v55.0.0 (*)
+│   └── datafusion-functions feature "math_expressions" (*)
+├── datafusion feature "parquet"
+│   ├── datafusion v55.0.0 (*)
+│   ├── datafusion feature "datafusion-datasource-parquet"
+│   │   └── datafusion v55.0.0 (*)
+│   └── datafusion-common feature "parquet" (*)
+├── datafusion feature "recursive_protection"
+│   ├── datafusion v55.0.0 (*)
+│   ├── datafusion-common feature "recursive_protection"
+│   │   └── datafusion-common v55.0.0 (*)
+│   ├── sqlparser feature "recursive-protection"
+│   │   ├── sqlparser v0.62.0 (*)
+│   │   ├── sqlparser feature "recursive"
+│   │   │   └── sqlparser v0.62.0 (*)
+│   │   └── sqlparser feature "std" (*)
+│   ├── datafusion-expr feature "recursive_protection"
+│   │   └── datafusion-expr v55.0.0 (*)
+│   ├── datafusion-physical-expr feature "recursive_protection"
+│   │   └── datafusion-physical-expr v55.0.0 (*)
+│   ├── datafusion-optimizer feature "recursive_protection"
+│   │   └── datafusion-optimizer v55.0.0 (*)
+│   ├── datafusion-physical-optimizer feature "recursive_protection"
+│   │   └── datafusion-physical-optimizer v55.0.0 (*)
+│   └── datafusion-sql feature "recursive_protection"
+│       └── datafusion-sql v55.0.0 (*)
+├── datafusion feature "sql"
+│   ├── datafusion v55.0.0 (*)
+│   ├── datafusion feature "datafusion-sql"
+│   │   └── datafusion v55.0.0 (*)
+│   ├── datafusion feature "sqlparser"
+│   │   └── datafusion v55.0.0 (*)
+│   └── datafusion-common feature "sql" (*)
+├── datafusion feature "string_expressions"
+│   ├── datafusion v55.0.0 (*)
+│   └── datafusion-functions feature "string_expressions" (*)
+├── datafusion feature "unicode_expressions"
+│   ├── datafusion v55.0.0 (*)
+│   ├── datafusion-functions feature "unicode_expressions" (*)
+│   └── datafusion-sql feature "unicode_expressions" (*)
+├── url feature "default" (*)
+├── parquet feature "arrow" (*)
+├── parquet feature "snap" (*)
+├── parquet feature "zstd" (*)
+├── tempfile feature "default" (*)
+├── fs2 feature "default"
+│   └── fs2 v0.4.3
+│       └── libc feature "default" (*)
+├── rusqlite feature "bundled"
+│   ├── rusqlite v0.38.0
+│   │   ├── bitflags feature "default" (*)
+│   │   ├── smallvec feature "default" (*)
+│   │   ├── fallible-iterator feature "default"
+│   │   │   ├── fallible-iterator v0.3.0
+│   │   │   └── fallible-iterator feature "alloc"
+│   │   │       └── fallible-iterator v0.3.0
+│   │   ├── fallible-streaming-iterator feature "default"
+│   │   │   └── fallible-streaming-iterator v0.1.9
+│   │   ├── hashlink feature "default"
+│   │   │   └── hashlink v0.11.1
+│   │   │       └── hashbrown feature "default-hasher"
+│   │   │           └── hashbrown v0.16.1
+│   │   │               └── foldhash v0.2.0
+│   │   └── libsqlite3-sys feature "default"
+│   │       ├── libsqlite3-sys v0.36.0
+│   │       │   [build-dependencies]
+│   │       │   ├── cc feature "default" (*)
+│   │       │   ├── pkg-config feature "default" (*)
+│   │       │   └── vcpkg feature "default"
+│   │       │       └── vcpkg v0.2.15
+│   │       └── libsqlite3-sys feature "min_sqlite_version_3_34_1"
+│   │           ├── libsqlite3-sys v0.36.0 (*)
+│   │           ├── libsqlite3-sys feature "pkg-config"
+│   │           │   └── libsqlite3-sys v0.36.0 (*)
+│   │           └── libsqlite3-sys feature "vcpkg"
+│   │               └── libsqlite3-sys v0.36.0 (*)
+│   ├── rusqlite feature "modern_sqlite"
+│   │   ├── rusqlite v0.38.0 (*)
+│   │   └── libsqlite3-sys feature "bundled_bindings"
+│   │       └── libsqlite3-sys v0.36.0 (*)
+│   └── libsqlite3-sys feature "bundled"
+│       ├── libsqlite3-sys v0.36.0 (*)
+│       ├── libsqlite3-sys feature "bundled_bindings" (*)
+│       └── libsqlite3-sys feature "cc"
+│           └── libsqlite3-sys v0.36.0 (*)
+└── rusqlite feature "default"
+    ├── rusqlite v0.38.0 (*)
+    └── rusqlite feature "cache"
+        ├── rusqlite v0.38.0 (*)
+        └── rusqlite feature "hashlink"
+            └── rusqlite v0.38.0 (*)

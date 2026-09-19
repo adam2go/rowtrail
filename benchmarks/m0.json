@@ -1,0 +1,104 @@
+{
+  "datafusion": "55.0.0",
+  "rows": 1048576,
+  "csv_ms": 9.220417,
+  "sort_ms": 352.8995,
+  "sort_plan_metrics": "SortExec: expr=[payload@1 ASC NULLS LAST, id@0 DESC], preserve_partitioning=[false], metrics=[output_rows=1.05 M, elapsed_compute=87.39ms, output_bytes=1884.1 MB, output_batches=1.02 K, spill_count=81, spilled_bytes=421.8 MB, spilled_rows=2.03 M]\n  DataSourceExec: file_groups={1 group: [[<repo>/benchmarks/generated/m0/many.parquet:0..228139988]]}, projection=[id, payload], file_type=parquet, sort_order_for_reorder=[payload@1 ASC NULLS LAST, id@0 DESC], metrics=[output_rows=1.05 M, elapsed_compute=109.56µs, output_bytes=812.0 MB, output_batches=1.02 K, files_ranges_pruned_statistics=1 total → 1 matched, row_groups_pruned_statistics=256 total → 256 matched, row_groups_pruned_bloom_filter=256 total → 256 matched, page_index_pages_pruned=0 total → 0 matched, page_index_rows_pruned=0 total → 0 matched, limit_pruned_row_groups=0 total → 0 matched, batches_split=0, bytes_scanned=218.1 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=43ns, metadata_load_time=32.79µs, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=347.58µs, time_elapsed_processing=25.19ms, time_elapsed_scanning_total=136.72ms, time_elapsed_scanning_until_data=417.58µs, output_rows_skew=0%, scan_efficiency_ratio=95.61% (218.1 M/228.1 M)]\n",
+  "cancel_probe_ms": 4930.681917,
+  "cpu_ms_after_cancel_in_200ms": 0.08100000000013097,
+  "engine_memory_bytes": 33554432,
+  "spill_limit_bytes": 536870912,
+  "hardware": {
+    "os": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "memory_bytes": 25769803776,
+    "logical_cpus": 14
+  },
+  "build": {
+    "rust": "1.94.0",
+    "profile": "release",
+    "lto": "thin",
+    "codegen_units": 8,
+    "target": "aarch64-apple-darwin"
+  },
+  "binary_bytes": {
+    "rowtrail": 2999632,
+    "rowtrail-runtime": 96190752
+  },
+  "startup_ms": {
+    "--help": {
+      "p50": 2.6389583945274353,
+      "p95": 2.946749795228243,
+      "samples": [
+        3.542833961546421,
+        2.914165845140815,
+        2.946749795228243,
+        2.925792010501027,
+        2.7169580571353436,
+        2.690457971766591,
+        2.698957920074463,
+        2.6386668905615807,
+        2.63924989849329,
+        2.552292076870799,
+        2.477457979694009,
+        2.5592921301722527,
+        2.516291104257107,
+        2.5524168740957975,
+        2.529915887862444,
+        2.528958022594452,
+        2.6402089279145002,
+        2.5960830971598625,
+        2.6432089507579803,
+        2.552042016759515
+      ],
+      "cache": "warm filesystem; fresh process each time"
+    },
+    "schema query": {
+      "p50": 2.653667004778981,
+      "p95": 2.771708182990551,
+      "samples": [
+        2.6510420721024275,
+        2.777125220745802,
+        2.700916025787592,
+        2.721708035096526,
+        2.6431670412421227,
+        2.771708182990551,
+        2.6855000760406256,
+        2.702666912227869,
+        2.6688328944146633,
+        2.709832973778248,
+        2.662541111931205,
+        2.626667032018304,
+        2.533082850277424,
+        2.57137487642467,
+        2.648082794621587,
+        2.656291937455535,
+        2.545916009694338,
+        2.5956660974770784,
+        2.6135831139981747,
+        2.618459053337574
+      ],
+      "cache": "warm filesystem; fresh process each time"
+    }
+  },
+  "archive_bytes": 33140738,
+  "mcp_probe": {
+    "protocol": "2025-11-25",
+    "tools": [
+      "data_open",
+      "data_inspect",
+      "data_query",
+      "data_read",
+      "data_control",
+      "data_export",
+      "data_events"
+    ],
+    "query_schema_valid": true
+  },
+  "limitations": [
+    "Startup samples do not flush OS cache.",
+    "The 200ms in-process cancellation timer overshot while the CPU-intensive plan was polling. The separate coordinator must enforce worker termination.",
+    "Engine MemoryPool is not a process RSS limit.",
+    "SQL plan metrics are engine counters, not physical device I/O."
+  ]
+}

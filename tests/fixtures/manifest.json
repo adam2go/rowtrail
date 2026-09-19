@@ -1,0 +1,29 @@
+{
+  "generator": "rowtrail-runtime fixtures --directory PATH --rows N",
+  "seed": 0,
+  "version": 1,
+  "small": {
+    "formats": ["csv", "parquet"],
+    "rows": 8,
+    "parquet_row_groups": 4,
+    "schema": [
+      {"name":"id","type":"Int64"},
+      {"name":"date","type":"Date32"},
+      {"name":"region","type":"Utf8"},
+      {"name":"product","type":"Utf8"},
+      {"name":"amount","type":"Decimal128(20, 2)"},
+      {"name":"note","type":"Utf8"}
+    ],
+    "expected_region_sum_count": [["华东","34.00","3"],["华北","100.00","2"],["华南","-5.00","2"],[null,"1.00","1"]],
+    "min_id": "9007199254740993",
+    "total_amount": "130.00"
+  },
+  "many": {
+    "format":"parquet",
+    "row_group_size":4096,
+    "id":"9007199254740993 + i",
+    "amount_cents":"null when i % 17 == 0, otherwise (i % 2001) - 1000",
+    "region":"null when i % 13 == 0, otherwise [华东,华南,华北][i % 3]",
+    "product":"A when i % 2 == 0, otherwise B"
+  }
+}
