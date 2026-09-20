@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "checks": [
+    "every immutable checkpoint matches a Python integer/Decimal prefix oracle; final snapshot contains one row",
+    "a fixed partial checkpoint can be queried/exported/reopened with partial quality preserved",
+    "preview none writes exactly one final checkpoint",
+    "durable result-ready events describe each committed aggregate revision",
+    "result budget exhaustion keeps the last complete file checkpoint, not half-updated aggregates",
+    "unsupported functions, types, aliases and CSV sources fail before accepting a job",
+    "empty input retains typed count zero and null sum/average",
+    "true cancellation preserves fixed earlier aggregate checkpoints",
+    "worker crash preserves one complete aggregate checkpoint and reports interrupted",
+    "numeric overflow is explicit and never replaces a valid checkpoint with a wrapped sum"
+  ],
+  "total_integration_scenarios": 53,
+  "rust_tests": 6
+}

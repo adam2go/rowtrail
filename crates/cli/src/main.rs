@@ -69,6 +69,11 @@ enum Command {
         #[arg(long, default_value_t = 8192)]
         max_bytes: usize,
     },
+    /// Run restricted progressive Parquet aggregation from a JSON request.
+    Analyze {
+        #[arg(long, default_value = "-")]
+        request: PathBuf,
+    },
     /// Stream a frozen CSV/TSV manifest to a managed Parquet dataset.
     Prepare {
         dataset: String,
@@ -284,6 +289,7 @@ impl ServerHandler for Mcp {
                 "open",
                 "inspect",
                 "prepare",
+                "analyze",
                 "query",
                 "read",
                 "control",
@@ -434,6 +440,7 @@ async fn run(args: Args) -> Result<i32> {
             "inspect",
             json!({"ref":reference,"revision":revision,"top_k":top_k,"columns":columns,"checks":checks,"offset":offset,"budget":{"max_rows":max_rows,"max_bytes":max_bytes}}),
         ),
+        Command::Analyze { request } => request_from("analyze", load(&request)?)?,
         Command::Prepare {
             dataset,
             manifest,

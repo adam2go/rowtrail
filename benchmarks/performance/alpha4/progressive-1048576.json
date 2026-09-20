@@ -1,0 +1,847 @@
+{
+  "kind": "exact file checkpoints versus an ordinary complete SQL aggregate",
+  "rows": 1048576,
+  "files": 16,
+  "source_bytes": 7313314,
+  "os": "macOS-26.6.2-arm64-arm-64bit",
+  "machine": "arm64",
+  "binary_sha256": {
+    "rowtrail": "bdf5da8a9f04baac3ae8a1a89c3db0770c8bca1ecbf9020be397e4d4b978af47",
+    "rowtrail-runtime": "32db52acbc5158ff4437104c0b36c7670c48d2d107ab34d2f2cd5915d153f27e"
+  },
+  "records": [
+    {
+      "repeat": 0,
+      "mode": "sql",
+      "first_observed_ms": 37.26904117502272,
+      "final_ms": 40.63108307309449,
+      "first_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_2c887927e706496c9fefaba943d316d6",
+          "input_coverage": "unknown"
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_a6eec4e3549d4cc18d9c2570957fbde3",
+              "manifest_ref": "mf_3f0628687b1f4caea1d0cdc5115aab43"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ]
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 10424192,
+          "source_read_bytes": 10424192,
+          "result_read_bytes": 0,
+          "read_requests": 32
+        },
+        "result_write_bytes": 1586,
+        "rows": 1,
+        "planning_ms": 3.821708,
+        "result_write_ms": 8.668083,
+        "commit_ack_ms": 10.004667,
+        "elapsed_ms": 32.84575,
+        "worker_pid": 60953,
+        "publication_ms": 9.968791,
+        "result_parts": 1,
+        "worker_elapsed_ms": 36.384874999999994,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "repeat": 0,
+      "mode": "progressive",
+      "first_observed_ms": 22.02179213054478,
+      "final_ms": 185.3758750949055,
+      "first_rows": [
+        [
+          "65536",
+          "61680",
+          "-3519.96",
+          "-0.057068"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_1b9a0b9f8f594db493247a89eb0ab429",
+          "input_coverage": {
+            "unit": "manifest_file",
+            "completed_files": 1,
+            "total_files": 16,
+            "order": "frozen_manifest_order"
+          }
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_95c4ad0771d34d528d8a90bcf25314bd",
+              "manifest_ref": "mf_f8cb3dd691ce4828bf85a0871ffb1c9e"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ],
+        "aggregation": {
+          "aggregates": [
+            {
+              "function": "count",
+              "column": null,
+              "alias": "rows"
+            },
+            {
+              "function": "count",
+              "column": "amount",
+              "alias": "nonnull"
+            },
+            {
+              "function": "sum",
+              "column": "amount",
+              "alias": "total"
+            },
+            {
+              "function": "avg",
+              "column": "amount",
+              "alias": "mean"
+            }
+          ],
+          "fragment_unit": "manifest_file",
+          "average": "Decimal128(38,6); truncated toward zero at six fractional digits; exact sum and count retained in computation"
+        }
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 10424192,
+          "source_read_bytes": 10424192,
+          "result_read_bytes": 0,
+          "read_requests": 32
+        },
+        "rows": 1,
+        "input_rows_processed": 1048576,
+        "files_completed": 16,
+        "files_total": 16,
+        "result_write_bytes": 25504,
+        "elapsed_ms": 177.339792,
+        "fragment_unit": "manifest_file",
+        "publication_ms": 73.675458,
+        "result_parts": 16,
+        "worker_elapsed_ms": 180.948833,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "worker_pid": 60956
+      }
+    },
+    {
+      "repeat": 1,
+      "mode": "progressive",
+      "first_observed_ms": 23.13499990850687,
+      "final_ms": 189.45999979041517,
+      "first_rows": [
+        [
+          "65536",
+          "61680",
+          "-3519.96",
+          "-0.057068"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_e3e56813d6c74db087b27e6a29b18cb5",
+          "input_coverage": {
+            "unit": "manifest_file",
+            "completed_files": 1,
+            "total_files": 16,
+            "order": "frozen_manifest_order"
+          }
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_c0d254d3467b49debd0f2ec11541f522",
+              "manifest_ref": "mf_83d16b47ab974abdad1f0baa1ddd4e4e"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ],
+        "aggregation": {
+          "aggregates": [
+            {
+              "function": "count",
+              "column": null,
+              "alias": "rows"
+            },
+            {
+              "function": "count",
+              "column": "amount",
+              "alias": "nonnull"
+            },
+            {
+              "function": "sum",
+              "column": "amount",
+              "alias": "total"
+            },
+            {
+              "function": "avg",
+              "column": "amount",
+              "alias": "mean"
+            }
+          ],
+          "fragment_unit": "manifest_file",
+          "average": "Decimal128(38,6); truncated toward zero at six fractional digits; exact sum and count retained in computation"
+        }
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 10424192,
+          "source_read_bytes": 10424192,
+          "result_read_bytes": 0,
+          "read_requests": 32
+        },
+        "rows": 1,
+        "input_rows_processed": 1048576,
+        "files_completed": 16,
+        "files_total": 16,
+        "result_write_bytes": 25504,
+        "elapsed_ms": 180.500792,
+        "fragment_unit": "manifest_file",
+        "publication_ms": 74.49166799999999,
+        "result_parts": 16,
+        "worker_elapsed_ms": 184.919125,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "worker_pid": 60959
+      }
+    },
+    {
+      "repeat": 1,
+      "mode": "sql",
+      "first_observed_ms": 37.7147919498384,
+      "final_ms": 41.135207982733846,
+      "first_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_76883d2fcd7d479b803f60d115bd9c39",
+          "input_coverage": "unknown"
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_8b74fa2d6c6443c0b612cc53d9a74cb7",
+              "manifest_ref": "mf_87fe779db8a549b0b218121fbf4ec248"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ]
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 10424192,
+          "source_read_bytes": 10424192,
+          "result_read_bytes": 0,
+          "read_requests": 32
+        },
+        "result_write_bytes": 1586,
+        "rows": 1,
+        "planning_ms": 4.546583,
+        "result_write_ms": 5.332292000000001,
+        "commit_ack_ms": 9.249458,
+        "elapsed_ms": 31.714958000000003,
+        "worker_pid": 60963,
+        "publication_ms": 9.188083,
+        "result_parts": 1,
+        "worker_elapsed_ms": 36.495084,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "repeat": 2,
+      "mode": "sql",
+      "first_observed_ms": 35.202667117118835,
+      "final_ms": 38.51620899513364,
+      "first_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_ae3fe0081f6d4c14ac9ff7861841e025",
+          "input_coverage": "unknown"
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_08ef13ea9d4a43e4a9bc33c555168721",
+              "manifest_ref": "mf_dfc3e4fd9c0144c4a3697e59de58cd12"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ]
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 10424192,
+          "source_read_bytes": 10424192,
+          "result_read_bytes": 0,
+          "read_requests": 32
+        },
+        "result_write_bytes": 1586,
+        "rows": 1,
+        "planning_ms": 4.149708,
+        "result_write_ms": 5.786626,
+        "commit_ack_ms": 8.289667000000001,
+        "elapsed_ms": 29.92675,
+        "worker_pid": 60966,
+        "publication_ms": 8.256207999999999,
+        "result_parts": 1,
+        "worker_elapsed_ms": 34.527415999999995,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "repeat": 2,
+      "mode": "progressive",
+      "first_observed_ms": 22.48425013385713,
+      "final_ms": 180.74908410198987,
+      "first_rows": [
+        [
+          "65536",
+          "61680",
+          "-3519.96",
+          "-0.057068"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_0e7e6d14350f472b8f928e69426c6d15",
+          "input_coverage": {
+            "unit": "manifest_file",
+            "completed_files": 1,
+            "total_files": 16,
+            "order": "frozen_manifest_order"
+          }
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_5fc805e1e3ca4d7ca442daf303073cd4",
+              "manifest_ref": "mf_baf2517ee7dc41ddbd6e1c2dd0360579"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ],
+        "aggregation": {
+          "aggregates": [
+            {
+              "function": "count",
+              "column": null,
+              "alias": "rows"
+            },
+            {
+              "function": "count",
+              "column": "amount",
+              "alias": "nonnull"
+            },
+            {
+              "function": "sum",
+              "column": "amount",
+              "alias": "total"
+            },
+            {
+              "function": "avg",
+              "column": "amount",
+              "alias": "mean"
+            }
+          ],
+          "fragment_unit": "manifest_file",
+          "average": "Decimal128(38,6); truncated toward zero at six fractional digits; exact sum and count retained in computation"
+        }
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 10424192,
+          "source_read_bytes": 10424192,
+          "result_read_bytes": 0,
+          "read_requests": 32
+        },
+        "rows": 1,
+        "input_rows_processed": 1048576,
+        "files_completed": 16,
+        "files_total": 16,
+        "result_write_bytes": 25504,
+        "elapsed_ms": 171.956875,
+        "fragment_unit": "manifest_file",
+        "publication_ms": 71.827959,
+        "result_parts": 16,
+        "worker_elapsed_ms": 176.256208,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "worker_pid": 60969
+      }
+    },
+    {
+      "repeat": 3,
+      "mode": "progressive",
+      "first_observed_ms": 24.938708171248436,
+      "final_ms": 194.3907500244677,
+      "first_rows": [
+        [
+          "65536",
+          "61680",
+          "-3519.96",
+          "-0.057068"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_1bfa4aba0bfa4c918b0806b239e30817",
+          "input_coverage": {
+            "unit": "manifest_file",
+            "completed_files": 1,
+            "total_files": 16,
+            "order": "frozen_manifest_order"
+          }
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_b7b91b39a414406a8344d7380ad19d48",
+              "manifest_ref": "mf_3ddc17c7418344e397358bc32d161088"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ],
+        "aggregation": {
+          "aggregates": [
+            {
+              "function": "count",
+              "column": null,
+              "alias": "rows"
+            },
+            {
+              "function": "count",
+              "column": "amount",
+              "alias": "nonnull"
+            },
+            {
+              "function": "sum",
+              "column": "amount",
+              "alias": "total"
+            },
+            {
+              "function": "avg",
+              "column": "amount",
+              "alias": "mean"
+            }
+          ],
+          "fragment_unit": "manifest_file",
+          "average": "Decimal128(38,6); truncated toward zero at six fractional digits; exact sum and count retained in computation"
+        }
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 10424192,
+          "source_read_bytes": 10424192,
+          "result_read_bytes": 0,
+          "read_requests": 32
+        },
+        "rows": 1,
+        "input_rows_processed": 1048576,
+        "files_completed": 16,
+        "files_total": 16,
+        "result_write_bytes": 25504,
+        "elapsed_ms": 185.015416,
+        "fragment_unit": "manifest_file",
+        "publication_ms": 78.35537400000001,
+        "result_parts": 16,
+        "worker_elapsed_ms": 189.701,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "worker_pid": 60973
+      }
+    },
+    {
+      "repeat": 3,
+      "mode": "sql",
+      "first_observed_ms": 37.9317079205066,
+      "final_ms": 41.3055419921875,
+      "first_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_1b286a92f4074761a92b4793ca8726bd",
+          "input_coverage": "unknown"
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_947da94ceb7241d68e1e0160c6b3f6d8",
+              "manifest_ref": "mf_2950ea15f0a74d14b390568df0e6e948"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ]
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 10424192,
+          "source_read_bytes": 10424192,
+          "result_read_bytes": 0,
+          "read_requests": 32
+        },
+        "result_write_bytes": 1586,
+        "rows": 1,
+        "planning_ms": 4.5028749999999995,
+        "result_write_ms": 6.1061250000000005,
+        "commit_ack_ms": 8.486291999999999,
+        "elapsed_ms": 32.111000000000004,
+        "worker_pid": 60976,
+        "publication_ms": 8.45225,
+        "result_parts": 1,
+        "worker_elapsed_ms": 37.172542,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "repeat": 4,
+      "mode": "sql",
+      "first_observed_ms": 36.22462507337332,
+      "final_ms": 39.61662505753338,
+      "first_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_e23ec9bb77744ae1b743c0e2666e8f47",
+          "input_coverage": "unknown"
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_44d00f39ed5f4c6c954c7418f7622304",
+              "manifest_ref": "mf_09e854dad55a43b590193caaff69abdc"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ]
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 10424192,
+          "source_read_bytes": 10424192,
+          "result_read_bytes": 0,
+          "read_requests": 32
+        },
+        "result_write_bytes": 1586,
+        "rows": 1,
+        "planning_ms": 4.234959,
+        "result_write_ms": 5.367667,
+        "commit_ack_ms": 9.295333,
+        "elapsed_ms": 30.661375,
+        "worker_pid": 60979,
+        "publication_ms": 9.262875,
+        "result_parts": 1,
+        "worker_elapsed_ms": 35.367250000000006,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "repeat": 4,
+      "mode": "progressive",
+      "first_observed_ms": 21.251250058412552,
+      "final_ms": 189.66912501491606,
+      "first_rows": [
+        [
+          "65536",
+          "61680",
+          "-3519.96",
+          "-0.057068"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_a9def81fdd04443f840ccef0cf220431",
+          "input_coverage": {
+            "unit": "manifest_file",
+            "completed_files": 1,
+            "total_files": 16,
+            "order": "frozen_manifest_order"
+          }
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_c320345e4c7b4dc7aa56d715bea80a09",
+              "manifest_ref": "mf_76f4cd0eaeba4fc7a1758017002aae99"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ],
+        "aggregation": {
+          "aggregates": [
+            {
+              "function": "count",
+              "column": null,
+              "alias": "rows"
+            },
+            {
+              "function": "count",
+              "column": "amount",
+              "alias": "nonnull"
+            },
+            {
+              "function": "sum",
+              "column": "amount",
+              "alias": "total"
+            },
+            {
+              "function": "avg",
+              "column": "amount",
+              "alias": "mean"
+            }
+          ],
+          "fragment_unit": "manifest_file",
+          "average": "Decimal128(38,6); truncated toward zero at six fractional digits; exact sum and count retained in computation"
+        }
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 10424192,
+          "source_read_bytes": 10424192,
+          "result_read_bytes": 0,
+          "read_requests": 32
+        },
+        "rows": 1,
+        "input_rows_processed": 1048576,
+        "files_completed": 16,
+        "files_total": 16,
+        "result_write_bytes": 25504,
+        "elapsed_ms": 181.4055,
+        "fragment_unit": "manifest_file",
+        "publication_ms": 73.93816499999998,
+        "result_parts": 16,
+        "worker_elapsed_ms": 185.193709,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "worker_pid": 60982
+      }
+    }
+  ],
+  "summary_ms": {
+    "sql": {
+      "first_observed_ms": 37.26904117502272,
+      "final_ms": 40.63108307309449
+    },
+    "progressive": {
+      "first_observed_ms": 22.48425013385713,
+      "final_ms": 189.45999979041517
+    }
+  },
+  "conditions": [
+    "Five serial repeats, alternating modes, warm OS cache, fresh workspace/session each run.",
+    "Open and fixture creation are excluded; worker startup, observation and checkpoint publication are included.",
+    "Poll interval 2 ms; observed first-result time is an upper bound on availability.",
+    "Every final answer and every first observed prefix matches independent Python integer/Decimal arithmetic.",
+    "Progressive partials describe only completed files; they are not population estimates.",
+    "Final cost includes all checkpoints, including unused old revisions."
+  ]
+}

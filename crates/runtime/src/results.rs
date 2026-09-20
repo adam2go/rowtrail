@@ -38,11 +38,19 @@ pub fn snapshot(db: &Db, result: &str, revision: Option<u64>) -> Result<Snapshot
         .optional()?;
     let (cutoff, rows, quality) =
         row.ok_or_else(|| anyhow::anyhow!("OBJECT_NOT_FOUND: revision {revision}"))?;
+    let start: u64 = c
+        .query_row(
+            "SELECT part_seq FROM checkpoints WHERE result_id=? AND revision=?",
+            params![result, revision],
+            |r| r.get(0),
+        )
+        .optional()?
+        .unwrap_or(0);
     let parts = c
         .prepare(
-            "SELECT path,bytes,checksum,rows,identity FROM parts WHERE result_id=? AND seq<? ORDER BY seq",
+            "SELECT path,bytes,checksum,rows,identity FROM parts WHERE result_id=? AND seq>=? AND seq<? ORDER BY seq",
         )?
-        .query_map(params![result, cutoff], |r| {
+        .query_map(params![result, start, cutoff], |r| {
             Ok((
                 PathBuf::from(r.get::<_, String>(0)?),
                 r.get(1)?,
@@ -54,7 +62,7 @@ pub fn snapshot(db: &Db, result: &str, revision: Option<u64>) -> Result<Snapshot
         .collect::<rusqlite::Result<Vec<_>>>()?
         .into_iter().map(|(path,size,hash,rows,identity)|Ok((path,size,hash,rows,serde_json::from_str(&identity)?))).collect::<Result<Vec<_>>>()?;
     ensure!(
-        parts.len() == cutoff as usize,
+        parts.len() == cutoff.saturating_sub(start) as usize,
         "RESULT_CORRUPT: missing part metadata"
     );
     Ok(Snapshot {

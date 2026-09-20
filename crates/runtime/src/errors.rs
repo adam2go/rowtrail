@@ -12,6 +12,7 @@ pub fn code(error: &anyhow::Error, fallback: &'static str) -> &'static str {
             "IDEMPOTENCY_CONFLICT",
             "SOURCE_CHANGED",
             "RESULT_CORRUPT",
+            "ARITHMETIC_OVERFLOW",
             "RESULT_UNAVAILABLE",
             "RESULT_NOT_READY",
             "OBJECT_NOT_FOUND",

@@ -95,3 +95,25 @@ branch before GC. Expired objects fail explicitly; do not reinterpret that failu
 as an empty table. Metadata, logs, events and external exports are outside this
 quota and GC. The [runnable workflow](../examples/prepare_explore.py) profiles,
 prepares, branches twice, exports and collects exactly its own intermediate data.
+
+## Progressive file aggregation (alpha.4)
+
+Send this to `analyze` / `data_analyze` / `rowtrail analyze --request request.json`:
+
+```json
+{"source":{"dataset_ref":"ds_ID","manifest_ref":"mf_ID"},"aggregates":[{"function":"count","alias":"rows"},{"function":"count","column":"amount","alias":"nonnull"},{"function":"sum","column":"amount","alias":"total"},{"function":"avg","column":"amount","alias":"mean"}],"execution":{"preview":"available","wait_ms":200}}
+```
+
+The source must be Parquet. Previews are cumulative snapshots over complete files
+in frozen manifest order. Each revision contains **one aggregate row**; later
+checkpoints replace the snapshot, not earlier immutable revisions. Read
+`quality.coverage.input_coverage.completed_files` and `total_files`. These measure
+files, not rows or bytes. Keep `result_ref` and the exact revision before branching.
+A finished query on a partial checkpoint still has partial original-source coverage.
+
+Sum/avg accept Int64, UInt64 and Decimal128 scale 0–6. Counts are UInt64; sums use
+Decimal128(38,input_scale). Average is Decimal128(38,6), truncating toward zero.
+Request sum plus non-null count if the caller needs a rational mean. No floats,
+GROUP BY, filters, SQL expressions, sampling, estimates or interrupted-run resume
+are included. A single-file source supplies one fragment, regardless of row groups.
+`preview:none` writes one final result. Details: [design](decisions/004-progressive-file-aggregation.md).

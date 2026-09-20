@@ -91,6 +91,7 @@ fn fault_child() {
                 rows: 1,
                 checksum: hex::encode(Sha256::digest(bytes)),
                 schema,
+                checkpoint: None,
             },
         )
         .unwrap();

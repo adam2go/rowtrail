@@ -142,6 +142,7 @@ impl StagedPart {
             rows: self.rows,
             checksum: hex::encode(output.hash.finalize()),
             schema: schema.clone(),
+            checkpoint: None,
         })
     }
 }
@@ -283,6 +284,15 @@ async fn execute_job(
     let result:Result<serde_json::Value>=async{
         for source in &spec.sources{source.validate()?}
         if spec.export.is_some(){return export(spec, &counters).await}
+        if spec.analysis.is_some(){
+            let timeout=spec.query.as_ref().unwrap().execution.run_timeout_ms;
+            return tokio::select! {biased;
+                _=stop_rx.changed()=>bail!("CANCELLED"),
+                _=term.recv()=>bail!("CANCELLED"),
+                _=tokio::time::sleep(Duration::from_millis(timeout))=>bail!("BUDGET_EXHAUSTED"),
+                result=crate::aggregate::execute(spec,counters.clone(),ack_rx)=>result,
+            }
+        }
         let (ctx,df)=crate::engine::plan(spec,counters.clone()).await?;
         let plan=df.create_physical_plan().await?;
         let schema=plan.schema();message(&WorkerMessage::Schema{schema:schema.as_ref().clone()}).await?;
@@ -471,4 +481,29 @@ async fn export(spec: &JobSpec, counters: &crate::store::Counters) -> Result<ser
     Ok(
         json!({"destination":target,"manifest":sidecar,"rows":rows,"bytes":output.bytes,"io":counters.value(),"staging":staging,"meta_staging":meta_staging}),
     )
+}
+
+pub(crate) async fn checkpoint(
+    spec: &JobSpec,
+    batch: &RecordBatch,
+    seq: u64,
+    remaining: u64,
+    progress: crate::model::Checkpoint,
+    ack: &mut tokio::sync::mpsc::Receiver<String>,
+) -> Result<u64> {
+    let schema = batch.schema();
+    let mut staged = StagedPart::new(spec, &schema, seq, remaining)?;
+    staged.write(batch)?;
+    let mut part = staged.finish(seq, &schema)?;
+    part.checkpoint = Some(progress);
+    let size = part.bytes;
+    message(&WorkerMessage::Part { part }).await?;
+    ensure!(
+        ack.recv().await.as_deref() == Some("ok"),
+        "CANCELLED: checkpoint rejected"
+    );
+    Ok(size)
+}
+pub(crate) async fn analysis_schema(schema: arrow::datatypes::Schema) -> Result<()> {
+    message(&WorkerMessage::Schema { schema }).await
 }

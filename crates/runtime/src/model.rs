@@ -1,6 +1,6 @@
 use crate::sources::{Manifest, SourceFile};
 use arrow::datatypes::Schema;
-use rowtrail_contracts::{DatasetBinding, ExportParams, QueryParams};
+use rowtrail_contracts::{AnalyzeParams, DatasetBinding, ExportParams, QueryParams};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::{collections::BTreeMap, path::PathBuf};
@@ -26,6 +26,8 @@ pub struct JobSpec {
     pub export: Option<ExportParams>,
     #[serde(default)]
     pub prepared: Option<DatasetBinding>,
+    #[serde(default)]
+    pub analysis: Option<AnalyzeParams>,
     pub inputs: BTreeMap<String, Input>,
     pub sources: Vec<Manifest>,
     pub quality: Value,
@@ -38,6 +40,13 @@ pub struct Part {
     pub rows: usize,
     pub checksum: String,
     pub schema: Schema,
+    #[serde(default)]
+    pub checkpoint: Option<Checkpoint>,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Checkpoint {
+    pub completed_files: usize,
+    pub total_files: usize,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]

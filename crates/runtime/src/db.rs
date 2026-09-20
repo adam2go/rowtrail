@@ -54,6 +54,7 @@ impl Db {
             CREATE TABLE IF NOT EXISTS results(id TEXT PRIMARY KEY,job_id TEXT NOT NULL REFERENCES jobs(id),schema TEXT,quality TEXT NOT NULL,head INTEGER NOT NULL DEFAULT 0,validity TEXT NOT NULL DEFAULT 'valid');
             CREATE TABLE IF NOT EXISTS revisions(result_id TEXT NOT NULL REFERENCES results(id),revision INTEGER NOT NULL,cutoff INTEGER NOT NULL,rows INTEGER NOT NULL,quality TEXT NOT NULL,PRIMARY KEY(result_id,revision));
             CREATE TABLE IF NOT EXISTS parts(result_id TEXT NOT NULL REFERENCES results(id),seq INTEGER NOT NULL,path TEXT NOT NULL,rows INTEGER NOT NULL,bytes INTEGER NOT NULL,checksum TEXT NOT NULL,identity TEXT NOT NULL,PRIMARY KEY(result_id,seq));
+            CREATE TABLE IF NOT EXISTS checkpoints(result_id TEXT NOT NULL,revision INTEGER NOT NULL,part_seq INTEGER NOT NULL,PRIMARY KEY(result_id,revision));
             CREATE TABLE IF NOT EXISTS events(seq INTEGER PRIMARY KEY AUTOINCREMENT,event_id TEXT UNIQUE NOT NULL,job_id TEXT NOT NULL,kind TEXT NOT NULL,payload TEXT NOT NULL,created INTEGER NOT NULL);
             CREATE INDEX IF NOT EXISTS events_job ON events(job_id,seq);
             CREATE TABLE IF NOT EXISTS idempotency(key TEXT PRIMARY KEY,hash TEXT NOT NULL,response TEXT NOT NULL);
@@ -65,7 +66,7 @@ impl Db {
             [id("store")],
         )?;
         c.execute(
-            "INSERT OR IGNORE INTO meta VALUES('schema_version','3')",
+            "INSERT OR IGNORE INTO meta VALUES('schema_version','4')",
             [],
         )?;
         let version: String = c.query_row(
@@ -73,7 +74,15 @@ impl Db {
             [],
             |r| r.get(0),
         )?;
-        ensure!(version == "3", "PROTOCOL_VERSION_MISMATCH: metadata schema");
+        ensure!(
+            version == "3" || version == "4",
+            "PROTOCOL_VERSION_MISMATCH: metadata schema"
+        );
+        // Prefix revisions from v3 remain readable. Mark the store before any
+        // checkpoint write so older runtimes reject the new revision semantics.
+        if version == "3" {
+            c.execute("UPDATE meta SET value='4' WHERE key='schema_version'", [])?;
+        }
         let store_id = c.query_row("SELECT value FROM meta WHERE key='store_id'", [], |r| {
             r.get(0)
         })?;
@@ -349,6 +358,29 @@ impl Db {
                 serde_json::to_string(&crate::sources::SourceFile::inspect(&dest)?)?
             ],
         )?;
+        ensure!(
+            spec.analysis.is_some() == part.checkpoint.is_some(),
+            "RESULT_CORRUPT: checkpoint descriptor"
+        );
+        if let Some(progress) = &part.checkpoint {
+            let total = spec.inputs.values().next().unwrap().files.len();
+            let expected_completed = if spec.query.as_ref().unwrap().execution.preview == "none" {
+                total
+            } else {
+                part.seq as usize + 1
+            };
+            ensure!(
+                progress.completed_files == expected_completed,
+                "RESULT_CORRUPT: noncontiguous aggregate coverage"
+            );
+            ensure!(
+                progress.total_files == total
+                    && progress.completed_files > 0
+                    && progress.completed_files <= total
+                    && part.rows == 1,
+                "RESULT_CORRUPT: checkpoint coverage"
+            );
+        }
         let preview = spec.prepared.is_none()
             && spec
                 .query
@@ -369,6 +401,16 @@ impl Db {
             quality["coverage"]["kind"] = json!("partial");
             quality["coverage"]["input_coverage"] = json!("unknown");
             quality["final_for_request"] = json!(false);
+            let rows = if let Some(progress) = &part.checkpoint {
+                quality["coverage"]["input_coverage"] = json!({"unit":"manifest_file","completed_files":progress.completed_files,"total_files":progress.total_files,"order":"frozen_manifest_order"});
+                tx.execute(
+                    "INSERT INTO checkpoints VALUES(?,?,?)",
+                    params![spec.result_ref, rev, part.seq],
+                )?;
+                1
+            } else {
+                rows
+            };
             tx.execute(
                 "INSERT INTO revisions VALUES(?,?,?,?,?)",
                 params![
@@ -439,7 +481,11 @@ impl Db {
             std::fs::remove_file(staging)?;
             std::fs::remove_file(meta_staging)?;
         }
-        if state != "completed" && spec.query.is_some() && spec.prepared.is_none() {
+        if state != "completed"
+            && spec.query.is_some()
+            && spec.prepared.is_none()
+            && spec.analysis.is_none()
+        {
             let head: u64 = tx.query_row(
                 "SELECT head FROM results WHERE id=?",
                 [&spec.result_ref],
@@ -467,7 +513,11 @@ impl Db {
                 )?;
             }
         }
-        if state == "completed" && spec.query.is_some() && spec.prepared.is_none() {
+        if state == "completed"
+            && spec.query.is_some()
+            && spec.prepared.is_none()
+            && spec.analysis.is_none()
+        {
             let (head, schema): (u64, Option<String>) = tx.query_row(
                 "SELECT head,schema FROM results WHERE id=?",
                 [&spec.result_ref],
@@ -487,6 +537,44 @@ impl Db {
             tx.execute(
                 "INSERT INTO revisions VALUES(?,?,?,?,?)",
                 params![spec.result_ref, head + 1, cutoff, rows, quality.to_string()],
+            )?;
+            tx.execute(
+                "UPDATE results SET head=? WHERE id=?",
+                params![head + 1, spec.result_ref],
+            )?;
+            event(
+                &tx,
+                &spec.job_id,
+                "result.ready",
+                json!({"result_ref":spec.result_ref,"revision":head+1,"quality":quality}),
+            )?;
+        }
+        if state == "completed" && spec.analysis.is_some() {
+            let (head,cutoff): (u64,u64) = tx.query_row("SELECT head,(SELECT COUNT(*) FROM parts WHERE result_id=results.id) FROM results WHERE id=?",[&spec.result_ref],|r|Ok((r.get(0)?,r.get(1)?)))?;
+            ensure!(
+                cutoff > 0,
+                "RESULT_CORRUPT: analysis completed without checkpoint"
+            );
+            let total = spec.inputs.values().next().unwrap().files.len();
+            let expected_parts = if spec.query.as_ref().unwrap().execution.preview == "none" {
+                1
+            } else {
+                total as u64
+            };
+            ensure!(
+                cutoff == expected_parts,
+                "RESULT_CORRUPT: incomplete aggregate completion"
+            );
+            let mut quality = spec.quality.clone();
+            quality["final_for_request"] = json!(true);
+            quality["coverage"]["input_coverage"] = json!({"unit":"manifest_file","completed_files":total,"total_files":total,"order":"frozen_manifest_order"});
+            tx.execute(
+                "INSERT INTO revisions VALUES(?,?,?,?,?)",
+                params![spec.result_ref, head + 1, cutoff, 1, quality.to_string()],
+            )?;
+            tx.execute(
+                "INSERT INTO checkpoints VALUES(?,?,?)",
+                params![spec.result_ref, head + 1, cutoff - 1],
             )?;
             tx.execute(
                 "UPDATE results SET head=? WHERE id=?",

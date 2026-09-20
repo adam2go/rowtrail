@@ -240,6 +240,22 @@ pub struct PrepareParams {
 }
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
+pub struct AggregateColumn {
+    pub function: String,
+    #[serde(default)]
+    pub column: Option<String>,
+    pub alias: String,
+}
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct AnalyzeParams {
+    pub source: DatasetBinding,
+    pub aggregates: Vec<AggregateColumn>,
+    #[serde(default)]
+    pub execution: Execution,
+}
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
 pub struct WorkspaceParams {
     pub action: String,
     #[serde(default)]
@@ -319,6 +335,7 @@ pub fn schema(method: &str) -> Option<Value> {
         "open" => serde_json::to_value(schemars::schema_for!(OpenParams)).ok()?,
         "inspect" => serde_json::to_value(schemars::schema_for!(InspectParams)).ok()?,
         "prepare" => serde_json::to_value(schemars::schema_for!(PrepareParams)).ok()?,
+        "analyze" => serde_json::to_value(schemars::schema_for!(AnalyzeParams)).ok()?,
         "workspace" => serde_json::to_value(schemars::schema_for!(WorkspaceParams)).ok()?,
         "query" => serde_json::to_value(schemars::schema_for!(QueryParams)).ok()?,
         "read" => serde_json::to_value(schemars::schema_for!(ReadParams)).ok()?,
