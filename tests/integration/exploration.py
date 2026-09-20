@@ -106,6 +106,20 @@ try:
     actual={r[0]:[int(Decimal(r[1])*100),int(r[2])] for r in read(aggregation)['rows']}
     assert actual==dict(expected),(actual,expected)
     check('multi-row-group Decimal aggregate matches independent integer reference')
+    _,packed=query({'t':binding(many)},'SELECT id FROM t ORDER BY id',execution={'preview':'none'})
+    assert packed['job']['metrics']['result_parts']<=2,packed
+    large_page=read(packed,max_rows=10000,max_bytes=900000)
+    tail=read(packed,max_rows=10000,max_bytes=900000,cursor=large_page['next_cursor'])
+    assert [r[0] for r in large_page['rows']+tail['rows']]==[str(9007199254740993+i) for i in range(16384)]
+    assert not tail['next_cursor']
+    _,repacked=query({'s':rb(packed)},'SELECT COUNT(*), MIN(id), MAX(id) FROM s')
+    assert read(repacked)['rows']==[['16384','9007199254740993',str(9007199254740993+16383)]]
+    assert repacked['job']['metrics']['io']['source_read_bytes']==0
+    check('coalesced multi-batch IPC preserves 10,000-row pagination and result-only SQL')
+    _,dictionary=query({'t':binding(many)},"SELECT arrow_cast(region, 'Dictionary(Int32, Utf8)') r FROM t",execution={'preview':'none'})
+    _,dictionary_counts=query({'s':rb(dictionary)},'SELECT r,COUNT(*) FROM s GROUP BY r')
+    assert {row[0]:int(row[1]) for row in read(dictionary_counts)['rows']}=={region:v[1] for region,v in expected.items()}
+    check('changing Arrow dictionaries remain readable and reusable across engine batches')
     destination=base/'export.parquet'
     exported=wait(call('export',{**rb(final),'format':'parquet','destination':str(destination)}))
     assert exported['job']['state']=='completed',exported
@@ -140,6 +154,26 @@ try:
     assert cancelled['job']['state']=='cancelled',cancelled
     assert cancelled['job']['metrics'].get('worker_exit_confirmed'),cancelled
     check('real background submission / external cancellation / confirmed worker exit')
+    for attempt in range(8):
+        streaming=call('query',{'bindings':{'t':binding(many)},'sql':'SELECT a.id FROM t a CROSS JOIN t b','execution':{'wait_ms':0,'run_timeout_ms':30000}})
+        deadline=time.monotonic()+5
+        while True:
+            status=call('control',{'action':'status','ref':streaming['job_id']})
+            state=status['job']
+            if state['readable_revision']:
+                assert state['state'] in ('running','stopping'),state
+                break
+            assert time.monotonic()<deadline,state
+            time.sleep(.005)
+        first=call('read',{'result_ref':state['result_ref'],'revision':state['readable_revision'],'max_rows':2})
+        assert len(first['rows'])==2 and first['quality']['coverage']['kind']=='partial',first
+        call('control',{'action':'cancel','ref':streaming['job_id']})
+        stopped=wait(streaming)
+        assert stopped['job']['state']=='cancelled',stopped
+        assert stopped['job']['metrics']['worker_exit_confirmed'],stopped
+        assert not stopped['job']['error'] or stopped['job']['error']['code']!='WORKER_LOST',stopped
+        assert read(stopped,max_rows=2)['quality']['coverage']['kind']=='partial'
+    check('first preview survives eight cancellation races during coalesced result publication')
     _,budget=query({'t':binding(many)},'SELECT * FROM t',execution={'scan_bytes':16},success=False)
     assert budget['job']['state']=='budget_exhausted',budget
     check('scan budget exhaustion does not masquerade as empty success')
@@ -229,7 +263,7 @@ try:
     assert len(read(observed)['rows'])==2
     check('bounded head inspection uses a real limited query and fixed result')
     late=data/'late.csv'
-    late.write_text('id,value\n'+''.join(f'{i},{"invalid" if i==3500 else i}\n' for i in range(4096)))
+    late.write_text('id,value\n'+''.join(f'{i},{"invalid" if i==20000 else i}\n' for i in range(24576)))
     late_source=call('open',{'source':str(late),'schema':[{'name':'id','type':'Int64'},{'name':'value','type':'Int64'}]})
     _,partial=query({'t':binding(late_source)},'SELECT * FROM t',success=False)
     assert partial['job']['state']=='failed' and partial['readable_revision'],partial

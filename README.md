@@ -24,6 +24,23 @@ retention/GC, and remote sources are still on the roadmap. See
 There is no established performance or agent-adoption advantage yet. Benchmarks
 include the cost of the worker, durable results, and protocol.
 
+## Install
+
+Native previews: macOS arm64 and Linux x86_64 (Ubuntu 24.04 / glibc 2.39 or newer).
+The installer verifies SHA-256 and places a versioned binary pair and notices in
+`~/.local/bin`. Set `ROWTRAIL_INSTALL_DIR` to choose another directory.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-alpha.2/install.sh -o /tmp/rowtrail-install.sh
+sh /tmp/rowtrail-install.sh
+export PATH="$HOME/.local/bin:$PATH"
+rowtrail --version
+```
+
+Or download and extract the native `.tar.xz` archive from [Releases](https://github.com/adam2go/rowtrail/releases).
+No Python, Node, Docker, language runtime, or external database is required.
+The package contains two executables, including the local query engine.
+
 ## Build
 
 Initial targets are macOS and Linux. Rust 1.94.0 and a native C toolchain are
@@ -92,6 +109,19 @@ Python is only needed for this optional example.
 ## CLI, MCP, and Rust client
 
 All entries use the same request types, durable jobs, and result store.
+For programmatic composition, keep one `rowtrail session` process open. Send one
+complete request envelope per line and receive one response envelope per line:
+
+```sh
+printf '%s\n' '{"api_version":"1","request_id":"example","method":"query","params":{"bindings":{},"sql":"SELECT 42 answer","execution":{"wait_ms":1000}}}' | rowtrail session
+```
+
+The [standard-library Python bridge](examples/session_client.py) uses this entry;
+[the complete example](examples/explore.py) reuses it across all exploration steps.
+Sessions are sequential; use another connection to control a job while a wait is
+pending. Closing a connection does not cancel accepted jobs. An interrupted RPC
+is never silently replayed. See the [agent guide](docs/agent-guide.md).
+
 
 ```sh
 rowtrail schema query
@@ -117,7 +147,7 @@ automatic model resumption are not currently advertised.
 Rust applications can depend on `rowtrail-client` and `rowtrail-contracts` in
 this workspace. Set `ROWTRAIL_RUNTIME` to the executable path when the runtime
 is not beside the host executable. `Client::call` is async and does not import
-the query engine.
+the query engine. `Client::session().await?` opens a reusable, checked connection.
 
 ## Semantics that matter
 
@@ -145,6 +175,7 @@ cargo clippy --workspace --all-targets --locked -- -D warnings
 cargo build --locked
 python3 tests/integration/exploration.py
 python3 scripts/mcp_probe.py target/debug/rowtrail
+python3 scripts/session_probe.py target/debug/rowtrail
 ```
 
 Tests use deterministic local fixtures and no model calls. Large fixtures are

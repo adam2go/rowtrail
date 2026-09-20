@@ -112,22 +112,8 @@ impl Client {
             logs.join("runtime.log").display()
         )
     }
-    pub async fn call(&self, request: &Request) -> Result<Response> {
-        // A shared coordinator's cwd is unrelated to later callers' working directories.
-        let mut request = request.clone();
-        let field = match request.method.as_str() {
-            "open" => Some("source"),
-            "export" => Some("destination"),
-            _ => None,
-        };
-        if let Some(field) = field
-            && let Some(path) = request
-                .params
-                .get(field)
-                .and_then(serde_json::Value::as_str)
-        {
-            request.params[field] = serde_json::to_value(std::path::absolute(path)?)?;
-        }
+    /// Open one checked connection for a sequence of agent operations.
+    pub async fn session(&self) -> Result<Session> {
         let mut stream = self.connect().await?;
         ensure!(
             stream.peer_cred()?.uid() == unsafe { libc::geteuid() },
@@ -143,7 +129,122 @@ impl Client {
             hello.ok && hello.api_version == API_VERSION,
             "PROTOCOL_VERSION_MISMATCH"
         );
-        send(&mut stream, &request).await?;
-        tokio::time::timeout(Duration::from_secs(65), receive(&mut stream)).await?
+        Ok(Session {
+            stream: Some(stream),
+        })
+    }
+    pub async fn call(&self, request: &Request) -> Result<Response> {
+        self.session().await?.call(request).await
+    }
+}
+
+/// Sequential, bounded RPCs without reconnecting or handshaking per operation.
+/// A failed or cancelled transport call consumes the connection: never silently
+/// replay a mutation whose response may have been lost. Open a new session and
+/// use the original idempotency key if the caller chooses to retry.
+pub struct Session {
+    stream: Option<UnixStream>,
+}
+impl Session {
+    pub async fn call(&mut self, request: &Request) -> Result<Response> {
+        let request = normalize(request)?;
+        let mut stream = self
+            .stream
+            .take()
+            .context("session closed; open a new session")?;
+        let response = tokio::time::timeout(Duration::from_secs(65), async {
+            send(&mut stream, &request).await?;
+            receive::<Response>(&mut stream).await
+        })
+        .await??;
+        ensure!(
+            response.api_version == API_VERSION,
+            "PROTOCOL_VERSION_MISMATCH"
+        );
+        self.stream = Some(stream);
+        Ok(response)
+    }
+}
+fn normalize(request: &Request) -> Result<Request> {
+    // A shared coordinator's cwd is unrelated to later callers' working directories.
+    let mut request = request.clone();
+    let field = match request.method.as_str() {
+        "open" => Some("source"),
+        "export" => Some("destination"),
+        _ => None,
+    };
+    if let Some(field) = field
+        && let Some(path) = request
+            .params
+            .get(field)
+            .and_then(serde_json::Value::as_str)
+    {
+        request.params[field] = serde_json::to_value(std::path::absolute(path)?)?;
+    }
+    Ok(request)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn cancelling_rpc_closes_session_without_replay() {
+        let (client, mut server) = UnixStream::pair().unwrap();
+        let mut session = Session {
+            stream: Some(client),
+        };
+        let (seen_tx, seen_rx) = tokio::sync::oneshot::channel();
+        let peer = tokio::spawn(async move {
+            let _: Request = receive(&mut server).await.unwrap();
+            seen_tx.send(()).unwrap();
+            assert!(receive::<Request>(&mut server).await.is_err());
+        });
+        let request = Request::new("query", serde_json::json!({}));
+        {
+            let call = session.call(&request);
+            tokio::pin!(call);
+            tokio::select! {
+                result = &mut call => panic!("unexpected response: {result:?}"),
+                _ = seen_rx => {},
+            }
+        }
+        assert!(session.stream.is_none());
+        assert!(
+            session
+                .call(&request)
+                .await
+                .unwrap_err()
+                .to_string()
+                .contains("session closed")
+        );
+        peer.await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn session_reuses_connection_for_complete_responses() {
+        let (client, mut server) = UnixStream::pair().unwrap();
+        let mut session = Session {
+            stream: Some(client),
+        };
+        let peer = tokio::spawn(async move {
+            for _ in 0..2 {
+                let request: Request = receive(&mut server).await.unwrap();
+                send(
+                    &mut server,
+                    &Response::success(&request, serde_json::json!({})),
+                )
+                .await
+                .unwrap();
+            }
+        });
+        for _ in 0..2 {
+            let request = Request::new("doctor", serde_json::json!({}));
+            assert_eq!(
+                session.call(&request).await.unwrap().request_id,
+                request.request_id
+            );
+        }
+        peer.await.unwrap();
     }
 }

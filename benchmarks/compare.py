@@ -2,14 +2,15 @@
 
 Requires duckdb only in the benchmark environment, never in the product.
 """
-import argparse, json, os, pathlib, platform, signal, statistics, subprocess, tempfile, time
+import argparse, hashlib, json, os, pathlib, platform, signal, statistics, subprocess, tempfile, time
 import duckdb
 
 p=argparse.ArgumentParser()
 p.add_argument('--bin-dir',default='target/release')
+p.add_argument('--entry', choices=['cli','session'], default='cli')
 p.add_argument('--repeats',type=int,default=3)
 p.add_argument('--rows',type=int,default=16384)
-p.add_argument('--output',default='benchmarks/baseline.json')
+p.add_argument('--output',default='benchmarks/local/latest.json')
 args=p.parse_args()
 root=pathlib.Path(__file__).resolve().parents[1]
 bins=(root/args.bin_dir).resolve()
@@ -25,11 +26,19 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-benchmark-') as td:
     source=directory/'data/many.parquet'
     for repeat in range(args.repeats):
         workspace=directory/f'workspace-{repeat}'
+        session=None
+        started=time.perf_counter()
+        if args.entry=='session':
+            session=subprocess.Popen([str(bins/'rowtrail'),'--workspace',str(workspace),'session'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,text=True)
         def call(method,params):
-            result=subprocess.run([str(bins/'rowtrail'),'--workspace',str(workspace),'call',method],input=json.dumps(params),text=True,capture_output=True,check=True)
+            if session is not None:
+                session.stdin.write(json.dumps({'api_version':'1','request_id':'benchmark','method':method,'params':params})+'\n');session.stdin.flush()
+                value=json.loads(session.stdout.readline());assert value['ok'],value
+                return value['result']
+            result=subprocess.run([str(bins/'rowtrail'),'--workspace',str(workspace),'call',method],input=json.dumps(params),text=True,capture_output=True)
+            assert result.returncode in (0,3), (result.returncode,result.stdout,result.stderr)
             value=json.loads(result.stdout);assert value['ok'],value
             return value['result']
-        started=time.perf_counter()
         opened=call('open',{'source':str(source)})
         opened_ms=(time.perf_counter()-started)*1000
         binding={'t':{'dataset_ref':opened['dataset_ref'],'manifest_ref':opened['manifest_ref']}}
@@ -44,8 +53,11 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-benchmark-') as td:
             if index==1:saved=ref
             else:rowtrail_results.append(q['observation']['rows'] if q.get('observation') is not None else call('read',ref)['rows'])
             stages.append({'query':sql,'elapsed_ms':(time.perf_counter()-t)*1000,'metrics':q['job']['metrics']})
-        rowtrail={'backend':'rowtrail','total_ms':(time.perf_counter()-started)*1000,'open_ms':opened_ms,'stages':stages,'entry':'CLI subprocess per operation','intermediate_storage':'durable Arrow parts'}
-        doctor=call('doctor',{});os.kill(doctor['coordinator_pid'],signal.SIGTERM)
+        rowtrail={'backend':'rowtrail','total_ms':(time.perf_counter()-started)*1000,'open_ms':opened_ms,'stages':stages,'entry':args.entry,'intermediate_storage':'durable Arrow parts'}
+        doctor=call('doctor',{})
+        if session is not None:
+            session.stdin.close();session.wait(timeout=5)
+        os.kill(doctor['coordinator_pid'],signal.SIGTERM)
         started=time.perf_counter();con=duckdb.connect();con.execute('SET threads=1')
         con.from_parquet(str(source)).create_view('t')
         stages=[];duck_results=[]
@@ -68,6 +80,6 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-benchmark-') as td:
         if isinstance(value,list):return [scrub(x) for x in value]
         if isinstance(value,dict):return {k:scrub(v) for k,v in value.items()}
         return value
-    report={'kind':'deterministic execution comparison; no model calls','os':platform.platform(),'machine':platform.machine(),'fixture_rows':args.rows,'fixture_bytes':source.stat().st_size,'cache':'OS cache not flushed; fresh RowTrail workspace and persistent engine sessions per repeat','records':scrub(records),'summary_ms':{name:statistics.median(r[name]['total_ms'] for r in records) for name in ['rowtrail','duckdb','datafusion']},'limitations':['This is not a same-Agent paired adoption experiment.','The baseline engines are allowed to retain intermediate tables in memory; RowTrail pays for disk durability and process isolation.','CLI startup is included for RowTrail; direct DataFusion process wall time is also recorded separately.','No claim of stable performance advantage is justified by these small local trials.']}
+    report={'kind':'deterministic execution comparison; no model calls','os':platform.platform(),'machine':platform.machine(),'binary_sha256':{name:hashlib.file_digest((bins/name).open('rb'),'sha256').hexdigest() for name in ['rowtrail','rowtrail-runtime']},'entry':args.entry,'fixture_rows':args.rows,'fixture_bytes':source.stat().st_size,'cache':'OS cache not flushed; fresh RowTrail workspace and persistent engine sessions per repeat','records':scrub(records),'summary_ms':{name:statistics.median(r[name]['total_ms'] for r in records) for name in ['rowtrail','duckdb','datafusion']},'limitations':['This is not a same-Agent paired adoption experiment.','The baseline engines are allowed to retain intermediate tables in memory; RowTrail pays for disk durability and process isolation.','CLI startup is included for RowTrail; direct DataFusion process wall time is also recorded separately.','No claim of stable performance advantage is justified by these small local trials.']}
     path=root/args.output;path.parent.mkdir(parents=True,exist_ok=True);path.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps(report['summary_ms'],indent=2))

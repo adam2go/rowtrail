@@ -45,7 +45,7 @@ pub async fn plan(
     let ctx = SessionContext::new_with_config_rt(
         SessionConfig::new()
             .with_target_partitions(1)
-            .with_batch_size(1024),
+            .with_batch_size(8192),
         runtime,
     );
     for (alias, input) in &spec.inputs {

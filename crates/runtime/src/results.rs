@@ -66,26 +66,25 @@ pub fn snapshot(db: &Db, result: &str, revision: Option<u64>) -> Result<Snapshot
         job_state,
     })
 }
-pub fn verify(path: &std::path::Path, expected_bytes: u64, checksum: &str) -> Result<u64> {
-    let mut f = File::open(path)
+fn verified_bytes(path: &std::path::Path, expected_bytes: u64, checksum: &str) -> Result<Vec<u8>> {
+    ensure!(
+        expected_bytes <= 8 * 1024 * 1024,
+        "RESULT_CORRUPT: oversized part"
+    );
+    let f = File::open(path)
         .map_err(|e| anyhow::anyhow!("RESULT_UNAVAILABLE: {}: {e}", path.display()))?;
     ensure!(
         f.metadata()?.len() == expected_bytes,
         "RESULT_CORRUPT: size mismatch"
     );
-    let mut hasher = Sha256::new();
-    let mut b = [0; 65536];
-    let mut bytes = 0;
-    loop {
-        let n = f.read(&mut b)?;
-        if n == 0 {
-            break;
-        }
-        hasher.update(&b[..n]);
-        bytes += n as u64;
-    }
+    let mut bytes = Vec::with_capacity(expected_bytes as usize);
+    f.take(expected_bytes + 1).read_to_end(&mut bytes)?;
     ensure!(
-        hex::encode(hasher.finalize()) == checksum,
+        bytes.len() as u64 == expected_bytes,
+        "RESULT_CORRUPT: size changed"
+    );
+    ensure!(
+        hex::encode(Sha256::digest(&bytes)) == checksum,
         "RESULT_CORRUPT: checksum mismatch"
     );
     Ok(bytes)
@@ -200,6 +199,8 @@ pub fn read(db: &Db, p: &ReadParams) -> Result<Value> {
     let mut returned = 0;
     let mut bytes_verified = 0;
     let mut bytes_read = 0;
+    let mut rows = Vec::new();
+    let mut row_bytes = 0;
     'parts: for (path, size, hash, part_rows, _identity) in &snap.parts {
         if position + part_rows <= start {
             position += part_rows;
@@ -208,8 +209,9 @@ pub fn read(db: &Db, p: &ReadParams) -> Result<Value> {
         if returned >= p.max_rows {
             break;
         }
-        bytes_verified += verify(path, *size, hash)?;
-        let reader = FileReader::try_new(File::open(path)?, Some(indices.clone()))?;
+        let bytes = verified_bytes(path, *size, hash)?;
+        bytes_verified += bytes.len() as u64;
+        let reader = FileReader::try_new(std::io::Cursor::new(bytes), Some(indices.clone()))?;
         bytes_read += size;
         for batch in reader {
             let batch = batch?;
@@ -226,17 +228,21 @@ pub fn read(db: &Db, p: &ReadParams) -> Result<Value> {
                     .iter()
                     .map(|a| value(a.as_ref(), row))
                     .collect::<Result<Vec<_>>>()?;
-                response["rows"].as_array_mut().unwrap().push(json!(values));
+                let row = json!(values);
+                let added_bytes = serde_json::to_vec(&row)?.len() + usize::from(!rows.is_empty());
                 response["next_cursor"] = cursor_for(start + returned as u64 + 1)?;
                 response["presentation"] = json!({"returned_rows":returned+1,"has_more":start+returned as u64+1<snap.rows});
-                if serde_json::to_vec(&response)?.len() + 256 > p.max_bytes {
-                    response["rows"].as_array_mut().unwrap().pop();
+                if serde_json::to_vec(&response)?.len() + row_bytes + added_bytes + 256
+                    > p.max_bytes
+                {
                     ensure!(
                         returned > 0,
                         "OUTPUT_BUDGET_TOO_SMALL: one row does not fit"
                     );
                     break 'parts;
                 }
+                row_bytes += added_bytes;
+                rows.push(row);
                 returned += 1;
                 position += 1;
             }
@@ -245,6 +251,7 @@ pub fn read(db: &Db, p: &ReadParams) -> Result<Value> {
     response["presentation"] =
         json!({"returned_rows":returned,"has_more":start+(returned as u64)<snap.rows});
     response["next_cursor"] = cursor_for(start + returned as u64)?;
+    response["rows"] = json!(rows);
     response["read_metrics"] =
         json!({"checksum_bytes":bytes_verified,"part_file_bytes_opened":bytes_read});
     ensure!(

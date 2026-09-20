@@ -12,7 +12,6 @@ use std::{
     sync::Arc,
     time::Duration,
 };
-use tokio::io::AsyncWriteExt;
 
 pub struct HashWriter {
     pub file: File,
@@ -37,41 +36,150 @@ impl Write for HashWriter {
     }
 }
 async fn message(value: &WorkerMessage) -> Result<()> {
-    let bytes = serde_json::to_vec(value)?;
+    let mut bytes = serde_json::to_vec(value)?;
     ensure!(bytes.len() <= FRAME_LIMIT, "PROTOCOL_FRAME_TOO_LARGE");
-    let mut out = tokio::io::stdout();
-    out.write_all(&bytes).await?;
-    out.write_all(b"\n").await?;
-    out.flush().await?;
+    bytes.push(b'\n');
+    // Finish a frame synchronously so dropping a cancelled query future cannot
+    // leave a partially written JSON frame ahead of its terminal report. The
+    // external supervisor can still kill a worker blocked on a full pipe.
+    let mut out = std::io::stdout().lock();
+    out.write_all(&bytes)?;
+    out.flush()?;
     Ok(())
 }
-fn stage_part(spec: &JobSpec, batch: &RecordBatch, seq: u64, remaining: u64) -> Result<Part> {
-    let dir = spec.workspace.join("staging").join(&spec.attempt);
-    std::fs::create_dir_all(&dir)?;
-    let path = dir.join(format!("{seq:012}.arrow"));
-    let output = HashWriter {
-        file: OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(&path)?,
-        hash: Sha256::new(),
-        bytes: 0,
-        limit: remaining.min(8 * 1024 * 1024),
-    };
-    let mut writer = FileWriter::try_new(output, batch.schema().as_ref())?;
-    writer.write(batch)?;
-    writer.finish()?;
-    let mut output = writer.into_inner()?;
-    output.flush()?;
-    output.file.sync_all()?;
-    Ok(Part {
-        seq,
-        path,
-        bytes: output.bytes,
-        rows: batch.num_rows(),
-        checksum: hex::encode(output.hash.finalize()),
-        schema: batch.schema().as_ref().clone(),
-    })
+// Seal complete IPC files, not individual engine batches. The writer holds only
+// IPC metadata; incoming Arrow batches are released after each write.
+const PART_TARGET: u64 = 4 * 1024 * 1024;
+const PART_LIMIT: u64 = 8 * 1024 * 1024;
+const PART_BATCH_LIMIT: usize = 128;
+struct StagedPart {
+    writer: FileWriter<HashWriter>,
+    path: std::path::PathBuf,
+    rows: usize,
+    batches: usize,
+    opened: tokio::time::Instant,
+}
+impl StagedPart {
+    fn new(
+        spec: &JobSpec,
+        schema: &arrow::datatypes::Schema,
+        seq: u64,
+        remaining: u64,
+    ) -> Result<Self> {
+        let dir = spec.workspace.join("staging").join(&spec.attempt);
+        std::fs::create_dir_all(&dir)?;
+        let path = dir.join(format!("{seq:012}.arrow"));
+        let output = HashWriter {
+            file: OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .open(&path)?,
+            hash: Sha256::new(),
+            bytes: 0,
+            limit: remaining.min(PART_LIMIT),
+        };
+        Ok(Self {
+            writer: FileWriter::try_new(output, schema)?,
+            path,
+            rows: 0,
+            batches: 0,
+            opened: tokio::time::Instant::now(),
+        })
+    }
+    fn write(&mut self, batch: &RecordBatch) -> Result<()> {
+        self.writer.write(batch)?;
+        self.rows += batch.num_rows();
+        self.batches += 1;
+        Ok(())
+    }
+    fn finish(mut self, seq: u64, schema: &arrow::datatypes::Schema) -> Result<Part> {
+        self.writer.finish()?;
+        let mut output = self.writer.into_inner()?;
+        output.flush()?;
+        output.file.sync_all()?;
+        Ok(Part {
+            seq,
+            path: self.path,
+            bytes: output.bytes,
+            rows: self.rows,
+            checksum: hex::encode(output.hash.finalize()),
+            schema: schema.clone(),
+        })
+    }
+}
+struct Output<'a> {
+    spec: &'a JobSpec,
+    schema: arrow::datatypes::SchemaRef,
+    staged: Option<StagedPart>,
+    parts: u64,
+    dictionary_batches: bool,
+    written: u64,
+    rows: usize,
+    write_ms: f64,
+    ack_ms: f64,
+}
+impl Output<'_> {
+    async fn publish(&mut self, ack_rx: &mut tokio::sync::mpsc::Receiver<String>) -> Result<()> {
+        let Some(staged) = self.staged.take() else {
+            return Ok(());
+        };
+        let t = std::time::Instant::now();
+        let part = staged.finish(self.parts, &self.schema)?;
+        self.write_ms += t.elapsed().as_secs_f64() * 1000.0;
+        self.rows += part.rows;
+        self.written += part.bytes;
+        let t = std::time::Instant::now();
+        message(&WorkerMessage::Part { part }).await?;
+        ensure!(
+            ack_rx.recv().await.as_deref() == Some("ok"),
+            "CANCELLED: coordinator rejected part"
+        );
+        self.ack_ms += t.elapsed().as_secs_f64() * 1000.0;
+        self.parts += 1;
+        Ok(())
+    }
+    async fn push(
+        &mut self,
+        batch: &RecordBatch,
+        ack_rx: &mut tokio::sync::mpsc::Receiver<String>,
+    ) -> Result<()> {
+        if let Some(staged) = &self.staged
+            && (staged
+                .writer
+                .get_ref()
+                .bytes
+                .saturating_add(batch.get_array_memory_size() as u64)
+                > PART_TARGET
+                || staged.batches >= PART_BATCH_LIMIT)
+        {
+            self.publish(ack_rx).await?;
+        }
+        let t = std::time::Instant::now();
+        if self.staged.is_none() {
+            self.staged = Some(StagedPart::new(
+                self.spec,
+                &self.schema,
+                self.parts,
+                self.spec
+                    .query
+                    .as_ref()
+                    .unwrap()
+                    .execution
+                    .result_bytes
+                    .saturating_sub(self.written),
+            )?);
+        }
+        self.staged.as_mut().unwrap().write(batch)?;
+        self.write_ms += t.elapsed().as_secs_f64() * 1000.0;
+        // Do not delay the first useful preview to fill a large part.
+        if self.dictionary_batches
+            || (self.parts == 0
+                && self.spec.query.as_ref().unwrap().execution.preview == "available")
+        {
+            self.publish(ack_rx).await?;
+        }
+        Ok(())
+    }
 }
 pub async fn run(token: &str) -> Result<()> {
     // The native watchdog remains responsive even when a CPU-heavy future does not yield.
@@ -145,24 +253,41 @@ async fn execute_job(
         let mut stream=datafusion::physical_plan::execute_stream(plan.clone(),ctx.task_ctx())?;
         let limits=&spec.query.as_ref().unwrap().execution;
         let deadline=tokio::time::sleep(Duration::from_millis(limits.run_timeout_ms));tokio::pin!(deadline);
-        let mut seq=0;let mut written=0;let mut rows=0;
-        loop {
-            let batch=tokio::select!{biased;_=stop_rx.changed()=>bail!("CANCELLED"),_=term.recv()=>bail!("CANCELLED"),_=&mut deadline=>bail!("BUDGET_EXHAUSTED"),next=stream.next()=>match next{Some(b)=>b?,None=>break}};
-            let per_row=batch.get_array_memory_size().checked_div(batch.num_rows().max(1)).unwrap_or(0).max(1);
-            let chunk=(4*1024*1024/per_row).clamp(1,1024);
-            for offset in (0..batch.num_rows()).step_by(chunk){
-                if *stop_rx.borrow(){bail!("CANCELLED")}
-                let batch=batch.slice(offset,chunk.min(batch.num_rows()-offset));
-                let part=stage_part(spec,&batch,seq,limits.result_bytes.saturating_sub(written))?;
-                rows+=part.rows;written+=part.bytes;
-                message(&WorkerMessage::Part{part}).await?;
-                let ack=tokio::select!{_=stop_rx.changed()=>bail!("CANCELLED"),_=term.recv()=>bail!("CANCELLED"),_=&mut deadline=>bail!("BUDGET_EXHAUSTED"),ack=ack_rx.recv()=>ack.ok_or_else(||anyhow::anyhow!("coordinator closed"))?};
-                ensure!(ack=="ok","coordinator rejected part: {ack}");seq+=1;
+        let planned_ms=started.elapsed().as_secs_f64()*1000.0;
+        let mut output=Output {spec,schema:schema.clone(),staged:None,parts:0,dictionary_batches:schema.flattened_fields().iter().any(|f|matches!(f.data_type(),arrow::datatypes::DataType::Dictionary(_, _))),written:0,rows:0,write_ms:0.0,ack_ms:0.0};
+        // One outer cancellation boundary also covers part acknowledgements.
+        let execute=async {
+            loop {
+                let flush_at=output.staged.as_ref().map(|p|p.opened+Duration::from_millis(50));
+                let batch=tokio::select! {
+                    next=stream.next()=>match next {Some(b)=>b?,None=>break},
+                    _=tokio::time::sleep_until(flush_at.unwrap_or_else(||tokio::time::Instant::now()+Duration::from_secs(60))), if flush_at.is_some()=>{
+                        output.publish(ack_rx).await?;
+                        continue;
+                    }
+                };
+                let per_row=batch.get_array_memory_size().checked_div(batch.num_rows().max(1)).unwrap_or(0).max(1);
+                let chunk=(2*1024*1024/per_row).clamp(1,8192);
+                for offset in (0..batch.num_rows()).step_by(chunk) {
+                    let batch=batch.slice(offset,chunk.min(batch.num_rows()-offset));
+                    output.push(&batch,ack_rx).await?;
+                }
             }
+            output.publish(ack_rx).await?;
+            Ok::<_,anyhow::Error>(())
+        };
+        tokio::select! {biased;
+            _=stop_rx.changed()=>bail!("CANCELLED"),
+            _=term.recv()=>bail!("CANCELLED"),
+            _=&mut deadline=>bail!("BUDGET_EXHAUSTED"),
+            result=execute=>result?,
         }
         drop(stream);
         for source in &spec.sources{source.validate()?}
-        Ok(json!({"io":counters.value(),"result_write_bytes":written,"rows":rows,"elapsed_ms":started.elapsed().as_secs_f64()*1000.0,"plan":format!("{}",datafusion::physical_plan::display::DisplayableExecutionPlan::with_metrics(plan.as_ref()).indent(true))}))
+        Ok(json!({"io":counters.value(),"result_write_bytes":output.written,"rows":output.rows,
+            "planning_ms":planned_ms,"result_write_ms":output.write_ms,"commit_ack_ms":output.ack_ms,
+            "elapsed_ms":started.elapsed().as_secs_f64()*1000.0,
+            "plan":format!("{}",datafusion::physical_plan::display::DisplayableExecutionPlan::with_metrics(plan.as_ref()).indent(true))}))
     }.await;
     match result {
         Ok(metrics) => message(&WorkerMessage::Completed { metrics }).await?,

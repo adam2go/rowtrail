@@ -8,7 +8,7 @@ async fn main() -> anyhow::Result<()> {
     let workspace = std::env::args()
         .nth(1)
         .unwrap_or_else(|| ".rowtrail".into());
-    let client = Client::new(workspace)?;
+    let mut client = Client::new(workspace)?.session().await?;
     let response=client.call(&Request::new("query",json!({"bindings":{},"sql":"SELECT CAST(9007199254740993 AS BIGINT) id","execution":{"wait_ms":1000}}))).await?;
     anyhow::ensure!(response.ok, "query was not accepted: {:?}", response.error);
     let mut result = response.result.unwrap();

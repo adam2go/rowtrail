@@ -6,7 +6,7 @@
 保存带固定版本的结果，再基于已有结果继续追问。结果留在磁盘，Agent 按预算读取观察。
 工具内部不调用模型，分析方向与结论由外部 Agent 判断。
 
-当前是 **0.1.0-alpha.1 工程预览版**，采用 Apache-2.0。已实现第一条精确探索闭环，
+当前是 **0.1.0-alpha.2 工程预览版**，采用 Apache-2.0。已实现第一条精确探索闭环，
 尚未实现抽样估计、宿主自动接续、原生 MCP Tasks、自动 GC 和远程来源。
 完整范围见 [进度与限制](docs/progress.md)。
 
@@ -15,7 +15,17 @@
 初期支持 macOS 和 Linux。将下载包内的 `rowtrail` 与 `rowtrail-runtime` 放在同一个
 `PATH` 目录即可。运行发布包不需要 Rust、Python、Node、Docker 或外部数据库。
 
-从源码构建需要 Rust 1.94.0 和 C 编译器：
+发布包提供 macOS arm64 和 Linux x86_64（Ubuntu 24.04 / glibc 2.39 及以上）版本。
+安装器校验 SHA-256，默认安装到 `~/.local/bin`，也可设置 `ROWTRAIL_INSTALL_DIR`：
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-alpha.2/install.sh -o /tmp/rowtrail-install.sh
+sh /tmp/rowtrail-install.sh
+export PATH="$HOME/.local/bin:$PATH"
+rowtrail --version
+```
+
+也可以下载 `.tar.xz` 包后解压。从源码构建需要 Rust 1.94.0 和 C 编译器：
 
 ```sh
 cargo build --release --locked
@@ -45,7 +55,7 @@ rowtrail export res_ID --revision 2 --format parquet --output ./result.parquet
 python3 examples/explore.py /tmp/rowtrail-data/many.parquet --rowtrail ./target/release/rowtrail
 ```
 
-这个可选示例使用 Python，自动传递固定结果引用，并输出两个分支的原始数据/结果读取计数。
+这个可选示例只用 Python 标准库，通过一个持久 `rowtrail session` 进程连续调用，自动传递固定结果引用，并输出两个分支的原始数据/结果读取计数。
 
 ## 接入 Agent
 
@@ -60,6 +70,9 @@ rowtrail events --job job_ID --follow --jsonl
 MCP 宿主配置中，command 使用 `rowtrail` 的绝对路径，args 使用
 `["--workspace", "/absolute/private/workspace", "mcp"]`，通信方式为 stdio。
 复杂操作可以用 `rowtrail call METHOD --request request.json` 由程序组合。
+高频程序组合优先使用 `rowtrail session`：stdin 每行发送一个完整请求 envelope，stdout
+每行返回一个响应，省去逐次启动 CLI 和握手。`Client::session()` 提供相同的 Rust 接口。
+关闭会话不取消已受理任务；通信中断不会偷偷重试创建操作。见 [Agent 接入指南](docs/agent-guide.md)。
 Rust 接入示例见 [query.rs](crates/client/examples/query.rs)。
 
 ## 结果语义

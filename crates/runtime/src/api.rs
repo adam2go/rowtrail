@@ -73,7 +73,7 @@ fn remember(c: &rusqlite::Connection, req: &Request, v: &Value) -> Result<()> {
     Ok(())
 }
 pub fn capabilities() -> Value {
-    json!({"api_version":"1","formats":["csv","tsv","parquet"],"source":"local","sql":"DataFusion 55.0.0 read-only SELECT; explicit bindings","analysis":[],"entries":["cli","mcp_stdio","rust_sdk"],"native_tasks":false,"automatic_resume":false,"source_consistency":"best_effort","result_storage":"immutable Arrow IPC files","max_frame_bytes":FRAME_LIMIT,"minimum_error_budget_bytes":512,"max_output_bytes":FRAME_LIMIT-512,"max_output_rows":10000,"max_manifest_files":128,"max_directory_entries":4096,"default_parallel_jobs":1,"cancellation":"cooperative signal with forced worker termination after 300ms","engine_memory_limit":"MemoryPool; not RSS hard limit","scan_limit":"byte reservation before local reads","result_retention":"until workspace removal; release and automatic GC not implemented","event_retention":"until workspace removal; no event pruning yet","unsupported":["Windows","remote","sampling","native_tasks","automatic_resume","union_by_name","prepare","binary_inline","RSS_hard_limit"]})
+    json!({"api_version":"1","formats":["csv","tsv","parquet"],"source":"local","sql":"DataFusion 55.0.0 read-only SELECT; explicit bindings","analysis":[],"entries":["cli","ndjson_session","mcp_stdio","rust_sdk"],"result_part_target_bytes":4194304,"result_part_max_bytes":8388608,"native_tasks":false,"automatic_resume":false,"source_consistency":"best_effort","result_storage":"immutable Arrow IPC files","max_frame_bytes":FRAME_LIMIT,"minimum_error_budget_bytes":512,"max_output_bytes":FRAME_LIMIT-512,"max_output_rows":10000,"max_manifest_files":128,"max_directory_entries":4096,"default_parallel_jobs":1,"cancellation":"cooperative signal with forced worker termination after 300ms","engine_memory_limit":"MemoryPool; not RSS hard limit","scan_limit":"byte reservation before local reads","result_retention":"until workspace removal; release and automatic GC not implemented","event_retention":"until workspace removal; no event pruning yet","unsupported":["Windows","remote","sampling","native_tasks","automatic_resume","union_by_name","prepare","binary_inline","RSS_hard_limit"]})
 }
 fn validate_execution(e: &Execution) -> Result<()> {
     ensure!(
@@ -701,6 +701,8 @@ fn submit(
     )?;
     remember(&tx, req, &refs)?;
     tx.commit()?;
+    db.work_available.notify_one();
+    db.changed.send_replace(());
     Ok(refs)
 }
 async fn wait_response(
@@ -711,12 +713,13 @@ async fn wait_response(
 ) -> Result<Value> {
     let job = refs["job_id"].as_str().unwrap().to_owned();
     let until = tokio::time::Instant::now() + std::time::Duration::from_millis(wait);
+    let mut changed = db.changed.subscribe();
     let state = loop {
         let state = db.job(&job)?;
         if terminal(state["state"].as_str().unwrap()) || tokio::time::Instant::now() >= until {
             break state;
         }
-        tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+        let _ = tokio::time::timeout_at(until, changed.changed()).await;
     };
     refs["job"] = state.clone();
     refs["readable_revision"] = state["readable_revision"].clone();
@@ -759,6 +762,7 @@ async fn events(db: &Db, p: EventsParams) -> Result<Value> {
         0
     };
     let deadline = tokio::time::Instant::now() + std::time::Duration::from_millis(p.wait_ms);
+    let mut changed = db.changed.subscribe();
     loop {
         let mut last = start;
         let mut list = vec![];
@@ -806,6 +810,6 @@ async fn events(db: &Db, p: EventsParams) -> Result<Value> {
             })?);
             return Ok(json!({"events":list,"next_cursor":cursor}));
         }
-        tokio::time::sleep(std::time::Duration::from_millis(25)).await;
+        let _ = tokio::time::timeout_at(deadline, changed.changed()).await;
     }
 }

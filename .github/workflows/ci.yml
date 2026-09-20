@@ -29,10 +29,15 @@ jobs:
       - run: cargo test --release --locked --workspace
       - run: python3 tests/integration/exploration.py --bin-dir target/release
       - run: python3 scripts/mcp_probe.py target/release/rowtrail
+      - run: python3 scripts/session_probe.py target/release/rowtrail
       - run: cargo run --locked -p rowtrail-client --example query -- /tmp/rowtrail-sdk
         env:
           ROWTRAIL_RUNTIME: ${{ github.workspace }}/target/release/rowtrail-runtime
+      - run: python3 -m venv /tmp/rowtrail-verification
+      - run: /tmp/rowtrail-verification/bin/pip install duckdb==1.5.5
+      - run: /tmp/rowtrail-verification/bin/python benchmarks/resources.py
       - run: python3 scripts/package.py
+      - run: python3 scripts/install_probe.py
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-${{ matrix.os }}

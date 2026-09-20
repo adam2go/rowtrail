@@ -72,7 +72,7 @@ pub async fn serve(workspace: &Path) -> Result<()> {
                             &spec,
                             "failed",
                             Some(json!({"code":"WORKER_LOST","message":format!("{e:#}")})),
-                            json!({}),
+                            json!({"execution_stopped":true,"worker_exit_confirmed":true}),
                         );
                     }
                     idle_since = Instant::now();
@@ -83,7 +83,11 @@ pub async fn serve(workspace: &Path) -> Result<()> {
                     if idle_since.elapsed() >= Duration::from_secs(60) {
                         terminate(&mut worker).await;
                     }
-                    tokio::time::sleep(Duration::from_millis(5)).await;
+                    let _ = tokio::time::timeout(
+                        Duration::from_secs(60),
+                        scheduler_db.work_available.notified(),
+                    )
+                    .await;
                 }
                 Err(e) => {
                     eprintln!("scheduler error: {e:#}");
@@ -174,6 +178,8 @@ async fn run_job(db: &Db, spec: &JobSpec, pool: &mut Option<Worker>) -> Result<(
     worker.input.flush().await?;
     let started = Instant::now();
     let mut stop_at = None;
+    let mut publish_ms = 0.0;
+    let mut part_count = 0u64;
     let mut terminal = None;
     let timeout = spec
         .query
@@ -189,7 +195,10 @@ async fn run_job(db: &Db, spec: &JobSpec, pool: &mut Option<Worker>) -> Result<(
                 match serde_json::from_str::<WorkerMessage>(&line)?{
                     WorkerMessage::Schema{schema}=>db.set_schema(spec,&schema)?,
                     WorkerMessage::Part{part}=>{
+                        let published_at=Instant::now();
                         let published=db.publish(spec,&part);
+                        publish_ms+=published_at.elapsed().as_secs_f64()*1000.0;
+                        if published.is_ok(){part_count+=1;}
                         worker.input.write_all(if published.is_ok(){b"ok\n"}else{b"cancel\n"}).await?;worker.input.flush().await?;
                         if let Err(e)=published&& db.stopping(&spec.job_id)?.is_none(){return Err(e)}
                     },
@@ -221,6 +230,8 @@ async fn run_job(db: &Db, spec: &JobSpec, pool: &mut Option<Worker>) -> Result<(
     if !reusable {
         terminate(pool).await;
     }
+    metrics["publication_ms"] = json!(publish_ms);
+    metrics["result_parts"] = json!(part_count);
     metrics["worker_elapsed_ms"] = json!(started.elapsed().as_secs_f64() * 1000.0);
     metrics["execution_stopped"] = json!(true);
     metrics["worker_exit_confirmed"] = json!(!reusable);

@@ -1,7 +1,30 @@
 # Implementation progress
 
-Updated 2026-09-20 for 0.1.0-alpha.1. This is the first M0 → M1 → M2A engineering
-delivery. It is not the complete M2B–M6 local product.
+Updated 2026-09-20 for 0.1.0-alpha.2. The initial M0 → M1 → M2A loop is
+implemented; this iteration advances performance, programmatic composition and
+distribution. It is not the complete M2B–M6 local product.
+
+## Alpha.2 changes
+
+- Coalesce engine batches into bounded Arrow IPC files; preserve the first
+  available preview, durable commits, exact types and fixed revisions.
+- Wake queue, wait and event readers from committed-state notifications. Report
+  planning, write, commit-acknowledgement and publication costs plus part counts.
+- Verify and decode each displayed result part from the same bounded buffer;
+  size JSON pages in linear work per returned row.
+- Persistent NDJSON and Rust sessions, a standard-library Python composition
+  example, and an agent integration guide. No automatic replay after an ambiguous
+  transport error, and no cancellation merely from closing a connection.
+- Native xz archives, SHA-256-checked installation, and CI distribution budgets.
+  No added production dependencies or human-facing application UI.
+- Added large-page/multi-batch checks, repeated cancellation while publishing,
+  session lifecycle/input bounds, and real archive installation checks.
+
+The current local suite passes 30 integration checks, four Rust unit tests, MCP,
+NDJSON and SDK probes, archive installation and checksum rejection. A real
+1,048,576-row sort under a 32 MiB engine pool spills to disk and its exported
+row order matches an independent full-row reference. Cross-platform alpha.2 CI
+and the final repeated comparison are being recorded for the release.
 
 ## Implemented and verified locally
 
@@ -34,7 +57,7 @@ delivery. It is not the complete M2B–M6 local product.
 
 ## Evidence
 
-The local release binaries pass 27 deterministic end-to-end checks. These cover
+The local release binaries pass 30 deterministic end-to-end checks. These cover
 hand-calculated CSV/four-row-group Parquet S1, branching saved results in S2, a
 16,384-row integer reference, worker reuse, precision/pagination, query and export
 budgets, timeouts, true cancellation, idempotency, read-only SQL, corrupt result

@@ -13,6 +13,9 @@ pub struct Db {
     pub conn: Mutex<Connection>,
     pub workspace: PathBuf,
     pub store_id: String,
+    // Notifications are hints only; durable SQLite state remains authoritative.
+    pub changed: tokio::sync::watch::Sender<()>,
+    pub work_available: tokio::sync::Notify,
 }
 pub fn parse(s: String) -> Result<Value> {
     Ok(serde_json::from_str(&s)?)
@@ -76,6 +79,8 @@ impl Db {
             conn: Mutex::new(c),
             workspace: workspace.to_owned(),
             store_id,
+            changed: tokio::sync::watch::channel(()).0,
+            work_available: tokio::sync::Notify::new(),
         };
         db.recover()?;
         Ok(db)
@@ -196,6 +201,7 @@ impl Db {
         tx.execute("UPDATE jobs SET state='running',phase='planning',started=? WHERE id=? AND state='queued'",params![now_ms(),spec.job_id])?;
         event(&tx, &spec.job_id, "job.started", json!({"state":"running"}))?;
         tx.commit()?;
+        self.changed.send_replace(());
         Ok(Some(spec))
     }
     pub fn stopping(&self, job: &str) -> Result<Option<String>> {
@@ -223,18 +229,21 @@ impl Db {
             tx.execute("UPDATE jobs SET state='stopping',stop_requested=COALESCE(stop_requested,?) WHERE id=?",params![reason,job])?;
         }
         tx.commit()?;
+        self.changed.send_replace(());
         Ok(())
     }
     pub fn set_schema(&self, spec: &JobSpec, schema: &arrow::datatypes::Schema) -> Result<()> {
-        let c = self.conn.lock().unwrap();
-        c.execute(
+        let mut c = self.conn.lock().unwrap();
+        let tx = c.transaction()?;
+        tx.execute(
             "UPDATE results SET schema=? WHERE id=?",
             params![serde_json::to_string(schema)?, spec.result_ref],
         )?;
-        c.execute(
+        tx.execute(
             "UPDATE jobs SET phase='executing' WHERE id=?",
             [&spec.job_id],
         )?;
+        tx.commit()?;
         Ok(())
     }
     pub fn publish(&self, spec: &JobSpec, part: &Part) -> Result<()> {
@@ -276,8 +285,10 @@ impl Db {
             "INVALID_ARGUMENT: invalid staging descriptor"
         );
         let dir = self.workspace.join("store").join(&spec.result_ref);
-        std::fs::create_dir_all(&dir)?;
-        File::open(self.workspace.join("store"))?.sync_all()?;
+        if part.seq == 0 {
+            std::fs::create_dir_all(&dir)?;
+            File::open(self.workspace.join("store"))?.sync_all()?;
+        }
         let saved_schema: String = tx.query_row(
             "SELECT schema FROM results WHERE id=?",
             [&spec.result_ref],
@@ -361,6 +372,7 @@ impl Db {
             )?;
         }
         tx.commit()?;
+        self.changed.send_replace(());
         Ok(())
     }
     pub fn finish(
@@ -484,6 +496,7 @@ impl Db {
             json!({"state":state,"result_ref":spec.result_ref,"error":error}),
         )?;
         tx.commit()?;
+        self.changed.send_replace(());
         Ok(())
     }
     pub fn invalidate(&self, parent: &str) -> Result<()> {
@@ -525,6 +538,7 @@ impl Db {
             }
         }
         tx.commit()?;
+        self.changed.send_replace(());
         Ok(())
     }
 }

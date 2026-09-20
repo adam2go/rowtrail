@@ -32,6 +32,8 @@ enum Command {
         method: String,
     },
     Mcp,
+    /// Exchange full request/response envelopes as NDJSON on one connection.
+    Session,
     Doctor,
     /// Send a contract request from a JSON file or stdin (-).
     Call {
@@ -303,6 +305,42 @@ impl ServerHandler for Mcp {
         .into())
     }
 }
+async fn session(workspace: PathBuf) -> Result<i32> {
+    use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt};
+    let mut input = tokio::io::BufReader::new(tokio::io::stdin());
+    let mut output = tokio::io::stdout();
+    let mut session = Client::new(workspace)?.session().await?;
+    loop {
+        let mut line = Vec::new();
+        let n = (&mut input)
+            .take((rowtrail_contracts::FRAME_LIMIT + 2) as u64)
+            .read_until(b'\n', &mut line)
+            .await?;
+        if n == 0 {
+            break;
+        }
+        ensure!(
+            line.len() <= rowtrail_contracts::FRAME_LIMIT + 1,
+            "PROTOCOL_FRAME_TOO_LARGE"
+        );
+        let request = serde_json::from_slice::<Request>(&line);
+        let response = match request {
+            Ok(request) => session.call(&request).await?,
+            Err(_) => Response::failure(
+                &Request::new("invalid", json!({})),
+                ApiError::new(
+                    "INVALID_ARGUMENT",
+                    "expected a full RowTrail request envelope",
+                ),
+            ),
+        };
+        output.write_all(&serde_json::to_vec(&response)?).await?;
+        output.write_all(b"\n").await?;
+        output.flush().await?;
+    }
+    Ok(0)
+}
+
 async fn run(args: Args) -> Result<i32> {
     let workspace = args
         .workspace
@@ -325,6 +363,9 @@ async fn run(args: Args) -> Result<i32> {
             .waiting()
             .await?;
         return Ok(0);
+    }
+    if matches!(args.command, Command::Session) {
+        return session(workspace).await;
     }
     let client = Client::new(workspace)?;
     let mut wait = false;
@@ -443,7 +484,7 @@ async fn run(args: Args) -> Result<i32> {
                 .and_then(|v| v["next_cursor"].as_str())
                 .map(str::to_owned);
         },
-        Command::Schema { .. } | Command::Mcp => unreachable!(),
+        Command::Schema { .. } | Command::Mcp | Command::Session => unreachable!(),
     };
     if args.idempotency_key.is_some() {
         req.idempotency_key = args.idempotency_key;
