@@ -17,7 +17,7 @@ Agent 探索一张大表，不应该先把整张表塞进上下文。RowTrail �
 执行只读 SQL，把带固定版本的结果留在磁盘。Agent 按预算读取带类型的观察，下一次追问
 可以直接从保存的结果继续。
 
-**alpha.4 新增：按 Parquet 文件递进的精确 count/sum/avg 检查点。**
+**alpha.4 新增：按 Parquet 文件递进的精确计数、求和与固定精度均值检查点。**
 Agent 可以先观察已处理部分，保存固定版本，再决定是否继续。alpha.3 的按需画像、
 显式 CSV 整理与安全回收也都保留。
 
@@ -57,8 +57,15 @@ rowtrail --version
 [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.4) 下载并解压。
 请将 `rowtrail` 和 `rowtrail-runtime` 放在同一个目录。
 
-原生压缩包保持 **30 MB** 上限；CLI 与运行时分别限制为 4.5 MB 和 125 MB。
-压缩下载体积与安装后的程序大小分开记录。
+已验证的原生发布包大小（十进制 MB）：
+
+| 平台 | 压缩下载 `.tar.xz` | CLI | 运行时 |
+|---|---:|---:|---:|
+| macOS arm64 | **19.10 MB** | 3.65 MB | 99.88 MB |
+| Linux x86_64 | **22.36 MB** | 4.10 MB | 114.60 MB |
+
+CLI 与运行时列为解压后的程序大小。压缩包保持 **30 MB** 上限，CLI 与运行时分别
+限制为 4.5 MB 和 125 MB。
 [原生产物大小与验证 →](docs/verification.md#native-distribution)
 
 ## 先问一个问题

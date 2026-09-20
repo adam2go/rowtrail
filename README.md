@@ -18,8 +18,8 @@ in its context. RowTrail opens local CSV/TSV/Parquet, runs read-only SQL, and ke
 versioned results on disk. The agent gets a bounded, typed observation and can
 branch from a saved result when the next question arrives.
 
-**New in alpha.4:** exact cumulative count/sum/avg checkpoints over Parquet
-files. Inspect an early partial result, keep its revision, and choose whether
+**New in alpha.4:** cumulative count/sum checkpoints and fixed-precision averages
+over Parquet files. Inspect an early partial result, keep its revision, and choose whether
 to continue. Profiles, explicit CSV preparation and safe workspace GC remain
 available from alpha.3.
 
@@ -61,8 +61,15 @@ Set `ROWTRAIL_INSTALL_DIR` to choose another directory, or extract an archive
 from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.4).
 Keep `rowtrail` and `rowtrail-runtime` together.
 
-Native archives must remain below **30 MB**; CLI and runtime budgets stay at
-4.5 MB and 125 MB. Installed size differs from compressed download size.
+Verified native release sizes (decimal MB):
+
+| Platform | Download `.tar.xz` | CLI | Runtime |
+|---|---:|---:|---:|
+| macOS arm64 | **19.10 MB** | 3.65 MB | 99.88 MB |
+| Linux x86_64 | **22.36 MB** | 4.10 MB | 114.60 MB |
+
+CLI/runtime columns are uncompressed binaries. Budgets remain **30 MB** per
+archive, 4.5 MB per CLI and 125 MB per runtime.
 [Native artifact sizes and verification →](docs/verification.md#native-distribution)
 
 ## Give it a question

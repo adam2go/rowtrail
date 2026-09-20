@@ -9,7 +9,7 @@ No tests call a model. Historical results remain in the
 
 ## Correctness
 
-The local release build passes **53 integration scenarios**: 30 foundation, 13
+The local release build and both native CI platforms pass **53 integration scenarios**: 30 foundation, 13
 alpha.3 profile/preparation/storage scenarios, and ten new progressive scenarios.
 Six Rust tests include the existing eight subprocess crash-at-commit cases for
 Arrow results and prepared Parquet, plus their child harness. MCP/NDJSON and the
@@ -37,6 +37,10 @@ opens a schema-3 store, preserves an exact large-integer fixed revision, derives
 new query from it, and verifies that the old runtime refuses the upgraded schema-4
 store. The upgrade is one-way. An old coordinator already running in a workspace
 keeps its capabilities until it finishes and exits.
+
+The [same upgrade probe using native CI archives](../benchmarks/performance/alpha4/upgrade-native-macos.json)
+also passes on macOS, using the published alpha.3 archive and the verified alpha.4
+release candidate. The report records both archive hashes.
 
 ## Progressive latency and total cost
 
@@ -98,15 +102,28 @@ reference. This is not a repeated timing study or a process-memory hard limit.
 
 ## Native distribution
 
-Release candidates must pass macOS arm64 and Ubuntu 24.04 x86_64 CI before
-publication. Budgets remain 30,000,000 compressed bytes, 4,500,000 CLI bytes and
+[Native CI passed on macOS arm64 and Ubuntu 24.04 x86_64](https://github.com/adam2go/rowtrail/actions/runs/35526103291)
+for source commit `9457d672ab34f464fd4fe973b2d15e93dd9c2e82`.
+Both archives were downloaded and independently checked against their SHA-256
+files and metadata. The installed macOS CI archive ran the progressive example
+over eight files: 24 rows, 16 non-null values, sum −36 and mean −2.250000, with
+complete final coverage. Installed-package upgrade from alpha.3 also passed.
+
+| Platform | Compressed bytes | CLI bytes | Runtime bytes |
+|---|---:|---:|---:|
+| macOS arm64 | 19,101,872 | 3,651,040 | 99,884,432 |
+| Linux x86_64 | 22,355,504 | 4,096,992 | 114,596,704 |
+
+Budgets remain 30,000,000 compressed bytes, 4,500,000 CLI bytes and
 125,000,000 runtime bytes. This iteration adds no dependency beyond alpha.3's
 299 declarations/notices. Apache-2.0 and upstream notices remain in each archive.
 Linux requires glibc 2.39+. Packages are unsigned engineering previews.
 
 The completed CI run, downloaded checksums, native sizes and platform resource
-reports will be recorded in [release-verification.json](release-verification.json)
-after verification. Prior published artifacts remain in the alpha.3 archive above.
+reports are recorded in [release-verification.json](release-verification.json).
+The release tag includes subsequent documentation/provenance updates; executable
+sources and the installer match the verified CI commit. Prior published artifacts
+remain in the alpha.3 archive above.
 
 ## Reproduce
 

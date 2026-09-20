@@ -1,6 +1,6 @@
 # Alpha.4: exact cumulative checkpoints over Parquet files
 
-Status: implemented candidate; native release checks are tracked separately.
+Status: implemented; native release checks are tracked in [release verification](../verification.md).
 
 ## Deliberately restricted contract
 

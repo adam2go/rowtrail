@@ -24,6 +24,12 @@ It does not claim completion of all M2B–M6 roadmap work.
   and checkpoint writes for earlier partial observations; it is not a general SQL
   speed optimization. [Design](decisions/004-progressive-file-aggregation.md).
 
+The [macOS arm64 / Ubuntu 24.04 x86_64 CI matrix](https://github.com/adam2go/rowtrail/actions/runs/35526103291)
+passed all checks. Downloaded archives pass independent hash verification; the
+macOS archive passes installation, progressive-example execution and upgrade from
+the published alpha.3 archive. Downloads are 19.10 / 22.36 MB (decimal).
+[Release provenance](release-verification.json).
+
 ## Alpha.3
 
 - One-query selected-column null counts and min/max, separate deterministic top-k,
@@ -41,7 +47,7 @@ It does not claim completion of all M2B–M6 roadmap work.
   GC persists expiration before deletion, and expired references fail explicitly.
 - Test-only subprocess crashes at four commit boundaries for Arrow results and
   prepared Parquet. Recovery distinguishes visible commits from orphan files.
-- All ten data contracts are available through MCP, CLI calls, NDJSON and the Rust
+- All nine alpha.3 data contracts are available through MCP, CLI calls, NDJSON and the Rust
   client; dedicated CLI commands cover preparation and storage maintenance.
 - A standard-library Python example runs open → profile → prepare → two saved
   branches → export → release/GC. The product still makes zero model calls.
