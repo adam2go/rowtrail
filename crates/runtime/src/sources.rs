@@ -27,6 +27,9 @@ pub struct SourceFile {
     pub mtime_nsec: i64,
     pub rows: Option<u64>,
     pub row_groups: Option<usize>,
+    /// Managed files carry a content digest; external sources use identity checks.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub checksum: Option<String>,
 }
 impl SourceFile {
     pub fn inspect(path: &Path) -> Result<Self> {
@@ -44,6 +47,7 @@ impl SourceFile {
             mtime_nsec: m.mtime_nsec(),
             rows: None,
             row_groups: None,
+            checksum: None,
         })
     }
     pub fn validate(&self) -> Result<()> {

@@ -4,9 +4,14 @@ mod db;
 mod engine;
 mod errors;
 mod model;
+mod prepare;
 mod probe;
+mod profile;
+#[cfg(test)]
+mod publication_tests;
 mod results;
 mod sources;
+mod storage;
 mod store;
 mod worker;
 use clap::{Parser, Subcommand};

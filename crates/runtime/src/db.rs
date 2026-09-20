@@ -11,6 +11,7 @@ use std::{
 
 pub struct Db {
     pub conn: Mutex<Connection>,
+    pub gc: std::sync::RwLock<()>,
     pub workspace: PathBuf,
     pub store_id: String,
     // Notifications are hints only; durable SQLite state remains authoritative.
@@ -57,6 +58,7 @@ impl Db {
             CREATE INDEX IF NOT EXISTS events_job ON events(job_id,seq);
             CREATE TABLE IF NOT EXISTS idempotency(key TEXT PRIMARY KEY,hash TEXT NOT NULL,response TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS deps(child TEXT NOT NULL,parent TEXT NOT NULL,PRIMARY KEY(child,parent));
+            CREATE TABLE IF NOT EXISTS retention(object TEXT PRIMARY KEY,released INTEGER NOT NULL);
             CREATE TABLE IF NOT EXISTS pins(object TEXT NOT NULL,owner TEXT NOT NULL,PRIMARY KEY(object,owner));")?;
         c.execute(
             "INSERT OR IGNORE INTO meta VALUES('store_id',?)",
@@ -77,6 +79,7 @@ impl Db {
         })?;
         let db = Self {
             conn: Mutex::new(c),
+            gc: std::sync::RwLock::new(()),
             workspace: workspace.to_owned(),
             store_id,
             changed: tokio::sync::watch::channel(()).0,
@@ -129,9 +132,11 @@ impl Db {
             .query_map([], |r| r.get::<_, String>(0))?
             .collect::<rusqlite::Result<Vec<_>>>()?;
         for spec in specs {
-            self.finish(&serde_json::from_str(&spec)?, "interrupted",
+            let spec: JobSpec = serde_json::from_str(&spec)?;
+            self.finish(&spec, "interrupted",
                 Some(json!({"code":"WORKER_LOST","message":"coordinator restarted; execution cannot resume in place"})),
                 json!({"execution_stopped":true,"worker_exit_confirmed":true,"recovered":true}))?;
+            crate::storage::clean_attempt(self, &spec)?;
         }
         Ok(())
     }
@@ -150,6 +155,7 @@ impl Db {
             })
             .optional()?;
         let (s, validity) = s.ok_or_else(|| anyhow::anyhow!("OBJECT_NOT_FOUND: {id}"))?;
+        ensure!(validity != "expired", "OBJECT_EXPIRED: {id}");
         let mut value = parse(s)?;
         value["validity"] = json!(validity);
         Ok(value)
@@ -182,8 +188,13 @@ impl Db {
             m.remove("staging");
             m.remove("meta_staging");
         }
+        let prepared: Option<String> = c.query_row(
+            "SELECT json_extract(spec,'$.prepared') FROM jobs WHERE id=?",
+            [id],
+            |r| r.get(0),
+        )?;
         Ok(
-            json!({"id":id,"state":row.0,"phase":row.1,"result_ref":row.2,"scope_ref":row.3,"readable_revision":head,"error":row.4.map(parse).transpose()?,"metrics":metrics,"created_ms":row.6,"started_ms":row.7,"finished_ms":row.8,"stop_requested":row.9}),
+            json!({"prepared":prepared.map(parse).transpose()?,"id":id,"state":row.0,"phase":row.1,"result_ref":row.2,"scope_ref":row.3,"readable_revision":head,"error":row.4.map(parse).transpose()?,"metrics":metrics,"created_ms":row.6,"started_ms":row.7,"finished_ms":row.8,"stop_requested":row.9}),
         )
     }
     pub fn queued(&self) -> Result<Option<JobSpec>> {
@@ -275,11 +286,16 @@ impl Db {
             |r| r.get(0),
         )?;
         ensure!(part.seq == expected, "RESULT_CONFLICT: out-of-order part");
+        let extension = if spec.prepared.is_some() {
+            "parquet"
+        } else {
+            "arrow"
+        };
         let staging = self
             .workspace
             .join("staging")
             .join(&spec.attempt)
-            .join(format!("{:012}.arrow", part.seq));
+            .join(format!("{:012}.{extension}", part.seq));
         ensure!(
             part.path == staging,
             "INVALID_ARGUMENT: invalid staging descriptor"
@@ -299,7 +315,7 @@ impl Db {
             saved_schema == part.schema,
             "RESULT_CORRUPT: part schema differs from result schema"
         );
-        let dest = dir.join(format!("{:012}.arrow", part.seq));
+        let dest = dir.join(format!("{:012}.{extension}", part.seq));
         if staging.exists() {
             ensure!(
                 !std::fs::symlink_metadata(&staging)?
@@ -312,6 +328,8 @@ impl Db {
                 "RESULT_CORRUPT: size mismatch"
             );
             std::fs::rename(&staging, &dest)?;
+            #[cfg(test)]
+            crate::publication_tests::fault("after_part_rename");
             File::open(&dir)?.sync_all()?;
         } else {
             ensure!(
@@ -331,10 +349,11 @@ impl Db {
                 serde_json::to_string(&crate::sources::SourceFile::inspect(&dest)?)?
             ],
         )?;
-        let preview = spec
-            .query
-            .as_ref()
-            .is_some_and(|q| q.execution.preview == "available");
+        let preview = spec.prepared.is_none()
+            && spec
+                .query
+                .as_ref()
+                .is_some_and(|q| q.execution.preview == "available");
         if preview {
             let rev: u64 = tx.query_row(
                 "SELECT head+1 FROM results WHERE id=?",
@@ -372,6 +391,8 @@ impl Db {
             )?;
         }
         tx.commit()?;
+        #[cfg(test)]
+        crate::publication_tests::fault("after_part_commit");
         self.changed.send_replace(());
         Ok(())
     }
@@ -418,7 +439,7 @@ impl Db {
             std::fs::remove_file(staging)?;
             std::fs::remove_file(meta_staging)?;
         }
-        if state != "completed" && spec.query.is_some() {
+        if state != "completed" && spec.query.is_some() && spec.prepared.is_none() {
             let head: u64 = tx.query_row(
                 "SELECT head FROM results WHERE id=?",
                 [&spec.result_ref],
@@ -446,7 +467,7 @@ impl Db {
                 )?;
             }
         }
-        if state == "completed" && spec.query.is_some() {
+        if state == "completed" && spec.query.is_some() && spec.prepared.is_none() {
             let (head, schema): (u64, Option<String>) = tx.query_row(
                 "SELECT head,schema FROM results WHERE id=?",
                 [&spec.result_ref],
@@ -478,6 +499,9 @@ impl Db {
                 json!({"result_ref":spec.result_ref,"revision":head+1,"quality":quality}),
             )?;
         }
+        if state == "completed" && spec.prepared.is_some() {
+            crate::prepare::commit(&tx, spec)?;
+        }
         tx.execute(
             "UPDATE jobs SET state=?,phase=?,error=?,metrics=?,finished=? WHERE id=?",
             params![
@@ -495,7 +519,11 @@ impl Db {
             &format!("job.{state}"),
             json!({"state":state,"result_ref":spec.result_ref,"error":error}),
         )?;
+        #[cfg(test)]
+        crate::publication_tests::fault("before_final_commit");
         tx.commit()?;
+        #[cfg(test)]
+        crate::publication_tests::fault("after_final_commit");
         self.changed.send_replace(());
         Ok(())
     }
@@ -518,11 +546,11 @@ impl Db {
         }
         for id in ids {
             tx.execute(
-                "UPDATE objects SET validity='source_changed' WHERE id=?",
+                "UPDATE objects SET validity='source_changed' WHERE id=? AND validity!='expired'",
                 [&id],
             )?;
             tx.execute(
-                "UPDATE results SET validity='source_changed' WHERE id=?",
+                "UPDATE results SET validity='source_changed' WHERE id=? AND validity!='expired'",
                 [&id],
             )?;
             let job: Option<String> = tx

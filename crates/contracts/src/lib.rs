@@ -214,6 +214,8 @@ pub struct InspectParams {
     #[serde(rename = "ref")]
     pub object_ref: String,
     #[serde(default)]
+    pub revision: Option<u64>,
+    #[serde(default)]
     pub columns: Vec<String>,
     #[serde(default)]
     pub checks: Vec<String>,
@@ -221,6 +223,29 @@ pub struct InspectParams {
     pub offset: usize,
     #[serde(default)]
     pub budget: OutputBudget,
+    #[serde(default)]
+    pub execution: Option<Execution>,
+    #[serde(default = "top_k")]
+    pub top_k: usize,
+}
+fn top_k() -> usize {
+    10
+}
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct PrepareParams {
+    pub source: DatasetBinding,
+    #[serde(default)]
+    pub execution: Execution,
+}
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct WorkspaceParams {
+    pub action: String,
+    #[serde(default)]
+    pub quota_bytes: Option<u64>,
+    #[serde(default = "yes")]
+    pub dry_run: bool,
 }
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
@@ -293,6 +318,8 @@ pub fn schema(method: &str) -> Option<Value> {
     Some(match method {
         "open" => serde_json::to_value(schemars::schema_for!(OpenParams)).ok()?,
         "inspect" => serde_json::to_value(schemars::schema_for!(InspectParams)).ok()?,
+        "prepare" => serde_json::to_value(schemars::schema_for!(PrepareParams)).ok()?,
+        "workspace" => serde_json::to_value(schemars::schema_for!(WorkspaceParams)).ok()?,
         "query" => serde_json::to_value(schemars::schema_for!(QueryParams)).ok()?,
         "read" => serde_json::to_value(schemars::schema_for!(ReadParams)).ok()?,
         "control" => serde_json::to_value(schemars::schema_for!(ControlParams)).ok()?,

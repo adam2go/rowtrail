@@ -15,6 +15,7 @@ pub fn code(error: &anyhow::Error, fallback: &'static str) -> &'static str {
             "RESULT_UNAVAILABLE",
             "RESULT_NOT_READY",
             "OBJECT_NOT_FOUND",
+            "OBJECT_EXPIRED",
             "OUTPUT_BUDGET_TOO_SMALL",
             "INVALID_CURSOR",
             "INVALID_ARGUMENT",

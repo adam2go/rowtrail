@@ -1,6 +1,6 @@
 use crate::sources::{Manifest, SourceFile};
 use arrow::datatypes::Schema;
-use rowtrail_contracts::{ExportParams, QueryParams};
+use rowtrail_contracts::{DatasetBinding, ExportParams, QueryParams};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::{collections::BTreeMap, path::PathBuf};
@@ -24,6 +24,8 @@ pub struct JobSpec {
     pub workspace: PathBuf,
     pub query: Option<QueryParams>,
     pub export: Option<ExportParams>,
+    #[serde(default)]
+    pub prepared: Option<DatasetBinding>,
     pub inputs: BTreeMap<String, Input>,
     pub sources: Vec<Manifest>,
     pub quality: Value,

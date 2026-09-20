@@ -28,6 +28,7 @@ jobs:
       - run: cargo build --release --locked
       - run: cargo test --release --locked --workspace
       - run: python3 tests/integration/exploration.py --bin-dir target/release
+      - run: python3 tests/integration/alpha3.py
       - run: python3 scripts/mcp_probe.py target/release/rowtrail
       - run: python3 scripts/session_probe.py target/release/rowtrail
       - run: cargo run --locked -p rowtrail-client --example query -- /tmp/rowtrail-sdk

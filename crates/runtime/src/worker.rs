@@ -52,8 +52,13 @@ async fn message(value: &WorkerMessage) -> Result<()> {
 const PART_TARGET: u64 = 4 * 1024 * 1024;
 const PART_LIMIT: u64 = 8 * 1024 * 1024;
 const PART_BATCH_LIMIT: usize = 128;
+enum PartWriter {
+    Arrow(FileWriter<HashWriter>),
+    Parquet(parquet::arrow::ArrowWriter<HashWriter>),
+}
 struct StagedPart {
-    writer: FileWriter<HashWriter>,
+    writer: PartWriter,
+    estimated_bytes: u64,
     path: std::path::PathBuf,
     rows: usize,
     batches: usize,
@@ -68,7 +73,12 @@ impl StagedPart {
     ) -> Result<Self> {
         let dir = spec.workspace.join("staging").join(&spec.attempt);
         std::fs::create_dir_all(&dir)?;
-        let path = dir.join(format!("{seq:012}.arrow"));
+        let extension = if spec.prepared.is_some() {
+            "parquet"
+        } else {
+            "arrow"
+        };
+        let path = dir.join(format!("{seq:012}.{extension}"));
         let output = HashWriter {
             file: OpenOptions::new()
                 .write(true)
@@ -79,7 +89,26 @@ impl StagedPart {
             limit: remaining.min(PART_LIMIT),
         };
         Ok(Self {
-            writer: FileWriter::try_new(output, schema)?,
+            writer: if spec.prepared.is_some() {
+                let mut quality = spec.quality.clone();
+                quality["final_for_request"] = json!(true);
+                let properties = parquet::file::properties::WriterProperties::builder()
+                    .set_compression(parquet::basic::Compression::SNAPPY)
+                    .set_max_row_group_row_count(Some(16384))
+                    .set_key_value_metadata(Some(vec![parquet::file::metadata::KeyValue::new(
+                        "rowtrail.quality".into(),
+                        Some(quality.to_string()),
+                    )]))
+                    .build();
+                PartWriter::Parquet(parquet::arrow::ArrowWriter::try_new(
+                    output,
+                    Arc::new(schema.clone()),
+                    Some(properties),
+                )?)
+            } else {
+                PartWriter::Arrow(FileWriter::try_new(output, schema)?)
+            },
+            estimated_bytes: 0,
             path,
             rows: 0,
             batches: 0,
@@ -87,14 +116,23 @@ impl StagedPart {
         })
     }
     fn write(&mut self, batch: &RecordBatch) -> Result<()> {
-        self.writer.write(batch)?;
+        match &mut self.writer {
+            PartWriter::Arrow(w) => w.write(batch)?,
+            PartWriter::Parquet(w) => w.write(batch)?,
+        }
+        self.estimated_bytes += batch.get_array_memory_size() as u64;
         self.rows += batch.num_rows();
         self.batches += 1;
         Ok(())
     }
-    fn finish(mut self, seq: u64, schema: &arrow::datatypes::Schema) -> Result<Part> {
-        self.writer.finish()?;
-        let mut output = self.writer.into_inner()?;
+    fn finish(self, seq: u64, schema: &arrow::datatypes::Schema) -> Result<Part> {
+        let mut output = match self.writer {
+            PartWriter::Arrow(mut w) => {
+                w.finish()?;
+                w.into_inner()?
+            }
+            PartWriter::Parquet(w) => w.into_inner()?,
+        };
         output.flush()?;
         output.file.sync_all()?;
         Ok(Part {
@@ -145,9 +183,7 @@ impl Output<'_> {
     ) -> Result<()> {
         if let Some(staged) = &self.staged
             && (staged
-                .writer
-                .get_ref()
-                .bytes
+                .estimated_bytes
                 .saturating_add(batch.get_array_memory_size() as u64)
                 > PART_TARGET
                 || staged.batches >= PART_BATCH_LIMIT)
@@ -273,6 +309,9 @@ async fn execute_job(
                     output.push(&batch,ack_rx).await?;
                 }
             }
+            if spec.prepared.is_some() && output.staged.is_none() && output.parts == 0 {
+                output.push(&RecordBatch::new_empty(schema.clone()), ack_rx).await?;
+            }
             output.publish(ack_rx).await?;
             Ok::<_,anyhow::Error>(())
         };
@@ -344,19 +383,13 @@ async fn export(spec: &JobSpec, counters: &crate::store::Counters) -> Result<ser
                     .filter(|n| *n <= p.execution.scan_bytes)
             })
             .map_err(|_| anyhow::anyhow!("RESOURCE_EXHAUSTED: export scan byte budget"))?;
-        use std::io::Read;
-        ensure!(
-            part.size <= 8 * 1024 * 1024,
-            "RESULT_CORRUPT: oversized result part"
-        );
-        let mut bytes = Vec::with_capacity(part.size as usize);
-        File::open(&part.path)?
-            .take(part.size + 1)
-            .read_to_end(&mut bytes)?;
-        ensure!(
-            bytes.len() as u64 == part.size,
-            "RESULT_CORRUPT: result part size changed"
-        );
+        let bytes = crate::results::verified_bytes(
+            &part.path,
+            part.size,
+            part.checksum
+                .as_deref()
+                .ok_or_else(|| anyhow::anyhow!("RESULT_CORRUPT: missing checksum"))?,
+        )?;
         counters
             .result_bytes
             .fetch_add(bytes.len() as u64, Ordering::Relaxed);

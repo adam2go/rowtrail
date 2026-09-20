@@ -54,6 +54,10 @@ enum Command {
     },
     Inspect {
         reference: String,
+        #[arg(long)]
+        revision: Option<u64>,
+        #[arg(long, default_value_t = 10)]
+        top_k: usize,
         #[arg(long, value_delimiter = ',')]
         columns: Vec<String>,
         #[arg(long, value_delimiter = ',', default_value = "schema")]
@@ -64,6 +68,29 @@ enum Command {
         max_rows: usize,
         #[arg(long, default_value_t = 8192)]
         max_bytes: usize,
+    },
+    /// Stream a frozen CSV/TSV manifest to a managed Parquet dataset.
+    Prepare {
+        dataset: String,
+        #[arg(long)]
+        manifest: String,
+        #[arg(long, default_value_t = 200)]
+        wait_ms: u64,
+    },
+    /// Inspect usage, configure a managed-data quota, or collect released data.
+    Workspace {
+        #[arg(default_value = "usage")]
+        action: String,
+        #[arg(long)]
+        quota_bytes: Option<u64>,
+        #[arg(long)]
+        apply: bool,
+    },
+    Pin {
+        reference: String,
+    },
+    Release {
+        reference: String,
     },
     Query {
         #[arg(long)]
@@ -254,7 +281,15 @@ impl ServerHandler for Mcp {
     ) -> std::result::Result<ListToolsResult, ErrorData> {
         Ok(ListToolsResult {
             tools: [
-                "open", "inspect", "query", "read", "control", "export", "events",
+                "open",
+                "inspect",
+                "prepare",
+                "query",
+                "read",
+                "control",
+                "export",
+                "events",
+                "workspace",
             ]
             .into_iter()
             .map(|n| tool(&format!("data_{n}")).unwrap())
@@ -388,6 +423,8 @@ async fn run(args: Args) -> Result<i32> {
         ),
         Command::Inspect {
             reference,
+            revision,
+            top_k,
             columns,
             checks,
             offset,
@@ -395,8 +432,30 @@ async fn run(args: Args) -> Result<i32> {
             max_bytes,
         } => Request::new(
             "inspect",
-            json!({"ref":reference,"columns":columns,"checks":checks,"offset":offset,"budget":{"max_rows":max_rows,"max_bytes":max_bytes}}),
+            json!({"ref":reference,"revision":revision,"top_k":top_k,"columns":columns,"checks":checks,"offset":offset,"budget":{"max_rows":max_rows,"max_bytes":max_bytes}}),
         ),
+        Command::Prepare {
+            dataset,
+            manifest,
+            wait_ms,
+        } => Request::new(
+            "prepare",
+            json!({"source":{"dataset_ref":dataset,"manifest_ref":manifest},"execution":{"wait_ms":wait_ms}}),
+        ),
+        Command::Workspace {
+            action,
+            quota_bytes,
+            apply,
+        } => Request::new(
+            "workspace",
+            json!({"action":action,"quota_bytes":quota_bytes,"dry_run":!apply}),
+        ),
+        Command::Pin { reference } => {
+            Request::new("control", json!({"action":"pin","ref":reference}))
+        }
+        Command::Release { reference } => {
+            Request::new("control", json!({"action":"release","ref":reference}))
+        }
         Command::Query {
             request,
             sql,

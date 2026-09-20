@@ -16,9 +16,28 @@ fn decode<T: DeserializeOwned>(v: &Value) -> Result<T> {
     serde_json::from_value(v.clone()).map_err(|e| anyhow::anyhow!("INVALID_ARGUMENT: {e}"))
 }
 fn request_hash(req: &Request) -> String {
-    let mut p = req.params.clone();
+    let mut p = if req.method == "prepare" {
+        serde_json::from_value::<PrepareParams>(req.params.clone())
+            .ok()
+            .and_then(|p| serde_json::to_value(p).ok())
+            .unwrap_or_else(|| req.params.clone())
+    } else {
+        req.params.clone()
+    };
     if let Some(o) = p.as_object_mut() {
         o.remove("output");
+        if req.method == "inspect" {
+            let head = o
+                .get("checks")
+                .and_then(Value::as_array)
+                .is_some_and(|checks| checks.iter().any(|v| v == "head"));
+            if let Some(budget) = o.get_mut("budget").and_then(Value::as_object_mut) {
+                budget.remove("max_bytes");
+                if !head {
+                    budget.remove("max_rows");
+                }
+            }
+        }
         if let Some(e) = o.get_mut("execution").and_then(Value::as_object_mut) {
             e.remove("wait_ms");
             e.remove("output");
@@ -73,7 +92,7 @@ fn remember(c: &rusqlite::Connection, req: &Request, v: &Value) -> Result<()> {
     Ok(())
 }
 pub fn capabilities() -> Value {
-    json!({"api_version":"1","formats":["csv","tsv","parquet"],"source":"local","sql":"DataFusion 55.0.0 read-only SELECT; explicit bindings","analysis":[],"entries":["cli","ndjson_session","mcp_stdio","rust_sdk"],"result_part_target_bytes":4194304,"result_part_max_bytes":8388608,"native_tasks":false,"automatic_resume":false,"source_consistency":"best_effort","result_storage":"immutable Arrow IPC files","max_frame_bytes":FRAME_LIMIT,"minimum_error_budget_bytes":512,"max_output_bytes":FRAME_LIMIT-512,"max_output_rows":10000,"max_manifest_files":128,"max_directory_entries":4096,"default_parallel_jobs":1,"cancellation":"cooperative signal with forced worker termination after 300ms","engine_memory_limit":"MemoryPool; not RSS hard limit","scan_limit":"byte reservation before local reads","result_retention":"until workspace removal; release and automatic GC not implemented","event_retention":"until workspace removal; no event pruning yet","unsupported":["Windows","remote","sampling","native_tasks","automatic_resume","union_by_name","prepare","binary_inline","RSS_hard_limit"]})
+    json!({"api_version":"1","formats":["csv","tsv","parquet"],"source":"local","sql":"DataFusion 55.0.0 read-only SELECT; explicit bindings","analysis":["inspect:null_count","inspect:min_max","inspect:top_k"],"entries":["cli","ndjson_session","mcp_stdio","rust_sdk"],"prepare":"explicit streaming CSV/TSV to managed Parquet; atomic dataset visibility","workspace_quota":"managed data plus conservative result/spill reservations; excludes SQLite, logs and external exports","verified_part_cache_bytes":8388608,"result_part_target_bytes":4194304,"result_part_max_bytes":8388608,"native_tasks":false,"automatic_resume":false,"source_consistency":"best_effort","result_storage":"immutable Arrow IPC files","max_frame_bytes":FRAME_LIMIT,"minimum_error_budget_bytes":512,"max_output_bytes":FRAME_LIMIT-512,"max_output_rows":10000,"max_manifest_files":128,"max_directory_entries":4096,"default_parallel_jobs":1,"cancellation":"cooperative signal with forced worker termination after 300ms","engine_memory_limit":"MemoryPool; not RSS hard limit","scan_limit":"byte reservation before local reads","result_retention":"retained by default; explicit pin/release and dependency-safe workspace gc","event_retention":"until workspace removal; no event pruning yet","unsupported":["Windows","remote","sampling","native_tasks","automatic_resume","union_by_name","binary_inline","RSS_hard_limit"]})
 }
 fn validate_execution(e: &Execution) -> Result<()> {
     ensure!(
@@ -265,84 +284,79 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
             };
             wait_response(&db, refs, p.execution.wait_ms, Some(p.execution.output)).await
         }
+        "prepare" => {
+            let p: PrepareParams = decode(&req.params)?;
+            validate_execution(&p.execution)?;
+            ensure!(
+                p.execution.goal == "exact",
+                "UNSUPPORTED_OPERATION: prepare requires exact execution"
+            );
+            let prior = { existing(&db.conn.lock().unwrap(), req)? };
+            let refs = if let Some(v) = prior {
+                v
+            } else {
+                let mut execution = p.execution.clone();
+                execution.preview = "none".into();
+                let query = QueryParams {
+                    bindings: BTreeMap::from([("source".into(), Binding::Dataset(p.source))]),
+                    sql: "SELECT * FROM source".into(),
+                    parameters: vec![],
+                    execution,
+                    notify: Notify::default(),
+                };
+                let (inputs, sources, quality) = resolve(&db, &query.bindings)?;
+                ensure!(
+                    inputs
+                        .values()
+                        .all(|i| matches!(i.format.as_str(), "csv" | "tsv")),
+                    "UNSUPPORTED_OPERATION: prepare accepts CSV/TSV manifests"
+                );
+                submit(&db, req, Some(query), None, inputs, sources, quality)?
+            };
+            wait_response(&db, refs, p.execution.wait_ms, None).await
+        }
         "read" => {
             let p: ReadParams = decode(&req.params)?;
             tokio::task::spawn_blocking(move || results::read(&db, &p)).await?
         }
         "inspect" => {
             let p: InspectParams = decode(&req.params)?;
-            if !p.checks.iter().any(|c| c == "head") {
+            if p.checks.iter().all(|c| c == "schema") {
                 return inspect(&db, p);
             }
-            ensure!(
-                p.checks.iter().all(|c| c == "schema" || c == "head"),
-                "UNSUPPORTED_OPERATION: inspect checks"
-            );
-            ensure!(
-                p.budget.max_rows > 0,
-                "INVALID_ARGUMENT: head requires positive max_rows"
-            );
-            let mut object = db.object(&p.object_ref)?;
-            if let Some(reference) = object.get("manifest_ref").and_then(Value::as_str) {
-                object = db.object(reference)?;
-            }
-            let m: Manifest = serde_json::from_value(object)?;
-            let columns = if p.columns.is_empty() {
-                m.schema
-                    .fields()
-                    .iter()
-                    .map(|f| f.name().clone())
-                    .collect::<Vec<_>>()
-            } else {
-                p.columns.clone()
-            };
-            for col in &columns {
-                m.schema.index_of(col)?;
-            }
-            let projection = columns
-                .iter()
-                .map(|s| format!("\"{}\"", s.replace('"', "\"\"")))
-                .collect::<Vec<_>>()
-                .join(",");
-            let mut bindings = BTreeMap::new();
-            bindings.insert(
-                "source".into(),
-                Binding::Dataset(DatasetBinding {
-                    dataset_ref: m.dataset_ref,
-                    manifest_ref: m.id,
-                }),
-            );
-            let query = QueryParams {
-                bindings,
-                sql: format!(
-                    "SELECT {projection} FROM source LIMIT {}",
-                    p.budget.max_rows
-                ),
-                parameters: vec![],
-                execution: Execution {
-                    scan_bytes: 1024 * 1024,
-                    run_timeout_ms: 1000,
-                    output: p.budget.clone(),
-                    ..Default::default()
-                },
-                notify: Notify::default(),
-            };
+            let (query, inspection) = crate::profile::query(&db, &p)?;
             validate_execution(&query.execution)?;
+            ensure!(
+                query.execution.goal == "exact"
+                    && matches!(query.execution.preview.as_str(), "available" | "none"),
+                "UNSUPPORTED_OPERATION: inspection mode"
+            );
+            let wait = query.execution.wait_ms;
             let prior = { existing(&db.conn.lock().unwrap(), req)? };
             let refs = if let Some(v) = prior {
                 v
             } else {
-                let (inputs, sources, quality) = resolve(&db, &query.bindings)?;
+                let (inputs, sources, mut quality) = resolve(&db, &query.bindings)?;
+                quality["inspection"] = inspection;
                 submit(&db, req, Some(query), None, inputs, sources, quality)?
             };
-            wait_response(&db, refs, 200, Some(p.budget)).await
+            wait_response(&db, refs, wait, Some(p.budget)).await
+        }
+        "workspace" => {
+            let p: WorkspaceParams = decode(&req.params)?;
+            tokio::task::spawn_blocking(move || crate::storage::workspace(&db, p)).await?
         }
         "control" => {
             let p: ControlParams = decode(&req.params)?;
             match p.action.as_str() {
+                "pin" | "release" => crate::storage::retain(&db, &p.object_ref, p.action == "pin"),
                 "status" => Ok(json!({"job":db.job(&p.object_ref)?})),
                 "refresh" => {
                     let object = db.object(&p.object_ref)?;
+                    ensure!(
+                        object["managed"] != true,
+                        "UNSUPPORTED_OPERATION: managed datasets are immutable; prepare a new source manifest"
+                    );
                     let reference = object["manifest_ref"].as_str().ok_or_else(|| {
                         anyhow::anyhow!("INVALID_ARGUMENT: refresh requires a dataset")
                     })?;
@@ -504,7 +518,7 @@ fn inspect(db: &Db, p: InspectParams) -> Result<Value> {
         "UNSUPPORTED_OPERATION: inspect currently supports schema; use bounded SQL for rows/statistics"
     );
     let (schema, mut out) = if p.object_ref.starts_with("res_") {
-        let snapshot = results::snapshot(db, &p.object_ref, None)?;
+        let snapshot = results::snapshot(db, &p.object_ref, p.revision)?;
         let out = json!({"ref":p.object_ref,"revision":snapshot.revision,"schema_origin":"materialized_result","quality":snapshot.quality,"validity":snapshot.validity,"row_count":snapshot.rows.to_string()});
         (snapshot.schema, out)
     } else {
@@ -551,6 +565,7 @@ fn resolve(
     db: &Db,
     bindings: &BTreeMap<String, Binding>,
 ) -> Result<(BTreeMap<String, Input>, Vec<Manifest>, Value)> {
+    let _guard = db.gc.read().unwrap();
     let mut inputs = BTreeMap::new();
     let mut sources = vec![];
     let mut partial = false;
@@ -609,11 +624,13 @@ fn resolve(
                 let files = s
                     .parts
                     .iter()
-                    .map(|(_p, _size, _hash, _rows, identity)| {
+                    .map(|(_p, _size, hash, _rows, identity)| {
                         identity
                             .validate()
                             .map_err(|e| anyhow::anyhow!("RESULT_CORRUPT: {e}"))?;
-                        Ok(identity.clone())
+                        let mut file = identity.clone();
+                        file.checksum = Some(hash.clone());
+                        Ok(file)
                     })
                     .collect::<Result<Vec<_>>>()?;
                 Input {
@@ -644,6 +661,7 @@ fn submit(
     sources: Vec<Manifest>,
     mut quality: Value,
 ) -> Result<Value> {
+    let _guard = db.gc.read().unwrap();
     let job = id("job");
     let result = id("res");
     let scope = id("scope");
@@ -659,6 +677,10 @@ fn submit(
         workspace: db.workspace.clone(),
         query,
         export,
+        prepared: (req.method == "prepare").then(|| DatasetBinding {
+            dataset_ref: id("ds"),
+            manifest_ref: id("mf"),
+        }),
         inputs,
         sources,
         quality: quality.clone(),
@@ -668,11 +690,25 @@ fn submit(
         spec_json.len() <= FRAME_LIMIT,
         "RESOURCE_EXHAUSTED: job specification exceeds IPC frame"
     );
-    let refs = json!({"job_id":job,"result_ref":result,"view_ref":view,"scope_ref":scope});
+    let refs = if let Some(p) = &spec.prepared {
+        json!({"job_id":job,"dataset_ref":p.dataset_ref,"manifest_ref":p.manifest_ref,"scope_ref":scope})
+    } else {
+        json!({"job_id":job,"result_ref":result,"view_ref":view,"scope_ref":scope})
+    };
     let mut c = db.conn.lock().unwrap();
     let tx = c.transaction()?;
     if let Some(v) = existing(&tx, req)? {
         return Ok(v);
+    }
+    crate::storage::admit(&tx, spec.query.as_ref())?;
+    for input in spec.inputs.values() {
+        let validity: String = tx.query_row("SELECT validity FROM objects WHERE id=?1 UNION ALL SELECT validity FROM results WHERE id=?1", [&input.source_ref], |r| r.get(0))?;
+        ensure!(
+            validity != "expired",
+            "OBJECT_EXPIRED: {}",
+            input.source_ref
+        );
+        ensure!(validity == "valid", "SOURCE_CHANGED: invalid input");
     }
     tx.execute("INSERT INTO jobs(id,state,phase,spec,attempt,result_ref,scope_ref,created) VALUES(?,'queued','queued',?,?,?,?,?)",params![job,spec_json,spec.attempt,result,scope,now_ms()])?;
     tx.execute(

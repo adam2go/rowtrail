@@ -30,6 +30,9 @@ pub struct CountStore {
     allowed: BTreeMap<Path, (SourceFile, bool)>,
     pub counters: Arc<Counters>,
     limit: u64,
+    // One verified part, at most 8 MiB, shared by footer/body range requests.
+    // Return slices of these exact bytes: never verify one read and parse another.
+    verified: tokio::sync::Mutex<Option<(Path, bytes::Bytes)>>,
 }
 fn err(s: impl ToString) -> Error {
     Error::Generic {
@@ -43,15 +46,29 @@ impl CountStore {
         limit: u64,
         counters: Arc<Counters>,
     ) -> anyhow::Result<Self> {
-        let mut allowed = BTreeMap::new();
+        let mut allowed: BTreeMap<Path, (SourceFile, bool)> = BTreeMap::new();
         for (f, source) in files {
-            allowed.insert(Path::from_filesystem_path(&f.path)?, (f, source));
+            let path = Path::from_filesystem_path(&f.path)?;
+            if let Some((previous, external)) = allowed.get_mut(&path) {
+                // A second external alias must not downgrade a managed file's
+                // checksum requirement. Account a shared managed read once.
+                if let (Some(a), Some(b)) = (&previous.checksum, &f.checksum) {
+                    anyhow::ensure!(a == b, "RESULT_CORRUPT: conflicting input digests");
+                }
+                if previous.checksum.is_none() {
+                    previous.checksum = f.checksum;
+                }
+                *external &= source;
+            } else {
+                allowed.insert(path, (f, source));
+            }
         }
         Ok(Self {
             inner: object_store::local::LocalFileSystem::new(),
             allowed,
             counters,
             limit,
+            verified: tokio::sync::Mutex::new(None),
         })
     }
 }
@@ -80,6 +97,42 @@ impl ObjectStore for CountStore {
             range,
             attributes,
         } = result;
+        if let Some(checksum) = &identity.checksum {
+            let mut cached = self.verified.lock().await;
+            if cached.as_ref().is_none_or(|(key, _)| key != path) {
+                self.counters
+                    .reserved
+                    .fetch_update(Ordering::SeqCst, Ordering::SeqCst, |x| {
+                        x.checked_add(identity.size).filter(|v| *v <= self.limit)
+                    })
+                    .map_err(|_| err("RESOURCE_EXHAUSTED: scan byte budget"))?;
+                let identity = identity.clone();
+                let checksum = checksum.clone();
+                let bytes = tokio::task::spawn_blocking(move || {
+                    crate::results::verified_bytes(&identity.path, identity.size, &checksum)
+                })
+                .await
+                .map_err(err)?
+                .map_err(err)?;
+                self.counters
+                    .result_bytes
+                    .fetch_add(bytes.len() as u64, Ordering::Relaxed);
+                *cached = Some((path.clone(), bytes.into()));
+            }
+            let bytes = cached
+                .as_ref()
+                .unwrap()
+                .1
+                .slice(range.start as usize..range.end as usize);
+            return Ok(GetResult {
+                payload: GetResultPayload::Stream(
+                    futures::stream::once(async move { Ok(bytes) }).boxed(),
+                ),
+                meta,
+                range,
+                attributes,
+            });
+        }
         let GetResultPayload::File(mut file, _) = payload else {
             return Err(err("unexpected non-local payload"));
         };

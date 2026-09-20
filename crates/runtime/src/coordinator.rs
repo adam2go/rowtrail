@@ -75,6 +75,9 @@ pub async fn serve(workspace: &Path) -> Result<()> {
                             json!({"execution_stopped":true,"worker_exit_confirmed":true}),
                         );
                     }
+                    if let Err(e) = crate::storage::clean_attempt(&scheduler_db, &spec) {
+                        eprintln!("cleanup error: {e:#}");
+                    }
                     idle_since = Instant::now();
                     scheduler_busy.store(0, Ordering::SeqCst);
                     scheduler_touched.store(now_ms(), Ordering::SeqCst);

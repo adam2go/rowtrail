@@ -26,6 +26,7 @@ pub fn snapshot(db: &Db, result: &str, revision: Option<u64>) -> Result<Snapshot
     let raw:Option<(Option<String>,u64,String,String)>=c.query_row("SELECT r.schema,r.head,r.validity,j.state FROM results r JOIN jobs j ON j.id=r.job_id WHERE r.id=?",[result],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?,r.get(3)?))).optional()?;
     let (schema, head, validity, job_state) =
         raw.ok_or_else(|| anyhow::anyhow!("OBJECT_NOT_FOUND: {result}"))?;
+    ensure!(validity != "expired", "OBJECT_EXPIRED: {result}");
     let revision = revision.unwrap_or(head);
     ensure!(revision > 0, "RESULT_NOT_READY: no committed revision");
     let row: Option<(u64, u64, String)> = c
@@ -66,7 +67,11 @@ pub fn snapshot(db: &Db, result: &str, revision: Option<u64>) -> Result<Snapshot
         job_state,
     })
 }
-fn verified_bytes(path: &std::path::Path, expected_bytes: u64, checksum: &str) -> Result<Vec<u8>> {
+pub fn verified_bytes(
+    path: &std::path::Path,
+    expected_bytes: u64,
+    checksum: &str,
+) -> Result<Vec<u8>> {
     ensure!(
         expected_bytes <= 8 * 1024 * 1024,
         "RESULT_CORRUPT: oversized part"
@@ -125,6 +130,7 @@ fn value(array: &dyn Array, row: usize) -> Result<Value> {
     }
 }
 pub fn read(db: &Db, p: &ReadParams) -> Result<Value> {
+    let _guard = db.gc.read().unwrap();
     ensure!(
         p.max_bytes <= rowtrail_contracts::FRAME_LIMIT - 512 && p.max_rows <= 10000,
         "INVALID_ARGUMENT: output exceeds capability limits"

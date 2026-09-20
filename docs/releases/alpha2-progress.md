@@ -1,0 +1,134 @@
+> Archived alpha.2 evidence. Measurements and supported features below are historical.
+
+# Implementation progress
+
+[Home](../../README.md) · [Verification report and test inventory](../verification.md)
+
+Updated 2026-09-20 for 0.1.0-alpha.2. The initial M0 → M1 → M2A loop is
+implemented; this iteration advances performance, programmatic composition and
+distribution. It is not the complete M2B–M6 local product.
+
+## Alpha.2 changes
+
+- Coalesce engine batches into bounded Arrow IPC files; preserve the first
+  available preview, durable commits, exact types and fixed revisions.
+- Wake queue, wait and event readers from committed-state notifications. Report
+  planning, write, commit-acknowledgement and publication costs plus part counts.
+- Verify and decode each displayed result part from the same bounded buffer;
+  size JSON pages in linear work per returned row.
+- Persistent NDJSON and Rust sessions, a standard-library Python composition
+  example, and an agent integration guide. No automatic replay after an ambiguous
+  transport error, and no cancellation merely from closing a connection.
+- Native xz archives, SHA-256-checked installation, and CI distribution budgets.
+  No added production dependencies or human-facing application UI.
+- Added large-page/multi-batch checks, repeated cancellation while publishing,
+  session lifecycle/input bounds, and real archive installation checks.
+
+The current local suite passes 30 integration checks, four Rust unit tests, MCP,
+NDJSON and SDK probes, archive installation and checksum rejection. A real
+1,048,576-row sort under a 32 MiB engine pool spills to disk and its exported
+row order matches an independent full-row reference. All of these checks pass
+on macOS and Linux in the alpha.2 CI run linked below.
+
+## Implemented and verified locally
+
+- Locked Rust 1.94.0, DataFusion 55.0.0 family, Arrow/Parquet 59.2.0, real spill
+  and cancellation probes. CLI/client dependency boundaries are checked.
+- Private local IPC, automatic coordinator startup, exclusive worker reuse,
+  persistent jobs/revisions/events, normalized idempotency and truthful failures.
+- Frozen local CSV/TSV/Parquet manifests, bounded CSV inference and Parquet footer
+  discovery, explicit schemas, bounded schema/head observations and field paging.
+- Read-only SQL with explicit dataset or fixed-result bindings and typed
+  parameters; streamed immutable Arrow parts, stable result pagination, exact
+  integer/Decimal JSON representation, CSV/Arrow/Parquet export with sidecars.
+- Real background jobs; wait and execution deadlines are independent. Cancellation
+  and failure replace the worker after observed exit. Crashes interrupt attempts
+  and preserve committed results. Successful jobs release their execution context
+  while retaining an idle worker for the next job.
+- Source/result read counters, result-write accounting, engine pool/spill budgets,
+  physical scan reservations (including export), bounded serialized observations
+  and errors. Shared-runtime clients resolve relative paths in their own working
+  directories. Error envelopes reserve a minimum 512-byte budget; truncated error
+  text and identifiers are explicitly flagged.
+- Best-effort source version checks and transitive invalidation. Refresh makes a
+  new manifest. Partial input quality propagates through derived queries and
+  Parquet export/reopen, including multi-file imports.
+- Real MCP stdio handshake and generated tool schemas; an MCP-created result is
+  read through CLI. The lightweight Rust SDK example checks the same large integer.
+- Durable event replay and an atomic job snapshot with a compatible event cursor.
+- Apache-2.0 project license, 298 dependency declarations/notices, reproducible
+  packaging scripts and a macOS/Linux GitHub Actions workflow.
+
+## Evidence
+
+The local release binaries pass 30 deterministic end-to-end checks. These cover
+hand-calculated CSV/four-row-group Parquet S1, branching saved results in S2, a
+16,384-row integer reference, worker reuse, precision/pagination, query and export
+budgets, timeouts, true cancellation, idempotency, read-only SQL, corrupt result
+files, coordinator/worker crashes, empty results/CSV headers, partial results,
+event replay, source invalidation and refresh. No tests call a model.
+
+`cargo fmt --check`, Clippy with warnings denied, workspace tests (including two
+error-type checks), dependency boundaries, MCP cross-entry consumption, and the
+SDK precision example pass on **Ubuntu 24.04 x86_64 and macOS 14 arm64** in
+[the alpha.2 CI run](https://github.com/adam2go/rowtrail/actions/runs/35482257736). Each platform passes all 30 end-to-end checks, persistent-session and verified-installation
+probes, plus the independent million-row out-of-core sort/export check.
+Both package checksums were verified after download; the macOS CI archive was
+also extracted and executed locally. Artifact hashes and provenance are in
+[release-verification.json](../release-verification.json).
+
+The five-repeat same-CLI comparison improves 16,384-row exploration from 349.58
+to 123.20 ms and 1,048,576-row exploration from 12,917.72 to 377.35 ms locally.
+The persistent session entry measures 104.13 / 360.55 ms respectively. Fixed
+10,000-row paging improves from 570.25 to 21.37 ms. Direct persistent DuckDB and
+DataFusion remain faster on the exploration workload; no competitive or agent
+adoption advantage is established. Raw repeats, hashes and conditions are in
+`benchmarks/performance/`. See `benchmarks/README.md` for boundaries.
+
+Verified CI packages are 19,000,420 bytes for macOS arm64 and 22,241,924 bytes for
+Linux x86_64 using xz. Installed binary pairs are about 103 / 118 MB respectively;
+download compression does not reduce installed size. Installation verifies SHA-256
+and has no language runtime or external database dependency. Distribution growth
+budgets are enforced in CI. Alpha.1 provenance remains in `docs/releases/`.
+
+## Remaining work and explicit limitations
+
+- M2B: broader sources and complex SQL/fault coverage, deep/wide metadata paging,
+  fuller physical resource accounting, stronger result integrity checks on every
+  derived-input path and a wider above-memory workload matrix.
+- M3: full inspect/profile controls, prepared-view execution and SDK ergonomics.
+  Current fixed views/scopes expose definitions; they are not a prepared-plan cache.
+- M4: constrained progressive Parquet aggregation, sampling/estimates, reusable
+  shard aggregate states, and estimate-to-exact continuation are not implemented.
+- M5: reference host resume, native MCP Tasks negotiation and external Agent trials.
+  Events are durable and replayable, but do not themselves resume a model run.
+- M6: workspace quotas, pin/release/GC, systematic crash-at-commit injection, full
+  cost accounting and release hardening. Results/events currently remain until
+  the workspace is removed while no runtime is using it.
+
+Source discovery currently supports at most 128 files / 4096 directory entries;
+larger inputs fail explicitly. Result parts are bounded to 8 MiB and public frames
+to 1 MiB. Engine memory accounting is not an RSS hard limit. Mutable local files
+use identity/size/mtime checks, not filesystem snapshots. CSV exports preserve
+quality in sidecars; reopening CSV does not automatically apply that sidecar or
+its schema. Use Parquet to carry quality metadata through RowTrail reopening.
+Windows, remote sources, union-by-name, native Tasks, automatic host resume and
+inline binary values are not advertised. Local metadata is versioned; incompatible
+preview stores fail explicitly and have no migration promise. Binary packages
+are unsigned engineering previews.
+
+## Continue development
+
+```sh
+cargo build --release --locked
+python3 tests/integration/exploration.py --bin-dir target/release
+python3 scripts/mcp_probe.py target/release/rowtrail
+python3 scripts/session_probe.py target/release/rowtrail
+python3 scripts/package.py
+python3 scripts/install_probe.py
+```
+
+Preserve the fixtures and quality contracts while extending capabilities.
+Prioritize resource/integrity coverage and programmatic combination costs before
+claiming an adoption benefit. The original private handoff is outside this Git
+repository; public documentation here is maintained separately.

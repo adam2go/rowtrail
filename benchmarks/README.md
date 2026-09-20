@@ -115,3 +115,16 @@ Initial M0 spill, artifact and dependency measurements remain in `m0.json` and
 historical alpha.1 measurements, not current alpha.2 artifact sizes. The checked-in
 integration trace is sanitized and large page arrays are shortened with explicit
 recording annotations and hashes; CI uploads full platform verification reports.
+
+## Alpha.3: integrity, profiles and explicit preparation
+
+[The current report](../docs/verification.md) publishes full-exploration measurements
+with content verification on saved-result SQL and export, including the initial
+software-hash regression and subsequent runtime-detected CPU acceleration.
+Raw five-repeat reports and executable hashes are in [performance/alpha3/](performance/alpha3/).
+
+`prepare.py` separately compares typed CSV with explicit managed-Parquet conversion.
+It includes startup, open, conversion, one profile and ten subsequent queries;
+mode order alternates and a Python integer-cent oracle checks all answers. The
+measured break-even is workload-specific and is never used as an automatic policy.
+Product code does not depend on DuckDB; this harness uses it only to write fixtures.

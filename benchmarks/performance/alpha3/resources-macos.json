@@ -1,0 +1,60 @@
+{
+  "status": "passed",
+  "os": "macOS-26.6.2-arm64-arm-64bit",
+  "rows": 1048576,
+  "source_bytes": 228139988,
+  "engine_pool_bytes": 33554432,
+  "sampled_worker_peak_rss_bytes": 142000128,
+  "rss_note": "ps samples while waiting; not a hard bound or exact process peak",
+  "sort_wall_ms_including_observation": 1183.520041173324,
+  "export_wall_ms": 310.19350001588464,
+  "spill_count": 26,
+  "result_parts": 64,
+  "largest_part_bytes": 3363970,
+  "all_exported_ids_match_independent_sort": true,
+  "sort_metrics": {
+    "io": {
+      "reserved_read_bytes": 228397175,
+      "source_read_bytes": 228397175,
+      "result_read_bytes": 0,
+      "read_requests": 257
+    },
+    "result_write_bytes": 215294080,
+    "rows": 1048576,
+    "planning_ms": 2.448542,
+    "result_write_ms": 552.0591679999997,
+    "commit_ack_ms": 283.179082,
+    "elapsed_ms": 1175.060084,
+    "plan": "SortExec: expr=[payload@1 ASC NULLS LAST, id@0 DESC], preserve_partitioning=[false], metrics=[output_rows=1.05 M, elapsed_compute=101.53ms, output_bytes=205.0 MB, output_batches=128, spill_count=26, spilled_bytes=577.3 MB, spilled_rows=2.95 M]\n  DataSourceExec: file_groups={1 group: [[private<fixture>/data/many.parquet:0..228139988]]}, projection=[id, payload], file_type=parquet, sort_order_for_reorder=[payload@1 ASC NULLS LAST, id@0 DESC], metrics=[output_rows=1.05 M, elapsed_compute=45.64\u00b5s, output_bytes=217.0 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=218.1 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=2ns, metadata_load_time=9.29\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=144.92\u00b5s, time_elapsed_processing=40.65ms, time_elapsed_scanning_total=173.21ms, time_elapsed_scanning_until_data=447.62\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=95.61% (218.1 M/228.1 M)]\n",
+    "publication_ms": 280.612792,
+    "result_parts": 64,
+    "worker_elapsed_ms": 1178.8543750000001,
+    "execution_stopped": true,
+    "worker_exit_confirmed": false,
+    "worker_reused": false,
+    "worker_pid": 55082
+  },
+  "export_metrics": {
+    "destination": "<fixture>/sorted.parquet",
+    "manifest": "<fixture>/sorted.parquet.rowtrail.json",
+    "rows": 1048576,
+    "bytes": 215270121,
+    "io": {
+      "reserved_read_bytes": 215294080,
+      "source_read_bytes": 0,
+      "result_read_bytes": 215294080,
+      "read_requests": 64
+    },
+    "worker_pid": 55082,
+    "worker_reused": true,
+    "publication_ms": 0.0,
+    "result_parts": 0,
+    "worker_elapsed_ms": 302.91145800000004,
+    "execution_stopped": true,
+    "worker_exit_confirmed": false
+  },
+  "binary_sha256": {
+    "rowtrail": "b6b23a887dbe2d3bd7e7c79aa5f134073795d83d0f2beb0f978665464d3c4e9d",
+    "rowtrail-runtime": "6c44e3b70532ec87c923bfcc1bfdf7f4d3f84039c2ed26ec9851bd51c5aaf410"
+  }
+}

@@ -49,6 +49,49 @@ need only the standard library and are optional. Rust applications can use
 [`Client::session()`](../crates/client/examples/query.rs) without linking the
 query engine. Neither entry requires a model API key.
 
-Sampling, prepared execution, native MCP Tasks, automatic model resume and GC
+Sampling, a SQL prepared-plan cache, native MCP Tasks and automatic model resume
 are not implemented. These must not be simulated by the integration host and
 presented as capabilities of RowTrail.
+
+## Inspect only what the next question needs (alpha.3)
+
+```json
+{"ref":"mf_ID","columns":["amount","units"],"checks":["null_count","min_max"],"execution":{"wait_ms":200,"scan_bytes":1073741824},"budget":{"max_rows":10,"max_bytes":8192}}
+```
+
+Send this to `inspect` / `data_inspect`. It returns a query job and a reusable
+result. `quality.inspection.outputs` describes each typed statistic. For common
+values, use one column and `checks:["top_k"], top_k:10`. Top-k is exact over the
+requested input, including null; a small k does not make aggregation free. Keep
+checks and selected columns narrow. Profiles have the same quality distinctions
+and execution budgets as SQL. `budget` controls the response; `execution` controls
+work. On results, include `ref:res_ID` and a fixed `revision`.
+
+## Prepare when repeated parsing is worth avoiding
+
+```json
+{"source":{"dataset_ref":"ds_ID","manifest_ref":"mf_ID"},"execution":{"wait_ms":200,"result_bytes":536870912,"spill_bytes":67108864}}
+```
+
+Send to `prepare` / `data_prepare`. Keep the returned job and proposed dataset /
+manifest references. Bind them **only after `job.state == completed`**; a completed
+wait/status response also includes `job.prepared`. Failure does not publish a
+partial dataset. Conversion preserves the frozen CSV schema, writes managed
+Parquet, and keeps an independent immutable copy. It costs time and space up front;
+use the [measured preparation workload](../benchmarks/performance/alpha3/prepare-1048576.json)
+to understand the tradeoff, not as a universal threshold.
+
+## Release storage explicitly
+
+- `workspace {"action":"usage"}` reports stored bytes and conservative reservations.
+- `workspace {"action":"configure","quota_bytes":2147483648}` enables a 2 GiB
+  managed-data quota; 0 disables it. Set realistic per-job result/spill budgets.
+- `control {"action":"pin","ref":"res_ID"}` retains a result or prepared dataset.
+- `control {"action":"release","ref":"res_ID"}` makes it eligible for collection.
+- `workspace {"action":"gc"}` previews collection; add `"dry_run":false` to apply.
+
+Retained children and active jobs protect their inputs. Release a complete unused
+branch before GC. Expired objects fail explicitly; do not reinterpret that failure
+as an empty table. Metadata, logs, events and external exports are outside this
+quota and GC. The [runnable workflow](../examples/prepare_explore.py) profiles,
+prepares, branches twice, exports and collects exactly its own intermediate data.

@@ -5,7 +5,7 @@
   <p>A small native data tool, built for agents.<br>Ask a question, keep an exact result, and continue from there.</p>
   <p>
     <a href="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml"><img src="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml/badge.svg" alt="Build and verify"></a>
-    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.2"><img src="https://img.shields.io/badge/release-v0.1.0--alpha.2-147D70" alt="Release v0.1.0-alpha.2"></a>
+    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.3"><img src="https://img.shields.io/badge/release-v0.1.0--alpha.3-147D70" alt="Release v0.1.0-alpha.3"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-147D70" alt="Apache-2.0 license"></a>
   </p>
   <p><a href="README.zh-CN.md">简体中文</a> · <a href="#install">Install</a> · <a href="docs/agent-guide.md">Agent guide</a> · <a href="docs/verification.md">Test results</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
@@ -18,11 +18,18 @@ in its context. RowTrail opens local CSV/TSV/Parquet, runs read-only SQL, and ke
 versioned results on disk. The agent gets a bounded, typed observation and can
 branch from a saved result when the next question arrives.
 
+**New in alpha.3:** profile selected columns, explicitly prepare CSV/TSV as
+Parquet, and release workspace data safely. Saved-result queries and exports
+now verify content integrity as well as file identity.
+
 **Zero internal model calls. No API key. No spreadsheet UI.** Your agent chooses
 the questions and decides when the evidence is sufficient.
 
 | Built for | What the agent gets |
 |---|---|
+| **Understand unfamiliar data** | On-demand null counts, min/max and exact top-k; every scan has budgets. |
+| **Avoid repeated CSV parsing** | Explicit streaming preparation to an immutable Parquet dataset. |
+| **Control stored data** | Pin/release, dependency-safe GC and managed-data quotas. |
 | **Continue exploring** | Fixed dataset manifests and result revisions; reuse intermediate results through SQL. |
 | **Spend context carefully** | Row and byte budgets, paginated observations, exact integer and Decimal representation. |
 | **Work beyond one call** | Durable accepted jobs, explicit waiting, events and cancellation. |
@@ -36,12 +43,12 @@ CSV / TSV / Parquet → exact query → saved result → next question
 
 ## Install
 
-**v0.1.0-alpha.2** is an early engineering preview, licensed under Apache-2.0.
+**v0.1.0-alpha.3** is an early engineering preview, licensed under Apache-2.0.
 Native packages are available for **macOS arm64** and **Linux x86_64**
 (Ubuntu 24.04 / glibc 2.39 or newer).
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-alpha.2/install.sh -o /tmp/rowtrail-install.sh
+curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-alpha.3/install.sh -o /tmp/rowtrail-install.sh
 sh /tmp/rowtrail-install.sh
 export PATH="$HOME/.local/bin:$PATH"
 rowtrail --version
@@ -49,16 +56,12 @@ rowtrail --version
 
 The installer verifies SHA-256 and installs a versioned pair in `~/.local/bin`.
 Set `ROWTRAIL_INSTALL_DIR` to choose another directory, or extract an archive
-from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.2).
+from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.3).
 Keep `rowtrail` and `rowtrail-runtime` together.
 
-| Platform | Download, `.tar.xz` | Two installed executables |
-|---|---:|---:|
-| macOS arm64 | 19.00 MB | 103.17 MB |
-| Linux x86_64 | 22.24 MB | 118.23 MB |
-
-MB means decimal megabytes. Installed totals above count the binaries, excluding
-notices and workspace data. [Exact sizes, checksums and CI provenance →](docs/verification.md#native-distribution)
+Release archives must stay below **30 MB** per platform; CI also enforces
+4.5 MB for the CLI and 125 MB for the runtime. Download size is different from
+installed binary size. [Exact artifact sizes and verification →](docs/verification.md#native-distribution)
 
 ## Give it a question
 
@@ -79,6 +82,8 @@ dataset and manifest IDs in SQL, then use a fixed result revision for the next
 question. [The complete workflow](docs/usage.md#try-the-exact-exploration-loop)
 covers opening, waiting, paging, branching and export. A
 [runnable composition example](examples/explore.py) passes the references automatically.
+The [alpha.3 end-to-end example](examples/prepare_explore.py) also profiles,
+prepares, exports and collects its own intermediate data.
 
 ## Connect your agent
 
@@ -103,31 +108,40 @@ branching twice from a saved result, and returning to the original dataset.
 | Entry | 16,384 rows | 1,048,576 rows |
 |---|---:|---:|
 | RowTrail alpha.1 · CLI | 349.58 | 12,917.72 |
-| **RowTrail alpha.2 · CLI** | **123.20** | **377.35** |
-| **RowTrail alpha.2 · persistent NDJSON** | **104.13** | **360.55** |
-| DuckDB 1.5.5 · persistent session | 9.49 | 90.50 |
-| Direct DataFusion 55.0.0 · persistent session | 4.79 | 57.55 |
+| RowTrail alpha.2 · CLI | 123.20 | 377.35 |
+| **RowTrail alpha.3 · CLI** | **122.92** | **345.68** |
+| RowTrail alpha.2 · persistent NDJSON | 104.13 | 360.55 |
+| **RowTrail alpha.3 · persistent NDJSON** | **103.99** | **322.28** |
+| DuckDB 1.5.5 · persistent session | 9.39 | 92.23 |
+| Direct DataFusion 55.0.0 · persistent session | 4.56 | 58.93 |
 
-The same CLI workload improved **2.84× / 34.23× over alpha.1**. Direct engines
-remain faster in this test: RowTrail also pays for durable results, process
-isolation and protocol. Reference engines retain in-memory intermediates;
-DataFusion startup is excluded from its timing. These are local measurements,
-not a universal speed claim or evidence of agent adoption.
+Alpha.3 includes content verification on saved-result queries. On the million-row
+workload it is **8.4% faster through CLI / 10.6% through a session than alpha.2**
+on this machine. Direct engines remain faster: RowTrail pays for durable results,
+process isolation and protocol. They retain in-memory intermediates; direct
+DataFusion startup is excluded. These are local measurements, not universal
+performance guarantees or evidence of agent adoption.
 
-The published binaries passed **30 integration checks and four Rust unit tests
-on each platform**, plus MCP/session/SDK/installer probes. A **1,048,576-row sort**
-spilled under a **32 MiB engine pool** and every exported ID matched an independent
-sort. That pool limit is not a limit on total process memory.
+**Preparation has a cost.** On a separate million-row CSV workload, conversion
+costs 271 ms. Open + profile + ten follow-up aggregates takes 736 ms directly from
+CSV, or 652 ms including preparation. The measured break-even is eight follow-ups;
+it varies with data and queries. RowTrail leaves that choice to the agent.
+
+Alpha.3 adds **13 new integration scenarios** to the original 30, plus crash
+injection at four commit boundaries for both Arrow results and prepared Parquet.
+Six Rust tests include the subprocess harness. A **1,048,576-row sort** spills
+under a **32 MiB engine pool**, and every exported ID is checked against an
+independent sort. That pool budget does not cap total process memory.
 
 [Verification report & test inventory](docs/verification.md) ·
 [Method, paging and resource measurements](benchmarks/README.md) ·
-[Raw repeated results](benchmarks/performance/summary.json)
+[Alpha.3 raw performance records](benchmarks/performance/alpha3/)
 
 ## What comes next
 
-The exact local exploration loop works today. Sampling, prepared execution,
-native MCP Tasks, automatic host resume, retention/GC and remote sources are
-still unimplemented. [Current capabilities and limits](docs/progress.md) are
+The next slice is restricted progressive Parquet aggregation. Sampling and
+estimates, a SQL prepared-plan cache, native MCP Tasks, automatic host resume,
+automatic storage eviction and remote sources remain unimplemented. [Current capabilities and limits](docs/progress.md) are
 tracked separately from the roadmap.
 
 We want a useful tool that stays easy to install, compose and understand.

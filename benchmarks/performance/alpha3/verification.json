@@ -1,0 +1,63 @@
+{
+  "suites": {
+    "integration": {
+      "status": "passed",
+      "checks": [
+        "bounded open / explicit Decimal schema / idempotent open",
+        "relative paths resolve in each caller directory, independently of coordinator cwd",
+        "S1 CSV and four-row-group Parquet agree with hand-calculated results",
+        "typed parameters / large integer preservation / fixed revision pagination",
+        "S2 two result-only branches avoid original reads; missing dimension requires original source",
+        "multi-row-group Decimal aggregate matches independent integer reference",
+        "coalesced multi-batch IPC preserves 10,000-row pagination and result-only SQL",
+        "changing Arrow dictionaries remain readable and reusable across engine batches",
+        "export fixed revision with quality sidecar and typed roundtrip",
+        "query idempotency excludes wait but rejects changed semantics",
+        "read-only SQL and explicit source access enforcement",
+        "SQL identifiers cannot impersonate resource errors or invalidate valid sources",
+        "real background submission / external cancellation / confirmed worker exit",
+        "first preview survives eight cancellation races during coalesced result publication",
+        "scan budget exhaustion does not masquerade as empty success",
+        "computation timeout stops execution independently of client waiting",
+        "export reserves input bytes before reading and does not publish on budget failure",
+        "serialized observation budgets and result schema inspection",
+        "large Unicode validation errors obey output budgets and signal truncation",
+        "durable event replay and exclusive cursor",
+        "atomic job snapshot supplies a compatible event replay cursor",
+        "coordinator crash isolates old attempt, preserves committed results, and reports interrupted",
+        "worker crash becomes interrupted with confirmed process exit",
+        "corrupt committed part fails explicitly instead of returning an empty table",
+        "genuine empty result has a schema and final committed revision",
+        "bounded head inspection uses a real limited query and fixed result",
+        "late CSV type failure preserves partial results and propagates quality through queries and export",
+        "multi-file imports conservatively merge quality and empty CSV exports retain headers",
+        "source version mismatch and downstream invalidation",
+        "refresh freezes a new manifest while preserving old result invalidation"
+      ]
+    },
+    "alpha3": {
+      "status": "passed",
+      "checks": [
+        "one-scan typed null/min/max profile; deterministic top-k; scan budgets",
+        "fixed-revision result inspection avoids original reads and rejects floating row inspections",
+        "prepare publishes typed immutable Parquet only on success; idempotency and source independence",
+        "empty prepared tables retain schema; late CSV parse failure never publishes a partial dataset",
+        "TSV preparation preserves delimiter semantics",
+        "multi-file CSV preparation preserves all rows and per-file headers",
+        "same-size same-mtime corruption is rejected in read, saved-result SQL and export",
+        "an external alias cannot downgrade integrity checks on a managed Parquet input",
+        "pin protects ancestors; dry-run is non-destructive; GC creates durable expired-reference errors",
+        "retained query dependencies protect released prepared datasets",
+        "GC protects active job inputs; stopped prepare never exposes an unfinished dataset",
+        "quota admission includes result and spill reservations; terminal jobs release reservations",
+        "join plus partitioned window matches independent integer oracle"
+      ]
+    }
+  },
+  "rust_test_count": 6,
+  "crash_scenarios": 8,
+  "notes": [
+    "Two of the six Rust tests form the subprocess crash-injection test and its child harness.",
+    "MCP, NDJSON, Rust SDK, generated example and distribution checks are also run."
+  ]
+}

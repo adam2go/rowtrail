@@ -130,3 +130,36 @@ the query engine. `Client::session().await?` opens a reusable, checked connectio
   consistency. They are not transactional filesystem snapshots.
 - Cancellation becomes terminal after worker exit is observed. Worker or
   coordinator crashes leave interrupted jobs, not resumable SQL instructions.
+
+## Demand-driven profiles and preparation
+
+```sh
+rowtrail inspect mf_ID --columns amount,units --checks null_count,min_max
+rowtrail inspect mf_ID --columns region --checks top_k --top-k 10
+rowtrail inspect res_ID --revision 3 --checks head --max-rows 5
+rowtrail prepare ds_ID --manifest mf_ID --wait-ms 1000
+rowtrail workspace usage
+rowtrail workspace configure --quota-bytes 2147483648
+rowtrail pin res_ID
+rowtrail release res_ID
+rowtrail workspace gc           # dry run
+rowtrail workspace gc --apply   # collect released, unprotected managed data
+```
+
+`prepare` returns proposed dataset/manifest references; wait for completion before
+binding them. `job.prepared` repeats those references in later status/wait calls.
+For full execution budgets, use `call inspect` or `call prepare` with JSON from
+`rowtrail schema METHOD`. `open` never performs a profile or automatic conversion.
+Release all unused branch results before GC; retained children protect ancestors.
+The quota excludes SQLite, logs, external files and RSS. See the
+[contract guide](agent-guide.md) for scope and error handling.
+
+Run the complete generated-data example from a source checkout:
+
+```sh
+python3 examples/prepare_explore.py --rowtrail "$PWD/target/release/rowtrail" \
+  --workspace /tmp/rowtrail-preparation-example --output /tmp/rowtrail-example.parquet
+```
+
+The final Parquet and quality sidecar remain after the example collects its own
+intermediate data. The destination must not already exist.
