@@ -59,9 +59,14 @@ Set `ROWTRAIL_INSTALL_DIR` to choose another directory, or extract an archive
 from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.3).
 Keep `rowtrail` and `rowtrail-runtime` together.
 
-Release archives must stay below **30 MB** per platform; CI also enforces
-4.5 MB for the CLI and 125 MB for the runtime. Download size is different from
-installed binary size. [Exact artifact sizes and verification →](docs/verification.md#native-distribution)
+| Platform | Download `.tar.xz` | Two installed binaries |
+|---|---:|---:|
+| macOS arm64 | 19.03 MB | 103.40 MB |
+| Linux x86_64 | 22.31 MB | 118.49 MB |
+
+Both native CI jobs passed. MB is decimal; installed sizes exclude notices and
+workspace data. The compressed budget remains 30 MB.
+[Exact sizes, checksums and CI provenance →](docs/verification.md#native-distribution)
 
 ## Give it a question
 

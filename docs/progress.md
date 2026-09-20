@@ -28,6 +28,8 @@ It does not claim completion of all M2B–M6 roadmap work.
 - A standard-library Python example runs open → profile → prepare → two saved
   branches → export → release/GC. The product still makes zero model calls.
 
+The macOS arm64 and Ubuntu 24.04 x86_64 [native CI matrix](https://github.com/adam2go/rowtrail/actions/runs/35523791505) passed; both downloaded archive checksums were verified.
+
 See [the design decision](decisions/003-demand-driven-storage.md),
 [agent contracts](agent-guide.md), and [verification](verification.md) for evidence.
 
