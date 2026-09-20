@@ -5,7 +5,7 @@
   <p>为 Agent 而生的小型原生数据工具。<br>提出问题，保存精确结果，沿着结果继续探索。</p>
   <p>
     <a href="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml"><img src="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml/badge.svg" alt="构建与验证"></a>
-    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.3"><img src="https://img.shields.io/badge/release-v0.1.0--alpha.3-147D70" alt="v0.1.0-alpha.3 版本"></a>
+    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.4"><img src="https://img.shields.io/badge/release-v0.1.0--alpha.4-147D70" alt="v0.1.0-alpha.4 版本"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-147D70" alt="Apache-2.0 许可证"></a>
   </p>
   <p><a href="README.md">English</a> · <a href="#安装">安装</a> · <a href="docs/agent-guide.md">Agent 接入</a> · <a href="docs/verification.md">测试报告</a> · <a href="CONTRIBUTING.md">参与贡献</a></p>
@@ -17,13 +17,15 @@ Agent 探索一张大表，不应该先把整张表塞进上下文。RowTrail �
 执行只读 SQL，把带固定版本的结果留在磁盘。Agent 按预算读取带类型的观察，下一次追问
 可以直接从保存的结果继续。
 
-**alpha.3 新增：按需画像、显式 CSV/TSV → Parquet 整理、工作区容量与回收。**
-保存结果的继续查询和导出也会校验内容完整性。
+**alpha.4 新增：按 Parquet 文件递进的精确 count/sum/avg 检查点。**
+Agent 可以先观察已处理部分，保存固定版本，再决定是否继续。alpha.3 的按需画像、
+显式 CSV 整理与安全回收也都保留。
 
 **内部零模型调用，无需 API Key，没有表格界面。** 问什么、证据够不够，由你的 Agent 判断。
 
 | 设计目标 | Agent 实际得到什么 |
 |---|---|
+| **如实呈现进度** | 明确文件覆盖范围的精确聚合，每个检查点都能固定版本。 |
 | **快速理解陌生数据** | 按需统计空值、最小/最大值、常见值；扫描受预算约束。 |
 | **减少重复解析 CSV** | 显式流式整理为不可变 Parquet 数据集。 |
 | **管理工作区容量** | pin/release、依赖保护 GC，以及托管数据配额。 |
@@ -40,11 +42,11 @@ CSV / TSV / Parquet → 精确查询 → 保存结果 → 继续追问
 
 ## 安装
 
-当前 **v0.1.0-alpha.3** 是工程预览版，采用 Apache-2.0 许可证。
+当前 **v0.1.0-alpha.4** 是工程预览版，采用 Apache-2.0 许可证。
 原生包支持 **macOS arm64** 和 **Linux x86_64**（Ubuntu 24.04 / glibc 2.39 及以上）。
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-alpha.3/install.sh -o /tmp/rowtrail-install.sh
+curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-alpha.4/install.sh -o /tmp/rowtrail-install.sh
 sh /tmp/rowtrail-install.sh
 export PATH="$HOME/.local/bin:$PATH"
 rowtrail --version
@@ -52,17 +54,12 @@ rowtrail --version
 
 安装器校验 SHA-256，默认安装版本化的二进制组合到 `~/.local/bin`。
 可设置 `ROWTRAIL_INSTALL_DIR` 更换目录，也可以从
-[Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.3) 下载并解压。
+[Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.4) 下载并解压。
 请将 `rowtrail` 和 `rowtrail-runtime` 放在同一个目录。
 
-| 平台 | `.tar.xz` 下载包 | 安装后两个可执行文件 |
-|---|---:|---:|
-| macOS arm64 | 19.03 MB | 103.40 MB |
-| Linux x86_64 | 22.31 MB | 118.49 MB |
-
-两个平台的原生 CI 均已通过。MB 使用十进制；安装体积不含许可说明与工作区数据。
-压缩包 30 MB 的上限继续由 CI 检查。
-[精确大小、校验和与构建来源 →](docs/verification.md#native-distribution)
+原生压缩包保持 **30 MB** 上限；CLI 与运行时分别限制为 4.5 MB 和 125 MB。
+压缩下载体积与安装后的程序大小分开记录。
+[原生产物大小与验证 →](docs/verification.md#native-distribution)
 
 ## 先问一个问题
 
@@ -82,6 +79,7 @@ rowtrail query --sql "SELECT region, SUM(amount) AS total
 [完整操作指南](docs/usage.md#try-the-exact-exploration-loop) 包含等待、分页、分支探索与导出；
 [可运行的组合示例](examples/explore.py) 会自动传递这些引用。
 [alpha.3 完整示例](examples/prepare_explore.py) 还串起了画像、整理、两次分支、导出和回收。
+[渐进示例](examples/progressive.py) 则演示观察检查点，并在覆盖足够多文件后显式取消。
 
 ## 接入 Agent
 
@@ -107,7 +105,8 @@ rowtrail query --sql "SELECT region, SUM(amount) AS total
 | RowTrail alpha.2 · CLI | 123.20 | 377.35 |
 | **RowTrail alpha.3 · CLI** | **122.92** | **345.68** |
 | RowTrail alpha.2 · 持久 NDJSON | 104.13 | 360.55 |
-| **RowTrail alpha.3 · 持久 NDJSON** | **103.99** | **322.28** |
+| RowTrail alpha.3 · 持久 NDJSON | 103.99 | 322.28 |
+| **RowTrail alpha.4 · 持久 NDJSON** | **104.03** | **319.67** |
 | DuckDB 1.5.5 · 持久会话 | 9.39 | 92.23 |
 | 直接 DataFusion 55.0.0 · 持久会话 | 4.56 | 58.93 |
 
@@ -120,19 +119,24 @@ CLI 快约 **8.4%**、持久会话快约 **10.6%**。直接引擎在此测试中
 后续聚合，直接读 CSV 共 736 ms，计入整理后共 652 ms。这组数据到第八次追问才回本；
 具体阈值会随数据和问题变化，因此 RowTrail 把是否整理的选择留给 Agent。
 
-alpha.3 在原有 30 项集成检查上增加了 **13 组场景**，并对 Arrow 结果和 Parquet 整理
-分别注入四个提交边界的进程崩溃。6 项 Rust 测试包含该子进程测试框架。
-**1,048,576 行排序**在 **32 MiB 引擎内存池**下实际落盘，所有导出 ID 与独立排序逐项一致。
-内存池上限不等于整个进程的内存上限。
+**更早观察也有成本。** 16 个 Parquet 文件、1,048,576 行的测试中，渐进模式首个可读局部
+检查点为 **22.48 ms**，普通 SQL 的首个结果为 **37.27 ms**；最终完成耗时分别为
+**189.46 ms 和 40.63 ms**，因为渐进模式会持久化每个文件的检查点。只需要最终答案时，
+普通 SQL 更合适。局部结果只代表已处理文件，不是整表估计；平均值固定六位小数并明确
+截断规则。[类型与限制](docs/decisions/004-progressive-file-aggregation.md) 有完整说明。
 
-[验证报告与测试清单](docs/verification.md) ·
-[测量方法与资源测试](benchmarks/README.md) ·
-[alpha.3 原始性能记录](benchmarks/performance/alpha3/)
+当前测试包含 **53 项集成场景**、6 项 Rust 测试（含八个提交崩溃场景）和
+MCP/会话/SDK/安装验证。每个渐进检查点都与独立整数/Decimal 计算逐项比对。百万行排序
+仍能在 32 MiB 引擎内存池下落盘，并校验所有导出 ID；内存池不等于进程 RSS 上限。
+
+[验证结果与完整测量条件](docs/verification.md) ·
+[alpha.4 原始记录](benchmarks/performance/alpha4/) ·
+[alpha.3 历史证据](docs/releases/alpha3-verification.md)
 
 ## 接下来的方向
 
-下一步是受限的 Parquet 渐进聚合。抽样估计、SQL 预备计划缓存、原生 MCP Tasks、宿主自动接续、
-自动淘汰策略和远程来源尚未实现。[当前能力与限制](docs/progress.md) 会与规划分开记录。
+渐进聚合目前按完整文件推进，不支持 GROUP BY 和过滤。行组调度、抽样估计、任务中断后续算、
+SQL 预备计划缓存、原生 MCP Tasks、宿主自动接续/淘汰和远程来源仍未实现。[当前能力与限制](docs/progress.md) 会与规划分开记录。
 
 我们希望它一直容易安装、容易组合、容易理解。欢迎让协议更清楚、安装包更小、完整探索
 更快的贡献。从 [贡献指南](CONTRIBUTING.md)、[源码构建](docs/usage.md#build) 或一个

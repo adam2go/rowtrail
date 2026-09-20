@@ -128,3 +128,13 @@ It includes startup, open, conversion, one profile and ten subsequent queries;
 mode order alternates and a Python integer-cent oracle checks all answers. The
 measured break-even is workload-specific and is never used as an automatic policy.
 Product code does not depend on DuckDB; this harness uses it only to write fixtures.
+
+## Alpha.4: useful partial latency versus final work
+
+`progressive.py` compares ordinary SQL and whole-file progressive aggregation on
+16 files / 1,048,576 rows. It measures observed first-result time separately from
+final completion and retains file-prefix quality, physical I/O and every raw run.
+Every observed partial and final answer matches a Python integer/Decimal oracle.
+The first partial arrives earlier, while retaining 16 checkpoints makes final
+completion slower. Read the [current report](../docs/verification.md) before using
+these measurements; a partial and complete result are different evidence.

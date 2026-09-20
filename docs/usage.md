@@ -163,3 +163,17 @@ python3 examples/prepare_explore.py --rowtrail "$PWD/target/release/rowtrail" \
 
 The final Parquet and quality sidecar remain after the example collects its own
 intermediate data. The destination must not already exist.
+
+## Progressive aggregate snapshots
+
+```sh
+rowtrail schema analyze
+rowtrail analyze --request aggregate.json
+python3 examples/progressive.py /path/to/parquet-directory --column amount \
+  --stop-after-files 3
+```
+
+The JSON shape and supported numeric types are in the [agent guide](agent-guide.md).
+The stop threshold is a caller policy; cancellation can race with another completed
+file, so inspect the returned job state and actual coverage. A partial checkpoint
+is a reusable exact answer over that file prefix, not an estimate over unseen data.

@@ -1,28 +1,12 @@
+> Archived alpha.3 evidence and capability snapshot.
+
 # Implementation progress
 
-[Home](../README.md) · [Verification and measurements](verification.md)
+[Home](../../README.md) · [Verification and measurements](../verification.md)
 
-Updated 2026-09-21 for **0.1.0-alpha.4**. This release adds restricted progressive Parquet file aggregation on top of
-demand-driven inspection and explicit storage management.
+Updated 2026-09-21 for **0.1.0-alpha.3**. This release extends the exact local
+exploration loop with demand-driven inspection and explicit storage management.
 It does not claim completion of all M2B–M6 roadmap work.
-
-## Alpha.4
-
-- `analyze`: cumulative count/sum/avg over complete Parquet manifest files, with
-  1–16 aggregate descriptions and normal job/resource budgets.
-- Replacement checkpoint revisions contain one row, stay immutable, and can be
-  queried or exported explicitly. File coverage and finality remain separate.
-- UInt64 counts; checked exact integer-unit sums; explicit Decimal average at
-  scale 6 with truncation toward zero. Floats/grouping/filter expressions rejected.
-- Budget/cancellation/worker-loss tests preserve the last full-file checkpoint;
-  empty and overflowing inputs have explicit semantics.
-- One-way schema-3 → schema-4 upgrade preserves old prefix revisions and prevents
-  older runtimes from opening stores with new checkpoint semantics. A real old/new
-  binary upgrade probe checks preserved values and derived SQL.
-- Ten new integration scenarios (53 total). Ordinary session exploration measures
-  104.03 / 319.67 ms for 16K / 1M rows locally. Progressive mode trades total time
-  and checkpoint writes for earlier partial observations; it is not a general SQL
-  speed optimization. [Design](decisions/004-progressive-file-aggregation.md).
 
 ## Alpha.3
 
@@ -41,15 +25,15 @@ It does not claim completion of all M2B–M6 roadmap work.
   GC persists expiration before deletion, and expired references fail explicitly.
 - Test-only subprocess crashes at four commit boundaries for Arrow results and
   prepared Parquet. Recovery distinguishes visible commits from orphan files.
-- All ten data contracts are available through MCP, CLI calls, NDJSON and the Rust
+- All nine contracts are available through MCP, CLI calls, NDJSON and the Rust
   client; dedicated CLI commands cover preparation and storage maintenance.
 - A standard-library Python example runs open → profile → prepare → two saved
   branches → export → release/GC. The product still makes zero model calls.
 
 The macOS arm64 and Ubuntu 24.04 x86_64 [native CI matrix](https://github.com/adam2go/rowtrail/actions/runs/35523791505) passed; both downloaded archive checksums were verified.
 
-See [the design decision](decisions/003-demand-driven-storage.md),
-[agent contracts](agent-guide.md), and [verification](verification.md) for evidence.
+See [the design decision](../decisions/003-demand-driven-storage.md),
+[agent contracts](../agent-guide.md), and [verification](../verification.md) for evidence.
 
 ## Existing foundation
 
@@ -58,14 +42,14 @@ results and fixed revisions/cursors, bounded observations, durable jobs/events,
 idempotency, real cancellation, worker reuse, crash interruption, source refresh
 and transitive invalidation. Two executables keep the client free of query-engine,
 database and HTTP dependencies. Apache-2.0, dependency notices and distribution
-size budgets remain mandatory. [Alpha.2 history](releases/alpha2-progress.md).
+size budgets remain mandatory. [Alpha.2 history](../releases/alpha2-progress.md).
 
 ## Limits and remaining work
 
-- Further progressive work: row-group scheduling, sampling/estimates, reusable
-  accumulator states and interrupted-run continuation are not implemented.
-  `analyze` reports file-prefix coverage; ordinary SQL previews remain output
-  prefixes with unknown input coverage. Neither represents a population estimate.
+- Alpha.4: restricted progressive Parquet count/sum/avg is the next planned slice.
+  Sampling, estimates, reusable fragment states and estimate-to-exact continuation
+  are not implemented. SQL previews remain committed output prefixes, not partial
+  aggregation estimates or known source-coverage percentages.
 - Top-k still performs an exact aggregation: k limits returned rows, not work.
   Broader above-memory join/window/high-cardinality workloads remain future work.
 - Preparation is CSV/TSV storage conversion, not a prepared SQL plan cache.
@@ -96,7 +80,6 @@ cargo build --release --locked
 cargo test --release --locked --workspace
 python3 tests/integration/exploration.py --bin-dir target/release
 python3 tests/integration/alpha3.py
-python3 tests/integration/alpha4.py
 python3 scripts/check_boundaries.py
 python3 scripts/mcp_probe.py target/release/rowtrail
 python3 scripts/session_probe.py target/release/rowtrail

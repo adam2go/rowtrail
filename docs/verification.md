@@ -1,140 +1,130 @@
-# Verification: alpha.3
+# Verification: alpha.4
 
-[Home](../README.md) · [Contracts](agent-guide.md) · [Current limits](progress.md)
+[Home](../README.md) · [Current limits](progress.md) · [Agent contracts](agent-guide.md)
 
-This report separates deterministic correctness, local performance measurements
-and release artifact verification. No test calls a model. It is not a real-agent
-adoption trial. Alpha.2 evidence remains in [the archived report](releases/alpha2-verification.md)
-and [release provenance](releases/alpha2-verification.json).
+This report separates correctness, local timing and native artifact verification.
+No tests call a model. Historical results remain in the
+[alpha.3 report](releases/alpha3-verification.md) and
+[alpha.3 release provenance](releases/alpha3-verification.json).
 
-## Correctness and lifecycle
+## Correctness
 
-Both [native CI jobs](https://github.com/adam2go/rowtrail/actions/runs/35523791505)
-pass **43 integration scenarios** (30 existing + 13
-new), **six Rust tests**, MCP-to-CLI result consumption, NDJSON lifecycle/frame
-bounds, the Rust SDK and the generated preparation/export/GC example.
-The [machine-readable check inventory](../benchmarks/performance/alpha3/verification.json)
-lists every scenario; the scripts keep complete request/response traces locally.
+The local release build passes **53 integration scenarios**: 30 foundation, 13
+alpha.3 profile/preparation/storage scenarios, and ten new progressive scenarios.
+Six Rust tests include the existing eight subprocess crash-at-commit cases for
+Arrow results and prepared Parquet, plus their child harness. MCP/NDJSON and the
+old-to-new binary upgrade probe also pass.
 
-| Alpha.3 addition | Evidence |
+| New scenario | What is checked |
 |---|---|
-| Selected-column null/min/max | One CSV read; exact large integers/Decimal and null semantics |
-| Top-k | Exact counts, deterministic count/value ordering, bounded output |
-| Saved-result profiles/head | Explicit revision; zero original-source reads |
-| Preparation | CSV/TSV, empty and multi-file tables, Decimal, idempotency, independent copy |
-| Failed preparation | Late parse error and time exhaustion publish no usable dataset |
-| Integrity | Same-size/same-mtime byte corruption fails read, derived SQL and export |
-| Conflicting aliases | External alias cannot bypass managed-Parquet checksum verification |
-| Retention | Pins/retained children protect ancestors; active job inputs survive GC |
-| GC | Dry-run preserves data; apply gives durable `OBJECT_EXPIRED`; repeated GC is safe |
-| Quota | Admission reserves result/spill budgets; completed tasks release reservations |
-| SQL | Join plus partitioned window agrees with an independent Python integer oracle |
-| Commit crashes | Four subprocess fault points × Arrow/Parquet paths = eight scenarios |
+| Every checkpoint | Exact count, signed/unsigned sums, nulls and six-digit Decimal means against independent Python arithmetic |
+| Snapshot replacement | Every revision contains one aggregate row, with fixed file-prefix coverage |
+| Reuse and export | Partial checkpoint SQL uses zero original bytes; export/reopen preserves partial quality |
+| Preview disabled | Exactly one final checkpoint |
+| Durable events | Every published aggregate revision has its `result.ready` event |
+| Result budget | Only the last complete file checkpoint remains readable |
+| Unsupported requests | Functions, numeric types, missing columns, duplicate aliases and CSV input fail explicitly |
+| Empty input | Count zero, null sum/average, typed schema |
+| Cancellation/worker crash | Execution stops; earlier checkpoints remain readable and partial |
+| Overflow | Checked arithmetic fails explicitly, without replacing a valid prefix with wrapped values |
 
-The crash test stops immediately after part rename, after part commit, before
-terminal commit and after terminal commit. It checks preview preservation, orphan
-cleanup, terminal-state preservation and all-or-nothing prepared-dataset visibility.
-Hooks exist only in test builds. Two of the six Rust tests are this subprocess
-suite and its child harness. External export/sidecar crash reconciliation remains
-future work; these tests do not establish atomicity across all external files.
+[Check inventory](../benchmarks/performance/alpha4/verification.json) ·
+[Executable integration tests](../tests/integration/alpha4.py).
+The full trace of each local/CI run is retained as a verification artifact.
 
-## Full-exploration performance
+A [real alpha.3 → alpha.4 binary probe](../benchmarks/performance/alpha4/upgrade.json)
+opens a schema-3 store, preserves an exact large-integer fixed revision, derives a
+new query from it, and verifies that the old runtime refuses the upgraded schema-4
+store. The upgrade is one-way. An old coordinator already running in a workspace
+keeps its capabilities until it finishes and exits.
 
-One macOS 26.6.2 arm64 machine, 24 GiB RAM, 14 logical CPUs, Rust 1.94.0, release
-build, five serial repeats, warm OS cache and fresh workspace per run. Workload:
-open → aggregate → persist filtered rows → two saved-result branches → query a
-different original dimension. Observations and client entry costs are included.
+## Progressive latency and total cost
 
-| Entry | 16,384 rows, median ms | 1,048,576 rows, median ms |
+1,048,576 rows split into 16 Parquet files, 7,313,314 source bytes. Count(*),
+count(amount), sum and mean; Decimal arithmetic. Five serial repeats with alternating
+mode order, warm OS cache and a fresh workspace/session each run. Both modes use
+RowTrail. Fixture creation and `open` are excluded; worker startup, observations,
+scanning, checkpoint writes and final publication are included.
+
+| Mode | First observed result, median ms | Final result, median ms |
 |---|---:|---:|
-| Alpha.2 CLI, historical | 123.20 | 377.35 |
-| Alpha.3 CLI | 122.92 | 345.68 |
-| Alpha.2 NDJSON, historical | 104.13 | 360.55 |
+| Ordinary SQL aggregate | 37.27 | 40.63 |
+| Progressive file checkpoints | 22.48 | 189.46 |
+
+The first progressive result is only the completed file prefix, not the full-table
+answer. Its exact rows are independently verified for its reported file coverage.
+The final answers are also checked independently. Polls are 2 ms apart, so observed
+availability is an upper bound. The progressive path persists 16 immutable parts
+instead of one, accounting for part of its final-time cost. It is useful when early
+bounded evidence or cancellation matters; ordinary SQL is preferable when only the
+complete answer matters. It is not a universal query-speed improvement.
+
+[All raw repeats, I/O, coverage and binary hashes](../benchmarks/performance/alpha4/progressive-1048576.json).
+The current contract is whole-file scheduling, no filters/grouping/estimates.
+Average is Decimal128(38,6), truncated toward zero. Request sum plus count if exact
+rational arithmetic is needed. [Arithmetic and snapshot design](decisions/004-progressive-file-aggregation.md).
+
+## Existing exploration performance
+
+Same persistent-session five-query workload as alpha.3: open, aggregate, persist a
+filtered result, branch twice, then query another original dimension. Five serial
+repeats on the same macOS 26.6.2 arm64 machine (24 GiB RAM, 14 logical CPUs), warm
+cache, fresh workspace. Every answer is checked against the independent engine.
+
+| Version | 16,384 rows, median ms | 1,048,576 rows, median ms |
+|---|---:|---:|
 | Alpha.3 NDJSON | 103.99 | 322.28 |
-| DuckDB 1.5.5 persistent, current CLI trial | 9.39 | 92.23 |
-| DataFusion 55.0.0 persistent, current CLI trial | 4.56 | 58.93 |
+| Alpha.4 NDJSON | 104.03 | 319.67 |
 
-Every trial checks answers. Direct engines may retain intermediate tables in
-memory; RowTrail persists them. Direct DataFusion excludes process startup but
-also records process wall time. The data supports a local improvement over
-alpha.2; it does not establish an advantage over these mature engines.
+The small differences do not establish a meaningful improvement or regression.
+Saved branches retain zero original-source reads and full content verification.
+Direct persistent DuckDB/DataFusion remain faster; their current timings and the
+fairness limits are retained in the raw reports.
+[Small trial](../benchmarks/performance/alpha4/session-16384.json) ·
+[Million-row trial](../benchmarks/performance/alpha4/session-1048576.json).
 
-[Raw CLI small](../benchmarks/performance/alpha3/cli-16384.json) ·
-[Raw CLI million](../benchmarks/performance/alpha3/cli-1048576.json) ·
-[Raw session small](../benchmarks/performance/alpha3/session-16384.json) ·
-[Raw session million](../benchmarks/performance/alpha3/session-1048576.json)
+The alpha.3 preparation experiment remains historical evidence: 271 ms conversion
+and a workload-specific break-even after eight follow-ups, including conversion.
+It has not been relabeled as an alpha.4 rerun.
 
-Full integrity initially slowed million-row session exploration to 469.98 ms.
-Runtime-detected SHA-256 CPU acceleration reduced it to 322.28 ms while retaining
-verification on all managed-input paths. The [pre-acceleration repeats](../benchmarks/performance/alpha3/before-sha-acceleration/)
-are retained, with their own executable hashes. The bounded cache shares verified
-bytes across range reads; it does not skip verification across jobs.
+## Above-memory regression
 
-## Preparation includes conversion cost
-
-1,048,576 rows; 32,269,410-byte typed CSV, approximately 8.31 MB managed Parquet.
-Five repeats per mode, alternating mode order. Both paths include session startup,
-open, amount profile and ten follow-up aggregate queries; the prepared path also
-includes conversion. Every answer matches a Python integer-cent oracle. DuckDB
-only writes the fixture here, and is not a speed baseline for this experiment.
-
-| Path | Prepare, median ms | Profile, median ms | Complete workflow, median ms |
-|---|---:|---:|---:|
-| Read CSV directly | 0 | 70.24 | 736.02 |
-| Explicit prepare + query | 271.11 | 22.27 | 652.29 |
-
-The first cheaper cumulative prepared result occurs at **eight follow-up queries**
-in this fixture. A single question does not justify its conversion cost. Row width,
-types, selectivity, cache and question count can change the result. Whole-part hash
-verification is included even when a Parquet query projects fewer columns.
-[All repeats, stages, I/O, binary hashes and conditions](../benchmarks/performance/alpha3/prepare-1048576.json).
-
-## Above-memory execution
-
-The existing independent full-row check still passes: 1,048,576 rows, 228,139,988
-source bytes, 32 MiB engine pool, 26 spill events, 64 result parts (largest
-3,363,970 bytes). Local sort including its observation: 1,183.52 ms; export:
-310.19 ms. Sampled worker RSS: 142,000,128 bytes. This is one correctness run,
-not a repeated timing benchmark or an RSS hard-bound measurement. Every exported
-ID matches the independent integer-key sort.
-[Raw resource report](../benchmarks/performance/alpha3/resources-macos.json).
+The full independent sort/export check passes again: 1,048,576 rows, 228,139,988
+source bytes, 32 MiB engine pool, 26 spills and 64 result parts, max 3,363,970 bytes.
+One local correctness run: sort with observation 1,289.69 ms; export 309.93 ms;
+sampled worker RSS 139,444,224 bytes. Every exported ID matches the integer-key
+reference. This is not a repeated timing study or a process-memory hard limit.
+[Raw report](../benchmarks/performance/alpha4/resources-macos.json).
 
 ## Native distribution
 
-Release candidates must pass the complete macOS arm64 and Ubuntu 24.04 x86_64 CI
-matrix before publication. Budgets remain 30,000,000 compressed bytes per archive,
-4,500,000 CLI bytes and 125,000,000 runtime bytes. Archives contain both binaries,
-Apache-2.0 and upstream notices for 299 dependency declarations. One small SHA
-assembly backend was added; no model, service, Python or Node dependency was added.
+Release candidates must pass macOS arm64 and Ubuntu 24.04 x86_64 CI before
+publication. Budgets remain 30,000,000 compressed bytes, 4,500,000 CLI bytes and
+125,000,000 runtime bytes. This iteration adds no dependency beyond alpha.3's
+299 declarations/notices. Apache-2.0 and upstream notices remain in each archive.
+Linux requires glibc 2.39+. Packages are unsigned engineering previews.
 
-[Release provenance](release-verification.json) records the successful native CI
-run and source commit `6153dce0c8b7d008d6613c0f5b8baa046d5f0b00`. Both downloaded
-archives passed SHA-256 verification. The macOS CI archive was installed locally
-and ran the complete profile/prepare/branch/export/GC example.
-
-| Artifact | Compressed bytes | CLI bytes | Runtime bytes |
-|---|---:|---:|---:|
-| macOS arm64 | 19,032,384 | 3,651,040 | 99,751,680 |
-| Linux x86_64 | 22,306,904 | 4,084,544 | 114,408,960 |
-
-Native Linux requires glibc 2.39+. Packages are unsigned previews. CI resource
-runs also passed full-row independent verification; their timings are not used
-as benchmark medians. Alpha.2 release evidence remains archived above.
+The completed CI run, downloaded checksums, native sizes and platform resource
+reports will be recorded in [release-verification.json](release-verification.json)
+after verification. Prior published artifacts remain in the alpha.3 archive above.
 
 ## Reproduce
 
 ```sh
+cargo fmt --check
+cargo clippy --workspace --all-targets --locked -- -D warnings
 cargo build --release --locked
 cargo test --release --workspace --locked
 python3 tests/integration/exploration.py --bin-dir target/release
 python3 tests/integration/alpha3.py
-# In an optional benchmark-only environment with duckdb==1.5.5:
+python3 tests/integration/alpha4.py
+# Optional benchmark-only environment, duckdb==1.5.5:
+python benchmarks/progressive.py
 python benchmarks/compare.py --entry session --rows 1048576 --repeats 5
-python benchmarks/prepare.py --rows 1048576 --repeats 5
 python benchmarks/resources.py
+# Actual old/new binaries are needed for the compatibility probe:
+python3 scripts/upgrade_probe.py /path/to/alpha3 /path/to/alpha4
 ```
 
-Raw performance files carry binary SHA-256 hashes. Keep timed work serial and
-avoid concurrent builds. Use `scripts/cargo-local.sh` for the local macOS toolchain
-selection when needed. CI shared-runner durations are correctness evidence, not
-comparable benchmark medians.
+Use the local Cargo wrapper on macOS when needed. Keep timed work serial and avoid
+concurrent builds. Shared-runner CI durations are not comparable benchmark medians.
