@@ -1,4 +1,5 @@
 """Deterministic S1/S2, lifecycle, and fault checks. No model or network required."""
+from workloads import LONG_QUERY
 import argparse, collections, json, os, pathlib, signal, sqlite3, subprocess, tempfile, time
 
 parser=argparse.ArgumentParser()
@@ -146,9 +147,17 @@ try:
     check('SQL identifiers cannot impersonate resource errors or invalidate valid sources')
 
     started=time.perf_counter()
-    long=call('query',{'bindings':{'t':binding(many)},'sql':'SELECT COUNT(*) FROM t a CROSS JOIN t b WHERE a.id+b.id>0','execution':{'wait_ms':0,'run_timeout_ms':30000}})
+    long=call('query',{'bindings':{'t':binding(many)},'sql':LONG_QUERY,'execution':{'wait_ms':0,'run_timeout_ms':30000}})
     assert time.perf_counter()-started<2
-    time.sleep(.1)
+    deadline=time.monotonic()+5
+    while True:
+        status=call('control',{'action':'status','ref':long['job_id']})['job']
+        assert status['state'] not in ('completed','failed','budget_exhausted','interrupted'),status
+        with sqlite3.connect(workspace/'metadata.sqlite') as connection:
+            worker=connection.execute('SELECT worker_pid FROM jobs WHERE id=?',(long['job_id'],)).fetchone()[0]
+        if status['state']=='running' and worker:break
+        assert time.monotonic()<deadline,status
+        time.sleep(.005)
     call('control',{'action':'cancel','ref':long['job_id']})
     cancelled=wait(long)
     assert cancelled['job']['state']=='cancelled',cancelled
@@ -178,7 +187,7 @@ try:
     assert budget['job']['state']=='budget_exhausted',budget
     check('scan budget exhaustion does not masquerade as empty success')
     assert budget['job']['metrics']['io']['source_read_bytes']<=16
-    _,timed=query({'t':binding(many)},'SELECT COUNT(*) FROM t a CROSS JOIN t b WHERE a.id+b.id>0',execution={'run_timeout_ms':30},success=False)
+    _,timed=query({'t':binding(many)},LONG_QUERY,execution={'run_timeout_ms':30},success=False)
     assert timed['job']['state']=='budget_exhausted' and timed['job']['metrics']['worker_exit_confirmed'],timed
     check('computation timeout stops execution independently of client waiting')
     no_export=base/'budget-export.parquet'
@@ -221,7 +230,7 @@ try:
     cancel_done=call('control',{'action':'cancel','ref':completed_job})
     assert cancel_done['already_terminal'] and cancel_done['job']['state']=='completed'
     # A global query has no readable revision before it has produced an answer.
-    long=call('query',{'bindings':{'t':binding(many)},'sql':'SELECT COUNT(*) FROM t a CROSS JOIN t b WHERE a.id+b.id>0','execution':{'wait_ms':0,'preview':'none'}})
+    long=call('query',{'bindings':{'t':binding(many)},'sql':LONG_QUERY,'execution':{'wait_ms':0,'preview':'none'}})
     for _ in range(100):
         status=call('control',{'action':'status','ref':long['job_id']})['job']
         if status['state']=='running':break
@@ -235,7 +244,7 @@ try:
     assert interrupted['state']=='interrupted',interrupted
     assert read(final)['rows']==fixture['small']['expected_region_sum_count']
     check('coordinator crash isolates old attempt, preserves committed results, and reports interrupted')
-    long=call('query',{'bindings':{'t':binding(many)},'sql':'SELECT COUNT(*) FROM t a CROSS JOIN t b WHERE a.id+b.id>0','execution':{'wait_ms':0}})
+    long=call('query',{'bindings':{'t':binding(many)},'sql':LONG_QUERY,'execution':{'wait_ms':0}})
     with sqlite3.connect(workspace/'metadata.sqlite') as connection:
         for _ in range(100):
             row=connection.execute('SELECT worker_pid FROM jobs WHERE id=?',(long['job_id'],)).fetchone()

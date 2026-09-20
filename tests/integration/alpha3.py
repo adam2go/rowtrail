@@ -1,4 +1,5 @@
 """Demand-driven profile, managed preparation, integrity and retention contracts."""
+from workloads import LONG_QUERY
 import argparse, hashlib, json, os, pathlib, signal, sqlite3, subprocess, tempfile, time
 from decimal import Decimal
 
@@ -149,7 +150,7 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-alpha3-') as td:
         numbers_file=base/'numbers.csv';numbers_file.write_text('id\n'+''.join(f'{i}\n' for i in range(16384)))
         numbers=call('open',{'source':str(numbers_file)})
         material=query({'t':bind(numbers)},'SELECT id FROM t')
-        active=call('query',{'bindings':{'t':ref(material)},'sql':'SELECT COUNT(*) FROM t a CROSS JOIN t b WHERE a.id+b.id>0','execution':{'wait_ms':0}})
+        active=call('query',{'bindings':{'t':ref(material)},'sql':LONG_QUERY,'execution':{'wait_ms':0}})
         call('control',{'action':'release','ref':ref(material)['result_ref']})
         call('control',{'action':'release','ref':active['result_ref']})
         assert call('control',{'action':'status','ref':active['job_id']})['job']['state'] not in terminal
