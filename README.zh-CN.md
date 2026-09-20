@@ -1,26 +1,41 @@
-# RowTrail
+<div align="center">
+  <img src="docs/brand/trail.png" width="720" alt="RowTrail 吉祥物小迹：三行薄荷绿色数据组成的小生物，沿着橙色足迹向前走。">
+  <h1>RowTrail</h1>
+  <p><strong>探索数据，留下可继续的足迹。</strong></p>
+  <p>为 Agent 而生的小型原生数据工具。<br>提出问题，保存精确结果，沿着结果继续探索。</p>
+  <p>
+    <a href="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml"><img src="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml/badge.svg" alt="构建与验证"></a>
+    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.2"><img src="https://img.shields.io/badge/release-v0.1.0--alpha.2-147D70" alt="v0.1.0-alpha.2 版本"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-147D70" alt="Apache-2.0 许可证"></a>
+  </p>
+  <p><a href="README.md">English</a> · <a href="#安装">安装</a> · <a href="docs/agent-guide.md">Agent 接入</a> · <a href="docs/verification.md">测试报告</a> · <a href="CONTRIBUTING.md">参与贡献</a></p>
+</div>
 
-[English](README.md) · [下载](https://github.com/adam2go/rowtrail/releases)
+---
 
-面向 Agent 的本地结构化数据探索工具。打开陌生 CSV 或 Parquet，执行只读 SQL，
-保存带固定版本的结果，再基于已有结果继续追问。结果留在磁盘，Agent 按预算读取观察。
-工具内部不调用模型，分析方向与结论由外部 Agent 判断。
+Agent 探索一张大表，不应该先把整张表塞进上下文。RowTrail 打开本地 CSV/TSV/Parquet，
+执行只读 SQL，把带固定版本的结果留在磁盘。Agent 按预算读取带类型的观察，下一次追问
+可以直接从保存的结果继续。
 
-当前是 **0.1.0-alpha.2 工程预览版**，采用 Apache-2.0。已实现第一条精确探索闭环，
-尚未实现抽样估计、宿主自动接续、原生 MCP Tasks、自动 GC 和远程来源。
-完整范围见 [进度与限制](docs/progress.md)。
+**内部零模型调用，无需 API Key，没有表格界面。** 问什么、证据够不够，由你的 Agent 判断。
 
-本版原生下载包约 **macOS 19 MB / Linux 22 MB**。同机同 CLI 的五步探索，
-16K 行约比上一版快 2.8 倍，百万行约快 34 倍；10,000 行分页从 570 ms 降到 21 ms。
-这是相对上一版的本机实测，完整条件、原始数据和成熟引擎对照见 [基准说明](benchmarks/README.md)。
+| 设计目标 | Agent 实际得到什么 |
+|---|---|
+| **探索可以接续** | 固定数据清单和结果版本，通过 SQL 复用中间结果。 |
+| **节省上下文** | 行数与字节预算、分页观察、精确保留整数与 Decimal。 |
+| **任务跨调用存续** | 持久化受理任务，显式等待、事件和取消。 |
+| **保持原生与轻量** | 两个可执行文件，运行不需要 Python、Node、Docker 或外部数据库。 |
 
-## 安装与运行
+```text
+CSV / TSV / Parquet → 精确查询 → 保存结果 → 继续追问
+                         ↓          ↓
+                      Agent 按预算读取观察
+```
 
-初期支持 macOS 和 Linux。将下载包内的 `rowtrail` 与 `rowtrail-runtime` 放在同一个
-`PATH` 目录即可。运行发布包不需要 Rust、Python、Node、Docker 或外部数据库。
+## 安装
 
-发布包提供 macOS arm64 和 Linux x86_64（Ubuntu 24.04 / glibc 2.39 及以上）版本。
-安装器校验 SHA-256，默认安装到 `~/.local/bin`，也可设置 `ROWTRAIL_INSTALL_DIR`：
+当前 **v0.1.0-alpha.2** 是工程预览版，采用 Apache-2.0 许可证。
+原生包支持 **macOS arm64** 和 **Linux x86_64**（Ubuntu 24.04 / glibc 2.39 及以上）。
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-alpha.2/install.sh -o /tmp/rowtrail-install.sh
@@ -29,65 +44,82 @@ export PATH="$HOME/.local/bin:$PATH"
 rowtrail --version
 ```
 
-也可以下载 `.tar.xz` 包后解压。从源码构建需要 Rust 1.94.0 和 C 编译器：
+安装器校验 SHA-256，默认安装版本化的二进制组合到 `~/.local/bin`。
+可设置 `ROWTRAIL_INSTALL_DIR` 更换目录，也可以从
+[Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.2) 下载并解压。
+请将 `rowtrail` 和 `rowtrail-runtime` 放在同一个目录。
+
+| 平台 | `.tar.xz` 下载包 | 安装后两个可执行文件合计 |
+|---|---:|---:|
+| macOS arm64 | 19.00 MB | 103.17 MB |
+| Linux x86_64 | 22.24 MB | 118.23 MB |
+
+这里 MB 使用十进制；安装体积仅统计两个程序，不含许可说明和工作区数据。
+[精确字节数、校验和及构建来源 →](docs/verification.md#native-distribution)
+
+## 先问一个问题
+
+安装后直接运行，不用另外下载数据：
 
 ```sh
-cargo build --release --locked
-export PATH="$PWD/target/release:$PATH"
-rowtrail doctor
-rowtrail-runtime fixtures --directory /tmp/rowtrail-data --rows 16384
-rowtrail open /tmp/rowtrail-data/small.parquet
+rowtrail query --sql "SELECT region, SUM(amount) AS total
+  FROM (VALUES ('east', 12), ('east', 8), ('west', 7)) AS orders(region, amount)
+  GROUP BY region ORDER BY region"
 ```
 
-用返回的 Dataset 与 Manifest ID 绑定输入：
+精确结果是 `east = 20`、`west = 7`。返回 JSON 包含稳定的任务引用；如果在等待预算内
+已有可读结果，还会包含有界的结果观察。`ok: true` 表示调用被接受，是否计算完成要看 `job.state`。
 
-```sh
-rowtrail query --bind orders=ds_ID@mf_ID \
-  --sql 'SELECT region, SUM(amount) AS total FROM orders GROUP BY region'
-rowtrail job wait job_ID --wait-ms 1000
-rowtrail read res_ID --revision 2 --max-rows 20
-rowtrail query --bind saved=res_ID@2 --sql 'SELECT * FROM saved WHERE total > 0'
-rowtrail export res_ID --revision 2 --format parquet --output ./result.parquet
-```
-
-示例中的 ID 和 revision 要替换成实际返回值。便宜查询直接返回结果观察；耗时查询返回
-真实后台任务。关闭提交命令不会停止计算，`rowtrail job cancel job_ID` 才会取消。
-
-如果想直接运行完整示例，无需手动替换 ID：
-
-```sh
-python3 examples/explore.py /tmp/rowtrail-data/many.parquet --rowtrail ./target/release/rowtrail
-```
-
-这个可选示例只用 Python 标准库，通过一个持久 `rowtrail session` 进程连续调用，自动传递固定结果引用，并输出两个分支的原始数据/结果读取计数。
+处理自己的文件，从 `rowtrail open ./orders.parquet` 开始。使用返回的 Dataset 和 Manifest ID
+绑定查询，再把固定结果版本交给下一次查询。
+[完整操作指南](docs/usage.md#try-the-exact-exploration-loop) 包含等待、分页、分支探索与导出；
+[可运行的组合示例](examples/explore.py) 会自动传递这些引用。
 
 ## 接入 Agent
 
-CLI、MCP 和 Rust SDK 共用请求结构、任务状态与持久结果。
+| 入口 | 适合的场景 | 开始使用 |
+|---|---|---|
+| CLI | 能力发现与单次调用 | `rowtrail schema query` · `rowtrail doctor` |
+| 持久 NDJSON 会话 | 同一进程内连续组合操作 | `rowtrail session` · [协议说明](docs/agent-guide.md) |
+| MCP stdio | Agent 工具宿主 | `rowtrail --workspace /absolute/private/workspace mcp` |
+| Rust 客户端 | 原生程序组合 | [`Client::session()` 示例](crates/client/examples/query.rs) |
 
-```sh
-rowtrail schema query
-rowtrail --workspace /absolute/private/workspace mcp
-rowtrail events --job job_ID --follow --jsonl
-```
+所有入口共用请求协议、任务和结果存储。断开连接不会取消已受理任务；通信中断不会偷偷
+重放可能已经受理的创建操作。可选的 [Python 桥接示例](examples/session_client.py) 只使用
+标准库，Python 不是产品运行依赖。
 
-MCP 宿主配置中，command 使用 `rowtrail` 的绝对路径，args 使用
-`["--workspace", "/absolute/private/workspace", "mcp"]`，通信方式为 stdio。
-复杂操作可以用 `rowtrail call METHOD --request request.json` 由程序组合。
-高频程序组合优先使用 `rowtrail session`：stdin 每行发送一个完整请求 envelope，stdout
-每行返回一个响应，省去逐次启动 CLI 和握手。`Client::session()` 提供相同的 Rust 接口。
-关闭会话不取消已受理任务；通信中断不会偷偷重试创建操作。见 [Agent 接入指南](docs/agent-guide.md)。
-Rust 接入示例见 [query.rs](crates/client/examples/query.rs)。
+## 性能有数字，也有依据
 
-## 结果语义
+同一台 Apple arm64 Mac，**每组运行五次，取中位数**，单位毫秒，越低越好。
+完整的五次查询探索包含打开输入、物化结果、两次结果分支，再回到原始数据查询其他维度。
 
-- `ok: true` 表示调用被接受；计算是否成功要看 `job.state`。
-- Int64、UInt64 与 Decimal 在 JSON 中用字符串保留精度，schema 保留数值类型。
-- 精度、覆盖范围、请求完成状态与展示截断分别表达。部分数据不会因为派生计算完成而变成完整数据。
-- 查询绑定固定 Manifest 或 Result revision；分页游标固定版本，不会偷偷跟随最新结果。
-- 等待、计算、扫描、结果存储和输出预算相互独立。引擎内存池上限不是整个进程的 RSS 上限。
-- 本地文件一致性通过文件身份、大小和修改时间尽力检查，不等同于文件系统事务快照。
+| 调用方式 | 16,384 行 | 1,048,576 行 |
+|---|---:|---:|
+| RowTrail alpha.1 · CLI | 349.58 | 12,917.72 |
+| **RowTrail alpha.2 · CLI** | **123.20** | **377.35** |
+| **RowTrail alpha.2 · 持久 NDJSON** | **104.13** | **360.55** |
+| DuckDB 1.5.5 · 持久会话 | 9.49 | 90.50 |
+| 直接 DataFusion 55.0.0 · 持久会话 | 4.79 | 57.55 |
 
-已有确定性测试与引擎对照，尚无已验证的 Agent 采用优势或性能优势。小数据上，
-RowTrail 的进程、协议与持久化成本明显高于直接使用持久 DuckDB/DataFusion 会话。
-测量方法和原始数字见 [基准说明](benchmarks/README.md)。
+同一 CLI 入口，相对 alpha.1 提升约 **2.84 倍 / 34.23 倍**。直接使用成熟引擎在此测试中
+仍然更快；RowTrail 还承担持久化结果、进程隔离和协议成本。对照允许保留内存中间表，
+DataFusion 计时不含进程启动。这些是本机实测，不代表普遍性能优势，也不是 Agent 采用效果实验。
+
+已发布程序在 **macOS 和 Linux 各通过 30 项集成检查、4 项 Rust 单元测试**，以及
+MCP、会话、SDK 和安装器验证。**1,048,576 行排序**在 **32 MiB 引擎内存池**下实际落盘，
+所有导出 ID 的顺序与独立排序逐项一致。内存池上限不等于整个进程的内存上限。
+
+[验证报告与测试清单](docs/verification.md) ·
+[测量方法、分页与资源测试](benchmarks/README.md) ·
+[五次重复测量原始记录](benchmarks/performance/summary.json)
+
+## 接下来的方向
+
+当前已经具备本地精确探索闭环。抽样估计、预备执行、原生 MCP Tasks、宿主自动接续、
+自动保留策略/GC 和远程来源尚未实现。[当前能力与限制](docs/progress.md) 会与规划分开记录。
+
+我们希望它一直容易安装、容易组合、容易理解。欢迎让协议更清楚、安装包更小、完整探索
+更快的贡献。从 [贡献指南](CONTRIBUTING.md)、[源码构建](docs/usage.md#build) 或一个
+[可复现的问题](https://github.com/adam2go/rowtrail/issues) 开始。
+
+<sub>认识 <a href="docs/brand/README.md">Trail / 小迹</a>，我们的三行数据伙伴。一个问题，一个结果，再向前一步。</sub>

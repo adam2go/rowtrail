@@ -3,6 +3,9 @@
 These are deterministic execution experiments with zero model calls. They do
 not establish agent adoption or a performance advantage over mature engines.
 
+For a readable inventory of all release checks, platform results, artifact sizes
+and checksums, start with the [verification report](../docs/verification.md).
+
 ## Reproduce
 
 ```sh

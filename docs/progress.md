@@ -1,5 +1,7 @@
 # Implementation progress
 
+[Home](../README.md) · [Verification report and test inventory](verification.md)
+
 Updated 2026-09-20 for 0.1.0-alpha.2. The initial M0 → M1 → M2A loop is
 implemented; this iteration advances performance, programmatic composition and
 distribution. It is not the complete M2B–M6 local product.

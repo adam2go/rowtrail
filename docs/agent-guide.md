@@ -1,5 +1,7 @@
 # Agent integration
 
+[Home](../README.md) · [Manual workflow](usage.md) · [Verification](verification.md)
+
 RowTrail is for agents and their programs. It has no spreadsheet UI and makes no
 model calls. Discover a request contract with `rowtrail schema METHOD`; use
 `rowtrail doctor` for actual capabilities. Open local CSV/TSV/Parquet with a
