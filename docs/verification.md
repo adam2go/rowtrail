@@ -9,7 +9,8 @@ and [release provenance](releases/alpha2-verification.json).
 
 ## Correctness and lifecycle
 
-The local release build passes **43 integration scenarios** (30 existing + 13
+Both [native CI jobs](https://github.com/adam2go/rowtrail/actions/runs/35523791505)
+pass **43 integration scenarios** (30 existing + 13
 new), **six Rust tests**, MCP-to-CLI result consumption, NDJSON lifecycle/frame
 bounds, the Rust SDK and the generated preparation/export/GC example.
 The [machine-readable check inventory](../benchmarks/performance/alpha3/verification.json)
@@ -106,9 +107,19 @@ matrix before publication. Budgets remain 30,000,000 compressed bytes per archiv
 Apache-2.0 and upstream notices for 299 dependency declarations. One small SHA
 assembly backend was added; no model, service, Python or Node dependency was added.
 
-Alpha.3 artifact hashes and the completed CI run are recorded in
-[release-verification.json](release-verification.json) after verification. The
-previous published artifact evidence remains in the alpha.2 archive above.
+[Release provenance](release-verification.json) records the successful native CI
+run and source commit `6153dce0c8b7d008d6613c0f5b8baa046d5f0b00`. Both downloaded
+archives passed SHA-256 verification. The macOS CI archive was installed locally
+and ran the complete profile/prepare/branch/export/GC example.
+
+| Artifact | Compressed bytes | CLI bytes | Runtime bytes |
+|---|---:|---:|---:|
+| macOS arm64 | 19,032,384 | 3,651,040 | 99,751,680 |
+| Linux x86_64 | 22,306,904 | 4,084,544 | 114,408,960 |
+
+Native Linux requires glibc 2.39+. Packages are unsigned previews. CI resource
+runs also passed full-row independent verification; their timings are not used
+as benchmark medians. Alpha.2 release evidence remains archived above.
 
 ## Reproduce
 

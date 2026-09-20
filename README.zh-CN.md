@@ -55,9 +55,14 @@ rowtrail --version
 [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.3) 下载并解压。
 请将 `rowtrail` 和 `rowtrail-runtime` 放在同一个目录。
 
-每个平台的压缩包必须低于 **30 MB**；CI 同时限制 CLI 不超过 4.5 MB、运行时不超过
-125 MB。压缩下载体积与安装后的程序体积分别记录。
-[精确大小与验证结果 →](docs/verification.md#native-distribution)
+| 平台 | `.tar.xz` 下载包 | 安装后两个可执行文件 |
+|---|---:|---:|
+| macOS arm64 | 19.03 MB | 103.40 MB |
+| Linux x86_64 | 22.31 MB | 118.49 MB |
+
+两个平台的原生 CI 均已通过。MB 使用十进制；安装体积不含许可说明与工作区数据。
+压缩包 30 MB 的上限继续由 CI 检查。
+[精确大小、校验和与构建来源 →](docs/verification.md#native-distribution)
 
 ## 先问一个问题
 
