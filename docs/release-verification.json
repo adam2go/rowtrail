@@ -1,42 +1,69 @@
 {
-  "version": "0.1.0-alpha.1",
-  "verified_source_commit": "bbe7e43a0c5c7cf3340651e65c8707044c5a9187",
-  "ci_run": "https://github.com/adam2go/rowtrail/actions/runs/35459097860",
+  "version": "0.1.0-alpha.2",
+  "verified_source_commit": "12659c32e6cbf1dcbce090e296069486227438c1",
+  "ci_run": "https://github.com/adam2go/rowtrail/actions/runs/35482257736",
   "platforms": [
     "Ubuntu 24.04 x86_64",
     "macOS 14 arm64"
   ],
   "per_platform": {
-    "end_to_end_checks": 27,
-    "runtime_error_type_tests": 2,
+    "end_to_end_checks": 30,
+    "rust_unit_tests": 4,
     "mcp_to_cli_result_consumption": true,
-    "rust_sdk_precision_check": true,
-    "format_and_clippy": true
+    "ndjson_session_lifecycle_and_frame_bounds": true,
+    "rust_sdk_persistent_session_precision": true,
+    "verified_archive_installation_and_corrupt_checksum_rejection": true,
+    "format_clippy_and_dependency_boundaries": true
   },
   "artifact_sha256_verified_locally": true,
-  "mac_archive_extracted_and_executed_locally": true,
+  "mac_archive_installed_and_executed_locally": true,
+  "out_of_core": {
+    "linux": {
+      "status": "passed",
+      "rows": 1048576,
+      "engine_pool_bytes": 33554432,
+      "sampled_worker_peak_rss_bytes": 139710464,
+      "sort_wall_ms_including_observation": 2231.724804999999,
+      "spill_count": 26,
+      "all_exported_ids_match_independent_sort": true
+    },
+    "macos": {
+      "status": "passed",
+      "rows": 1048576,
+      "engine_pool_bytes": 33554432,
+      "sampled_worker_peak_rss_bytes": 139018240,
+      "sort_wall_ms_including_observation": 2807.3599580000064,
+      "spill_count": 26,
+      "all_exported_ids_match_independent_sort": true
+    }
+  },
   "artifacts": [
     {
-      "version": "0.1.0-alpha.1",
+      "version": "0.1.0-alpha.2",
       "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
-      "artifact": "rowtrail-0.1.0-alpha.1-x86_64-unknown-linux-gnu.tar.gz",
-      "sha256": "282843eee7596816e293760ca94869dbddd54492629b5668e09ae9eff721f931",
-      "compressed_bytes": 38955569,
+      "artifact": "rowtrail-0.1.0-alpha.2-x86_64-unknown-linux-gnu.tar.xz",
+      "sha256": "600f3ff0284bde8a1d40f28da531da13e59186d269f7b52e46d16a09e9975289",
+      "compressed_bytes": 22241924,
       "binary_bytes": {
-        "rowtrail": 3876960,
-        "rowtrail-runtime": 114239360
-      }
+        "rowtrail": 4009968,
+        "rowtrail-runtime": 114223840
+      },
+      "compression": "xz level 6",
+      "size_budget_passed": true
     },
     {
-      "version": "0.1.0-alpha.1",
+      "version": "0.1.0-alpha.2",
       "platform": "macOS-14.8.9-arm64-arm-64bit-Mach-O",
-      "artifact": "rowtrail-0.1.0-alpha.1-aarch64-apple-darwin.tar.gz",
-      "sha256": "b5ae2fa79a530970dd1d6d79b750508212800d76bcfd2208b1e3f2d78dae6463",
-      "compressed_bytes": 35164005,
+      "artifact": "rowtrail-0.1.0-alpha.2-aarch64-apple-darwin.tar.xz",
+      "sha256": "fe0d4bf742b1b92a1c08c7797df3215a7fa67f62dd0eb4f14fcb57cc38fedf50",
+      "compressed_bytes": 19000420,
       "binary_bytes": {
-        "rowtrail": 3468400,
-        "rowtrail-runtime": 99652256
-      }
+        "rowtrail": 3568048,
+        "rowtrail-runtime": 99602720
+      },
+      "compression": "xz level 6",
+      "size_budget_passed": true
     }
-  ]
+  ],
+  "release_source_note": "Final release tag additionally records benchmark, verification and integration documentation. Runtime, client, installer and packaging code match verified_source_commit."
 }

@@ -20,6 +20,8 @@ Read the corresponding response line before sending the next request. Request
 and response frames are bounded to 1 MiB. Schema and help need no coordinator;
 data sessions start one when needed. Relative paths are resolved by the client
 process, so launch it in the intended working directory or use absolute paths.
+Idle connections close after 60 seconds. Reopen a session when needed; workspace
+objects and accepted jobs persist independently of the connection.
 
 - Check `ok`, then `job.state`. Acceptance is not computation success.
 - Consume an included `observation` directly. Do not make an extra `read` call

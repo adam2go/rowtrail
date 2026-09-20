@@ -10,6 +10,10 @@
 尚未实现抽样估计、宿主自动接续、原生 MCP Tasks、自动 GC 和远程来源。
 完整范围见 [进度与限制](docs/progress.md)。
 
+本版原生下载包约 **macOS 19 MB / Linux 22 MB**。同机同 CLI 的五步探索，
+16K 行约比上一版快 2.8 倍，百万行约快 34 倍；10,000 行分页从 570 ms 降到 21 ms。
+这是相对上一版的本机实测，完整条件、原始数据和成熟引擎对照见 [基准说明](benchmarks/README.md)。
+
 ## 安装与运行
 
 初期支持 macOS 和 Linux。将下载包内的 `rowtrail` 与 `rowtrail-runtime` 放在同一个

@@ -1,0 +1,80 @@
+{
+  "hardware": {
+    "os": "macOS 26.6.2",
+    "arch": "arm64",
+    "ram_bytes": 25769803776,
+    "logical_cpus": 14
+  },
+  "before_source_commit": "5ef5e0ff762a641836bf6a78566768a82666ad9e",
+  "after_source_commit": "12659c32e6cbf1dcbce090e296069486227438c1",
+  "repeats": 5,
+  "execution": "serial benchmark runs; no concurrent build or test workload; warm OS cache, fresh workspace/session for each repeat",
+  "records": [
+    {
+      "report": "after-cli-1048576.json",
+      "rows": 1048576,
+      "entry": "cli",
+      "min_ms": 373.9476250484586,
+      "median_ms": 377.35125003382564,
+      "max_ms": 422.6339580491185,
+      "duckdb_median_ms": 90.50191706046462,
+      "datafusion_median_ms": 57.546333
+    },
+    {
+      "report": "after-cli-16384.json",
+      "rows": 16384,
+      "entry": "cli",
+      "min_ms": 122.74445896036923,
+      "median_ms": 123.20000003091991,
+      "max_ms": 132.3257500771433,
+      "duckdb_median_ms": 9.49091580696404,
+      "datafusion_median_ms": 4.785208
+    },
+    {
+      "report": "before-cli-1048576.json",
+      "rows": 1048576,
+      "entry": "cli",
+      "min_ms": 12220.907291863114,
+      "median_ms": 12917.722917161882,
+      "max_ms": 13456.856208154932,
+      "duckdb_median_ms": 92.09383302368224,
+      "datafusion_median_ms": 57.780041999999995
+    },
+    {
+      "report": "before-cli-16384.json",
+      "rows": 16384,
+      "entry": "cli",
+      "min_ms": 326.5009999740869,
+      "median_ms": 349.5837498921901,
+      "max_ms": 456.36908314190805,
+      "duckdb_median_ms": 12.855124892666936,
+      "datafusion_median_ms": 5.2865
+    },
+    {
+      "report": "after-session-1048576.json",
+      "rows": 1048576,
+      "entry": "session",
+      "min_ms": 356.6213750746101,
+      "median_ms": 360.5515828821808,
+      "max_ms": 370.24683388881385,
+      "duckdb_median_ms": 90.96345794387162,
+      "datafusion_median_ms": 57.475625
+    },
+    {
+      "report": "after-session-16384.json",
+      "rows": 16384,
+      "entry": "session",
+      "min_ms": 103.72920800000429,
+      "median_ms": 104.13299989886582,
+      "max_ms": 104.363749967888,
+      "duckdb_median_ms": 10.577083099633455,
+      "datafusion_median_ms": 4.972958
+    }
+  ],
+  "limitations": [
+    "All five calculations are exact; independent DuckDB answers match.",
+    "This is an engineering comparison, not a paired external-agent adoption trial.",
+    "Rows and part files change from coalescing; published durability and quality semantics remain the same.",
+    "RowTrail still pays durable storage/process/protocol costs that in-process reference engines do not."
+  ]
+}

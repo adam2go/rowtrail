@@ -21,8 +21,11 @@ implemented. Progressive sampling, automatic host resume, native MCP Tasks,
 retention/GC, and remote sources are still on the roadmap. See
 [verified capabilities and limitations](docs/progress.md).
 
-There is no established performance or agent-adoption advantage yet. Benchmarks
-include the cost of the worker, durable results, and protocol.
+Alpha.2's local five-query exploration is 2.8× faster on 16K rows and 34× on 1M
+rows than alpha.1 with the same CLI entry. Native downloads are **19 MB macOS /
+22 MB Linux**, with no external runtime. [Measurements](benchmarks/README.md)
+include durable results and strong persistent-engine baselines; no general
+advantage over DuckDB/DataFusion or agent-adoption benefit is established.
 
 ## Install
 

@@ -23,8 +23,8 @@ distribution. It is not the complete M2B–M6 local product.
 The current local suite passes 30 integration checks, four Rust unit tests, MCP,
 NDJSON and SDK probes, archive installation and checksum rejection. A real
 1,048,576-row sort under a 32 MiB engine pool spills to disk and its exported
-row order matches an independent full-row reference. Cross-platform alpha.2 CI
-and the final repeated comparison are being recorded for the release.
+row order matches an independent full-row reference. All of these checks pass
+on macOS and Linux in the alpha.2 CI run linked below.
 
 ## Implemented and verified locally
 
@@ -67,15 +67,25 @@ event replay, source invalidation and refresh. No tests call a model.
 `cargo fmt --check`, Clippy with warnings denied, workspace tests (including two
 error-type checks), dependency boundaries, MCP cross-entry consumption, and the
 SDK precision example pass on **Ubuntu 24.04 x86_64 and macOS 14 arm64** in
-[the final CI run](https://github.com/adam2go/rowtrail/actions/runs/35459097860). Each platform passes all 27 end-to-end checks.
+[the alpha.2 CI run](https://github.com/adam2go/rowtrail/actions/runs/35482257736). Each platform passes all 30 end-to-end checks, persistent-session and verified-installation
+probes, plus the independent million-row out-of-core sort/export check.
 Both package checksums were verified after download; the macOS CI archive was
 also extracted and executed locally. Artifact hashes and provenance are in
 [release-verification.json](release-verification.json).
 
-The five-repeat initial comparison is recorded in `benchmarks/baseline.json`.
-RowTrail's median is about 379 ms versus 14 ms for persistent DuckDB and 5 ms for
-persistent direct DataFusion on this small workload. No stable performance or
-Agent-adoption advantage is claimed. See `benchmarks/README.md` for boundaries.
+The five-repeat same-CLI comparison improves 16,384-row exploration from 349.58
+to 123.20 ms and 1,048,576-row exploration from 12,917.72 to 377.35 ms locally.
+The persistent session entry measures 104.13 / 360.55 ms respectively. Fixed
+10,000-row paging improves from 570.25 to 21.37 ms. Direct persistent DuckDB and
+DataFusion remain faster on the exploration workload; no competitive or agent
+adoption advantage is established. Raw repeats, hashes and conditions are in
+`benchmarks/performance/`. See `benchmarks/README.md` for boundaries.
+
+Verified CI packages are 19,000,420 bytes for macOS arm64 and 22,241,924 bytes for
+Linux x86_64 using xz. Installed binary pairs are about 103 / 118 MB respectively;
+download compression does not reduce installed size. Installation verifies SHA-256
+and has no language runtime or external database dependency. Distribution growth
+budgets are enforced in CI. Alpha.1 provenance remains in `docs/releases/`.
 
 ## Remaining work and explicit limitations
 
@@ -109,7 +119,9 @@ are unsigned engineering previews.
 cargo build --release --locked
 python3 tests/integration/exploration.py --bin-dir target/release
 python3 scripts/mcp_probe.py target/release/rowtrail
+python3 scripts/session_probe.py target/release/rowtrail
 python3 scripts/package.py
+python3 scripts/install_probe.py
 ```
 
 Preserve the fixtures and quality contracts while extending capabilities.

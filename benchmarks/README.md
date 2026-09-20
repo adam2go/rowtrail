@@ -1,77 +1,114 @@
 # Measurements
 
-These are deterministic execution experiments, not paired real-Agent trials.
-There are zero model calls. No adoption or performance advantage is established.
+These are deterministic execution experiments with zero model calls. They do
+not establish agent adoption or a performance advantage over mature engines.
 
 ## Reproduce
 
 ```sh
 cargo build --release --locked
-python3 tests/integration/exploration.py --bin-dir target/release
 python3 -m venv /tmp/rowtrail-bench
 /tmp/rowtrail-bench/bin/pip install duckdb==1.5.5
-/tmp/rowtrail-bench/bin/python benchmarks/compare.py --repeats 5
+/tmp/rowtrail-bench/bin/python benchmarks/compare.py --entry cli --repeats 5
+/tmp/rowtrail-bench/bin/python benchmarks/compare.py --entry session --rows 1048576 --repeats 5
+python3 benchmarks/paging.py
+/tmp/rowtrail-bench/bin/python benchmarks/resources.py
 ```
 
-DuckDB is a benchmark-only dependency. Normal builds and runtime do not use it.
-The DataFusion baseline is a developer helper in the runtime executable.
+DuckDB is only a benchmark/verification dependency. The product does not require
+it or Python. Source fixtures are generated locally, never shipped in the package.
 
-## Initial exact exploration baseline
+## Alpha.2 exploration results
 
-Measured on Apple arm64 macOS with 24 GiB RAM and 14 logical CPUs, release Rust
-1.94.0. The deterministic Parquet fixture contains 16,384 rows in four row groups.
-Five repeats use a fresh RowTrail workspace, with OS caches left warm. Each
-backend executes the same five calculations: original group, materialized filter,
-saved group, saved count, and a different original dimension. Decimal/count
-answers are checked against DuckDB. S1/S2 correctness is separately checked by
-manual values and integer arithmetic.
+Same Apple arm64 machine, macOS 26.6.2, 24 GiB RAM, 14 logical CPUs, Rust 1.94.0
+release. Five repetitions per entry/scale; no concurrent local build or test
+workload. OS caches are left warm. Each repeat has a fresh RowTrail workspace
+and fresh persistent reference-engine sessions. Measurements cover opening,
+initial materialization, two saved-result branches and return to a different
+original dimension. CLI runs include process startup for every operation;
+NDJSON includes starting its one process. All answers match independent DuckDB.
 
-Times cover preparation, initial materialization, both saved-result branches,
-and the final return to original input. Units are milliseconds.
+Median milliseconds for the same five-query exploration:
 
-| Backend | Minimum | Median | Maximum |
-|---|---:|---:|---:|
-| rowtrail | 357.59 | 378.77 | 391.07 |
-| duckdb | 13.00 | 13.51 | 26.67 |
-| datafusion | 5.24 | 5.37 | 5.47 |
+| Entry | 16,384 rows | 1,048,576 rows |
+|---|---:|---:|
+| Alpha.1, CLI per operation | 349.58 | 12,917.72 |
+| Alpha.2, CLI per operation | 123.20 | 377.35 |
+| Alpha.2, persistent NDJSON | 104.13 | 360.55 |
+| DuckDB 1.5.5, persistent session (alpha.2 CLI run) | 9.49 | 90.50 |
+| Direct DataFusion 55.0.0, persistent session (same run) | 4.79 | 57.55 |
 
-RowTrail pays for CLI invocations, its coordinator/worker protocol, immutable
-result files, fsync, SQLite commits, source validation, and bounded observations.
-The coordinator reuses successful workers. Both reference engines retain a
-persistent session and in-memory intermediate tables. They are allowed to cache;
-they are not forced to restart per question. Direct DataFusion's process startup
-is excluded from the table, but its process wall time is retained in the JSON.
+Holding the CLI entry constant, alpha.2 is about **2.84× / 34.23× faster than
+alpha.1 on these two workloads**. The session entry removes further process and
+handshake cost. This is not a claim of generally outperforming DuckDB/DataFusion:
+RowTrail still pays for durable results, process isolation and protocol. Reference
+engines are allowed in-memory intermediate tables. Direct DataFusion process
+startup is excluded from its total; process wall time is retained separately.
 
-This workload favors direct engines. RowTrail is substantially slower here.
-Durability and process isolation explain some of the difference, but do not
-establish that the added cost is worthwhile for an Agent. Earlier local runs
-with a worker per job and an unnecessary extra read measured a 448.76 ms RowTrail
-median; the current result is a diagnostic observation, not a controlled claim
-of general speedup. Broader datasets and paired external Agent trials remain open.
+The million-row filter now writes nine result files in the representative run,
+instead of roughly a thousand small batch files. Each saved-result branch opens
+28 data requests rather than 3,073, and still reads **zero original-source bytes**.
+Original-source reads are unchanged. Files remain sealed, checksummed and durable
+before publication; SQLite remains in FULL synchronous mode. Worker metrics split
+planning, result writing and acknowledgement, while coordinator metrics report
+publication time and part count. Publication is contained in acknowledgement time;
+do not add overlapping measurements as if they were independent stages.
 
-`baseline.json` retains each repeat and RowTrail source/result read and write
-counters. Both saved-result branches read zero original-source bytes. M0's larger
-spill experiment and initial artifact measurements are in `m0.json`; those
-minimal-probe sizes are not the final package sizes. The initial dependency
-feature graph is `m0-dependency-features.txt`.
+[performance/summary.json](performance/summary.json) identifies source commits,
+conditions and min/median/max distributions. The adjacent raw reports retain all
+repeats, stages, plans, I/O counters and executable SHA-256 hashes. The benchmark
+harness accepts CLI exit code 3 for an unfinished wait; it does not mistake an
+accepted background job for a failed tool call.
 
-`traces/macos-local.json` contains the 27 release-binary integration checks and
-request/response traces with local paths removed. These include failed/rejected
-operations and recovery, not only successful queries. CI uploads separate
-platform traces and package metadata. Whole-process resource profiling and
-Agent interaction-cost distributions are incomplete; engine pool limits must
-not be confused with an RSS guarantee.
+## Bounded paging
 
-## Client distribution and discovery
+A fixed sorted result of 16,384 Int64 IDs, same CLI entry, five warm-cache reads
+at each requested page size. Each returned ID is checked independently.
 
-The final local arm64 macOS build measures 3,468,368 bytes for `rowtrail` and
-99,685,280 bytes for `rowtrail-runtime`; the pair plus license notices compresses
-to about 35.2 MB. Help and schema discovery do not start the runtime. Ten fresh
-process samples with warm OS cache measured about 4 ms median wall time, including
-the `/usr/bin/time` wrapper, and below 8 MB peak client RSS. These are local
-measurements, not promises for other machines or the sizes of CI-built packages.
-See `client-startup-macos.json`. For a single sample on macOS:
+| Returned rows | Alpha.1 median ms | Alpha.2 median ms |
+|---|---:|---:|
+| 100 | 5.31 | 3.51 |
+| 1,000 | 12.33 | 5.00 |
+| 10,000 | 570.25 | 21.37 |
 
-```sh
-/usr/bin/time -l target/release/rowtrail schema query
-```
+The 10,000-row page improves about 26.68× locally after removing repeated
+serialization of all prior rows. Each touched part is verified and decoded from
+the same bounded byte buffer. Byte budgets, revision-fixed cursors and exact
+64-bit integer JSON strings remain unchanged. Raw samples are
+[before-paging.json](performance/before-paging.json) and
+[after-paging.json](performance/after-paging.json).
+
+## Real out-of-core execution
+
+[resources.json](performance/resources.json) runs a real coordinator/worker query,
+not just the direct-engine probe. It sorts 1,048,576 rows (228,139,988 source bytes)
+by payload and ID under a **32 MiB engine pool**, with a 512 MiB spill allowance.
+The final local run completes in about 1.39 s, reports 26 spill operations, and
+publishes 64 parts (largest 3,363,970 bytes). Parquet export takes about 0.51 s.
+Every exported ID matches an independent Python integer-key sort; DuckDB only
+reads the exported Parquet during this verification.
+
+Sampled worker RSS is about 146 MB. The pool is **not** an RSS hard limit, and
+`ps` sampling may miss the true peak. CI runs the same case on macOS and Linux;
+its raw platform reports are uploaded separately. Above-memory coverage is still
+a limited workload matrix, not a guarantee for every join/aggregate/SQL plan.
+
+## Distribution and regressions
+
+The local alpha.2 CLI is about 3.57 MB and the runtime about 99.7 MB. Native xz
+level-6 archives are about 19 MB on this Mac, versus about 35 MB for the previous
+gzip package. Compression changes download size, not installed binary size or
+runtime speed. End users need neither Rust nor Python/Node/Docker/another engine.
+Use the release asset metadata for exact cross-platform sizes and checksums.
+
+[budgets.json](budgets.json) enforces native binary/archive growth limits during
+packaging. Integration tests bound parts, check 10,000-row paging and verify zero
+original reads for saved-result branches. Shared CI runners do not enforce a
+fragile universal millisecond limit. Keep raw repeated measurements on a named
+reference machine before making performance claims.
+
+Initial M0 spill, artifact and dependency measurements remain in `m0.json` and
+`m0-dependency-features.txt`. `baseline.json` and `client-startup-macos.json` are
+historical alpha.1 measurements, not current alpha.2 artifact sizes. The checked-in
+integration trace is sanitized and large page arrays are shortened with explicit
+recording annotations and hashes; CI uploads full platform verification reports.
