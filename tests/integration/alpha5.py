@@ -120,7 +120,13 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-alpha5-') as td:
   page=call('workspace',{'action':'summary','kind':'dataset','max_bytes':16384})
   expired_data=next(x for x in page['items'] if x['ref']==prepared['job']['prepared']['dataset_ref'])
   assert expired_data['stored_validity']=='expired' and not expired_data['next_actions']
-  check('catalog retains expiration tombstones and errors expose actionable recovery guidance')
+  path=base/'data/many.parquet';stat=path.stat();os.utime(path,ns=(stat.st_atime_ns,stat.st_mtime_ns+1000000000))
+  assert call('read',ref(done),False)['error']['code']=='SOURCE_CHANGED'
+  page=call('workspace',{'action':'summary','kind':'result','max_bytes':65536});assert page['next_cursor'] is None
+  invalid=next(x for x in page['items'] if x['ref']==ref(done)['result_ref'])
+  assert invalid['stored_validity']=='source_changed' and not invalid['next_actions']
+  assert page['counts']['readable_results']==sum(x['binding'] is not None and x['stored_validity']=='valid' for x in page['items'])
+  check('catalog excludes known-invalid results from readable counts and retains explicit expiration tombstones and recovery hints')
   succeeded=True
  finally:
   if 'client' in locals():client.__exit__()

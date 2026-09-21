@@ -81,7 +81,7 @@ pub fn summary(db: &Db, p: WorkspaceParams) -> Result<Value> {
             |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
         )?
         .collect::<rusqlite::Result<_>>()?;
-    let counts=tx.query_row("SELECT (SELECT COUNT(*) FROM objects WHERE kind='dataset'),(SELECT COUNT(*) FROM jobs WHERE state IN ('queued','running','stopping')),(SELECT COUNT(*) FROM results WHERE head>0 AND validity!='expired')",[],|r|Ok(json!({"datasets":r.get::<_,u64>(0)?,"active_jobs":r.get::<_,u64>(1)?,"readable_results":r.get::<_,u64>(2)?})))?;
+    let counts=tx.query_row("SELECT (SELECT COUNT(*) FROM objects WHERE kind='dataset'),(SELECT COUNT(*) FROM jobs WHERE state IN ('queued','running','stopping')),(SELECT COUNT(*) FROM results WHERE head>0 AND validity='valid')",[],|r|Ok(json!({"datasets":r.get::<_,u64>(0)?,"active_jobs":r.get::<_,u64>(1)?,"readable_results":r.get::<_,u64>(2)?})))?;
     let mut out = json!({"store_id":db.store_id,"counts":counts,"items":[],"next_cursor":null,"membership":"fixed at first page; values observed per page","validity_check":"stored only; source identities checked when bindings are used"});
     let mut has_more = false;
     for (index, (kind, id, rowid)) in rows.iter().enumerate() {
