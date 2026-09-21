@@ -61,10 +61,15 @@ Set `ROWTRAIL_INSTALL_DIR` to choose another directory, or extract an archive
 from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.6).
 Keep `rowtrail` and `rowtrail-runtime` together.
 
-Native alpha.6 artifact checks are pending. The local macOS archive is about
-19.19 MB; final Linux/macOS sizes will be recorded after CI artifact verification.
-Budgets remain **30 MB** per archive, 4.5 MB per CLI and 125 MB per runtime.
-[Native artifact verification](docs/verification.md#native-distribution).
+Verified native release sizes (decimal MB):
+
+| Platform | Download `.tar.xz` | CLI | Runtime |
+|---|---:|---:|---:|
+| macOS arm64 | **19.16 MB** | 3.70 MB | 99.98 MB |
+| Linux x86_64 | **22.42 MB** | 4.13 MB | 114.72 MB |
+
+CLI/runtime are uncompressed sizes. Budgets remain **30 MB** per archive,
+4.5 MB per CLI and 125 MB per runtime. [Native artifact verification](docs/verification.md#native-distribution).
 
 ## Give it a question
 
@@ -139,14 +144,14 @@ from the alpha.5 rerun. Ordinary SQL still wins when only the final answer matte
 [All conditions and raw records](docs/verification.md).
 
 **Agent efficiency needs its own evidence.** The [minimal bootstrap](docs/agent-quickstart.md),
-on-demand schemas, mechanical waiting and compact job projection keep complete
-observations available in code. An updated real-agent paired pilot is running.
-[Alpha.5's 12 historical trials](docs/releases/alpha5-verification.md#real-external-agent-paired-pilot)
-all answered correctly, but RowTrail was slower and used more cumulative input
-tokens than persistent DuckDB. Engine improvements alone do not establish better
-end-to-end agent efficiency.
+on-demand schemas and optional helpers keep full observations in caller code.
+All 12 updated paired trials answer correctly and both arms reuse saved data on
+handoff, but RowTrail is still slower and uses more cumulative input tokens than
+persistent DuckDB. Compared with the historical pilot, exploration improves while
+handoff does not; shorter instructions alone are insufficient.
+[Every trial and limitation](docs/verification.md#real-external-agent-paired-pilot).
 
-The local suite has **73 integration scenarios**, seven Rust tests including eight
+The local build and both native CI platforms pass **73 integration scenarios**, seven Rust tests including eight
 subprocess commit-crash cases, and MCP/session/SDK/installation/two-version checks.
 Same-size, same-mtime corruption of compressed parts is still rejected.
 

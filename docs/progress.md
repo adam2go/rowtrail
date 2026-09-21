@@ -2,7 +2,7 @@
 
 [Home](../README.md) · [Verification and measurements](verification.md)
 
-Updated 2026-09-22 for **0.1.0-alpha.6** (release candidate). This iteration
+Updated 2026-09-22 for **0.1.0-alpha.6**. This iteration
 reduces result storage/verification I/O and page construction cost while keeping
 durable publication, bounded buffers and explicit agent contracts.
 It does not claim completion of all M2B–M6 roadmap work.
@@ -27,9 +27,14 @@ It does not claim completion of all M2B–M6 roadmap work.
   numeric reuse, complete exploration, paging and a real spill workload.
 - The external-agent harness now profiles scalar and metadata-only DuckDB
   statements correctly; missing/incomplete profiles are never counted as zero.
+  All 12 updated paired tasks pass, but RowTrail still uses more time/tokens than
+  persistent DuckDB; shorter setup improves the exploration sample, not handoff.
 
 [Design](decisions/006-result-performance.md) · [Measurements](verification.md).
-Native macOS/Linux artifacts and the updated agent pilot are being verified.
+Native [macOS/Linux CI](https://github.com/adam2go/rowtrail/actions/runs/35628707262) and independent artifact verification passed.
+Installed packages pass the alpha.6 scenarios and bidirectional compatibility with
+published alpha.5. Downloads are 19.16 / 22.42 MB (decimal).
+[Provenance](release-verification.json).
 
 ## Alpha.5
 
@@ -58,11 +63,11 @@ Native macOS/Linux artifacts and the updated agent pilot are being verified.
   contains no model integration.
 
 [Design and boundaries](decisions/005-row-groups-and-reconnection.md) ·
-[Measurements and release status](verification.md). Native artifact verification
+[Measurements and release status](releases/alpha5-verification.md). Native artifact verification
 passed on [Linux and macOS](https://github.com/adam2go/rowtrail/actions/runs/35553205162); both archive hashes were checked independently.
 The installed macOS archive passes row-group exploration, workspace handoff and
 upgrade from published alpha.4. Downloads are 19.09 / 22.42 MB (decimal).
-[Release provenance](release-verification.json). The complete agent pilot is published.
+[Release provenance](releases/alpha5-verification.json). The complete agent pilot is published.
 
 ## Alpha.4
 
@@ -125,6 +130,11 @@ database and HTTP dependencies. Apache-2.0, dependency notices and distribution
 size budgets remain mandatory. [Alpha.2 history](releases/alpha2-progress.md).
 
 ## Limits and remaining work
+
+- Ordinary SQL follows DataFusion type semantics: an Int64/UInt64 SUM can wrap
+  when its accumulator overflows. Cast inputs to Decimal(38,0) when a wider sum
+  is needed. This is separate from JSON number preservation and from analyze
+  aggregates, which explicitly reject overflow.
 
 - Further progressive work: sampling/estimates, reusable accumulator states and
   interrupted-run continuation are not implemented. `analyze` reports fragment-prefix coverage; ordinary SQL previews remain output

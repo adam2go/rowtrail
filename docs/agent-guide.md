@@ -160,7 +160,7 @@ Details: [row-group design](decisions/005-row-groups-and-reconnection.md) and
 [arithmetic contract](decisions/004-progressive-file-aggregation.md).
 
 Metadata upgrades once from schema 3/4 to 5. Existing fixed revisions remain
-readable, but older runtimes refuse an upgraded workspace. Back up a workspace
+readable, but runtimes before alpha.5 refuse an upgraded workspace. Back up a workspace
 before upgrading if you need to keep using the old runtime.
 
 Alpha.6 keeps metadata schema 5 and reads existing plain IPC parts. Larger new

@@ -1,7 +1,7 @@
 # Alpha.5: row-group observations and workspace reconnection
 
-Status: implemented and verified for alpha.5. See [verification](../verification.md)
-and [native artifact provenance](../release-verification.json).
+Status: implemented and verified for alpha.5. See [verification](../releases/alpha5-verification.md)
+and [native artifact provenance](../releases/alpha5-verification.json).
 
 `analyze` defaults to `fragment_unit:parquet_row_group` and
 `checkpoint_interval_ms:50`. Explicit `manifest_file` plus interval 0 preserves

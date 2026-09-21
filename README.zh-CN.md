@@ -56,8 +56,14 @@ rowtrail --version
 [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.6) 下载并解压。
 请将 `rowtrail` 和 `rowtrail-runtime` 放在同一个目录。
 
-alpha.6 候选版的原生产物验证正在进行。本地 macOS 构建压缩包约 19.19 MB；
-最终 Linux/macOS 大小将在 CI 产物校验后记录。下载包上限 **30 MB**，CLI / 运行时上限 4.5 / 125 MB。
+已验证的原生发布包大小（十进制 MB）：
+
+| 平台 | 压缩下载 `.tar.xz` | CLI | 运行时 |
+|---|---:|---:|---:|
+| macOS arm64 | **19.16 MB** | 3.70 MB | 99.98 MB |
+| Linux x86_64 | **22.42 MB** | 4.13 MB | 114.72 MB |
+
+CLI 与运行时为解压大小。压缩包上限 **30 MB**，CLI / 运行时上限为 4.5 / 125 MB。
 [原生产物验证](docs/verification.md#native-distribution)。
 
 ## 先问一个问题
@@ -120,12 +126,12 @@ rowtrail query --sql "SELECT region, SUM(amount) AS total
 与 alpha.5 本次重跑基本持平。只要最终答案时，普通 SQL 仍更快。
 [原始记录和完整条件](docs/verification.md)。
 
-**Agent 效率也要实测。** 新增[精简启动说明](docs/agent-quickstart.md)、按需 schema、机械等待和
-保留完整观察信息的精简展示 helper。更新后的真实 Agent 配对试验正在运行；
-[alpha.5 的 12 次历史试验](docs/releases/alpha5-verification.md#real-external-agent-paired-pilot)全部答对，
-但当时 RowTrail 比持久 DuckDB 更慢、累计输入 token 更多。引擎改进不等于已经证明 Agent 整体效率领先。
+**Agent 效率也要实测。** 新增[精简启动说明](docs/agent-quickstart.md)、按需 schema 和可选 helper，
+完整观察仍保留在调用方代码中。更新的 12 次配对试验全部答对，两方接续时都复用了保存结果；
+但 RowTrail 仍比持久 DuckDB 更慢、累计输入 token 更多。相对历史试验，探索任务有改善，
+接续任务却没有，说明只缩短说明还不够。[全部试验与限制](docs/verification.md#real-external-agent-paired-pilot)。
 
-本地已有 **73 项集成场景**、7 项 Rust 测试（含八种提交边界子进程崩溃场景），
+本地和两个原生 CI 平台均通过 **73 项集成场景**、7 项 Rust 测试（含八种提交边界子进程崩溃场景），
 以及 MCP、会话、SDK、安装和新旧版本互读验证。压缩文件仍能识别同大小、同修改时间的篡改。
 
 [完整验证报告](docs/verification.md) · [alpha.6 原始记录](benchmarks/performance/alpha6/) ·

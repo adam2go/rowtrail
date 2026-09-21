@@ -8,7 +8,7 @@ and [release provenance](releases/alpha5-verification.json) remain archived.
 
 ## Correctness
 
-The local release build passes **73 integration scenarios**: 30 foundation,
+The local release build and both native CI platforms pass **73 integration scenarios**: 30 foundation,
 13 alpha.3, ten alpha.4, twelve alpha.5 and eight alpha.6. Seven Rust tests include
 exact page-byte accounting and eight subprocess publication-crash scenarios.
 Formatting, Clippy, dependency boundaries, MCP/session/SDK, installation and
@@ -84,7 +84,10 @@ would expand them. Compression can still cost CPU on difficult data.
 
 A separate seeded Python generator creates 131,072 rows with eight high-entropy
 63-bit integer columns. Python computes exact sums; SQL explicitly casts to
-Decimal(38,0) before summing to avoid a 64-bit accumulator overflow. DuckDB only
+Decimal(38,0) before summing to avoid a 64-bit accumulator overflow.
+Ordinary SQL Int64/UInt64 sums inherit the engine's wrapping semantics; preserving
+JSON integers as strings does not widen the SQL accumulator. The progressive
+analyze contract explicitly rejects overflow. DuckDB only
 converts the CSV fixture to Parquet outside timing. Materialization plus three
 saved aggregates takes **150.03 → 138.75 ms**, seven alternating repeats (7.5%
 lower). All sums match Python and all saved branches read zero source bytes.
@@ -137,30 +140,78 @@ cache. No whole-result memory cache was added. [Old resource run](../benchmarks/
 
 ## Real external-agent paired pilot
 
-The alpha.6 pilot is running with the same requested model/settings as alpha.5:
-GPT-6 Astra, xhigh, Codex CLI 0.154.0-alpha.6.2, two tasks and three repeats per
-backend. Both arms retain a Python environment and may compose calls/materialize
-results. RowTrail receives the published minimal bootstrap and optional helpers;
-DuckDB remains a persistent connection. This changed integration means comparison
-with alpha.5 model latency is observational, not a controlled prompt A/B.
+The same requested model/settings as alpha.5 were used: GPT-6 Astra, xhigh,
+Codex CLI 0.154.0-alpha.6.2, 16,391 rows, two tasks, three repeats per backend.
+All **12 planned trials passed** the independent integer-cent/large-ID oracle.
+Both arms retain a Python environment and may compose calls/materialize results.
+RowTrail receives the published minimal bootstrap and optional helpers; DuckDB
+remains a persistent connection. There are no internal product model calls.
 
-The harness now uses DuckDB profiling coverage ALL and one-row fetch lookahead,
-which finalizes scalar results without collecting an unbounded table. Tests cover
-aggregate scans, metadata-only counts, materialization, mixed fetch methods and
-catalog queries. Incomplete profiles remain unknown, never zero. Scanned rows,
-physical bytes and SQL source references are different metrics. Raw reasoning
-stays local; public evidence will retain answers, failures, tool traces and usage.
-The [official non-interactive CLI documentation](https://learn.chatgpt.com/docs/non-interactive-mode)
-describes the JSON event/output-schema execution used by this optional harness.
+| Task / arm | Correct | Total seconds | Code calls | Backend code ms | Bridge bytes | Input tokens (cached subset) |
+|---|---:|---:|---:|---:|---:|---:|
+| explore / rowtrail | 3/3 | 72.94 | 5 | 57.70 | 6,945 | 116,608 (96,384) |
+| explore / duckdb | 3/3 | 52.90 | 3 | 10.27 | 900 | 75,981 (58,880) |
+| handoff / rowtrail | 3/3 | 62.07 | 5 | 36.48 | 7,893 | 117,217 (97,280) |
+| handoff / duckdb | 3/3 | 37.30 | 3 | 6.39 | 623 | 74,487 (58,112) |
+
+These are medians. Input usage is cumulative across the turn, includes cached
+input and CLI system/tool scaffolding, and is not peak context. Bridge bytes
+include schemas printed through `rt.schema`; separate USAGE.md reads and CLI
+scaffolding are excluded. The alpha.5 harness used a separate static schema file,
+so the bridge byte totals are not directly comparable between versions.
+
+RowTrail exploration reads the original source in **2 / 2 / 3 jobs**; DuckDB scans
+it in **3 / 2 / 3 statements**, with **49,173 / 32,782 / 49,173 scanned rows**.
+All handoff trials reuse the saved subset: RowTrail original bytes are zero, and
+DuckDB has zero source scan rows and zero original-source query statements.
+DuckDB physical byte counts remain unmeasured; metadata-only reads are distinct
+from scanned rows. Every successful recorded DuckDB statement has a profile.
+The profile guard covers scalar fetches, metadata-only counts, materialization,
+mixed fetch methods and catalog queries without whole-result collection.
+
+RowTrail remains slower and uses more cumulative input tokens than persistent
+DuckDB in both tasks. Against the historical alpha.5 pilot, exploration changes
+from 96.63 to 72.94 seconds and 181,085 to 116,608 input tokens; handoff changes
+from 55.49 to 62.07 seconds and 113,009 to 117,217 input tokens. Thus the shorter
+bootstrap did not improve both tasks. The prompt/bootstrap and profiling changed,
+and model/network variation is substantial: this is an observational comparison,
+not proof that an engine or documentation change caused a model-latency reduction.
+Further agent efficiency work needs fewer discovery/decision turns and more
+representative tasks; these small samples do not establish adoption or superiority.
+
+[All trials, responses, errors and usage](../benchmarks/performance/alpha6/agent-pair/report.json) ·
+[Summary and conditions](../benchmarks/performance/alpha6/agent-pair/summary.json) ·
+[Prompts and setup](../benchmarks/performance/alpha6/agent-pair/README.md).
+There were no selective trial retries. Raw reasoning stays local; the public
+report retains non-reasoning tool/answer events. The optional harness uses
+[documented JSON event/output-schema execution](https://learn.chatgpt.com/docs/non-interactive-mode).
 
 ## Native distribution
 
-Native Linux/macOS CI and artifact audit are pending. Local macOS packaging passes
-all size and checksum-installation checks: 19,189,388 compressed bytes, 3,700,656
-CLI bytes, 100,017,600 runtime bytes. These local files are not the release assets.
-Budgets remain 30,000,000 / 4,500,000 / 125,000,000 bytes respectively. Cargo.lock
-adds no external package; 299 dependency declarations/notices remain. Apache-2.0
-and upstream notices stay in every archive. [Release status](release-verification.json).
+[Linux x86_64 and macOS arm64 native CI](https://github.com/adam2go/rowtrail/actions/runs/35628707262) passed at source commit
+`ab5df279e579925640178f5c25e5b5374da7d336`. Downloaded archives match their SHA-256/size manifests; extracted binary
+hashes match the tested binaries. License contents and all distribution budgets
+were checked independently. The actual macOS package was installed and passed
+all eight alpha.6 scenarios, exact large-integer SQL, row-group exploration and
+fresh-session workspace handoff.
+
+[Published alpha.5 ↔ native alpha.6 compatibility](../benchmarks/performance/alpha6/storage-compat-native-macos.json)
+checks plain/compressed parts, fixed partial revisions and derived SQL in both
+directions. Metadata remains schema 5.
+
+| Platform | Compressed bytes | CLI bytes | Runtime bytes |
+|---|---:|---:|---:|
+| macOS arm64 | 19,161,256 | 3,700,672 | 99,984,576 |
+| Linux x86_64 | 22,416,688 | 4,134,792 | 114,718,208 |
+
+Budgets remain 30,000,000 / 4,500,000 / 125,000,000 bytes respectively. No external
+package was added; 299 dependency declarations/notices remain. Apache-2.0 and
+upstream notices stay in every archive. Linux requires glibc 2.39+. Packages are
+unsigned engineering previews. [Exact provenance and platform resource runs](release-verification.json) ·
+[Native check inventory](../benchmarks/performance/alpha6/verification.json).
+The release tag includes later documentation/measurement updates; executable
+sources, installer and CI checks match the verified source commit. Bundled docs
+are the CI-time candidate snapshot; the repository has the completed report.
 
 ## Reproduce
 
