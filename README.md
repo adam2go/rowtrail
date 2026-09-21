@@ -5,7 +5,7 @@
   <p>A small native data tool, built for agents.<br>Ask a question, keep an exact result, and continue from there.</p>
   <p>
     <a href="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml"><img src="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml/badge.svg" alt="Build and verify"></a>
-    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.4"><img src="https://img.shields.io/badge/release-v0.1.0--alpha.4-147D70" alt="Release v0.1.0-alpha.4"></a>
+    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.5"><img src="https://img.shields.io/badge/release-v0.1.0--alpha.5-147D70" alt="Release v0.1.0-alpha.5"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-147D70" alt="Apache-2.0 license"></a>
   </p>
   <p><a href="README.zh-CN.md">简体中文</a> · <a href="#install">Install</a> · <a href="docs/agent-guide.md">Agent guide</a> · <a href="docs/verification.md">Test results</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
@@ -18,21 +18,20 @@ in its context. RowTrail opens local CSV/TSV/Parquet, runs read-only SQL, and ke
 versioned results on disk. The agent gets a bounded, typed observation and can
 branch from a saved result when the next question arrives.
 
-**New in alpha.4:** cumulative count/sum checkpoints and fixed-precision averages
-over Parquet files. Inspect an early partial result, keep its revision, and choose whether
-to continue. Profiles, explicit CSV preparation and safe workspace GC remain
-available from alpha.3.
+**New in alpha.5:** row-group checkpoints inside a single Parquet file, faster
+progressive aggregation, and a bounded workspace catalog for reconnecting agents.
+`rowtrail guide` explains the workflow; `mcp-config` prints a ready-to-copy config.
 
 **Zero internal model calls. No API key. No spreadsheet UI.** Your agent chooses
 the questions and decides when the evidence is sufficient.
 
 | Built for | What the agent gets |
 |---|---|
-| **Observe progress honestly** | Exact file-prefix aggregates with explicit coverage and immutable revisions. |
+| **Observe progress honestly** | Exact row-group-prefix aggregates with explicit coverage and immutable revisions. |
 | **Understand unfamiliar data** | On-demand null counts, min/max and exact top-k; every scan has budgets. |
 | **Avoid repeated CSV parsing** | Explicit streaming preparation to an immutable Parquet dataset. |
 | **Control stored data** | Pin/release, dependency-safe GC and managed-data quotas. |
-| **Continue exploring** | Fixed dataset manifests and result revisions; reuse intermediate results through SQL. |
+| **Continue exploring** | Discover saved bindings with `workspace summary`; reuse fixed results through SQL. |
 | **Spend context carefully** | Row and byte budgets, paginated observations, exact integer and Decimal representation. |
 | **Work beyond one call** | Durable accepted jobs, explicit waiting, events and cancellation. |
 | **Stay native and small** | Two executables; no Python, Node, Docker or external database required. |
@@ -45,12 +44,12 @@ CSV / TSV / Parquet → exact query → saved result → next question
 
 ## Install
 
-**v0.1.0-alpha.4** is an early engineering preview, licensed under Apache-2.0.
+**v0.1.0-alpha.5** is an early engineering preview, licensed under Apache-2.0.
 Native packages are available for **macOS arm64** and **Linux x86_64**
 (Ubuntu 24.04 / glibc 2.39 or newer).
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-alpha.4/install.sh -o /tmp/rowtrail-install.sh
+curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-alpha.5/install.sh -o /tmp/rowtrail-install.sh
 sh /tmp/rowtrail-install.sh
 export PATH="$HOME/.local/bin:$PATH"
 rowtrail --version
@@ -58,19 +57,12 @@ rowtrail --version
 
 The installer verifies SHA-256 and installs a versioned pair in `~/.local/bin`.
 Set `ROWTRAIL_INSTALL_DIR` to choose another directory, or extract an archive
-from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.4).
+from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.5).
 Keep `rowtrail` and `rowtrail-runtime` together.
 
-Verified native release sizes (decimal MB):
-
-| Platform | Download `.tar.xz` | CLI | Runtime |
-|---|---:|---:|---:|
-| macOS arm64 | **19.10 MB** | 3.65 MB | 99.88 MB |
-| Linux x86_64 | **22.36 MB** | 4.10 MB | 114.60 MB |
-
-CLI/runtime columns are uncompressed binaries. Budgets remain **30 MB** per
-archive, 4.5 MB per CLI and 125 MB per runtime.
-[Native artifact sizes and verification →](docs/verification.md#native-distribution)
+Native alpha.5 artifact checks are pending for this release candidate. Distribution
+budgets remain **30 MB** per archive, **4.5 MB** per CLI and **125 MB** per runtime
+(decimal bytes). [Release verification](docs/verification.md#native-distribution).
 
 ## Give it a question
 
@@ -94,15 +86,15 @@ covers opening, waiting, paging, branching and export. A
 The [alpha.3 end-to-end example](examples/prepare_explore.py) also profiles,
 prepares, exports and collects its own intermediate data.
 The [progressive example](examples/progressive.py) observes checkpoints and can
-explicitly stop once it has enough file coverage.
+explicitly stop once it has enough fragment or file coverage.
 
 ## Connect your agent
 
 | Entry | Use it for | Start here |
 |---|---|---|
-| CLI | Discovery and one-off calls | `rowtrail schema query` · `rowtrail doctor` |
+| CLI | Discovery and one-off calls | `rowtrail guide` · `rowtrail schema query` · `rowtrail doctor` |
 | Persistent NDJSON | Many operations in one process | `rowtrail session` · [protocol guide](docs/agent-guide.md) |
-| MCP over stdio | Agent tool hosts | `rowtrail --workspace /absolute/private/workspace mcp` |
+| MCP over stdio | Agent tool hosts | `rowtrail --workspace /absolute/private/workspace mcp-config` |
 | Rust client | Native programmatic composition | [`Client::session()` example](crates/client/examples/query.rs) |
 
 All entries share the same contracts, jobs and result store. Closing a connection
@@ -123,9 +115,10 @@ branching twice from a saved result, and returning to the original dataset.
 | **RowTrail alpha.3 · CLI** | **122.92** | **345.68** |
 | RowTrail alpha.2 · persistent NDJSON | 104.13 | 360.55 |
 | RowTrail alpha.3 · persistent NDJSON | 103.99 | 322.28 |
-| **RowTrail alpha.4 · persistent NDJSON** | **104.03** | **319.67** |
-| DuckDB 1.5.5 · persistent session | 9.39 | 92.23 |
-| Direct DataFusion 55.0.0 · persistent session | 4.56 | 58.93 |
+| RowTrail alpha.4 · persistent NDJSON | 104.03 | 319.67 |
+| **RowTrail alpha.5 · persistent NDJSON** | **104.35** | **318.97** |
+| DuckDB 1.5.5 · persistent session (alpha.5 run) | 10.82 | 88.98 |
+| Direct DataFusion 55.0.0 · persistent session (alpha.5 run) | 4.78 | 55.14 |
 
 Alpha.3 includes content verification on saved-result queries. On the million-row
 workload it is **8.4% faster through CLI / 10.6% through a session than alpha.2**
@@ -139,28 +132,28 @@ costs 271 ms. Open + profile + ten follow-up aggregates takes 736 ms directly fr
 CSV, or 652 ms including preparation. The measured break-even is eight follow-ups;
 it varies with data and queries. RowTrail leaves that choice to the agent.
 
-**Earlier evidence has a cost.** On 16 Parquet files / 1,048,576 rows, progressive
-aggregation returns its first observed partial checkpoint in **22.48 ms**, versus
-**37.27 ms** for the ordinary SQL result. Final completion takes **189.46 ms versus
-40.63 ms** because progressive mode persists every file checkpoint. Use ordinary
-SQL when only a final answer is useful. Partials cover completed files only;
-they are not population estimates. Average uses six decimal places with explicit
-truncation; [types and limits](docs/decisions/004-progressive-file-aggregation.md).
+**Progressive aggregation is substantially cheaper in alpha.5.** On 16 Parquet
+files / 1,048,576 rows, its first checkpoint arrives in **21.22 ms**, and final
+completion in **49.18 ms** (alpha.4 rerun: 184.11 ms). The default now coalesces
+intermediate checkpoints; this case writes two instead of 16. Ordinary SQL still
+finishes sooner at **37.60 ms**. A single file with 16 row groups returns its first
+prefix in **20.18 ms** and completes in **46.20 ms**. Prefixes describe processed
+rows, never population estimates. [Conditions and raw measurements](docs/verification.md).
 
-The current suite has **53 integration scenarios**, six Rust tests including eight
-subprocess commit-crash cases, and MCP/session/SDK/installation checks. Every
-progressive checkpoint is checked against independent integer/Decimal arithmetic.
+The current suite has **65 integration scenarios**, six Rust tests including eight
+subprocess commit-crash cases, and MCP/session/SDK/installation checks. Every tested
+row-group checkpoint matches independent integer/Decimal arithmetic.
 A million-row sort still spills under a 32 MiB engine pool and verifies every
 exported ID. The pool budget is not a process RSS cap.
 
 [Verification and all timing conditions](docs/verification.md) ·
-[Alpha.4 raw records](benchmarks/performance/alpha4/) ·
-[Archived alpha.3 evidence](docs/releases/alpha3-verification.md)
+[Alpha.5 raw records](benchmarks/performance/alpha5/) ·
+[Archived alpha.4 evidence](docs/releases/alpha4-verification.md)
 
 ## What comes next
 
-Progressive aggregation currently schedules whole files, with no GROUP BY or
-filters. Row-group scheduling, sampling/estimates, interrupted-run continuation,
+Progressive aggregation supports whole files and row groups, with no GROUP BY or
+filters. Sampling/estimates, interrupted-run continuation,
 a SQL prepared-plan cache, native MCP Tasks, automatic host resume/eviction and
 remote sources remain unimplemented. [Current capabilities and limits](docs/progress.md) are
 tracked separately from the roadmap.

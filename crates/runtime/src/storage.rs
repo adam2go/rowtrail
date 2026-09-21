@@ -85,6 +85,13 @@ pub fn retain(db: &Db, reference: &str, pin: bool) -> Result<Value> {
 }
 
 pub fn workspace(db: &Db, p: WorkspaceParams) -> Result<Value> {
+    if p.action == "summary" {
+        return crate::catalog::summary(db, p);
+    }
+    ensure!(
+        p.cursor.is_none() && p.kind.is_none(),
+        "INVALID_ARGUMENT: cursor/kind are only for summary"
+    );
     ensure!(
         matches!(p.action.as_str(), "usage" | "configure" | "gc"),
         "UNSUPPORTED_OPERATION: workspace action"

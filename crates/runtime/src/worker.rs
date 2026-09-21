@@ -342,7 +342,7 @@ async fn execute_job(
         Ok(metrics) => message(&WorkerMessage::Completed { metrics }).await?,
         Err(e) => {
             message(&WorkerMessage::Failed {
-                code: crate::errors::code(&e, "SQL_ERROR").into(),
+                code: crate::errors::code(&e, counters.failure_code().unwrap_or("SQL_ERROR")).into(),
                 message: format!("{e:#}"),
                 metrics: json!({"elapsed_ms":started.elapsed().as_secs_f64()*1000.0,"io":counters.value()}),
             })

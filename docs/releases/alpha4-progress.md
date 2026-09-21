@@ -1,38 +1,10 @@
 # Implementation progress
 
-[Home](../README.md) · [Verification and measurements](verification.md)
+[Home](../../README.md) · [Verification and measurements](../verification.md)
 
-Updated 2026-09-21 for **0.1.0-alpha.5** (release candidate). This iteration adds row-group
-aggregation, bounded workspace reconnection and agent setup guidance.
+Updated 2026-09-21 for **0.1.0-alpha.4**. This release adds restricted progressive Parquet file aggregation on top of
+demand-driven inspection and explicit storage management.
 It does not claim completion of all M2B–M6 roadmap work.
-
-## Alpha.5
-
-- `analyze` defaults to complete Parquet row groups, including single-file inputs.
-  One job-wide execution context, projected scans and a bounded footer cache avoid
-  repeated planning. First/final checkpoints remain durable; intermediate prefixes
-  coalesce at a configurable interval (50 ms default, 0 for every fragment).
-- Coverage names actual fragments, files and processed rows. Arithmetic, immutable
-  revisions, partial-result reuse, cancellation and resource budgets stay explicit.
-  File mode plus interval 0 preserves the alpha.4 execution contract.
-- `workspace summary` lists datasets, jobs and fixed result bindings within row/byte
-  budgets. Pagination has fixed membership and live metadata; stored validity does
-  not imply sources have just been revalidated. No data scan or model call.
-- `guide`, `mcp-config`, method-specific MCP descriptions and typed recovery hints
-  help a new agent connect and continue. No host configuration is edited implicitly.
-- Metadata schema 5 upgrades schema 3/4 once, preserves old fixed revisions, and
-  prevents old runtimes from reopening an upgraded store.
-- Twelve new integration scenarios; 65 total. Million-row progressive completion
-  is 49.18 ms locally versus 184.11 ms for an alpha.4 rerun (five repeats each).
-  This includes coalescing 16 checkpoints down to two; it is not equal publication
-  frequency. Final-only SQL is still faster (37.60 ms).
-- A real external-agent paired pilot compares the same model with RowTrail and
-  persistent DuckDB on exploration and saved-result handoff. Results are reported
-  separately from deterministic tests; the product contains no model integration.
-
-[Design and boundaries](decisions/005-row-groups-and-reconnection.md) ·
-[Measurements and release status](verification.md). Native artifact verification
-and the agent experiment are pending for this candidate.
 
 ## Alpha.4
 
@@ -50,13 +22,13 @@ and the agent experiment are pending for this candidate.
 - Ten new integration scenarios (53 total). Ordinary session exploration measures
   104.03 / 319.67 ms for 16K / 1M rows locally. Progressive mode trades total time
   and checkpoint writes for earlier partial observations; it is not a general SQL
-  speed optimization. [Design](decisions/004-progressive-file-aggregation.md).
+  speed optimization. [Design](../decisions/004-progressive-file-aggregation.md).
 
 The [macOS arm64 / Ubuntu 24.04 x86_64 CI matrix](https://github.com/adam2go/rowtrail/actions/runs/35526103291)
 passed all checks. Downloaded archives pass independent hash verification; the
 macOS archive passes installation, progressive-example execution and upgrade from
 the published alpha.3 archive. Downloads are 19.10 / 22.36 MB (decimal).
-[Alpha.4 release provenance](releases/alpha4-verification.json).
+[Release provenance](alpha4-verification.json).
 
 ## Alpha.3
 
@@ -82,8 +54,8 @@ the published alpha.3 archive. Downloads are 19.10 / 22.36 MB (decimal).
 
 The macOS arm64 and Ubuntu 24.04 x86_64 [native CI matrix](https://github.com/adam2go/rowtrail/actions/runs/35523791505) passed; both downloaded archive checksums were verified.
 
-See [the design decision](decisions/003-demand-driven-storage.md),
-[agent contracts](agent-guide.md), and [verification](verification.md) for evidence.
+See [the design decision](../decisions/003-demand-driven-storage.md),
+[agent contracts](../agent-guide.md), and [verification](../verification.md) for evidence.
 
 ## Existing foundation
 
@@ -92,12 +64,13 @@ results and fixed revisions/cursors, bounded observations, durable jobs/events,
 idempotency, real cancellation, worker reuse, crash interruption, source refresh
 and transitive invalidation. Two executables keep the client free of query-engine,
 database and HTTP dependencies. Apache-2.0, dependency notices and distribution
-size budgets remain mandatory. [Alpha.2 history](releases/alpha2-progress.md).
+size budgets remain mandatory. [Alpha.2 history](alpha2-progress.md).
 
 ## Limits and remaining work
 
-- Further progressive work: sampling/estimates, reusable accumulator states and
-  interrupted-run continuation are not implemented. `analyze` reports fragment-prefix coverage; ordinary SQL previews remain output
+- Further progressive work: row-group scheduling, sampling/estimates, reusable
+  accumulator states and interrupted-run continuation are not implemented.
+  `analyze` reports file-prefix coverage; ordinary SQL previews remain output
   prefixes with unknown input coverage. Neither represents a population estimate.
 - Top-k still performs an exact aggregation: k limits returned rows, not work.
   Broader above-memory join/window/high-cardinality workloads remain future work.
@@ -115,8 +88,7 @@ size budgets remain mandatory. [Alpha.2 history](releases/alpha2-progress.md).
 - External export file and sidecar publication is not one atomic filesystem
   transaction with SQLite; comprehensive export crash reconciliation is pending.
 - Windows, remote sources, union-by-name, native MCP Tasks, automatic host resume,
-  inline binary cells remain unimplemented. A small synthetic agent pilot is not
-  evidence of adoption or broadly improved agent efficiency.
+  inline binary cells and real-agent adoption experiments remain unimplemented.
 - Preview metadata is versioned with no migration promise. Packages are unsigned
   engineering previews. CSV sidecars are not automatically reimported as schema
   or quality; use Parquet when carrying those properties through reopening.
@@ -131,7 +103,6 @@ cargo test --release --locked --workspace
 python3 tests/integration/exploration.py --bin-dir target/release
 python3 tests/integration/alpha3.py
 python3 tests/integration/alpha4.py
-python3 tests/integration/alpha5.py
 python3 scripts/check_boundaries.py
 python3 scripts/mcp_probe.py target/release/rowtrail
 python3 scripts/session_probe.py target/release/rowtrail

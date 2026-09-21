@@ -1,0 +1,21 @@
+{
+  "api_version": "1",
+  "purpose": "Explore local structured data through bounded observations and reusable fixed results. The caller chooses the questions and judges the evidence.",
+  "start": ["rowtrail schema METHOD", "rowtrail doctor", "rowtrail workspace summary"],
+  "entries": {"one_call": "rowtrail call METHOD --request request.json", "persistent": "rowtrail session", "mcp": "rowtrail mcp", "mcp_configuration": "rowtrail --workspace /absolute/path mcp-config"},
+  "workflow": [
+    "Open CSV/TSV/Parquet; keep dataset_ref and manifest_ref. Open does not perform a full profile.",
+    "Request only needed inspect columns/checks. Query with explicit bindings and typed parameters.",
+    "Check ok, then job.state. Read an included observation directly; do not fetch it again.",
+    "For follow-up SQL, bind result_ref plus a fixed revision. Keep large tables outside model context.",
+    "For progressive Parquet count/sum/avg, use analyze. Its observations cover only the reported prefix; ordinary SQL is preferable for final-only answers.",
+    "A fresh conversation can discover existing bindings and active jobs with workspace summary. Pass its cursor unchanged to get the next page.",
+    "Use control wait/status/cancel and durable events. Mechanical waiting needs no model. Disconnecting does not cancel accepted work.",
+    "Release unused results, inspect workspace gc dry-run, then explicitly apply collection. Retained descendants protect their inputs."
+  ],
+  "quality": "Read accuracy, coverage, final_for_request and presentation separately. Completing a query on a partial result does not make its original-source coverage complete.",
+  "numbers": "Int64, UInt64 and Decimal values are JSON strings with declared schema types. Preserve exact arithmetic. Progressive avg is Decimal128(38,6), truncated toward zero.",
+  "budgets": "Waiting, computation, memory, scanning, stored results and output have separate limits. Engine memory is not a process RSS hard cap.",
+  "retry": "After ambiguous transport failure, inspect durable state or deliberately reuse the original idempotency key. Never silently replay a possibly accepted mutation.",
+  "capabilities": "Use doctor for the running coordinator's actual capabilities. A still-running old coordinator retains its old version. No internal model calls or automatic host resume."
+}

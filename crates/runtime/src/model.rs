@@ -45,8 +45,21 @@ pub struct Part {
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Checkpoint {
+    pub unit: String,
+    pub completed_fragments: usize,
+    pub total_fragments: Option<usize>,
+    pub processed_rows: u64,
     pub completed_files: usize,
     pub total_files: usize,
+}
+impl Checkpoint {
+    pub fn coverage(&self) -> Value {
+        if self.unit == "manifest_file" {
+            serde_json::json!({"unit":self.unit,"completed_files":self.completed_files,"total_files":self.total_files,"order":"frozen_manifest_order"})
+        } else {
+            serde_json::json!({"unit":self.unit,"completed_files":self.completed_files,"total_files":self.total_files,"completed_fragments":self.completed_fragments,"total_fragments":self.total_fragments,"processed_rows":self.processed_rows,"order":"frozen_manifest_order_then_row_group"})
+        }
+    }
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]

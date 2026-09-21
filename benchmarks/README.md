@@ -1,7 +1,8 @@
 # Measurements
 
-These are deterministic execution experiments with zero model calls. They do
-not establish agent adoption or a performance advantage over mature engines.
+Core performance and correctness experiments make zero model calls. The optional
+`agent_pair.py` harness runs an external model and reports its usage separately.
+Neither kind establishes broad agent adoption or universal engine superiority.
 
 For a readable inventory of all release checks, platform results, artifact sizes
 and checksums, start with the [verification report](../docs/verification.md).
@@ -138,3 +139,17 @@ Every observed partial and final answer matches a Python integer/Decimal oracle.
 The first partial arrives earlier, while retaining 16 checkpoints makes final
 completion slower. Read the [current report](../docs/verification.md) before using
 these measurements; a partial and complete result are different evidence.
+
+## Alpha.5: row groups, reconnection and real agents
+
+`progressive.py` now records fragment/checkpoint settings and supports single-file
+row-group workloads. The alpha.4 rerun and alpha.5 defaults have different checkpoint
+frequencies; read the [current verification](../docs/verification.md) before comparing.
+
+`agent_pair.py` runs the same externally authenticated Codex model against RowTrail
+and a persistent DuckDB connection, with persistent Python variables on both sides.
+It retains all paired trials, independent answers, tool traces, token usage and
+separate source-scan evidence. It is never imported by the product. Raw Codex events
+stay under ignored `benchmarks/local/`; published records exclude reasoning events
+and replace local paths. Running it consumes model quota. No automatic retry or
+selection of only successful trials.

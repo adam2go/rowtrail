@@ -35,6 +35,10 @@ enum Command {
     /// Exchange full request/response envelopes as NDJSON on one connection.
     Session,
     Doctor,
+    /// Print concise machine-readable integration guidance without starting a runtime.
+    Guide,
+    /// Print a stdio MCP configuration; does not modify host configuration.
+    McpConfig,
     /// Send a contract request from a JSON file or stdin (-).
     Call {
         method: String,
@@ -84,6 +88,14 @@ enum Command {
     },
     /// Inspect usage, configure a managed-data quota, or collect released data.
     Workspace {
+        #[arg(long)]
+        cursor: Option<String>,
+        #[arg(long)]
+        kind: Option<String>,
+        #[arg(long, default_value_t = 100)]
+        limit: usize,
+        #[arg(long, default_value_t = 8192)]
+        max_bytes: usize,
         #[arg(default_value = "usage")]
         action: String,
         #[arg(long)]
@@ -264,11 +276,29 @@ fn tool(name: &str) -> Option<Tool> {
     let method = name.strip_prefix("data_")?;
     let mut schema = rowtrail_contracts::schema(method)?;
     schema["properties"]["_request"] = json!({"type":"object","additionalProperties":false,"properties":{"request_id":{"type":"string"},"idempotency_key":{"type":"string"}}});
+    let description = match method {
+        "workspace" => {
+            "summary returns a bounded catalog of existing datasets, fixed result bindings and jobs; cursor pages membership without rescanning sources. Also usage, configure and explicit gc."
+        }
+        "analyze" => {
+            "Progressive Parquet count/sum/avg over complete row groups or files. Immutable partial checkpoints have explicit coverage; avg truncates to six decimal digits. Ordinary query is preferable for final-only answers."
+        }
+        "read" => {
+            "Read a fixed result revision or continue its cursor under row/byte budgets. Preserve numeric strings and distinguish partial coverage from final_for_request."
+        }
+        "query" => {
+            "Read-only SQL with explicit dataset/manifest or result/revision bindings. Reuse fixed intermediate results; consume included observations before making extra read calls."
+        }
+        "control" => {
+            "Wait, inspect status, cancel actual execution, refresh a source, or pin/release managed results. Disconnecting does not cancel jobs."
+        }
+        _ => {
+            "Persistent jobs and fixed result revisions; inspect state and quality. Acceptance does not mean completion."
+        }
+    };
     Some(Tool::new(
         name.to_owned(),
-        format!(
-            "RowTrail {method}. Uses persistent jobs and fixed result revisions. Inspect returned job state and quality; accepted does not mean completed."
-        ),
+        format!("RowTrail {method}. {description}"),
         schema.as_object()?.clone(),
     ))
 }
@@ -387,6 +417,20 @@ async fn run(args: Args) -> Result<i32> {
         .workspace
         .or_else(|| std::env::var_os("ROWTRAIL_WORKSPACE").map(PathBuf::from))
         .unwrap_or_else(|| PathBuf::from(".rowtrail"));
+    if matches!(args.command, Command::Guide) {
+        println!("{}", include_str!("guide.json").trim());
+        return Ok(0);
+    }
+    if matches!(args.command, Command::McpConfig) {
+        let executable = std::env::current_exe()?;
+        println!(
+            "{}",
+            serde_json::to_string_pretty(
+                &json!({"mcpServers":{"rowtrail":{"command":executable,"args":["--workspace",absolute(&workspace)?,"mcp"]}}})
+            )?
+        );
+        return Ok(0);
+    }
     if let Command::Schema { method } = &args.command {
         println!(
             "{}",
@@ -450,12 +494,16 @@ async fn run(args: Args) -> Result<i32> {
             json!({"source":{"dataset_ref":dataset,"manifest_ref":manifest},"execution":{"wait_ms":wait_ms}}),
         ),
         Command::Workspace {
+            cursor,
+            kind,
+            limit,
+            max_bytes,
             action,
             quota_bytes,
             apply,
         } => Request::new(
             "workspace",
-            json!({"action":action,"quota_bytes":quota_bytes,"dry_run":!apply}),
+            json!({"action":action,"quota_bytes":quota_bytes,"dry_run":!apply,"cursor":cursor,"kind":kind,"limit":limit,"max_bytes":max_bytes}),
         ),
         Command::Pin { reference } => {
             Request::new("control", json!({"action":"pin","ref":reference}))
@@ -550,7 +598,11 @@ async fn run(args: Args) -> Result<i32> {
                 .and_then(|v| v["next_cursor"].as_str())
                 .map(str::to_owned);
         },
-        Command::Schema { .. } | Command::Mcp | Command::Session => unreachable!(),
+        Command::Schema { .. }
+        | Command::Mcp
+        | Command::Session
+        | Command::Guide
+        | Command::McpConfig => unreachable!(),
     };
     if args.idempotency_key.is_some() {
         req.idempotency_key = args.idempotency_key;

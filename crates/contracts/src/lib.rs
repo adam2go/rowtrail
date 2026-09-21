@@ -49,7 +49,24 @@ impl ApiError {
             code: code.into(),
             message: message.to_string(),
             retryable: false,
-            details: json!({}),
+            details: match code {
+                "OBJECT_NOT_FOUND" | "OBJECT_EXPIRED" => {
+                    json!({"suggestion":"Use workspace summary to find available bindings; expired results require a new computation."})
+                }
+                "SOURCE_CHANGED" => {
+                    json!({"suggestion":"Refresh the dataset, inspect its new manifest, then submit a new request. Do not reuse invalidated results."})
+                }
+                "INVALID_CURSOR" => {
+                    json!({"suggestion":"Use the cursor unchanged with its original workspace and filters, or restart pagination."})
+                }
+                "RESULT_NOT_READY" => {
+                    json!({"suggestion":"Wait for a readable revision with control wait or durable events."})
+                }
+                "UNSUPPORTED_OPERATION" | "INVALID_ARGUMENT" => {
+                    json!({"suggestion":"Check schema METHOD and doctor for supported fields and capabilities."})
+                }
+                _ => json!({}),
+            },
         }
     }
 }
@@ -249,14 +266,32 @@ pub struct AggregateColumn {
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct AnalyzeParams {
+    #[serde(default = "row_group_unit")]
+    pub fragment_unit: String,
+    #[serde(default = "checkpoint_interval")]
+    pub checkpoint_interval_ms: u64,
     pub source: DatasetBinding,
     pub aggregates: Vec<AggregateColumn>,
     #[serde(default)]
     pub execution: Execution,
 }
+fn row_group_unit() -> String {
+    "parquet_row_group".into()
+}
+fn checkpoint_interval() -> u64 {
+    50
+}
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct WorkspaceParams {
+    #[serde(default)]
+    pub cursor: Option<String>,
+    #[serde(default)]
+    pub kind: Option<String>,
+    #[serde(default = "read_rows")]
+    pub limit: usize,
+    #[serde(default = "read_bytes")]
+    pub max_bytes: usize,
     pub action: String,
     #[serde(default)]
     pub quota_bytes: Option<u64>,

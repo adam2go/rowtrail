@@ -1,5 +1,6 @@
 mod aggregate;
 mod api;
+mod catalog;
 mod coordinator;
 mod db;
 mod engine;

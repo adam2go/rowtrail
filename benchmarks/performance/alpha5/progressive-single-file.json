@@ -1,0 +1,880 @@
+{
+  "kind": "exact fragment checkpoints versus an ordinary complete SQL aggregate",
+  "fragment_unit_request": null,
+  "checkpoint_interval_ms_request": null,
+  "row_group_size": 65536,
+  "rows": 1048576,
+  "files": 1,
+  "source_bytes": 7311421,
+  "os": "macOS-26.6.2-arm64-arm-64bit",
+  "machine": "arm64",
+  "binary_sha256": {
+    "rowtrail": "78d1b8436aac00e9bec706415ad77f5a713b1bd9632736e7cf789f674d842bf8",
+    "rowtrail-runtime": "b5b1601f471edef839b57825e7e09861f9996f5c28b7b2044f06ae48000f7c04"
+  },
+  "records": [
+    {
+      "repeat": 0,
+      "mode": "sql",
+      "first_observed_ms": 36.73220798373222,
+      "final_ms": 40.114708011969924,
+      "first_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_e1869a12181d4b718c67374f5788cbfe",
+          "input_coverage": "unknown"
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_e529f1cad74a476fbca7066cb4ce1984",
+              "manifest_ref": "mf_f29de1faafe042aaaeb8b0a8a4c1a846"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ]
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 3635166,
+          "source_read_bytes": 3635166,
+          "result_read_bytes": 0,
+          "read_requests": 17
+        },
+        "result_write_bytes": 1586,
+        "rows": 1,
+        "planning_ms": 2.2425420000000003,
+        "result_write_ms": 10.541834,
+        "commit_ack_ms": 9.278875,
+        "elapsed_ms": 32.18675,
+        "worker_pid": 89403,
+        "publication_ms": 9.24125,
+        "result_parts": 1,
+        "worker_elapsed_ms": 37.604416,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "repeat": 0,
+      "mode": "progressive",
+      "first_observed_ms": 21.65724989026785,
+      "final_ms": 47.77104198001325,
+      "first_rows": [
+        [
+          "65536",
+          "61680",
+          "-3519.96",
+          "-0.057068"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_5065449d6245429caa5813f5eab981d5",
+          "input_coverage": {
+            "unit": "parquet_row_group",
+            "completed_files": 0,
+            "total_files": 1,
+            "completed_fragments": 1,
+            "total_fragments": 16,
+            "processed_rows": 65536,
+            "order": "frozen_manifest_order_then_row_group"
+          }
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_cd4da6265a0640ed9673312c5f294393",
+              "manifest_ref": "mf_bc53b3e7df6441c7867e111710eaba20"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ],
+        "aggregation": {
+          "aggregates": [
+            {
+              "function": "count",
+              "column": null,
+              "alias": "rows"
+            },
+            {
+              "function": "count",
+              "column": "amount",
+              "alias": "nonnull"
+            },
+            {
+              "function": "sum",
+              "column": "amount",
+              "alias": "total"
+            },
+            {
+              "function": "avg",
+              "column": "amount",
+              "alias": "mean"
+            }
+          ],
+          "fragment_unit": "parquet_row_group",
+          "average": "Decimal128(38,6); truncated toward zero at six fractional digits; exact sum and count retained in computation"
+        }
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 3114485,
+          "source_read_bytes": 3114485,
+          "result_read_bytes": 0,
+          "read_requests": 18
+        },
+        "rows": 1,
+        "input_rows_processed": 1048576,
+        "files_completed": 1,
+        "files_total": 1,
+        "fragments_completed": 16,
+        "fragment_unit": "parquet_row_group",
+        "result_write_bytes": 3188,
+        "checkpoints": 2,
+        "checkpoint_interval_ms": 50,
+        "elapsed_ms": 39.992125,
+        "publication_ms": 13.351375999999998,
+        "result_parts": 2,
+        "worker_elapsed_ms": 43.693334,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "worker_pid": 89406
+      }
+    },
+    {
+      "repeat": 1,
+      "mode": "progressive",
+      "first_observed_ms": 22.04125002026558,
+      "final_ms": 48.17720805294812,
+      "first_rows": [
+        [
+          "65536",
+          "61680",
+          "-3519.96",
+          "-0.057068"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_e7814f2bb23c44a1bbd51022125482d9",
+          "input_coverage": {
+            "unit": "parquet_row_group",
+            "completed_files": 0,
+            "total_files": 1,
+            "completed_fragments": 1,
+            "total_fragments": 16,
+            "processed_rows": 65536,
+            "order": "frozen_manifest_order_then_row_group"
+          }
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_5eaec97555e34bed825568db709a0acc",
+              "manifest_ref": "mf_002225e0355149f0a21f5f724ce49c71"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ],
+        "aggregation": {
+          "aggregates": [
+            {
+              "function": "count",
+              "column": null,
+              "alias": "rows"
+            },
+            {
+              "function": "count",
+              "column": "amount",
+              "alias": "nonnull"
+            },
+            {
+              "function": "sum",
+              "column": "amount",
+              "alias": "total"
+            },
+            {
+              "function": "avg",
+              "column": "amount",
+              "alias": "mean"
+            }
+          ],
+          "fragment_unit": "parquet_row_group",
+          "average": "Decimal128(38,6); truncated toward zero at six fractional digits; exact sum and count retained in computation"
+        }
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 3114485,
+          "source_read_bytes": 3114485,
+          "result_read_bytes": 0,
+          "read_requests": 18
+        },
+        "rows": 1,
+        "input_rows_processed": 1048576,
+        "files_completed": 1,
+        "files_total": 1,
+        "fragments_completed": 16,
+        "fragment_unit": "parquet_row_group",
+        "result_write_bytes": 3188,
+        "checkpoints": 2,
+        "checkpoint_interval_ms": 50,
+        "elapsed_ms": 40.317208,
+        "publication_ms": 13.574791,
+        "result_parts": 2,
+        "worker_elapsed_ms": 44.060917,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "worker_pid": 89417
+      }
+    },
+    {
+      "repeat": 1,
+      "mode": "sql",
+      "first_observed_ms": 31.553667038679123,
+      "final_ms": 34.91954202763736,
+      "first_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_c999a3db51ea435dbb67d5eb5734804f",
+          "input_coverage": "unknown"
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_87ea1c41fb074309a40f8408184a141c",
+              "manifest_ref": "mf_3c783be814104f9f8d53ebfe1fa0bca5"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ]
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 3635166,
+          "source_read_bytes": 3635166,
+          "result_read_bytes": 0,
+          "read_requests": 17
+        },
+        "result_write_bytes": 1586,
+        "rows": 1,
+        "planning_ms": 2.371541,
+        "result_write_ms": 5.265709000000001,
+        "commit_ack_ms": 8.327959,
+        "elapsed_ms": 26.819916,
+        "worker_pid": 89420,
+        "publication_ms": 8.286583,
+        "result_parts": 1,
+        "worker_elapsed_ms": 31.18725,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "repeat": 2,
+      "mode": "sql",
+      "first_observed_ms": 32.12020895443857,
+      "final_ms": 35.4703338816762,
+      "first_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_0103625bb1524523b9aeb4eeb6ccd006",
+          "input_coverage": "unknown"
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_e5fb1c450ee84d29a5fa0f27da4af3f4",
+              "manifest_ref": "mf_fcdb2cf51873489291c33f9dd0588eb9"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ]
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 3635166,
+          "source_read_bytes": 3635166,
+          "result_read_bytes": 0,
+          "read_requests": 17
+        },
+        "result_write_bytes": 1586,
+        "rows": 1,
+        "planning_ms": 2.3159579999999997,
+        "result_write_ms": 5.882125,
+        "commit_ack_ms": 8.297,
+        "elapsed_ms": 27.273333,
+        "worker_pid": 89423,
+        "publication_ms": 8.256583,
+        "result_parts": 1,
+        "worker_elapsed_ms": 31.899166,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "repeat": 2,
+      "mode": "progressive",
+      "first_observed_ms": 20.150624914094806,
+      "final_ms": 46.12404201179743,
+      "first_rows": [
+        [
+          "65536",
+          "61680",
+          "-3519.96",
+          "-0.057068"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_0fccf70f814e43e79e22ff6274a31464",
+          "input_coverage": {
+            "unit": "parquet_row_group",
+            "completed_files": 0,
+            "total_files": 1,
+            "completed_fragments": 1,
+            "total_fragments": 16,
+            "processed_rows": 65536,
+            "order": "frozen_manifest_order_then_row_group"
+          }
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_b6d01282a9b54bd4a6aa88f30d9fd773",
+              "manifest_ref": "mf_aaff614bad904806a2fb8988a2074faf"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ],
+        "aggregation": {
+          "aggregates": [
+            {
+              "function": "count",
+              "column": null,
+              "alias": "rows"
+            },
+            {
+              "function": "count",
+              "column": "amount",
+              "alias": "nonnull"
+            },
+            {
+              "function": "sum",
+              "column": "amount",
+              "alias": "total"
+            },
+            {
+              "function": "avg",
+              "column": "amount",
+              "alias": "mean"
+            }
+          ],
+          "fragment_unit": "parquet_row_group",
+          "average": "Decimal128(38,6); truncated toward zero at six fractional digits; exact sum and count retained in computation"
+        }
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 3114485,
+          "source_read_bytes": 3114485,
+          "result_read_bytes": 0,
+          "read_requests": 18
+        },
+        "rows": 1,
+        "input_rows_processed": 1048576,
+        "files_completed": 1,
+        "files_total": 1,
+        "fragments_completed": 16,
+        "fragment_unit": "parquet_row_group",
+        "result_write_bytes": 3188,
+        "checkpoints": 2,
+        "checkpoint_interval_ms": 50,
+        "elapsed_ms": 38.168209,
+        "publication_ms": 12.385917,
+        "result_parts": 2,
+        "worker_elapsed_ms": 41.926875,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "worker_pid": 89426
+      }
+    },
+    {
+      "repeat": 3,
+      "mode": "progressive",
+      "first_observed_ms": 20.184833090752363,
+      "final_ms": 46.1967911105603,
+      "first_rows": [
+        [
+          "65536",
+          "61680",
+          "-3519.96",
+          "-0.057068"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_cbc659089b9e4bce8048bee7b95523b8",
+          "input_coverage": {
+            "unit": "parquet_row_group",
+            "completed_files": 0,
+            "total_files": 1,
+            "completed_fragments": 1,
+            "total_fragments": 16,
+            "processed_rows": 65536,
+            "order": "frozen_manifest_order_then_row_group"
+          }
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_6da3f25993224f3f86073dd5bb673292",
+              "manifest_ref": "mf_8df3809c850a43068073d4704f7cf791"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ],
+        "aggregation": {
+          "aggregates": [
+            {
+              "function": "count",
+              "column": null,
+              "alias": "rows"
+            },
+            {
+              "function": "count",
+              "column": "amount",
+              "alias": "nonnull"
+            },
+            {
+              "function": "sum",
+              "column": "amount",
+              "alias": "total"
+            },
+            {
+              "function": "avg",
+              "column": "amount",
+              "alias": "mean"
+            }
+          ],
+          "fragment_unit": "parquet_row_group",
+          "average": "Decimal128(38,6); truncated toward zero at six fractional digits; exact sum and count retained in computation"
+        }
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 3114485,
+          "source_read_bytes": 3114485,
+          "result_read_bytes": 0,
+          "read_requests": 18
+        },
+        "rows": 1,
+        "input_rows_processed": 1048576,
+        "files_completed": 1,
+        "files_total": 1,
+        "fragments_completed": 16,
+        "fragment_unit": "parquet_row_group",
+        "result_write_bytes": 3188,
+        "checkpoints": 2,
+        "checkpoint_interval_ms": 50,
+        "elapsed_ms": 38.360541999999995,
+        "publication_ms": 12.545209,
+        "result_parts": 2,
+        "worker_elapsed_ms": 42.110541,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "worker_pid": 89429
+      }
+    },
+    {
+      "repeat": 3,
+      "mode": "sql",
+      "first_observed_ms": 31.01154090836644,
+      "final_ms": 34.340708050876856,
+      "first_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_16abdbeaea8b44019b926b4c50c2a055",
+          "input_coverage": "unknown"
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_dfbdce4948674105a778ea299249f98d",
+              "manifest_ref": "mf_9cfa9719d2d443c9ad7892527430404e"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ]
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 3635166,
+          "source_read_bytes": 3635166,
+          "result_read_bytes": 0,
+          "read_requests": 17
+        },
+        "result_write_bytes": 1586,
+        "rows": 1,
+        "planning_ms": 2.3224169999999997,
+        "result_write_ms": 4.891374,
+        "commit_ack_ms": 8.314708000000001,
+        "elapsed_ms": 26.402625,
+        "worker_pid": 89432,
+        "publication_ms": 8.271042,
+        "result_parts": 1,
+        "worker_elapsed_ms": 30.863291,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "repeat": 4,
+      "mode": "sql",
+      "first_observed_ms": 32.380541088059545,
+      "final_ms": 35.75612511485815,
+      "first_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_0f202562f1d344248b53a082927198ef",
+          "input_coverage": "unknown"
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_d1398aa9ea464df5b2a661d18695da45",
+              "manifest_ref": "mf_2ac44146cbdd486cb9b41f2a9c77cf0e"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ]
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 3635166,
+          "source_read_bytes": 3635166,
+          "result_read_bytes": 0,
+          "read_requests": 17
+        },
+        "result_write_bytes": 1586,
+        "rows": 1,
+        "planning_ms": 2.272,
+        "result_write_ms": 5.2267909999999995,
+        "commit_ack_ms": 9.547084000000002,
+        "elapsed_ms": 27.816917,
+        "worker_pid": 89435,
+        "publication_ms": 9.510208,
+        "result_parts": 1,
+        "worker_elapsed_ms": 32.15075,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "repeat": 4,
+      "mode": "progressive",
+      "first_observed_ms": 19.974624970927835,
+      "final_ms": 46.05304100550711,
+      "first_rows": [
+        [
+          "65536",
+          "61680",
+          "-3519.96",
+          "-0.057068"
+        ]
+      ],
+      "first_quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "partial",
+          "scope_ref": "scope_9cd84724c3bf4db9a286ba2f7577c247",
+          "input_coverage": {
+            "unit": "parquet_row_group",
+            "completed_files": 0,
+            "total_files": 1,
+            "completed_fragments": 1,
+            "total_fragments": 16,
+            "processed_rows": 65536,
+            "order": "frozen_manifest_order_then_row_group"
+          }
+        },
+        "final_for_request": false,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_0a1511bc09e14605841196b071aae1a1",
+              "manifest_ref": "mf_ae2e42a591984c049322c2ba6cc83416"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ],
+        "aggregation": {
+          "aggregates": [
+            {
+              "function": "count",
+              "column": null,
+              "alias": "rows"
+            },
+            {
+              "function": "count",
+              "column": "amount",
+              "alias": "nonnull"
+            },
+            {
+              "function": "sum",
+              "column": "amount",
+              "alias": "total"
+            },
+            {
+              "function": "avg",
+              "column": "amount",
+              "alias": "mean"
+            }
+          ],
+          "fragment_unit": "parquet_row_group",
+          "average": "Decimal128(38,6); truncated toward zero at six fractional digits; exact sum and count retained in computation"
+        }
+      },
+      "final_rows": [
+        [
+          "1048576",
+          "986895",
+          "-482.01",
+          "-0.000488"
+        ]
+      ],
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 3114485,
+          "source_read_bytes": 3114485,
+          "result_read_bytes": 0,
+          "read_requests": 18
+        },
+        "rows": 1,
+        "input_rows_processed": 1048576,
+        "files_completed": 1,
+        "files_total": 1,
+        "fragments_completed": 16,
+        "fragment_unit": "parquet_row_group",
+        "result_write_bytes": 3188,
+        "checkpoints": 2,
+        "checkpoint_interval_ms": 50,
+        "elapsed_ms": 38.294541,
+        "publication_ms": 12.390417,
+        "result_parts": 2,
+        "worker_elapsed_ms": 41.959333,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "worker_pid": 89438
+      }
+    }
+  ],
+  "summary_ms": {
+    "sql": {
+      "first_observed_ms": 32.12020895443857,
+      "final_ms": 35.4703338816762
+    },
+    "progressive": {
+      "first_observed_ms": 20.184833090752363,
+      "final_ms": 46.1967911105603
+    }
+  },
+  "conditions": [
+    "Five serial repeats, alternating modes, warm OS cache, fresh workspace/session each run.",
+    "Open and fixture creation are excluded; worker startup, observation and checkpoint publication are included.",
+    "Poll interval 2 ms; observed first-result time is an upper bound on availability.",
+    "Every final answer and every first observed prefix matches independent Python integer/Decimal arithmetic.",
+    "Progressive partials describe only committed fragments in reported coverage; they are not population estimates.",
+    "Final cost includes all checkpoints, including unused old revisions."
+  ]
+}

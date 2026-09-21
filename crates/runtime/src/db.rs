@@ -1,4 +1,4 @@
-use crate::model::{JobSpec, Part};
+use crate::model::{Checkpoint, JobSpec, Part};
 use anyhow::{Result, ensure};
 use rowtrail_contracts::{id, now_ms, terminal};
 use rusqlite::{Connection, OptionalExtension, params};
@@ -54,6 +54,7 @@ impl Db {
             CREATE TABLE IF NOT EXISTS results(id TEXT PRIMARY KEY,job_id TEXT NOT NULL REFERENCES jobs(id),schema TEXT,quality TEXT NOT NULL,head INTEGER NOT NULL DEFAULT 0,validity TEXT NOT NULL DEFAULT 'valid');
             CREATE TABLE IF NOT EXISTS revisions(result_id TEXT NOT NULL REFERENCES results(id),revision INTEGER NOT NULL,cutoff INTEGER NOT NULL,rows INTEGER NOT NULL,quality TEXT NOT NULL,PRIMARY KEY(result_id,revision));
             CREATE TABLE IF NOT EXISTS parts(result_id TEXT NOT NULL REFERENCES results(id),seq INTEGER NOT NULL,path TEXT NOT NULL,rows INTEGER NOT NULL,bytes INTEGER NOT NULL,checksum TEXT NOT NULL,identity TEXT NOT NULL,PRIMARY KEY(result_id,seq));
+            CREATE TABLE IF NOT EXISTS analysis_progress(result_id TEXT PRIMARY KEY,progress TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS checkpoints(result_id TEXT NOT NULL,revision INTEGER NOT NULL,part_seq INTEGER NOT NULL,PRIMARY KEY(result_id,revision));
             CREATE TABLE IF NOT EXISTS events(seq INTEGER PRIMARY KEY AUTOINCREMENT,event_id TEXT UNIQUE NOT NULL,job_id TEXT NOT NULL,kind TEXT NOT NULL,payload TEXT NOT NULL,created INTEGER NOT NULL);
             CREATE INDEX IF NOT EXISTS events_job ON events(job_id,seq);
@@ -66,7 +67,7 @@ impl Db {
             [id("store")],
         )?;
         c.execute(
-            "INSERT OR IGNORE INTO meta VALUES('schema_version','4')",
+            "INSERT OR IGNORE INTO meta VALUES('schema_version','5')",
             [],
         )?;
         let version: String = c.query_row(
@@ -75,13 +76,15 @@ impl Db {
             |r| r.get(0),
         )?;
         ensure!(
-            version == "3" || version == "4",
+            matches!(version.as_str(), "3" | "4" | "5"),
             "PROTOCOL_VERSION_MISMATCH: metadata schema"
         );
-        // Prefix revisions from v3 remain readable. Mark the store before any
-        // checkpoint write so older runtimes reject the new revision semantics.
-        if version == "3" {
-            c.execute("UPDATE meta SET value='4' WHERE key='schema_version'", [])?;
+        // Upgrade atomically; old runtimes must reject the new analysis contract.
+        if version != "5" {
+            c.execute_batch("BEGIN IMMEDIATE;
+                UPDATE jobs SET spec=json_set(spec,'$.analysis.fragment_unit','manifest_file','$.analysis.checkpoint_interval_ms',0)
+                  WHERE json_type(spec,'$.analysis')='object' AND json_type(spec,'$.analysis.fragment_unit') IS NULL;
+                UPDATE meta SET value='5' WHERE key='schema_version'; COMMIT;")?;
         }
         let store_id = c.query_row("SELECT value FROM meta WHERE key='store_id'", [], |r| {
             r.get(0)
@@ -363,23 +366,74 @@ impl Db {
             "RESULT_CORRUPT: checkpoint descriptor"
         );
         if let Some(progress) = &part.checkpoint {
-            let total = spec.inputs.values().next().unwrap().files.len();
-            let expected_completed = if spec.query.as_ref().unwrap().execution.preview == "none" {
-                total
-            } else {
-                part.seq as usize + 1
-            };
+            let p = spec.analysis.as_ref().unwrap();
+            let files = &spec.inputs.values().next().unwrap().files;
             ensure!(
-                progress.completed_files == expected_completed,
-                "RESULT_CORRUPT: noncontiguous aggregate coverage"
-            );
-            ensure!(
-                progress.total_files == total
-                    && progress.completed_files > 0
-                    && progress.completed_files <= total
+                progress.unit == p.fragment_unit
+                    && progress.total_files == files.len()
+                    && progress.completed_files <= files.len()
                     && part.rows == 1,
                 "RESULT_CORRUPT: checkpoint coverage"
             );
+            ensure!(
+                progress
+                    .total_fragments
+                    .is_none_or(|n| progress.completed_fragments <= n),
+                "RESULT_CORRUPT: fragment coverage"
+            );
+            if progress.unit == "manifest_file" {
+                ensure!(
+                    progress.completed_fragments == progress.completed_files
+                        && progress.total_fragments == Some(files.len()),
+                    "RESULT_CORRUPT: file coverage"
+                );
+            } else if let Some(total) = files.iter().map(|f| f.row_groups).sum::<Option<usize>>() {
+                ensure!(
+                    progress.total_fragments == Some(total),
+                    "RESULT_CORRUPT: row group total"
+                );
+                let complete = files
+                    .iter()
+                    .take(progress.completed_files)
+                    .map(|f| f.row_groups.unwrap())
+                    .sum::<usize>();
+                let upper = complete
+                    + files
+                        .get(progress.completed_files)
+                        .map(|f| f.row_groups.unwrap())
+                        .unwrap_or(0);
+                ensure!(
+                    (complete..=upper).contains(&progress.completed_fragments),
+                    "RESULT_CORRUPT: row group prefix"
+                );
+            }
+            let previous: Option<String> = tx
+                .query_row(
+                    "SELECT progress FROM analysis_progress WHERE result_id=?",
+                    [&spec.result_ref],
+                    |r| r.get(0),
+                )
+                .optional()?;
+            if let Some(raw) = previous {
+                let prior: Checkpoint = serde_json::from_str(&raw)?;
+                ensure!(
+                    progress.completed_files >= prior.completed_files
+                        && progress.completed_fragments >= prior.completed_fragments
+                        && progress.processed_rows >= prior.processed_rows
+                        && (progress.completed_fragments > prior.completed_fragments
+                            || progress.completed_files > prior.completed_files),
+                    "RESULT_CORRUPT: nonmonotonic coverage"
+                );
+            }
+            if p.execution.preview == "none" {
+                ensure!(
+                    part.seq == 0
+                        && progress.completed_files == files.len()
+                        && progress.total_fragments == Some(progress.completed_fragments),
+                    "RESULT_CORRUPT: incomplete final checkpoint"
+                );
+            }
+            tx.execute("INSERT INTO analysis_progress VALUES(?,?) ON CONFLICT(result_id) DO UPDATE SET progress=excluded.progress",params![spec.result_ref,serde_json::to_string(progress)?])?;
         }
         let preview = spec.prepared.is_none()
             && spec
@@ -402,7 +456,7 @@ impl Db {
             quality["coverage"]["input_coverage"] = json!("unknown");
             quality["final_for_request"] = json!(false);
             let rows = if let Some(progress) = &part.checkpoint {
-                quality["coverage"]["input_coverage"] = json!({"unit":"manifest_file","completed_files":progress.completed_files,"total_files":progress.total_files,"order":"frozen_manifest_order"});
+                quality["coverage"]["input_coverage"] = progress.coverage();
                 tx.execute(
                     "INSERT INTO checkpoints VALUES(?,?,?)",
                     params![spec.result_ref, rev, part.seq],
@@ -555,19 +609,20 @@ impl Db {
                 cutoff > 0,
                 "RESULT_CORRUPT: analysis completed without checkpoint"
             );
-            let total = spec.inputs.values().next().unwrap().files.len();
-            let expected_parts = if spec.query.as_ref().unwrap().execution.preview == "none" {
-                1
-            } else {
-                total as u64
-            };
+            let raw: String = tx.query_row(
+                "SELECT progress FROM analysis_progress WHERE result_id=?",
+                [&spec.result_ref],
+                |r| r.get(0),
+            )?;
+            let progress: Checkpoint = serde_json::from_str(&raw)?;
             ensure!(
-                cutoff == expected_parts,
+                progress.completed_files == progress.total_files
+                    && progress.total_fragments == Some(progress.completed_fragments),
                 "RESULT_CORRUPT: incomplete aggregate completion"
             );
             let mut quality = spec.quality.clone();
             quality["final_for_request"] = json!(true);
-            quality["coverage"]["input_coverage"] = json!({"unit":"manifest_file","completed_files":total,"total_files":total,"order":"frozen_manifest_order"});
+            quality["coverage"]["input_coverage"] = progress.coverage();
             tx.execute(
                 "INSERT INTO revisions VALUES(?,?,?,?,?)",
                 params![spec.result_ref, head + 1, cutoff, 1, quality.to_string()],

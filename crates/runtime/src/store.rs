@@ -18,8 +18,21 @@ pub struct Counters {
     pub source_bytes: AtomicU64,
     pub result_bytes: AtomicU64,
     pub requests: AtomicU64,
+    failure: std::sync::Mutex<Option<&'static str>>,
 }
 impl Counters {
+    pub fn failure_code(&self) -> Option<&'static str> {
+        *self.failure.lock().unwrap()
+    }
+    fn record_failure(&self, error: anyhow::Error) -> Error {
+        let code = crate::errors::code(&error, "IO_ERROR");
+        *self.failure.lock().unwrap() = Some(code);
+        err(error)
+    }
+    fn exhausted(&self) -> Error {
+        self.record_failure(anyhow::anyhow!("RESOURCE_EXHAUSTED: scan byte budget"))
+    }
+
     pub fn value(&self) -> serde_json::Value {
         serde_json::json!({"reserved_read_bytes":self.reserved.load(Ordering::Relaxed),"source_read_bytes":self.source_bytes.load(Ordering::Relaxed),"result_read_bytes":self.result_bytes.load(Ordering::Relaxed),"read_requests":self.requests.load(Ordering::Relaxed)})
     }
@@ -84,7 +97,9 @@ impl ObjectStore for CountStore {
             .allowed
             .get(path)
             .ok_or_else(|| err("UNREGISTERED_SOURCE"))?;
-        identity.validate().map_err(err)?;
+        identity
+            .validate()
+            .map_err(|e| self.counters.record_failure(e))?;
         let head = opts.head;
         let result = self.inner.get_opts(path, opts).await?;
         if head {
@@ -105,7 +120,7 @@ impl ObjectStore for CountStore {
                     .fetch_update(Ordering::SeqCst, Ordering::SeqCst, |x| {
                         x.checked_add(identity.size).filter(|v| *v <= self.limit)
                     })
-                    .map_err(|_| err("RESOURCE_EXHAUSTED: scan byte budget"))?;
+                    .map_err(|_| self.counters.exhausted())?;
                 let identity = identity.clone();
                 let checksum = checksum.clone();
                 let bytes = tokio::task::spawn_blocking(move || {
@@ -113,7 +128,7 @@ impl ObjectStore for CountStore {
                 })
                 .await
                 .map_err(err)?
-                .map_err(err)?;
+                .map_err(|e| self.counters.record_failure(e))?;
                 self.counters
                     .result_bytes
                     .fetch_add(bytes.len() as u64, Ordering::Relaxed);
@@ -154,7 +169,7 @@ impl ObjectStore for CountStore {
                         .fetch_update(Ordering::SeqCst, Ordering::SeqCst, |x| {
                             x.checked_add(n).filter(|v| *v <= limit)
                         })
-                        .map_err(|_| err("RESOURCE_EXHAUSTED: scan byte budget"))?;
+                        .map_err(|_| count.exhausted())?;
                     let (file, bytes) = tokio::task::spawn_blocking(move || {
                         let mut b = vec![0; n as usize];
                         file.read_exact(&mut b).map_err(err)?;

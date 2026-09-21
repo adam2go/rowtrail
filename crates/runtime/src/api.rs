@@ -92,7 +92,7 @@ fn remember(c: &rusqlite::Connection, req: &Request, v: &Value) -> Result<()> {
     Ok(())
 }
 pub fn capabilities() -> Value {
-    json!({"api_version":"1","metadata_schema":"4; one-way upgrade from 3","progressive_aggregation":{"fragment_unit":"manifest_file","aggregate_limit":16,"numeric_inputs":"Int64, UInt64, Decimal128 scale 0..6","sum":"Decimal128(38,input_scale)","avg":"Decimal128(38,6), truncation toward zero","group_by":false,"sampling":false},"formats":["csv","tsv","parquet"],"source":"local","sql":"DataFusion 55.0.0 read-only SELECT; explicit bindings","analysis":["inspect:null_count","inspect:min_max","inspect:top_k","analyze:count","analyze:sum","analyze:avg"],"entries":["cli","ndjson_session","mcp_stdio","rust_sdk"],"prepare":"explicit streaming CSV/TSV to managed Parquet; atomic dataset visibility","workspace_quota":"managed data plus conservative result/spill reservations; excludes SQLite, logs and external exports","verified_part_cache_bytes":8388608,"result_part_target_bytes":4194304,"result_part_max_bytes":8388608,"native_tasks":false,"automatic_resume":false,"source_consistency":"best_effort","result_storage":"immutable Arrow IPC files","max_frame_bytes":FRAME_LIMIT,"minimum_error_budget_bytes":512,"max_output_bytes":FRAME_LIMIT-512,"max_output_rows":10000,"max_manifest_files":128,"max_directory_entries":4096,"default_parallel_jobs":1,"cancellation":"cooperative signal with forced worker termination after 300ms","engine_memory_limit":"MemoryPool; not RSS hard limit","scan_limit":"byte reservation before local reads","result_retention":"retained by default; explicit pin/release and dependency-safe workspace gc","event_retention":"until workspace removal; no event pruning yet","unsupported":["Windows","remote","sampling","native_tasks","automatic_resume","union_by_name","binary_inline","RSS_hard_limit"]})
+    json!({"api_version":"1","metadata_schema":"5; one-way upgrade from 3/4","progressive_aggregation":{"fragment_unit":"parquet_row_group","fragment_units":["parquet_row_group","manifest_file"],"checkpoint_interval_ms":50,"aggregate_limit":16,"numeric_inputs":"Int64, UInt64, Decimal128 scale 0..6","sum":"Decimal128(38,input_scale)","avg":"Decimal128(38,6), truncation toward zero","group_by":false,"sampling":false},"formats":["csv","tsv","parquet"],"source":"local","sql":"DataFusion 55.0.0 read-only SELECT; explicit bindings","analysis":["inspect:null_count","inspect:min_max","inspect:top_k","analyze:count","analyze:sum","analyze:avg"],"entries":["cli","ndjson_session","mcp_stdio","rust_sdk"],"workspace_summary":"bounded metadata catalog with fixed bindings and store-scoped cursor; no source scan","prepare":"explicit streaming CSV/TSV to managed Parquet; atomic dataset visibility","workspace_quota":"managed data plus conservative result/spill reservations; excludes SQLite, logs and external exports","verified_part_cache_bytes":8388608,"result_part_target_bytes":4194304,"result_part_max_bytes":8388608,"native_tasks":false,"automatic_resume":false,"source_consistency":"best_effort","result_storage":"immutable Arrow IPC files","max_frame_bytes":FRAME_LIMIT,"minimum_error_budget_bytes":512,"max_output_bytes":FRAME_LIMIT-512,"max_output_rows":10000,"max_manifest_files":128,"max_directory_entries":4096,"default_parallel_jobs":1,"cancellation":"cooperative signal with forced worker termination after 300ms","engine_memory_limit":"MemoryPool; not RSS hard limit","scan_limit":"byte reservation before local reads","result_retention":"retained by default; explicit pin/release and dependency-safe workspace gc","event_retention":"until workspace removal; no event pruning yet","unsupported":["Windows","remote","sampling","native_tasks","automatic_resume","union_by_name","binary_inline","RSS_hard_limit"]})
 }
 fn validate_execution(e: &Execution) -> Result<()> {
     ensure!(
@@ -136,7 +136,7 @@ fn output_limit(req: &Request) -> usize {
             .pointer("/budget/max_bytes")
             .and_then(Value::as_u64)
             .unwrap_or(8192),
-        "events" => req
+        "events" | "workspace" => req
             .params
             .get("max_bytes")
             .and_then(Value::as_u64)
@@ -305,7 +305,7 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
                     "UNSUPPORTED_OPERATION: analyze requires a frozen Parquet manifest"
                 );
                 let projection = crate::aggregate::projection(input, &p)?;
-                quality["aggregation"] = json!({"aggregates":p.aggregates,"fragment_unit":"manifest_file","average":"Decimal128(38,6); truncated toward zero at six fractional digits; exact sum and count retained in computation"});
+                quality["aggregation"] = json!({"aggregates":p.aggregates,"fragment_unit":p.fragment_unit,"average":"Decimal128(38,6); truncated toward zero at six fractional digits; exact sum and count retained in computation"});
                 let query = QueryParams {
                     bindings,
                     sql: format!("SELECT {projection} FROM source"),
@@ -760,7 +760,7 @@ fn submit(
             json!({"view_ref":view,"request":req.params}).to_string()
         ],
     )?;
-    tx.execute("INSERT INTO objects(id,kind,data) VALUES(?,'scope',?)",params![scope,json!({"scope_ref":scope,"inputs":spec.query.as_ref().map(|q|&q.bindings),"sql":spec.query.as_ref().map(|q|&q.sql),"parameters":spec.query.as_ref().map(|q|&q.parameters),"coverage_semantics":if spec.analysis.is_some(){"one cumulative aggregate checkpoint over complete files in frozen manifest order"}else{"committed output prefix until final; input scan coverage unknown"},"quality":quality}).to_string()])?;
+    tx.execute("INSERT INTO objects(id,kind,data) VALUES(?,'scope',?)",params![scope,json!({"scope_ref":scope,"inputs":spec.query.as_ref().map(|q|&q.bindings),"sql":spec.query.as_ref().map(|q|&q.sql),"parameters":spec.query.as_ref().map(|q|&q.parameters),"coverage_semantics":if spec.analysis.is_some(){"one cumulative aggregate checkpoint over complete fragments in frozen manifest order"}else{"committed output prefix until final; input scan coverage unknown"},"quality":quality}).to_string()])?;
     for input in spec.inputs.values() {
         tx.execute(
             "INSERT OR IGNORE INTO deps VALUES(?,?)",
@@ -798,6 +798,14 @@ async fn wait_response(
     refs["job"] = state.clone();
     refs["readable_revision"] = state["readable_revision"].clone();
     refs["observation"] = Value::Null;
+    let mut actions = vec![];
+    if state["readable_revision"].is_number() {
+        actions.push("read");
+    }
+    if !terminal(state["state"].as_str().unwrap()) {
+        actions.extend(["wait", "cancel"]);
+    }
+    refs["next_actions"] = json!(actions);
     if let (Some(budget), Some(revision)) = (output, state["readable_revision"].as_u64()) {
         let p = ReadParams {
             result_ref: state["result_ref"].as_str().unwrap().into(),

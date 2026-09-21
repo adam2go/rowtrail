@@ -8,6 +8,7 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-alpha4-') as td:
     base=pathlib.Path(td);ws=base/'workspace'
     client=subprocess.Popen([str(bins/'rowtrail'),'--workspace',str(ws),'session'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,text=True)
     def call(method,params,ok=True):
+        if method=='analyze':params={'fragment_unit':'manifest_file','checkpoint_interval_ms':0,**params}
         req={'api_version':'1','request_id':str(len(traces)),'method':method,'params':params};client.stdin.write(json.dumps(req)+'\n');client.stdin.flush();r=json.loads(client.stdout.readline());traces.append({'request':req,'response':r})
         if ok:assert r['ok'],r
         return r['result'] if r['ok'] else r

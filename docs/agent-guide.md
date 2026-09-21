@@ -3,7 +3,7 @@
 [Home](../README.md) · [Manual workflow](usage.md) · [Verification](verification.md)
 
 RowTrail is for agents and their programs. It has no spreadsheet UI and makes no
-model calls. Discover a request contract with `rowtrail schema METHOD`; use
+model calls. Start with `rowtrail guide` for a machine-readable workflow. Discover a request contract with `rowtrail schema METHOD`; use
 `rowtrail doctor` for actual capabilities. Open local CSV/TSV/Parquet with a
 bounded schema observation, then bind the returned dataset and manifest IDs.
 
@@ -17,6 +17,25 @@ A session request is one JSON line:
 ```json
 {"api_version":"1","request_id":"q1","idempotency_key":"analysis-step-1","method":"query","params":{"bindings":{},"sql":"SELECT CAST(9007199254740993 AS BIGINT) id","execution":{"wait_ms":200,"output":{"max_rows":10,"max_bytes":8192}}}}
 ```
+
+`rowtrail --workspace /absolute/private/workspace mcp-config` prints an MCP server
+configuration with the actual executable path. It does not edit host settings.
+`guide`, `schema` and `mcp-config` do not start the runtime or create a workspace.
+
+## Reconnect without guessing references (alpha.5)
+
+Call `workspace` with `{"action":"summary","limit":20,"max_bytes":8192}`.
+It lists datasets, jobs and results with fixed bindings, stored validity, coverage
+and suggested next actions. Reuse an item's `binding` for SQL, or retain a job ID
+and explicitly wait/cancel. Filter with `kind: "dataset"`, `"job"` or `"result"`.
+Follow `next_cursor` unchanged with the same kind; it fixes page membership against
+new insertions, while each page reads current metadata. Counts cover the workspace.
+This is a bounded metadata catalog: it does not scan sources or generate prose.
+Stored validity is checked again when a binding is used. Expired tombstones are
+explicit; finding a reference does not make expired data usable.
+
+The summary reconnects an agent to durable objects; it does not resume an
+interrupted calculation. Retry a mutation only with its original idempotency key.
 
 Read the corresponding response line before sending the next request. Request
 and response frames are bounded to 1 MiB. Schema and help need no coordinator;
@@ -96,7 +115,7 @@ as an empty table. Metadata, logs, events and external exports are outside this
 quota and GC. The [runnable workflow](../examples/prepare_explore.py) profiles,
 prepares, branches twice, exports and collects exactly its own intermediate data.
 
-## Progressive file aggregation (alpha.4)
+## Progressive row-group aggregation (alpha.5)
 
 Send this to `analyze` / `data_analyze` / `rowtrail analyze --request request.json`:
 
@@ -104,16 +123,30 @@ Send this to `analyze` / `data_analyze` / `rowtrail analyze --request request.js
 {"source":{"dataset_ref":"ds_ID","manifest_ref":"mf_ID"},"aggregates":[{"function":"count","alias":"rows"},{"function":"count","column":"amount","alias":"nonnull"},{"function":"sum","column":"amount","alias":"total"},{"function":"avg","column":"amount","alias":"mean"}],"execution":{"preview":"available","wait_ms":200}}
 ```
 
-The source must be Parquet. Previews are cumulative snapshots over complete files
-in frozen manifest order. Each revision contains **one aggregate row**; later
+The source must be Parquet. Previews are cumulative snapshots over complete row
+groups in frozen file/row-group order. Each revision contains **one aggregate row**; later
 checkpoints replace the snapshot, not earlier immutable revisions. Read
-`quality.coverage.input_coverage.completed_files` and `total_files`. These measure
-files, not rows or bytes. Keep `result_ref` and the exact revision before branching.
+`quality.coverage.input_coverage.completed_fragments`, `total_fragments`,
+`processed_rows`, `completed_files` and `total_files`. `total_fragments` can be null
+for older/prepared manifests until all footers are read; completed final coverage
+has an exact total. These are prefix coverage, not statistical estimates.
+Keep `result_ref` and the exact revision before branching.
 A finished query on a partial checkpoint still has partial original-source coverage.
 
 Sum/avg accept Int64, UInt64 and Decimal128 scale 0–6. Counts are UInt64; sums use
 Decimal128(38,input_scale). Average is Decimal128(38,6), truncating toward zero.
 Request sum plus non-null count if the caller needs a rational mean. No floats,
 GROUP BY, filters, SQL expressions, sampling, estimates or interrupted-run resume
-are included. A single-file source supplies one fragment, regardless of row groups.
-`preview:none` writes one final result. Details: [design](decisions/004-progressive-file-aggregation.md).
+are included. A single large file can now supply many fragments. The first complete
+fragment is published immediately; later checkpoints coalesce with
+`checkpoint_interval_ms:50` (default). Set 0 to publish every fragment, or up to
+60000 to reduce writes. This interval is checked at fragment boundaries, not a
+wall-clock response deadline. The final prefix is always published.
+`preview:none` writes one final result. For alpha.4 file-prefix behavior, explicitly
+set `fragment_unit:"manifest_file", checkpoint_interval_ms:0`.
+Details: [row-group design](decisions/005-row-groups-and-reconnection.md) and
+[arithmetic contract](decisions/004-progressive-file-aggregation.md).
+
+Metadata upgrades once from schema 3/4 to 5. Existing fixed revisions remain
+readable, but older runtimes refuse an upgraded workspace. Back up a workspace
+before upgrading if you need to keep using the old runtime.
