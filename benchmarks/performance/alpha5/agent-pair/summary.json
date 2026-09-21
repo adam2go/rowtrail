@@ -1,0 +1,358 @@
+{
+  "kind": "real external-agent paired pilot",
+  "model": "gpt-6-astra",
+  "reasoning_effort": "xhigh",
+  "codex_version": "codex-cli 0.154.0-alpha.6.2",
+  "duckdb_version": "1.5.5",
+  "rows": 16391,
+  "fixture_sha256": "01318255b1a6e421682819eb2c12590fa7ca9a2e4c721c4b5212d9f1e66a212d",
+  "binary_sha256": {
+    "rowtrail": "78d1b8436aac00e9bec706415ad77f5a713b1bd9632736e7cf789f674d842bf8",
+    "rowtrail-runtime": "b5b1601f471edef839b57825e7e09861f9996f5c28b7b2044f06ae48000f7c04"
+  },
+  "conditions": [
+    "Same model/settings, task and input for both arms; fresh agent per task; arm order alternates by repeat.",
+    "Both use a persistent Python process and may compose calls, cache values and materialize results. DuckDB connection and temporary tables persist.",
+    "Handoff setup materializes the same subset before the agent starts; setup time is reported separately and included in total.",
+    "No internal product model calls; models run only in this optional external harness.",
+    "I/O counters differ: RowTrail reports physical source/result bytes, DuckDB profiles report original-source scanned rows. Null means not measured, never zero.",
+    "Small synthetic pilot; not an adoption study or universal speed claim. Retain failures and usage including cached tokens.",
+    "Agent wall time includes CLI/model/tool time. Backend code time and emitted observation bytes are separate; emitted bytes are not total model tokens."
+  ],
+  "measurement_notes": [
+    "Usage input_tokens is cumulative model input across the turn and includes cached input; it is not peak context size. The CLI also supplies system/tool scaffolding.",
+    "Agent wall time includes model/network/scheduling variation. Backend-only code time and total setup+agent time are retained separately. Three repeats per task are descriptive, not a powered statistical study.",
+    "The model has prior SQL/DuckDB familiarity. RowTrail receives its full agent guide and request schemas; their reading cost is part of the reported integration experience, not matched documentation lengths.",
+    "DuckDB JSON profiles are incomplete for some fetchone/metadata statements. Original-source scan-row totals are null when an unprofiled source SQL statement occurs; no missing profile is relabeled zero.",
+    "Trace source-statement counts exclude DESCRIBE and are logical statement counts, not physical scan counts. RowTrail source-reading job counts use recorded physical-byte metrics.",
+    "Handoff traces were reviewed: both arms discover the stored subset and query it, with no source-reading query. DuckDB has a physical saved table, not a view over the source.",
+    "Tool response bytes measure the persistent-code bridge output, excluding documentation/schema reads and CLI overhead. They are not model context tokens.",
+    "No selective retries: all 12 planned trials are retained. This pilot does not test progressive early stopping, real customer data or long-running multi-agent workloads."
+  ],
+  "summary": [
+    {
+      "task": "explore",
+      "arm": "rowtrail",
+      "passed": 3,
+      "trials": 3,
+      "setup_ms": {
+        "median": 28.850666945800185,
+        "min": 21.2654578499496,
+        "max": 30.030374880880117
+      },
+      "agent_wall_ms": {
+        "median": 96604.38954108395,
+        "min": 84829.60595795885,
+        "max": 97376.06875016354
+      },
+      "total_ms": {
+        "median": 96634.41991596483,
+        "min": 84858.45662490465,
+        "max": 97397.33420801349
+      },
+      "code_calls": {
+        "median": 6,
+        "min": 5,
+        "max": 6
+      },
+      "code_wall_ms": {
+        "median": 81.57999999821186,
+        "min": 72.6647898554802,
+        "max": 89.36608210206032
+      },
+      "observed_response_bytes": {
+        "median": 6229,
+        "min": 5256,
+        "max": 8928
+      },
+      "input_tokens": {
+        "median": 181085,
+        "min": 156098,
+        "max": 193949
+      },
+      "cached_input_tokens": {
+        "median": 155264,
+        "min": 130944,
+        "max": 167296
+      },
+      "output_tokens": {
+        "median": 2038,
+        "min": 1604,
+        "max": 2084
+      },
+      "reasoning_output_tokens": {
+        "median": 435,
+        "min": 371,
+        "max": 669
+      },
+      "source_read_bytes": [
+        3018500,
+        2342056,
+        2342056
+      ],
+      "result_read_bytes": [
+        4596,
+        0,
+        0
+      ],
+      "duckdb_source_scan_rows": [
+        null,
+        null,
+        null
+      ],
+      "source_reading_jobs": [
+        4,
+        3,
+        3
+      ],
+      "source_reading_sql_statements": [
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "task": "explore",
+      "arm": "duckdb",
+      "passed": 3,
+      "trials": 3,
+      "setup_ms": {
+        "median": 8.687333902344108,
+        "min": 7.542209001258016,
+        "max": 38.63704111427069
+      },
+      "agent_wall_ms": {
+        "median": 56689.90304204635,
+        "min": 56620.05170783959,
+        "max": 61277.30495901778
+      },
+      "total_ms": {
+        "median": 56728.540083160624,
+        "min": 56627.59391684085,
+        "max": 61285.99229292013
+      },
+      "code_calls": {
+        "median": 3,
+        "min": 3,
+        "max": 3
+      },
+      "code_wall_ms": {
+        "median": 9.760458022356033,
+        "min": 9.742708876729012,
+        "max": 12.402208987623453
+      },
+      "observed_response_bytes": {
+        "median": 938,
+        "min": 919,
+        "max": 1062
+      },
+      "input_tokens": {
+        "median": 75999,
+        "min": 75780,
+        "max": 76004
+      },
+      "cached_input_tokens": {
+        "median": 58752,
+        "min": 43136,
+        "max": 58880
+      },
+      "output_tokens": {
+        "median": 1228,
+        "min": 1074,
+        "max": 1272
+      },
+      "reasoning_output_tokens": {
+        "median": 247,
+        "min": 234,
+        "max": 319
+      },
+      "source_read_bytes": [
+        null,
+        null,
+        null
+      ],
+      "result_read_bytes": [
+        null,
+        null,
+        null
+      ],
+      "duckdb_source_scan_rows": [
+        null,
+        null,
+        null
+      ],
+      "source_reading_jobs": [
+        null,
+        null,
+        null
+      ],
+      "source_reading_sql_statements": [
+        3,
+        3,
+        3
+      ]
+    },
+    {
+      "task": "handoff",
+      "arm": "rowtrail",
+      "passed": 3,
+      "trials": 3,
+      "setup_ms": {
+        "median": 84.92258307524025,
+        "min": 77.79379212297499,
+        "max": 88.11166719533503
+      },
+      "agent_wall_ms": {
+        "median": 55407.47749991715,
+        "min": 54804.76645799354,
+        "max": 77227.35900012776
+      },
+      "total_ms": {
+        "median": 55492.40008299239,
+        "min": 54882.56025011651,
+        "max": 77315.4706673231
+      },
+      "code_calls": {
+        "median": 3,
+        "min": 3,
+        "max": 5
+      },
+      "code_wall_ms": {
+        "median": 24.00279138237238,
+        "min": 23.27999914996326,
+        "max": 46.4735000859946
+      },
+      "observed_response_bytes": {
+        "median": 5729,
+        "min": 4233,
+        "max": 14899
+      },
+      "input_tokens": {
+        "median": 113009,
+        "min": 111951,
+        "max": 169980
+      },
+      "cached_input_tokens": {
+        "median": 75776,
+        "min": 69888,
+        "max": 143360
+      },
+      "output_tokens": {
+        "median": 1056,
+        "min": 1049,
+        "max": 1110
+      },
+      "reasoning_output_tokens": {
+        "median": 240,
+        "min": 118,
+        "max": 241
+      },
+      "source_read_bytes": [
+        0,
+        0,
+        0
+      ],
+      "result_read_bytes": [
+        377796,
+        188898,
+        188898
+      ],
+      "duckdb_source_scan_rows": [
+        null,
+        null,
+        null
+      ],
+      "source_reading_jobs": [
+        0,
+        0,
+        0
+      ],
+      "source_reading_sql_statements": [
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "task": "handoff",
+      "arm": "duckdb",
+      "passed": 3,
+      "trials": 3,
+      "setup_ms": {
+        "median": 11.669666040688753,
+        "min": 11.522625107318163,
+        "max": 11.738125002011657
+      },
+      "agent_wall_ms": {
+        "median": 45506.43774983473,
+        "min": 42037.69987495616,
+        "max": 62039.423416834325
+      },
+      "total_ms": {
+        "median": 45518.17587483674,
+        "min": 42049.36954099685,
+        "max": 62050.94604194164
+      },
+      "code_calls": {
+        "median": 3,
+        "min": 3,
+        "max": 3
+      },
+      "code_wall_ms": {
+        "median": 6.467083003371954,
+        "min": 6.440457887947559,
+        "max": 6.755125010386109
+      },
+      "observed_response_bytes": {
+        "median": 606,
+        "min": 605,
+        "max": 623
+      },
+      "input_tokens": {
+        "median": 74453,
+        "min": 74282,
+        "max": 74467
+      },
+      "cached_input_tokens": {
+        "median": 43392,
+        "min": 43136,
+        "max": 58112
+      },
+      "output_tokens": {
+        "median": 587,
+        "min": 574,
+        "max": 594
+      },
+      "reasoning_output_tokens": {
+        "median": 0,
+        "min": 0,
+        "max": 0
+      },
+      "source_read_bytes": [
+        null,
+        null,
+        null
+      ],
+      "result_read_bytes": [
+        null,
+        null,
+        null
+      ],
+      "duckdb_source_scan_rows": [
+        0,
+        0,
+        0
+      ],
+      "source_reading_jobs": [
+        null,
+        null,
+        null
+      ],
+      "source_reading_sql_statements": [
+        0,
+        0,
+        0
+      ]
+    }
+  ]
+}

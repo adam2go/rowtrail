@@ -56,8 +56,15 @@ rowtrail --version
 [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.5) 下载并解压。
 请将 `rowtrail` 和 `rowtrail-runtime` 放在同一个目录。
 
-alpha.5 候选版的原生产物验证正在进行。分发预算保持：压缩包 **30 MB**、
-CLI **4.5 MB**、运行时 **125 MB**（十进制）。[发布验证](docs/verification.md#native-distribution)。
+已验证的原生发布包大小（十进制 MB）：
+
+| 平台 | 压缩下载 `.tar.xz` | CLI | 运行时 |
+|---|---:|---:|---:|
+| macOS arm64 | **19.09 MB** | 3.70 MB | 99.98 MB |
+| Linux x86_64 | **22.42 MB** | 4.13 MB | 114.77 MB |
+
+CLI 与运行时为解压大小。压缩包上限 **30 MB**，CLI / 运行时上限为 4.5 / 125 MB。
+[原生产物验证](docs/verification.md#native-distribution)。
 
 ## 先问一个问题
 
@@ -99,22 +106,16 @@ rowtrail query --sql "SELECT region, SUM(amount) AS total
 
 | 调用方式 | 16,384 行 | 1,048,576 行 |
 |---|---:|---:|
-| RowTrail alpha.1 · CLI | 349.58 | 12,917.72 |
-| RowTrail alpha.2 · CLI | 123.20 | 377.35 |
-| **RowTrail alpha.3 · CLI** | **122.92** | **345.68** |
-| RowTrail alpha.2 · 持久 NDJSON | 104.13 | 360.55 |
-| RowTrail alpha.3 · 持久 NDJSON | 103.99 | 322.28 |
-| RowTrail alpha.4 · 持久 NDJSON | 104.03 | 319.67 |
+| RowTrail alpha.4 · 持久 NDJSON（历史记录） | 104.03 | 319.67 |
 | **RowTrail alpha.5 · 持久 NDJSON** | **104.35** | **318.97** |
-| DuckDB 1.5.5 · 持久会话（alpha.5 同次测试） | 10.82 | 88.98 |
-| 直接 DataFusion 55.0.0 · 持久会话（alpha.5 同次测试） | 4.78 | 55.14 |
+| DuckDB 1.5.5 · 持久会话 | 10.82 | 88.98 |
+| 直接 DataFusion 55.0.0 · 持久会话 | 4.78 | 55.14 |
 
-alpha.3 已包含结果复用时的内容校验。在这台机器的百万行探索中，相对 alpha.2，
-CLI 快约 **8.4%**、持久会话快约 **10.6%**。直接引擎在此测试中仍然更快；RowTrail 还承担
-持久化、进程隔离和协议成本。对照保留内存中间表，DataFusion 计时不含启动。
-本机测量不代表普遍性能优势，也不是 Agent 采用效果实验。
+这组普通探索测试与 alpha.4 基本持平。直接引擎仍然更快；RowTrail 还承担持久化、内容校验、
+进程隔离和协议成本。对照保留内存中间表，DataFusion 计时不含启动。
+这些是本机测量，不代表普遍性能优势。
 
-**整理有前置成本。** 另一组百万行 CSV 测试中，转换约需 271 ms。打开、画像并做十次
+**整理有前置成本。** alpha.3 的历史百万行 CSV 测试中，转换约需 271 ms。打开、画像并做十次
 后续聚合，直接读 CSV 共 736 ms，计入整理后共 652 ms。这组数据到第八次追问才回本；
 具体阈值会随数据和问题变化，因此 RowTrail 把是否整理的选择留给 Agent。
 
@@ -123,6 +124,10 @@ CLI 快约 **8.4%**、持久会话快约 **10.6%**。直接引擎在此测试中
 默认合并中间检查点，这组测试从持久化 16 次降为两次。只需最终答案时，普通 SQL 仍更快：
 **37.60 ms**。单文件、16 个行组也能在 **20.18 ms** 返回局部结果，**46.20 ms** 完成。
 局部结果只代表已经处理的前缀，不是整表估计。[条件与原始记录](docs/verification.md)。
+
+**真实 Agent 实验也公开差距。** 同模型的 12 次探索/接续任务全部答对；RowTrail 和持久
+DuckDB 都能在接续时复用保存的数据、不重扫原文件。但这组小样本里 RowTrail 更慢，
+累计输入 token 也更多，尚未证明整体 Agent 效率更高。[全部试验与限制](docs/verification.md#real-external-agent-paired-pilot)。
 
 当前共有 **65 项集成场景**、六项 Rust 测试（含八种提交边界子进程崩溃场景），以及
 MCP、会话、SDK 与安装验证。测试逐一核对行组检查点的独立整数/Decimal 答案。

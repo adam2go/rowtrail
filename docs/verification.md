@@ -10,7 +10,7 @@ calls. The paired experiment explicitly runs an external model. Historical alpha
 
 ## Correctness
 
-The local release build passes **65 integration scenarios**: 30 foundation, 13
+The local release build and both native CI platforms pass **65 integration scenarios**: 30 foundation, 13
 alpha.3, ten alpha.4 and twelve alpha.5. Six Rust tests include eight real subprocess
 commit-crash cases and their child harness. Formatting, Clippy, dependency boundaries,
 MCP/session entry checks and old/new-binary upgrade checks pass locally.
@@ -28,13 +28,14 @@ MCP/session entry checks and old/new-binary upgrade checks pass locally.
 | Managed Parquet | Checksum validation and discovered final fragment totals |
 | Cancel/worker loss | Single-file prefixes survive; stopped worker is confirmed |
 | Reconnection/pagination | Fixed bindings found by a fresh client; new objects excluded mid-pagination |
-| Expiration | Tombstones, no reuse suggestions for expired data, explicit recovery errors |
+| Stored validity | Known-invalid results excluded from readable counts; expiration tombstones and recovery hints |
 
+[Check inventory](../benchmarks/performance/alpha5/verification.json) ·
 [Executable checks](../tests/integration/alpha5.py). Full traces remain in CI artifacts.
 The [alpha.4 → alpha.5 binary upgrade probe](../benchmarks/performance/alpha5/upgrade.json)
 checks old exact large integers and a fixed partial checkpoint, derived SQL, and
 old-runtime rejection after schema 4 → 5. The upgrade is one-way. Existing schema-3
-stores also have a migration path. An old live coordinator keeps its capabilities
+stores also [pass the real old/new-binary probe](../benchmarks/performance/alpha5/upgrade-from-alpha3.json). An old live coordinator keeps its capabilities
 until it finishes and exits; use `doctor` to inspect the actual running version.
 
 ## Progressive latency and total cost
@@ -50,14 +51,18 @@ Decimal arithmetic checks all finals and every first observed prefix.
 | Input / mode | First observed result, median ms | Final result, median ms |
 |---|---:|---:|
 | 16 files, alpha.4 progressive rerun | 21.98 | 184.11 |
-| 16 files, alpha.5 progressive | 21.22 | 49.18 |
+| 16 files, alpha.5 progressive (default coalescing) | 21.22 | 49.18 |
+| 16 files, alpha.5 manifest_file / interval 0 | 24.30 | 190.85 |
 | 16 files, alpha.5 ordinary SQL | 34.26 | 37.60 |
 | 1 file / 16 row groups, alpha.5 progressive | 20.18 | 46.20 |
 | 1 file / 16 row groups, alpha.5 ordinary SQL | 32.12 | 35.47 |
 
 Alpha.5 progressive final time is **73.3% lower** than the alpha.4 rerun here. The
 new default coalesces 16 checkpoints into two; this is a comparison of default
-behaviors, **not equal publication frequency**. It also uses one context per job,
+behaviors, **not equal publication frequency**. With every file checkpoint retained,
+alpha.5 takes 190.85 ms (same run SQL: 42.66 ms), so these samples do not show an
+execution-speed gain at equal publication frequency. The default improvement is
+mainly fewer durable checkpoint writes. The implementation uses one context per job,
 projected row-group scans and a bounded footer cache. The first partial covers only
 a processed prefix; a partial and complete result are different evidence. SQL is
 still faster when only a final answer is useful. A single enormous row group must
@@ -66,8 +71,11 @@ finish before its first aggregate checkpoint. No grouping, filtering or estimate
 Raw repetitions, coverage, I/O and binary hashes:
 [16-file alpha.5](../benchmarks/performance/alpha5/progressive-16files.json),
 [alpha.4 rerun](../benchmarks/performance/alpha5/alpha4-recheck-16files.json),
-[single-file alpha.5](../benchmarks/performance/alpha5/progressive-single-file.json).
-These are local candidate binaries, not the separately built native CI archives.
+[single-file alpha.5](../benchmarks/performance/alpha5/progressive-single-file.json),
+[equal-publication control](../benchmarks/performance/alpha5/progressive-every-file.json).
+These local candidate binaries precede final catalog availability fixes; the SQL
+and progressive execution paths are unchanged. Their hashes are distinct from
+the separately built native CI archives.
 
 ## Existing exploration performance
 
@@ -93,17 +101,50 @@ historical evidence; it has not been relabeled as an alpha.5 rerun.
 
 ## Real external-agent paired pilot
 
-The experiment is running for this candidate. Both arms use the same model/settings,
-16,391 synthetic rows, a persistent Python environment and a persistent backend.
-The agent may compose calls and materialize tables in both arms. Two tasks cover
-multi-step exploration and discovering/reusing a previous session's materialized
-subset. Three repeats alternate arm order. Independent Python integer-cent answers,
-failures, elapsed time, model usage and source-scan evidence are retained.
+All **12 planned trials passed** (two tasks × two arms × three repeats), using
+Codex CLI 0.154.0-alpha.6.2 with requested model `gpt-6-astra`, effort `xhigh`.
+The input has 16,391 synthetic rows. Each arm gets a fresh agent and a persistent
+Python environment/backend, may compose calls and materialize intermediates;
+arm order alternates. Handoff seeds the same filtered subset before the agent
+starts and provides no object/table name. Python integer-cent oracles check every
+answer, including IDs above 2^53. No failed trial was removed or retried.
 
-[Harness](../benchmarks/agent_pair.py). This is optional benchmark infrastructure,
-not a runtime dependency or a demonstration of broad agent adoption. Emitted tool
-bytes and model tokens are distinct measurements. RowTrail source/result byte
-counters and DuckDB scanned-row profiles are not directly interchangeable.
+Medians across three repeats per task/arm; total time includes setup:
+
+| Task / backend | Correct | Total seconds | Code calls | Bridge output bytes | Cumulative input tokens (cached) |
+|---|---:|---:|---:|---:|---:|
+| Explore / RowTrail | 3/3 | 96.63 | 6 | 6,229 | 181,085 (155,264) |
+| Explore / persistent DuckDB | 3/3 | 56.73 | 3 | 938 | 75,999 (58,752) |
+| Handoff / RowTrail | 3/3 | 55.49 | 3 | 5,729 | 113,009 (75,776) |
+| Handoff / persistent DuckDB | 3/3 | 45.52 | 3 | 606 | 74,453 (43,392) |
+
+**This pilot does not show a RowTrail efficiency advantage.** It demonstrates
+correctness and usable saved-result discovery. Both backends complete all handoffs
+without scanning the original input. RowTrail exploration has 4/3/3 source-reading
+jobs, versus 3/3/3 source-reading SQL statements for DuckDB. These logical operation
+counts are not identical physical scan measures. RowTrail reports 3,018,500 /
+2,342,056 / 2,342,056 original-source bytes for exploration and zero for handoff
+(excludes metadata reads during open). DuckDB profiles are missing for some
+fetchone/metadata statements; complete exploration scan-row counts are **unknown**,
+not zero. Handoff statements and profiles show saved-table reuse; all traces were
+reviewed. Do not compare DuckDB scanned rows with RowTrail physical bytes.
+
+Cumulative input tokens sum every model input, including cached tokens and CLI
+system/tool scaffolding; they are not peak context size or billed uncached tokens.
+Bridge bytes exclude separate guide/schema reads. The model already knows SQL;
+RowTrail supplies a longer guide/schema and exposes more job/quality metadata.
+Model scheduling/network/cache variation contributes to total time. Backend code
+itself has median 81.58 / 9.76 ms (explore) and 24.00 / 6.47 ms (handoff), much less
+than end-to-end agent time. Three repeats and tiny synthetic tasks support only
+descriptive comparisons; progressive early stopping and real customer workflows
+are not evaluated. The next integration priority is less discovery text, fewer
+irrelevant fields and fewer tool round trips while keeping quality explicit.
+
+[Full sanitized traces, answers and usage](../benchmarks/performance/alpha5/agent-pair/report.json) ·
+[Summary and measurement limits](../benchmarks/performance/alpha5/agent-pair/summary.json) ·
+[Harness](../benchmarks/agent_pair.py). Raw model reasoning is excluded from published
+records. The external harness consumes model quota; the product still makes no
+model calls and needs no provider account.
 
 ## Above-memory regression
 
@@ -116,11 +157,26 @@ not a repeated timing study or an RSS cap.
 
 ## Native distribution
 
-Native Linux/macOS CI and artifact audit are pending for this candidate. No alpha.5
-native archive is claimed verified yet. Budgets remain 30,000,000 compressed bytes,
-4,500,000 CLI bytes and 125,000,000 runtime bytes. No new dependency was added;
-299 declarations/notices remain. Archives retain Apache-2.0 and upstream notices.
-Linux requires glibc 2.39+. Packages are unsigned engineering previews.
+[The Linux x86_64 / macOS arm64 CI matrix](https://github.com/adam2go/rowtrail/actions/runs/35553205162) passed at source commit
+`dedf04fff543655b4ff44e8ea9b627796d738a32`. Both archives were downloaded, hashed independently and checked against
+metadata/checksum files, binary size budgets and license contents. The actual macOS
+archive was installed: guide/config start no runtime, a 16,391-row / five-row-group
+example completes with exact count/sum/mean, and a fresh session discovers its fixed
+result and reads it back. [Published alpha.4 → native alpha.5 upgrade](../benchmarks/performance/alpha5/upgrade-native-macos.json)
+also preserves old fixed and partial revisions and rejects the old runtime afterward.
+
+| Platform | Compressed bytes | CLI bytes | Runtime bytes |
+|---|---:|---:|---:|
+| macOS arm64 | 19,086,900 | 3,700,672 | 99,984,384 |
+| Linux x86_64 | 22,422,336 | 4,134,696 | 114,765,344 |
+
+Budgets remain 30,000,000 compressed bytes, 4,500,000 CLI bytes and 125,000,000
+runtime bytes. No new dependency was added; 299 declarations/notices remain.
+Archives retain Apache-2.0 and upstream notices. Linux requires glibc 2.39+.
+Packages are unsigned engineering previews. [Exact provenance and platform resource checks](release-verification.json).
+The tag includes later documentation/measurement updates; executable sources,
+installer and CI checks match the verified source commit. Bundled documentation
+is the CI-time candidate snapshot; the repository carries the completed report.
 
 ## Reproduce
 

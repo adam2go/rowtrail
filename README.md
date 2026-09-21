@@ -60,9 +60,15 @@ Set `ROWTRAIL_INSTALL_DIR` to choose another directory, or extract an archive
 from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.5).
 Keep `rowtrail` and `rowtrail-runtime` together.
 
-Native alpha.5 artifact checks are pending for this release candidate. Distribution
-budgets remain **30 MB** per archive, **4.5 MB** per CLI and **125 MB** per runtime
-(decimal bytes). [Release verification](docs/verification.md#native-distribution).
+Verified native release sizes (decimal MB):
+
+| Platform | Download `.tar.xz` | CLI | Runtime |
+|---|---:|---:|---:|
+| macOS arm64 | **19.09 MB** | 3.70 MB | 99.98 MB |
+| Linux x86_64 | **22.42 MB** | 4.13 MB | 114.77 MB |
+
+CLI/runtime are uncompressed sizes. Budgets remain **30 MB** per archive,
+4.5 MB per CLI and 125 MB per runtime. [Native artifact verification](docs/verification.md#native-distribution).
 
 ## Give it a question
 
@@ -110,24 +116,17 @@ branching twice from a saved result, and returning to the original dataset.
 
 | Entry | 16,384 rows | 1,048,576 rows |
 |---|---:|---:|
-| RowTrail alpha.1 · CLI | 349.58 | 12,917.72 |
-| RowTrail alpha.2 · CLI | 123.20 | 377.35 |
-| **RowTrail alpha.3 · CLI** | **122.92** | **345.68** |
-| RowTrail alpha.2 · persistent NDJSON | 104.13 | 360.55 |
-| RowTrail alpha.3 · persistent NDJSON | 103.99 | 322.28 |
-| RowTrail alpha.4 · persistent NDJSON | 104.03 | 319.67 |
+| RowTrail alpha.4 · persistent NDJSON (historical) | 104.03 | 319.67 |
 | **RowTrail alpha.5 · persistent NDJSON** | **104.35** | **318.97** |
-| DuckDB 1.5.5 · persistent session (alpha.5 run) | 10.82 | 88.98 |
-| Direct DataFusion 55.0.0 · persistent session (alpha.5 run) | 4.78 | 55.14 |
+| DuckDB 1.5.5 · persistent session | 10.82 | 88.98 |
+| Direct DataFusion 55.0.0 · persistent session | 4.78 | 55.14 |
 
-Alpha.3 includes content verification on saved-result queries. On the million-row
-workload it is **8.4% faster through CLI / 10.6% through a session than alpha.2**
-on this machine. Direct engines remain faster: RowTrail pays for durable results,
-process isolation and protocol. They retain in-memory intermediates; direct
-DataFusion startup is excluded. These are local measurements, not universal
-performance guarantees or evidence of agent adoption.
+Ordinary exploration performance is stable versus alpha.4 in these samples.
+Direct engines remain faster: RowTrail pays for durable results, content verification,
+process isolation and protocol. Baselines retain in-memory intermediates; direct
+DataFusion startup is excluded. These are local timings, not universal guarantees.
 
-**Preparation has a cost.** On a separate million-row CSV workload, conversion
+**Preparation has a cost.** In the historical alpha.3 million-row CSV experiment, conversion
 costs 271 ms. Open + profile + ten follow-up aggregates takes 736 ms directly from
 CSV, or 652 ms including preparation. The measured break-even is eight follow-ups;
 it varies with data and queries. RowTrail leaves that choice to the agent.
@@ -139,6 +138,12 @@ intermediate checkpoints; this case writes two instead of 16. Ordinary SQL still
 finishes sooner at **37.60 ms**. A single file with 16 row groups returns its first
 prefix in **20.18 ms** and completes in **46.20 ms**. Prefixes describe processed
 rows, never population estimates. [Conditions and raw measurements](docs/verification.md).
+
+**Real agent evidence, including the gap.** A same-model paired pilot completes
+all 12 exploration/handoff tasks correctly. Both RowTrail and persistent DuckDB
+reuse saved data without rescanning the original during handoff. RowTrail is slower
+and uses more cumulative input tokens in this small pilot; it does not yet show
+better end-to-end agent efficiency. [All trials and limitations](docs/verification.md#real-external-agent-paired-pilot).
 
 The current suite has **65 integration scenarios**, six Rust tests including eight
 subprocess commit-crash cases, and MCP/session/SDK/installation checks. Every tested

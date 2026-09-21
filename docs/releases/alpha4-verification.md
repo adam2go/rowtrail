@@ -1,6 +1,6 @@
 # Verification: alpha.4
 
-[Home](../../README.md) · [Current limits](progress.md) · [Agent contracts](../agent-guide.md)
+[Home](../../README.md) · [Current limits](alpha4-progress.md) · [Agent contracts](../agent-guide.md)
 
 This report separates correctness, local timing and native artifact verification.
 No tests call a model. Historical results remain in the

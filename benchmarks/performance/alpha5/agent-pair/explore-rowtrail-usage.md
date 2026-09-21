@@ -1,3 +1,4 @@
+The persistent environment provides rt.call(method, params), returning the result object or raising an error. It uses RowTrail. rt.reconnect() creates a fresh transport without replaying any calls. Use workspace summary to find saved bindings. API request schemas are in schemas.json.
 # Agent integration
 
 [Home](../README.md) · [Manual workflow](usage.md) · [Verification](verification.md)
@@ -21,6 +22,21 @@ A session request is one JSON line:
 `rowtrail --workspace /absolute/private/workspace mcp-config` prints an MCP server
 configuration with the actual executable path. It does not edit host settings.
 `guide`, `schema` and `mcp-config` do not start the runtime or create a workspace.
+
+## Reconnect without guessing references (alpha.5)
+
+Call `workspace` with `{"action":"summary","limit":20,"max_bytes":8192}`.
+It lists datasets, jobs and results with fixed bindings, stored validity, coverage
+and suggested next actions. Reuse an item's `binding` for SQL, or retain a job ID
+and explicitly wait/cancel. Filter with `kind: "dataset"`, `"job"` or `"result"`.
+Follow `next_cursor` unchanged with the same kind; it fixes page membership against
+new insertions, while each page reads current metadata. Counts cover the workspace.
+This is a bounded metadata catalog: it does not scan sources or generate prose.
+Stored validity is checked again when a binding is used. Expired tombstones are
+explicit; finding a reference does not make expired data usable.
+
+The summary reconnects an agent to durable objects; it does not resume an
+interrupted calculation. Retry a mutation only with its original idempotency key.
 
 Read the corresponding response line before sending the next request. Request
 and response frames are bounded to 1 MiB. Schema and help need no coordinator;
@@ -56,22 +72,6 @@ query engine. Neither entry requires a model API key.
 Sampling, a SQL prepared-plan cache, native MCP Tasks and automatic model resume
 are not implemented. These must not be simulated by the integration host and
 presented as capabilities of RowTrail.
-
-## Reconnect without guessing references (alpha.5)
-
-Call `workspace` with `{"action":"summary","limit":20,"max_bytes":8192}`.
-It lists datasets, jobs and results with fixed bindings, stored validity, coverage
-and suggested next actions. Reuse an item's `binding` for SQL, or retain a job ID
-and explicitly wait/cancel. Filter with `kind: "dataset"`, `"job"` or `"result"`.
-Counts describe stored state: known-invalid results are excluded from the readable
-count, while unobserved source changes remain unknown. Follow `next_cursor` unchanged with the same kind; it fixes page membership against
-new insertions, while each page reads current metadata. Counts cover the workspace.
-This is a bounded metadata catalog: it does not scan sources or generate prose.
-Stored validity is checked again when a binding is used. Expired tombstones are
-explicit; finding a reference does not make expired data usable.
-
-The summary reconnects an agent to durable objects; it does not resume an
-interrupted calculation. Retry a mutation only with its original idempotency key.
 
 ## Inspect only what the next question needs (alpha.3)
 

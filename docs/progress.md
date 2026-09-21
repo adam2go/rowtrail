@@ -2,7 +2,7 @@
 
 [Home](../README.md) · [Verification and measurements](verification.md)
 
-Updated 2026-09-21 for **0.1.0-alpha.5** (release candidate). This iteration adds row-group
+Updated 2026-09-21 for **0.1.0-alpha.5**. This iteration adds row-group
 aggregation, bounded workspace reconnection and agent setup guidance.
 It does not claim completion of all M2B–M6 roadmap work.
 
@@ -27,12 +27,17 @@ It does not claim completion of all M2B–M6 roadmap work.
   This includes coalescing 16 checkpoints down to two; it is not equal publication
   frequency. Final-only SQL is still faster (37.60 ms).
 - A real external-agent paired pilot compares the same model with RowTrail and
-  persistent DuckDB on exploration and saved-result handoff. Results are reported
-  separately from deterministic tests; the product contains no model integration.
+  persistent DuckDB on exploration and saved-result handoff. All 12 trials answer
+  correctly and both arms reuse the saved subset, but RowTrail is slower and uses
+  more cumulative input tokens here. No broad efficiency/adoption claim; the product
+  contains no model integration.
 
 [Design and boundaries](decisions/005-row-groups-and-reconnection.md) ·
 [Measurements and release status](verification.md). Native artifact verification
-and the agent experiment are pending for this candidate.
+passed on [Linux and macOS](https://github.com/adam2go/rowtrail/actions/runs/35553205162); both archive hashes were checked independently.
+The installed macOS archive passes row-group exploration, workspace handoff and
+upgrade from published alpha.4. Downloads are 19.09 / 22.42 MB (decimal).
+[Release provenance](release-verification.json). The complete agent pilot is published.
 
 ## Alpha.4
 
