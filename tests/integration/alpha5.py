@@ -121,6 +121,7 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-alpha5-') as td:
   expired_data=next(x for x in page['items'] if x['ref']==prepared['job']['prepared']['dataset_ref'])
   assert expired_data['stored_validity']=='expired' and not expired_data['next_actions']
   path=base/'data/many.parquet';stat=path.stat();os.utime(path,ns=(stat.st_atime_ns,stat.st_mtime_ns+1000000000))
+  assert call('query',{'bindings':{'t':source},'sql':'SELECT COUNT(*) FROM t'},False)['error']['code']=='SOURCE_CHANGED'
   assert call('read',ref(done),False)['error']['code']=='SOURCE_CHANGED'
   page=call('workspace',{'action':'summary','kind':'result','max_bytes':65536});assert page['next_cursor'] is None
   invalid=next(x for x in page['items'] if x['ref']==ref(done)['result_ref'])
