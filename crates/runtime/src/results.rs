@@ -4,6 +4,7 @@ use arrow::{
     array::*,
     datatypes::{DataType, Schema},
     ipc::reader::FileReader,
+    util::display::{ArrayFormatter, FormatOptions},
 };
 use rowtrail_contracts::ReadParams;
 use rusqlite::{OptionalExtension, params};
@@ -111,11 +112,11 @@ struct Cursor {
     offset: u64,
     columns: Vec<String>,
 }
-fn value(array: &dyn Array, row: usize) -> Result<Value> {
+fn value(array: &dyn Array, formatter: &ArrayFormatter<'_>, row: usize) -> Result<Value> {
     if array.is_null(row) {
         return Ok(Value::Null);
     }
-    let formatted = arrow::util::display::array_value_to_string(array, row)?;
+    let formatted = formatter.value(row).to_string();
     match array.data_type() {
         DataType::Int8
         | DataType::Int16
@@ -209,6 +210,20 @@ pub fn read(db: &Db, p: &ReadParams) -> Result<Value> {
         serde_json::to_vec(&response)?.len() + 256 <= p.max_bytes,
         "OUTPUT_BUDGET_TOO_SMALL: metadata does not fit"
     );
+    // The per-row changes are decimal counts, a boolean and a hex cursor.
+    // Account for their exact encoded lengths instead of serializing the full
+    // schema and quality once for every row. Final envelope checking stays below.
+    let cursor_zero_bytes = serde_json::to_vec(&Cursor {
+        store_id: db.store_id.clone(),
+        result_ref: p.result_ref.clone(),
+        revision: snap.revision,
+        offset: 0,
+        columns: p.columns.clone(),
+    })?
+    .len();
+    response["next_cursor"] = Value::Null;
+    response["presentation"] = json!({"returned_rows":0,"has_more":true});
+    let metadata_bytes = serde_json::to_vec(&response)?.len();
     let mut position = 0;
     let mut returned = 0;
     let mut bytes_verified = 0;
@@ -229,6 +244,12 @@ pub fn read(db: &Db, p: &ReadParams) -> Result<Value> {
         bytes_read += size;
         for batch in reader {
             let batch = batch?;
+            let options = FormatOptions::default().with_display_error(true);
+            let formatters = batch
+                .columns()
+                .iter()
+                .map(|a| ArrayFormatter::try_new(a.as_ref(), &options))
+                .collect::<std::result::Result<Vec<_>, _>>()?;
             for row in 0..batch.num_rows() {
                 if position < start {
                     position += 1;
@@ -240,15 +261,19 @@ pub fn read(db: &Db, p: &ReadParams) -> Result<Value> {
                 let values = batch
                     .columns()
                     .iter()
-                    .map(|a| value(a.as_ref(), row))
+                    .zip(&formatters)
+                    .map(|(a, f)| value(a.as_ref(), f, row))
                     .collect::<Result<Vec<_>>>()?;
                 let row = json!(values);
                 let added_bytes = serde_json::to_vec(&row)?.len() + usize::from(!rows.is_empty());
-                response["next_cursor"] = cursor_for(start + returned as u64 + 1)?;
-                response["presentation"] = json!({"returned_rows":returned+1,"has_more":start+returned as u64+1<snap.rows});
-                if serde_json::to_vec(&response)?.len() + row_bytes + added_bytes + 256
-                    > p.max_bytes
-                {
+                let candidate_bytes = page_metadata_bytes(
+                    metadata_bytes,
+                    cursor_zero_bytes,
+                    start + returned as u64 + 1,
+                    returned + 1,
+                    snap.rows,
+                );
+                if candidate_bytes + row_bytes + added_bytes + 256 > p.max_bytes {
                     ensure!(
                         returned > 0,
                         "OUTPUT_BUDGET_TOO_SMALL: one row does not fit"
@@ -273,4 +298,58 @@ pub fn read(db: &Db, p: &ReadParams) -> Result<Value> {
         "OUTPUT_BUDGET_TOO_SMALL"
     );
     Ok(response)
+}
+
+fn page_metadata_bytes(
+    base: usize,
+    cursor_zero: usize,
+    offset: u64,
+    rows: usize,
+    total: u64,
+) -> usize {
+    let digits = |n: u64| n.checked_ilog10().unwrap_or(0) as usize + 1;
+    let cursor = if offset < total {
+        // Two hex characters per byte, plus JSON string quotes.
+        2 * (cursor_zero + digits(offset) - 1) + 2
+    } else {
+        4 // null
+    };
+    base + digits(rows as u64) - 1 + usize::from(offset >= total) + cursor - 4
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn page_byte_accounting_matches_json_at_decimal_boundaries() {
+        let mut cursor = Cursor {
+            store_id: "store_abc".into(),
+            result_ref: "res_def".into(),
+            revision: 19,
+            offset: 0,
+            columns: vec!["金额\n\"\\".into()],
+        };
+        let cursor_zero = serde_json::to_vec(&cursor).unwrap().len();
+        let base = json!({"schema":[{"name":"金额\n\"\\","type":"Decimal128(20, 2)"}],"rows":[],"next_cursor":null,"presentation":{"returned_rows":0,"has_more":true}});
+        let base_bytes = serde_json::to_vec(&base).unwrap().len();
+        for offset in [0, 9, 10, 99, 100, 999, 1000, u64::MAX - 1, u64::MAX] {
+            for rows in [0, 9, 10, 99, 100, 9999, 10000] {
+                for total in [offset, u64::MAX] {
+                    cursor.offset = offset;
+                    let mut actual = base.clone();
+                    actual["next_cursor"] = if offset < total {
+                        json!(hex::encode(serde_json::to_vec(&cursor).unwrap()))
+                    } else {
+                        Value::Null
+                    };
+                    actual["presentation"] = json!({"returned_rows":rows,"has_more":offset<total});
+                    assert_eq!(
+                        page_metadata_bytes(base_bytes, cursor_zero, offset, rows, total),
+                        serde_json::to_vec(&actual).unwrap().len()
+                    );
+                }
+            }
+        }
+    }
 }

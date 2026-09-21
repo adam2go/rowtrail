@@ -5,7 +5,7 @@
   <p>为 Agent 而生的小型原生数据工具。<br>提出问题，保存精确结果，沿着结果继续探索。</p>
   <p>
     <a href="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml"><img src="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml/badge.svg" alt="构建与验证"></a>
-    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.5"><img src="https://img.shields.io/badge/release-v0.1.0--alpha.5-147D70" alt="v0.1.0-alpha.5 版本"></a>
+    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.6"><img src="https://img.shields.io/badge/release-v0.1.0--alpha.6-147D70" alt="v0.1.0-alpha.6 版本"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-147D70" alt="Apache-2.0 许可证"></a>
   </p>
   <p><a href="README.md">English</a> · <a href="#安装">安装</a> · <a href="docs/agent-guide.md">Agent 接入</a> · <a href="docs/verification.md">测试报告</a> · <a href="CONTRIBUTING.md">参与贡献</a></p>
@@ -17,8 +17,8 @@ Agent 探索一张大表，不应该先把整张表塞进上下文。RowTrail �
 执行只读 SQL，把带固定版本的结果留在磁盘。Agent 按预算读取带类型的观察，下一次追问
 可以直接从保存的结果继续。
 
-**alpha.5 新增：单个 Parquet 文件也能按行组渐进观察，降低渐进聚合开销，并用工作区摘要找回已保存结果。**
-`rowtrail guide` 提供机器可读流程，`mcp-config` 生成可复制的接入配置。
+**alpha.6 聚焦性能：压缩中间结果、减少持久化提交成本、加快分页，并缩短 Agent 接入上下文。**
+本机交替对照中，百万行完整探索约快 14%，一万行分页约快 60%；安装包继续受 30 MB 上限约束。
 
 **内部零模型调用，无需 API Key，没有表格界面。** 问什么、证据够不够，由你的 Agent 判断。
 
@@ -41,11 +41,11 @@ CSV / TSV / Parquet → 精确查询 → 保存结果 → 继续追问
 
 ## 安装
 
-当前 **v0.1.0-alpha.5** 是工程预览版，采用 Apache-2.0 许可证。
+当前 **v0.1.0-alpha.6** 是工程预览版，采用 Apache-2.0 许可证。
 原生包支持 **macOS arm64** 和 **Linux x86_64**（Ubuntu 24.04 / glibc 2.39 及以上）。
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-alpha.5/install.sh -o /tmp/rowtrail-install.sh
+curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-alpha.6/install.sh -o /tmp/rowtrail-install.sh
 sh /tmp/rowtrail-install.sh
 export PATH="$HOME/.local/bin:$PATH"
 rowtrail --version
@@ -53,17 +53,11 @@ rowtrail --version
 
 安装器校验 SHA-256，默认安装版本化的二进制组合到 `~/.local/bin`。
 可设置 `ROWTRAIL_INSTALL_DIR` 更换目录，也可以从
-[Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.5) 下载并解压。
+[Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.6) 下载并解压。
 请将 `rowtrail` 和 `rowtrail-runtime` 放在同一个目录。
 
-已验证的原生发布包大小（十进制 MB）：
-
-| 平台 | 压缩下载 `.tar.xz` | CLI | 运行时 |
-|---|---:|---:|---:|
-| macOS arm64 | **19.09 MB** | 3.70 MB | 99.98 MB |
-| Linux x86_64 | **22.42 MB** | 4.13 MB | 114.77 MB |
-
-CLI 与运行时为解压大小。压缩包上限 **30 MB**，CLI / 运行时上限为 4.5 / 125 MB。
+alpha.6 候选版的原生产物验证正在进行。本地 macOS 构建压缩包约 19.19 MB；
+最终 Linux/macOS 大小将在 CI 产物校验后记录。下载包上限 **30 MB**，CLI / 运行时上限 4.5 / 125 MB。
 [原生产物验证](docs/verification.md#native-distribution)。
 
 ## 先问一个问题
@@ -101,40 +95,41 @@ rowtrail query --sql "SELECT region, SUM(amount) AS total
 
 ## 性能有数字，也有依据
 
-同一台 Apple arm64 Mac，**每组运行五次，取中位数**，单位毫秒，越低越好。
-完整的五次查询探索包含打开输入、物化结果、两次结果分支，再回到原始数据查询其他维度。
+同一台 Apple arm64 Mac，**七轮交替运行新旧版本，取中位数**，单位毫秒。
+完整五步探索包含打开输入、物化结果、两次结果分支，再回到原始数据查询其他维度。
 
 | 调用方式 | 16,384 行 | 1,048,576 行 |
 |---|---:|---:|
-| RowTrail alpha.4 · 持久 NDJSON（历史记录） | 104.03 | 319.67 |
-| **RowTrail alpha.5 · 持久 NDJSON** | **104.35** | **318.97** |
-| DuckDB 1.5.5 · 持久会话 | 10.82 | 88.98 |
-| 直接 DataFusion 55.0.0 · 持久会话 | 4.78 | 55.14 |
+| RowTrail alpha.5 · 本次重跑 | 109.46 | 348.38 |
+| **RowTrail alpha.6 · 持久 NDJSON** | **110.34** | **298.90** |
+| DuckDB 1.5.5 · 持久会话 | 10.62 | 92.19 |
+| 直接 DataFusion 55.0.0 · 持久会话 | 4.76 | 59.05 |
 
-这组普通探索测试与 alpha.4 基本持平。直接引擎仍然更快；RowTrail 还承担持久化、内容校验、
-进程隔离和协议成本。对照保留内存中间表，DataFusion 计时不含启动。
+百万行任务约快 **14%**，小数据基本持平。直接引擎仍然更快；RowTrail 还承担持久化、
+内容校验、进程隔离和协议成本。对照保留内存中间表，DataFusion 计时不含启动。
 这些是本机测量，不代表普遍性能优势。
 
-**整理有前置成本。** alpha.3 的历史百万行 CSV 测试中，转换约需 271 ms。打开、画像并做十次
-后续聚合，直接读 CSV 共 736 ms，计入整理后共 652 ms。这组数据到第八次追问才回本；
-具体阈值会随数据和问题变化，因此 RowTrail 把是否整理的选择留给 Agent。
+- **少读磁盘：** 百万行样例的保存结果由 33.52 MB 降到 **4.22 MB**，约减少 87%。
+  分片从 9 个减为 6 个；后续分支仍校验保存文件，原始数据读取为零。
+- **更快分页：** 10,000 行固定结果读取从 **21.92 ms 降到 8.80 ms**，均含 CLI 启动，五次中位数。
+- **检查难压缩数据：** 高熵整数的保存加三次复用，七轮交替中位数从 150.03 ms 降到 **138.75 ms**。
+- **保持资源约束：** 百万行排序在 32 MiB 引擎池下实际溢写 26 次，逐一核对全部导出 ID；
+  本次采样 worker RSS 约 139.7 MB。引擎池预算不是进程 RSS 上限。
 
-**alpha.5 显著降低了渐进聚合的完整耗时。** 16 个 Parquet 文件、1,048,576 行，
-首个检查点为 **21.22 ms**，最终完成为 **49.18 ms**；本次重跑 alpha.4 为 **184.11 ms**。
-默认合并中间检查点，这组测试从持久化 16 次降为两次。只需最终答案时，普通 SQL 仍更快：
-**37.60 ms**。单文件、16 个行组也能在 **20.18 ms** 返回局部结果，**46.20 ms** 完成。
-局部结果只代表已经处理的前缀，不是整表估计。[条件与原始记录](docs/verification.md)。
+渐进观察仍然有效：单文件 16 个行组，首个前缀 **19.40 ms**，完整完成 **45.32 ms**，
+与 alpha.5 本次重跑基本持平。只要最终答案时，普通 SQL 仍更快。
+[原始记录和完整条件](docs/verification.md)。
 
-**真实 Agent 实验也公开差距。** 同模型的 12 次探索/接续任务全部答对；RowTrail 和持久
-DuckDB 都能在接续时复用保存的数据、不重扫原文件。但这组小样本里 RowTrail 更慢，
-累计输入 token 也更多，尚未证明整体 Agent 效率更高。[全部试验与限制](docs/verification.md#real-external-agent-paired-pilot)。
+**Agent 效率也要实测。** 新增[精简启动说明](docs/agent-quickstart.md)、按需 schema、机械等待和
+保留完整观察信息的精简展示 helper。更新后的真实 Agent 配对试验正在运行；
+[alpha.5 的 12 次历史试验](docs/releases/alpha5-verification.md#real-external-agent-paired-pilot)全部答对，
+但当时 RowTrail 比持久 DuckDB 更慢、累计输入 token 更多。引擎改进不等于已经证明 Agent 整体效率领先。
 
-当前共有 **65 项集成场景**、六项 Rust 测试（含八种提交边界子进程崩溃场景），以及
-MCP、会话、SDK 与安装验证。测试逐一核对行组检查点的独立整数/Decimal 答案。
-百万行排序在 32 MiB 引擎内存池下产生真实溢写，并核对全部导出 ID；内存池预算不是进程 RSS 上限。
+本地已有 **73 项集成场景**、7 项 Rust 测试（含八种提交边界子进程崩溃场景），
+以及 MCP、会话、SDK、安装和新旧版本互读验证。压缩文件仍能识别同大小、同修改时间的篡改。
 
-[完整验证报告](docs/verification.md) · [alpha.5 原始记录](benchmarks/performance/alpha5/) ·
-[alpha.4 历史报告](docs/releases/alpha4-verification.md)
+[完整验证报告](docs/verification.md) · [alpha.6 原始记录](benchmarks/performance/alpha6/) ·
+[alpha.5 历史报告](docs/releases/alpha5-verification.md)
 
 ## 接下来的方向
 

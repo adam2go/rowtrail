@@ -31,6 +31,7 @@ jobs:
       - run: python3 tests/integration/alpha3.py
       - run: python3 tests/integration/alpha4.py
       - run: python3 tests/integration/alpha5.py
+      - run: python3 tests/integration/alpha6.py
       - run: python3 scripts/mcp_probe.py target/release/rowtrail
       - run: python3 scripts/session_probe.py target/release/rowtrail
       - run: cargo run --locked -p rowtrail-client --example query -- /tmp/rowtrail-sdk
@@ -38,6 +39,7 @@ jobs:
           ROWTRAIL_RUNTIME: ${{ github.workspace }}/target/release/rowtrail-runtime
       - run: python3 -m venv /tmp/rowtrail-verification
       - run: /tmp/rowtrail-verification/bin/pip install duckdb==1.5.5
+      - run: /tmp/rowtrail-verification/bin/python tests/benchmark_harness.py
       - run: /tmp/rowtrail-verification/bin/python benchmarks/resources.py
       - run: python3 scripts/package.py
       - run: python3 scripts/install_probe.py

@@ -1,0 +1,1151 @@
+{
+  "kind": "interleaved durable materialization plus three saved-result aggregates",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "rows": 131072,
+  "repeats": 5,
+  "fixture_sha256": "7a5dd7f36a739ca4d481ead46ec7141ac231cff47eaaf61634a300b7b853d81e",
+  "fixture_bytes": 9453652,
+  "variants": {
+    "alpha5": {
+      "rowtrail": {
+        "bytes": 3700656,
+        "sha256": "78d1b8436aac00e9bec706415ad77f5a713b1bd9632736e7cf789f674d842bf8"
+      },
+      "rowtrail-runtime": {
+        "bytes": 100033920,
+        "sha256": "c3eac9595e19726c2b0860b931d512286a970f7bbe6e364cc263ff2470f576af"
+      }
+    },
+    "coalesced": {
+      "rowtrail": {
+        "bytes": 3700656,
+        "sha256": "78d1b8436aac00e9bec706415ad77f5a713b1bd9632736e7cf789f674d842bf8"
+      },
+      "rowtrail-runtime": {
+        "bytes": 99968016,
+        "sha256": "3163ae37968e41f70f779278859c492a87b68f9045a8e6a04235822e4da34749"
+      }
+    }
+  },
+  "records": [
+    {
+      "variant": "alpha5",
+      "repeat": 0,
+      "total_ms": 313.9583340380341,
+      "stages": [
+        {
+          "elapsed_ms": 144.21079098246992,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9965918,
+              "source_read_bytes": 9965918,
+              "result_read_bytes": 0,
+              "read_requests": 17
+            },
+            "result_write_bytes": 9600534,
+            "rows": 131072,
+            "planning_ms": 72.364667,
+            "result_write_ms": 30.733083,
+            "commit_ack_ms": 18.646917,
+            "elapsed_ms": 129.531042,
+            "worker_pid": 13802,
+            "publication_ms": 18.171042000000003,
+            "result_parts": 3,
+            "worker_elapsed_ms": 136.15058299999998,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": false,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 55.267290910705924,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9600534,
+              "source_read_bytes": 0,
+              "result_read_bytes": 9600534,
+              "read_requests": 10
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 27.612708,
+            "result_write_ms": 4.811208,
+            "commit_ack_ms": 10.277542,
+            "elapsed_ms": 52.509666,
+            "worker_pid": 13802,
+            "publication_ms": 10.19775,
+            "result_parts": 1,
+            "worker_elapsed_ms": 53.584541,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 25.94783389940858,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9600534,
+              "source_read_bytes": 0,
+              "result_read_bytes": 9600534,
+              "read_requests": 10
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 2.946042,
+            "result_write_ms": 5.093833999999999,
+            "commit_ack_ms": 10.160875,
+            "elapsed_ms": 24.353375,
+            "worker_pid": 13802,
+            "publication_ms": 10.100875,
+            "result_parts": 1,
+            "worker_elapsed_ms": 24.599125,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 24.912749882787466,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9600534,
+              "source_read_bytes": 0,
+              "result_read_bytes": 9600534,
+              "read_requests": 10
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 2.9784170000000003,
+            "result_write_ms": 4.564583,
+            "commit_ack_ms": 9.197166,
+            "elapsed_ms": 23.280667,
+            "worker_pid": 13802,
+            "publication_ms": 9.15025,
+            "result_parts": 1,
+            "worker_elapsed_ms": 23.523916999999997,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        }
+      ],
+      "parts": 3,
+      "stored_bytes": 9600534,
+      "largest_part_bytes": 3609930,
+      "independent_oracle_passed": true
+    },
+    {
+      "variant": "coalesced",
+      "repeat": 0,
+      "total_ms": 147.43883395567536,
+      "stages": [
+        {
+          "elapsed_ms": 53.99924982339144,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9965918,
+              "source_read_bytes": 9965918,
+              "result_read_bytes": 0,
+              "read_requests": 17
+            },
+            "result_write_bytes": 8554484,
+            "rows": 131072,
+            "planning_ms": 1.766833,
+            "result_write_ms": 20.324833,
+            "commit_ack_ms": 18.823417,
+            "elapsed_ms": 44.733250000000005,
+            "worker_pid": 13805,
+            "publication_ms": 18.6925,
+            "result_parts": 2,
+            "worker_elapsed_ms": 49.396542,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": false,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 24.922541808336973,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 8554484,
+              "source_read_bytes": 0,
+              "result_read_bytes": 8554484,
+              "read_requests": 7
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 4.106833,
+            "result_write_ms": 4.0375000000000005,
+            "commit_ack_ms": 9.339917,
+            "elapsed_ms": 23.21725,
+            "worker_pid": 13805,
+            "publication_ms": 9.288,
+            "result_parts": 1,
+            "worker_elapsed_ms": 23.490167,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 23.76524987630546,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 8554484,
+              "source_read_bytes": 0,
+              "result_read_bytes": 8554484,
+              "read_requests": 7
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.925375,
+            "result_write_ms": 4.053917,
+            "commit_ack_ms": 8.203791,
+            "elapsed_ms": 22.174417,
+            "worker_pid": 13805,
+            "publication_ms": 8.157417,
+            "result_parts": 1,
+            "worker_elapsed_ms": 22.412292,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 24.64070892892778,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 8554484,
+              "source_read_bytes": 0,
+              "result_read_bytes": 8554484,
+              "read_requests": 7
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.601125,
+            "result_write_ms": 5.154416,
+            "commit_ack_ms": 8.303541,
+            "elapsed_ms": 22.646209,
+            "worker_pid": 13805,
+            "publication_ms": 8.256083,
+            "result_parts": 1,
+            "worker_elapsed_ms": 22.898124999999997,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        }
+      ],
+      "parts": 2,
+      "stored_bytes": 8554484,
+      "largest_part_bytes": 4820434,
+      "independent_oracle_passed": true
+    },
+    {
+      "variant": "coalesced",
+      "repeat": 1,
+      "total_ms": 140.37912501953542,
+      "stages": [
+        {
+          "elapsed_ms": 49.77345885708928,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9965918,
+              "source_read_bytes": 9965918,
+              "result_read_bytes": 0,
+              "read_requests": 17
+            },
+            "result_write_bytes": 8554484,
+            "rows": 131072,
+            "planning_ms": 1.7472500000000002,
+            "result_write_ms": 21.138375999999997,
+            "commit_ack_ms": 13.587125,
+            "elapsed_ms": 40.321209,
+            "worker_pid": 13808,
+            "publication_ms": 13.436417,
+            "result_parts": 2,
+            "worker_elapsed_ms": 44.9745,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": false,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 25.27979202568531,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 8554484,
+              "source_read_bytes": 0,
+              "result_read_bytes": 8554484,
+              "read_requests": 7
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 4.0690409999999995,
+            "result_write_ms": 4.453333000000001,
+            "commit_ack_ms": 9.383333,
+            "elapsed_ms": 23.682333,
+            "worker_pid": 13808,
+            "publication_ms": 9.3205,
+            "result_parts": 1,
+            "worker_elapsed_ms": 23.915834,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 22.739874897524714,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 8554484,
+              "source_read_bytes": 0,
+              "result_read_bytes": 8554484,
+              "read_requests": 7
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.700709,
+            "result_write_ms": 3.805542,
+            "commit_ack_ms": 8.246792,
+            "elapsed_ms": 21.345709,
+            "worker_pid": 13808,
+            "publication_ms": 8.203583,
+            "result_parts": 1,
+            "worker_elapsed_ms": 21.56325,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 23.1460421346128,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 8554484,
+              "source_read_bytes": 0,
+              "result_read_bytes": 8554484,
+              "read_requests": 7
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.731375,
+            "result_write_ms": 3.889332,
+            "commit_ack_ms": 8.402208,
+            "elapsed_ms": 21.755083000000003,
+            "worker_pid": 13808,
+            "publication_ms": 8.347417,
+            "result_parts": 1,
+            "worker_elapsed_ms": 21.969583,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        }
+      ],
+      "parts": 2,
+      "stored_bytes": 8554484,
+      "largest_part_bytes": 4820434,
+      "independent_oracle_passed": true
+    },
+    {
+      "variant": "alpha5",
+      "repeat": 1,
+      "total_ms": 145.8816670347005,
+      "stages": [
+        {
+          "elapsed_ms": 53.0846668407321,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9965918,
+              "source_read_bytes": 9965918,
+              "result_read_bytes": 0,
+              "read_requests": 17
+            },
+            "result_write_bytes": 9600534,
+            "rows": 131072,
+            "planning_ms": 1.739792,
+            "result_write_ms": 21.784498999999997,
+            "commit_ack_ms": 16.908625,
+            "elapsed_ms": 44.244834,
+            "worker_pid": 13819,
+            "publication_ms": 16.744374,
+            "result_parts": 3,
+            "worker_elapsed_ms": 49.153417,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": false,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 24.850790854543447,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9600534,
+              "source_read_bytes": 0,
+              "result_read_bytes": 9600534,
+              "read_requests": 10
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.55225,
+            "result_write_ms": 4.479958,
+            "commit_ack_ms": 8.313292,
+            "elapsed_ms": 23.103083,
+            "worker_pid": 13819,
+            "publication_ms": 8.246292,
+            "result_parts": 1,
+            "worker_elapsed_ms": 23.373209,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 24.92824988439679,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9600534,
+              "source_read_bytes": 0,
+              "result_read_bytes": 9600534,
+              "read_requests": 10
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.1165,
+            "result_write_ms": 4.908459,
+            "commit_ack_ms": 8.235666,
+            "elapsed_ms": 23.265459,
+            "worker_pid": 13819,
+            "publication_ms": 8.175959,
+            "result_parts": 1,
+            "worker_elapsed_ms": 23.482,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 23.764332989230752,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9600534,
+              "source_read_bytes": 0,
+              "result_read_bytes": 9600534,
+              "read_requests": 10
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.10775,
+            "result_write_ms": 4.325666,
+            "commit_ack_ms": 8.244958,
+            "elapsed_ms": 22.210542,
+            "worker_pid": 13819,
+            "publication_ms": 8.193125,
+            "result_parts": 1,
+            "worker_elapsed_ms": 22.445708000000003,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        }
+      ],
+      "parts": 3,
+      "stored_bytes": 9600534,
+      "largest_part_bytes": 3609930,
+      "independent_oracle_passed": true
+    },
+    {
+      "variant": "alpha5",
+      "repeat": 2,
+      "total_ms": 148.31370790489018,
+      "stages": [
+        {
+          "elapsed_ms": 54.47045806795359,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9965918,
+              "source_read_bytes": 9965918,
+              "result_read_bytes": 0,
+              "read_requests": 17
+            },
+            "result_write_bytes": 9600534,
+            "rows": 131072,
+            "planning_ms": 1.877958,
+            "result_write_ms": 23.065499000000003,
+            "commit_ack_ms": 16.927501,
+            "elapsed_ms": 45.777375,
+            "worker_pid": 13822,
+            "publication_ms": 16.733293000000003,
+            "result_parts": 3,
+            "worker_elapsed_ms": 50.538708,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": false,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 25.115291820839047,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9600534,
+              "source_read_bytes": 0,
+              "result_read_bytes": 9600534,
+              "read_requests": 10
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.5685,
+            "result_write_ms": 4.284083,
+            "commit_ack_ms": 8.232417,
+            "elapsed_ms": 23.101083000000003,
+            "worker_pid": 13822,
+            "publication_ms": 8.157875,
+            "result_parts": 1,
+            "worker_elapsed_ms": 23.382958,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 24.41775007173419,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9600534,
+              "source_read_bytes": 0,
+              "result_read_bytes": 9600534,
+              "read_requests": 10
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.218333,
+            "result_write_ms": 4.721542,
+            "commit_ack_ms": 8.1005,
+            "elapsed_ms": 22.841375,
+            "worker_pid": 13822,
+            "publication_ms": 8.051541,
+            "result_parts": 1,
+            "worker_elapsed_ms": 23.046042,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 25.203207973390818,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9600534,
+              "source_read_bytes": 0,
+              "result_read_bytes": 9600534,
+              "read_requests": 10
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.168584,
+            "result_write_ms": 4.5555829999999995,
+            "commit_ack_ms": 8.239917,
+            "elapsed_ms": 23.385667,
+            "worker_pid": 13822,
+            "publication_ms": 8.178667,
+            "result_parts": 1,
+            "worker_elapsed_ms": 23.603167000000003,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        }
+      ],
+      "parts": 3,
+      "stored_bytes": 9600534,
+      "largest_part_bytes": 3609930,
+      "independent_oracle_passed": true
+    },
+    {
+      "variant": "coalesced",
+      "repeat": 2,
+      "total_ms": 136.9244169909507,
+      "stages": [
+        {
+          "elapsed_ms": 45.59091595001519,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9965918,
+              "source_read_bytes": 9965918,
+              "result_read_bytes": 0,
+              "read_requests": 17
+            },
+            "result_write_bytes": 8554484,
+            "rows": 131072,
+            "planning_ms": 1.716541,
+            "result_write_ms": 18.660583,
+            "commit_ack_ms": 12.731708,
+            "elapsed_ms": 36.87025,
+            "worker_pid": 13825,
+            "publication_ms": 12.613041,
+            "result_parts": 2,
+            "worker_elapsed_ms": 41.219292,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": false,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 24.02537502348423,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 8554484,
+              "source_read_bytes": 0,
+              "result_read_bytes": 8554484,
+              "read_requests": 7
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 4.1125,
+            "result_write_ms": 4.497167,
+            "commit_ack_ms": 8.23075,
+            "elapsed_ms": 22.541625,
+            "worker_pid": 13825,
+            "publication_ms": 8.170333,
+            "result_parts": 1,
+            "worker_elapsed_ms": 22.756417000000003,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 24.37045914120972,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 8554484,
+              "source_read_bytes": 0,
+              "result_read_bytes": 8554484,
+              "read_requests": 7
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.600667,
+            "result_write_ms": 5.049500000000001,
+            "commit_ack_ms": 8.166333,
+            "elapsed_ms": 22.436917,
+            "worker_pid": 13825,
+            "publication_ms": 8.087917000000001,
+            "result_parts": 1,
+            "worker_elapsed_ms": 22.706292,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 23.606417002156377,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 8554484,
+              "source_read_bytes": 0,
+              "result_read_bytes": 8554484,
+              "read_requests": 7
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.748417,
+            "result_write_ms": 3.793126,
+            "commit_ack_ms": 8.323667,
+            "elapsed_ms": 21.569542,
+            "worker_pid": 13825,
+            "publication_ms": 8.271291,
+            "result_parts": 1,
+            "worker_elapsed_ms": 21.78325,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        }
+      ],
+      "parts": 2,
+      "stored_bytes": 8554484,
+      "largest_part_bytes": 4820434,
+      "independent_oracle_passed": true
+    },
+    {
+      "variant": "coalesced",
+      "repeat": 3,
+      "total_ms": 137.33762502670288,
+      "stages": [
+        {
+          "elapsed_ms": 45.05420895293355,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9965918,
+              "source_read_bytes": 9965918,
+              "result_read_bytes": 0,
+              "read_requests": 17
+            },
+            "result_write_bytes": 8554484,
+            "rows": 131072,
+            "planning_ms": 1.720917,
+            "result_write_ms": 18.575293,
+            "commit_ack_ms": 12.739,
+            "elapsed_ms": 36.557792,
+            "worker_pid": 13828,
+            "publication_ms": 12.615417,
+            "result_parts": 2,
+            "worker_elapsed_ms": 40.71075,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": false,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 24.4186669588089,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 8554484,
+              "source_read_bytes": 0,
+              "result_read_bytes": 8554484,
+              "read_requests": 7
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 4.041792,
+            "result_write_ms": 4.465999,
+            "commit_ack_ms": 8.456875,
+            "elapsed_ms": 22.936208,
+            "worker_pid": 13828,
+            "publication_ms": 8.371708,
+            "result_parts": 1,
+            "worker_elapsed_ms": 23.158708,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 23.875333834439516,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 8554484,
+              "source_read_bytes": 0,
+              "result_read_bytes": 8554484,
+              "read_requests": 7
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.654917,
+            "result_write_ms": 4.858418,
+            "commit_ack_ms": 8.305791,
+            "elapsed_ms": 22.378375,
+            "worker_pid": 13828,
+            "publication_ms": 8.247417,
+            "result_parts": 1,
+            "worker_elapsed_ms": 22.623542,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 24.071959080174565,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 8554484,
+              "source_read_bytes": 0,
+              "result_read_bytes": 8554484,
+              "read_requests": 7
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.4985,
+            "result_write_ms": 4.3731670000000005,
+            "commit_ack_ms": 9.37425,
+            "elapsed_ms": 22.615416999999997,
+            "worker_pid": 13828,
+            "publication_ms": 9.27725,
+            "result_parts": 1,
+            "worker_elapsed_ms": 22.833542,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        }
+      ],
+      "parts": 2,
+      "stored_bytes": 8554484,
+      "largest_part_bytes": 4820434,
+      "independent_oracle_passed": true
+    },
+    {
+      "variant": "alpha5",
+      "repeat": 3,
+      "total_ms": 146.90579194575548,
+      "stages": [
+        {
+          "elapsed_ms": 52.81641683541238,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9965918,
+              "source_read_bytes": 9965918,
+              "result_read_bytes": 0,
+              "read_requests": 17
+            },
+            "result_write_bytes": 9600534,
+            "rows": 131072,
+            "planning_ms": 1.6930420000000002,
+            "result_write_ms": 21.497878,
+            "commit_ack_ms": 17.664291,
+            "elapsed_ms": 44.331500000000005,
+            "worker_pid": 13831,
+            "publication_ms": 17.467875,
+            "result_parts": 3,
+            "worker_elapsed_ms": 48.5,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": false,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 26.345917023718357,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9600534,
+              "source_read_bytes": 0,
+              "result_read_bytes": 9600534,
+              "read_requests": 10
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.707667,
+            "result_write_ms": 4.590083,
+            "commit_ack_ms": 9.283458,
+            "elapsed_ms": 24.582292,
+            "worker_pid": 13831,
+            "publication_ms": 9.209625,
+            "result_parts": 1,
+            "worker_elapsed_ms": 24.852708,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 24.733874946832657,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9600534,
+              "source_read_bytes": 0,
+              "result_read_bytes": 9600534,
+              "read_requests": 10
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.3635,
+            "result_write_ms": 4.558832999999999,
+            "commit_ack_ms": 8.25625,
+            "elapsed_ms": 23.252374999999997,
+            "worker_pid": 13831,
+            "publication_ms": 8.193624999999999,
+            "result_parts": 1,
+            "worker_elapsed_ms": 23.453875,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 24.102665949612856,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9600534,
+              "source_read_bytes": 0,
+              "result_read_bytes": 9600534,
+              "read_requests": 10
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.070625,
+            "result_write_ms": 4.4731250000000005,
+            "commit_ack_ms": 8.17875,
+            "elapsed_ms": 22.463917,
+            "worker_pid": 13831,
+            "publication_ms": 8.126667000000001,
+            "result_parts": 1,
+            "worker_elapsed_ms": 22.770584,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        }
+      ],
+      "parts": 3,
+      "stored_bytes": 9600534,
+      "largest_part_bytes": 3609930,
+      "independent_oracle_passed": true
+    },
+    {
+      "variant": "alpha5",
+      "repeat": 4,
+      "total_ms": 149.10562499426305,
+      "stages": [
+        {
+          "elapsed_ms": 53.28800017014146,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9965918,
+              "source_read_bytes": 9965918,
+              "result_read_bytes": 0,
+              "read_requests": 17
+            },
+            "result_write_bytes": 9600534,
+            "rows": 131072,
+            "planning_ms": 1.784917,
+            "result_write_ms": 21.647666,
+            "commit_ack_ms": 16.684418,
+            "elapsed_ms": 43.774709,
+            "worker_pid": 13834,
+            "publication_ms": 16.460583,
+            "result_parts": 3,
+            "worker_elapsed_ms": 48.596042,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": false,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 26.689416961744428,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9600534,
+              "source_read_bytes": 0,
+              "result_read_bytes": 9600534,
+              "read_requests": 10
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.611208,
+            "result_write_ms": 4.756584000000001,
+            "commit_ack_ms": 9.358583,
+            "elapsed_ms": 24.928708,
+            "worker_pid": 13834,
+            "publication_ms": 9.29875,
+            "result_parts": 1,
+            "worker_elapsed_ms": 25.183125,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 24.966625031083822,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9600534,
+              "source_read_bytes": 0,
+              "result_read_bytes": 9600534,
+              "read_requests": 10
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.119833,
+            "result_write_ms": 4.924917,
+            "commit_ack_ms": 8.266875,
+            "elapsed_ms": 23.274292,
+            "worker_pid": 13834,
+            "publication_ms": 8.199541,
+            "result_parts": 1,
+            "worker_elapsed_ms": 23.530792,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 24.86137510277331,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9600534,
+              "source_read_bytes": 0,
+              "result_read_bytes": 9600534,
+              "read_requests": 10
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.181583,
+            "result_write_ms": 4.810875,
+            "commit_ack_ms": 8.278875,
+            "elapsed_ms": 23.273041000000003,
+            "worker_pid": 13834,
+            "publication_ms": 8.211042,
+            "result_parts": 1,
+            "worker_elapsed_ms": 23.508542,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        }
+      ],
+      "parts": 3,
+      "stored_bytes": 9600534,
+      "largest_part_bytes": 3609930,
+      "independent_oracle_passed": true
+    },
+    {
+      "variant": "coalesced",
+      "repeat": 4,
+      "total_ms": 139.26954194903374,
+      "stages": [
+        {
+          "elapsed_ms": 45.94508302398026,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 9965918,
+              "source_read_bytes": 9965918,
+              "result_read_bytes": 0,
+              "read_requests": 17
+            },
+            "result_write_bytes": 8554484,
+            "rows": 131072,
+            "planning_ms": 1.781042,
+            "result_write_ms": 18.596708999999997,
+            "commit_ack_ms": 12.566292,
+            "elapsed_ms": 36.460167,
+            "worker_pid": 13837,
+            "publication_ms": 12.373292,
+            "result_parts": 2,
+            "worker_elapsed_ms": 41.221584,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": false,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 25.86637483909726,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 8554484,
+              "source_read_bytes": 0,
+              "result_read_bytes": 8554484,
+              "read_requests": 7
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 4.256041000000001,
+            "result_write_ms": 5.119542,
+            "commit_ack_ms": 9.096125,
+            "elapsed_ms": 24.29725,
+            "worker_pid": 13837,
+            "publication_ms": 9.03875,
+            "result_parts": 1,
+            "worker_elapsed_ms": 24.529667,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 23.993999930098653,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 8554484,
+              "source_read_bytes": 0,
+              "result_read_bytes": 8554484,
+              "read_requests": 7
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.585458,
+            "result_write_ms": 4.0791249999999994,
+            "commit_ack_ms": 9.262041,
+            "elapsed_ms": 22.535208,
+            "worker_pid": 13837,
+            "publication_ms": 9.2095,
+            "result_parts": 1,
+            "worker_elapsed_ms": 22.754208,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        },
+        {
+          "elapsed_ms": 24.086625082418323,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 8554484,
+              "source_read_bytes": 0,
+              "result_read_bytes": 8554484,
+              "read_requests": 7
+            },
+            "result_write_bytes": 3002,
+            "rows": 1,
+            "planning_ms": 3.5401249999999997,
+            "result_write_ms": 4.205208,
+            "commit_ack_ms": 9.2205,
+            "elapsed_ms": 22.562166,
+            "worker_pid": 13837,
+            "publication_ms": 9.173375,
+            "result_parts": 1,
+            "worker_elapsed_ms": 22.801875,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          }
+        }
+      ],
+      "parts": 2,
+      "stored_bytes": 8554484,
+      "largest_part_bytes": 4820434,
+      "independent_oracle_passed": true
+    }
+  ],
+  "summary_ms": {
+    "alpha5": 148.31370790489018,
+    "coalesced": 139.26954194903374
+  },
+  "limitations": [
+    "OS cache is not flushed; fresh workspace and persistent session per trial.",
+    "Single machine, deterministic high-entropy numeric fixture; not an agent trial or a universal performance claim.",
+    "No RSS samples here; see the separate spill/resource workload."
+  ]
+}

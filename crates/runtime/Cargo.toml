@@ -8,7 +8,7 @@ license.workspace = true
 rowtrail-contracts = { path = "../contracts" }
 rowtrail-client = { path = "../client" }
 datafusion = { version = "=55.0.0", default-features = false, features = ["sql", "parquet", "datetime_expressions", "string_expressions", "unicode_expressions", "math_expressions", "recursive_protection"] }
-arrow = { version = "=59.2.0", default-features = false, features = ["ipc", "csv", "json"] }
+arrow = { version = "=59.2.0", default-features = false, features = ["ipc", "ipc_compression", "csv", "json"] }
 arrow-schema = { version = "=59.2.0", features = ["serde"] }
 parquet = { version = "=59.2.0", default-features = false, features = ["arrow", "snap", "zstd"] }
 object_store = { version = "=0.13.2", default-features = false }

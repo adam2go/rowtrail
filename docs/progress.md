@@ -2,9 +2,34 @@
 
 [Home](../README.md) · [Verification and measurements](verification.md)
 
-Updated 2026-09-21 for **0.1.0-alpha.5**. This iteration adds row-group
-aggregation, bounded workspace reconnection and agent setup guidance.
+Updated 2026-09-22 for **0.1.0-alpha.6** (release candidate). This iteration
+reduces result storage/verification I/O and page construction cost while keeping
+durable publication, bounded buffers and explicit agent contracts.
 It does not claim completion of all M2B–M6 roadmap work.
+
+## Alpha.6
+
+- Large Arrow result parts use Zstd level 1; small observations and progressive
+  checkpoints stay plain IPC. Existing dependencies supply the codecs. A 64 KiB
+  writer buffer reduces small writes; flush/file sync still precede publication.
+- Arrow parts target 6 MiB with the existing 8 MiB encoded/128-batch hard bounds.
+  Prepared Parquet keeps its 4 MiB target. First previews remain immediate;
+  fewer later parts reduce durable commits without relaxing SQLite FULL sync.
+- Page reads reuse column formatters and count metadata/cursor bytes directly.
+  Typed rows, nulls, precision, projected names, quality and byte limits stay intact.
+- The optional Python bridge has bounded mechanical waiting, single-schema
+  discovery and a compact projection preserving complete observations and errors.
+  [Minimal bootstrap](agent-quickstart.md) keeps the initial integration context small.
+- Metadata remains schema 5. A two-version probe checks legacy plain parts,
+  fixed partial revisions and alpha.5 reading/querying new compressed parts.
+- Eight new integration scenarios, plus exact metadata-size arithmetic checks.
+  Performance evidence includes rejected compression variants, high-entropy
+  numeric reuse, complete exploration, paging and a real spill workload.
+- The external-agent harness now profiles scalar and metadata-only DuckDB
+  statements correctly; missing/incomplete profiles are never counted as zero.
+
+[Design](decisions/006-result-performance.md) · [Measurements](verification.md).
+Native macOS/Linux artifacts and the updated agent pilot are being verified.
 
 ## Alpha.5
 
@@ -137,6 +162,7 @@ python3 tests/integration/exploration.py --bin-dir target/release
 python3 tests/integration/alpha3.py
 python3 tests/integration/alpha4.py
 python3 tests/integration/alpha5.py
+python3 tests/integration/alpha6.py
 python3 scripts/check_boundaries.py
 python3 scripts/mcp_probe.py target/release/rowtrail
 python3 scripts/session_probe.py target/release/rowtrail

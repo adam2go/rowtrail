@@ -7,14 +7,14 @@ use serde_json::json;
 use sha2::{Digest, Sha256};
 use std::{
     fs::{File, OpenOptions},
-    io::Write,
+    io::{BufWriter, Write},
     path::Path,
     sync::Arc,
     time::Duration,
 };
 
 pub struct HashWriter {
-    pub file: File,
+    pub file: BufWriter<File>,
     pub hash: Sha256,
     pub bytes: u64,
     pub limit: u64,
@@ -49,7 +49,7 @@ async fn message(value: &WorkerMessage) -> Result<()> {
 }
 // Seal complete IPC files, not individual engine batches. The writer holds only
 // IPC metadata; incoming Arrow batches are released after each write.
-const PART_TARGET: u64 = 4 * 1024 * 1024;
+const PART_TARGET: u64 = 6 * 1024 * 1024;
 const PART_LIMIT: u64 = 8 * 1024 * 1024;
 const PART_BATCH_LIMIT: usize = 128;
 enum PartWriter {
@@ -70,6 +70,7 @@ impl StagedPart {
         schema: &arrow::datatypes::Schema,
         seq: u64,
         remaining: u64,
+        compress: bool,
     ) -> Result<Self> {
         let dir = spec.workspace.join("staging").join(&spec.attempt);
         std::fs::create_dir_all(&dir)?;
@@ -80,10 +81,13 @@ impl StagedPart {
         };
         let path = dir.join(format!("{seq:012}.{extension}"));
         let output = HashWriter {
-            file: OpenOptions::new()
-                .write(true)
-                .create_new(true)
-                .open(&path)?,
+            file: BufWriter::with_capacity(
+                64 * 1024,
+                OpenOptions::new()
+                    .write(true)
+                    .create_new(true)
+                    .open(&path)?,
+            ),
             hash: Sha256::new(),
             bytes: 0,
             limit: remaining.min(PART_LIMIT),
@@ -106,7 +110,18 @@ impl StagedPart {
                     Some(properties),
                 )?)
             } else {
-                PartWriter::Arrow(FileWriter::try_new(output, schema)?)
+                let options = arrow::ipc::writer::IpcWriteOptions::default();
+                // Small observations/checkpoints stay plain IPC. Large parts
+                // use the existing codec; incompressible buffers fall back to
+                // raw Arrow buffers. The checksum covers the encoded bytes.
+                let options = if compress {
+                    options
+                        .try_with_compression(Some(arrow::ipc::CompressionType::ZSTD))?
+                        .try_with_compression_level(Some(1))?
+                } else {
+                    options
+                };
+                PartWriter::Arrow(FileWriter::try_new_with_options(output, schema, options)?)
             },
             estimated_bytes: 0,
             path,
@@ -134,7 +149,7 @@ impl StagedPart {
             PartWriter::Parquet(w) => w.into_inner()?,
         };
         output.flush()?;
-        output.file.sync_all()?;
+        output.file.get_ref().sync_all()?;
         Ok(Part {
             seq,
             path: self.path,
@@ -186,7 +201,11 @@ impl Output<'_> {
             && (staged
                 .estimated_bytes
                 .saturating_add(batch.get_array_memory_size() as u64)
-                > PART_TARGET
+                > if self.spec.prepared.is_some() {
+                    4 * 1024 * 1024
+                } else {
+                    PART_TARGET
+                }
                 || staged.batches >= PART_BATCH_LIMIT)
         {
             self.publish(ack_rx).await?;
@@ -204,6 +223,7 @@ impl Output<'_> {
                     .execution
                     .result_bytes
                     .saturating_sub(self.written),
+                batch.get_array_memory_size() >= 64 * 1024,
             )?);
         }
         self.staged.as_mut().unwrap().write(batch)?;
@@ -367,10 +387,13 @@ async fn export(spec: &JobSpec, counters: &crate::store::Counters) -> Result<ser
     );
     let staging = parent.join(format!(".rowtrail-{}.tmp", spec.attempt));
     let writer = HashWriter {
-        file: OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(&staging)?,
+        file: BufWriter::with_capacity(
+            64 * 1024,
+            OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .open(&staging)?,
+        ),
         hash: Sha256::new(),
         bytes: 0,
         limit: p.execution.result_bytes,
@@ -465,7 +488,7 @@ async fn export(spec: &JobSpec, counters: &crate::store::Counters) -> Result<ser
         }
     };
     output.flush()?;
-    output.file.sync_all()?;
+    output.file.get_ref().sync_all()?;
     let sidecar = target.with_file_name(format!(
         "{}.rowtrail.json",
         target.file_name().unwrap().to_string_lossy()
@@ -492,7 +515,7 @@ pub(crate) async fn checkpoint(
     ack: &mut tokio::sync::mpsc::Receiver<String>,
 ) -> Result<u64> {
     let schema = batch.schema();
-    let mut staged = StagedPart::new(spec, &schema, seq, remaining)?;
+    let mut staged = StagedPart::new(spec, &schema, seq, remaining, false)?;
     staged.write(batch)?;
     let mut part = staged.finish(seq, &schema)?;
     part.checkpoint = Some(progress);

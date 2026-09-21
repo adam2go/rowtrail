@@ -2,6 +2,9 @@
 
 [Home](../README.md) · [Manual workflow](usage.md) · [Verification](verification.md)
 
+For a small initial context, start with the [minimal bootstrap](agent-quickstart.md)
+and discover individual schemas on demand.
+
 RowTrail is for agents and their programs. It has no spreadsheet UI and makes no
 model calls. Start with `rowtrail guide` for a machine-readable workflow. Discover a request contract with `rowtrail schema METHOD`; use
 `rowtrail doctor` for actual capabilities. Open local CSV/TSV/Parquet with a
@@ -49,9 +52,17 @@ objects and accepted jobs persist independently of the connection.
   the client never automatically replays a potentially accepted mutation.
 
 The Python [bridge](../examples/session_client.py) and [workflow](../examples/explore.py)
-need only the standard library and are optional. Rust applications can use
+need only the standard library and are optional. The bridge also has `schema(method)`,
+`finish(response, timeout=30)` and `observe(response)`: discover locally, wait
+mechanically, and print a compact job view while keeping the full response in
+code. Always check the returned state; a helper deadline does not cancel a job.
+The complete typed observation, quality, fixed binding and error are preserved. Rust applications can use
 [`Client::session()`](../crates/client/examples/query.rs) without linking the
 query engine. Neither entry requires a model API key.
+
+For ordinary SQL, cast values to `DECIMAL(38,0)` before summing when the sum
+can exceed a 64-bit integer. SQL follows engine type semantics; the checked
+progressive aggregate contract below is separate.
 
 Sampling, a SQL prepared-plan cache, native MCP Tasks and automatic model resume
 are not implemented. These must not be simulated by the integration host and
@@ -151,3 +162,8 @@ Details: [row-group design](decisions/005-row-groups-and-reconnection.md) and
 Metadata upgrades once from schema 3/4 to 5. Existing fixed revisions remain
 readable, but older runtimes refuse an upgraded workspace. Back up a workspace
 before upgrading if you need to keep using the old runtime.
+
+Alpha.6 keeps metadata schema 5 and reads existing plain IPC parts. Larger new
+result parts can use Zstd IPC compression; alpha.5 already includes its decoder.
+Stored byte/scan budgets count encoded bytes. Verification still reads whole
+parts, so projection does not eliminate integrity I/O.

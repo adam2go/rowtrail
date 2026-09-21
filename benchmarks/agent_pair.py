@@ -28,6 +28,9 @@ def oracle(rows,task):
  return {'region':region,'region_total':money(totals[region]),'product':product,'product_total':money(products[product]),'positive_count':str(len(positive)),'min_positive_id':str(min(v[0] for v in positive)),'null_region_total':money(sum(v[3] for v in values if v[1] is None and v[3] is not None))}
 
 class LoggedRowTrail:
+ finish=RowTrail.finish
+ schema=RowTrail.schema
+ observe=staticmethod(RowTrail.observe)
  def __init__(self,binary,workspace):self.binary=binary;self.workspace=workspace;self.client=RowTrail(str(binary),str(workspace));self.calls=[]
  def call(self,method,params,idempotency_key=None):
   started=time.perf_counter()
@@ -46,24 +49,38 @@ class LoggedDuckDB:
  def __init__(self,directory):
   import duckdb
   self.connection=duckdb.connect(str(directory/'data.duckdb'));self.connection.execute("SET threads=1");self.connection.execute("SET memory_limit='134217728B'")
-  self.connection.execute("PRAGMA enable_profiling='json'");self.directory=directory;self.calls=[]
+  self.connection.execute("PRAGMA enable_profiling='no_output'");self.connection.execute("SET profiling_coverage='ALL'");self.calls=[];self.pending=None
+ def capture_profile(self):
+  if not self.calls:return
+  value=json.loads(self.connection.get_profiling_information())
+  # A query in progress can return a placeholder or the previous profile.
+  if value.get('query_name')==self.calls[-1]['sql']:self.calls[-1]['profile']=value
  def execute(self,sql,params=None):
-  path=self.directory/f'profile-{len(self.calls)}.json';path.unlink(missing_ok=True)
-  self.connection.execute('PRAGMA profiling_output='+"'"+str(path).replace("'","''")+"'")
-  started=time.perf_counter();record={'sql':sql,'params':params,'profile_path':str(path)};self.calls.append(record)
-  try:self.connection.execute(sql,params or []);record['execute_ms']=(time.perf_counter()-started)*1000;return self
+  self.capture_profile();self.pending=None
+  started=time.perf_counter();record={'sql':sql,'params':params};self.calls.append(record)
+  try:self.connection.execute(sql,params or []);record['execute_ms']=(time.perf_counter()-started)*1000;self.capture_profile();return self
   except Exception as e:record['error']=str(e);raise
+ def fetchone(self):
+  row=self.pending if self.pending is not None else self.connection.fetchone()
+  # One-row lookahead finalizes scalar/last-row profiles without collecting an
+  # unbounded result. The next caller still receives the prefetched row.
+  self.pending=self.connection.fetchone() if row is not None else None
+  self.capture_profile();return row
+ def fetchmany(self,size=1):
+  if size<=0:return []
+  rows=[] if self.pending is None else [self.pending];self.pending=None
+  rows.extend(self.connection.fetchmany(size-len(rows)))
+  if rows:self.pending=self.connection.fetchone()
+  self.capture_profile();return rows
+ def fetchall(self):
+  rows=[] if self.pending is None else [self.pending];self.pending=None
+  rows.extend(self.connection.fetchall());self.capture_profile();return rows
  def __getattr__(self,name):
-  if name not in ('fetchall','fetchone','fetchmany','description'):raise AttributeError('Use execute(sql, params) for measured database access')
+  if name!='description':raise AttributeError('Use execute(sql, params) for measured database access')
   return getattr(self.connection,name)
  def close(self):self.connection.close()
  def profiles(self):
-  out=[]
-  for call in self.calls:
-   value=dict(call);path=pathlib.Path(value.pop('profile_path'))
-   if path.exists():value['profile']=json.loads(path.read_text())
-   out.append(value)
-  return out
+  self.capture_profile();return list(self.calls)
 
 BRIDGE='''import json,socket,sys
 s=socket.socket(socket.AF_UNIX);s.connect("broker.sock")
@@ -86,10 +103,11 @@ def run_trial(a,task,arm,repeat,fixture,out):
     while result['job']['state'] in ('queued','running'):result=backend.call('control',{'action':'wait','ref':result['job']['id'],'wait_ms':1000})
     assert result['job']['state']=='completed';backend.reconnect()
    backend.calls.clear()
-   docs=(ROOT/'docs/agent-guide.md').read_text()
-   notes='The persistent environment provides rt.call(method, params), returning the result object or raising an error. It uses RowTrail. rt.reconnect() creates a fresh transport without replaying any calls. Use workspace summary to find saved bindings. API request schemas are in schemas.json.\n'+docs
-   schemas={name:json.loads(subprocess.check_output([str(ROOT/a.bin_dir/'rowtrail'),'schema',name])) for name in ('open','inspect','query','read','control','workspace')}
-   (base/'schemas.json').write_text(json.dumps(schemas))
+   docs=(ROOT/('docs/agent-quickstart.md' if a.bootstrap=='compact' else 'docs/agent-guide.md')).read_text()
+   notes='The persistent environment provides rt.call(method, params), returning the result object or raising an error. rt.schema(method) discovers a single local request contract. rt.finish(response) waits mechanically; rt.observe(response) projects a compact job view. rt.reconnect() creates a fresh transport without replaying any calls.\n'+docs
+   if a.bootstrap=='full':
+    schemas={name:json.loads(subprocess.check_output([str(ROOT/a.bin_dir/'rowtrail'),'schema',name])) for name in ('open','inspect','query','read','control','workspace')}
+    (base/'schemas.json').write_text(json.dumps(schemas));notes+='\nFull request schemas are also available in schemas.json.\n'
   else:
    backend=LoggedDuckDB(base);env['con']=backend
    if task=='handoff':backend.execute("CREATE TABLE prior_filtered AS SELECT id,region,product,amount FROM read_parquet(?) WHERE region='华东' AND amount IS NOT NULL",[str(source)])
@@ -155,7 +173,7 @@ Return only the final JSON answer matching answer.schema.json. Check accuracy an
    unmeasured=False
    for r in backend_calls:
     if 'profile' in r:scans(r['profile'])
-    elif 'READ_PARQUET' in r['sql'].upper() and 'error' not in r:unmeasured=True
+    elif 'error' not in r:unmeasured=True
    if unmeasured:source_scan_rows=None
    source_read=None;result_read=None
   reuse_ok=task!='handoff' or (source_read==0 if arm=='rowtrail' else source_scan_rows==0)
@@ -170,7 +188,7 @@ Return only the final JSON answer matching answer.schema.json. Check accuracy an
   return record
 
 if __name__=='__main__':
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('--model',required=True);p.add_argument('--effort',default='xhigh');p.add_argument('--repeats',type=int,default=3);p.add_argument('--rows',type=int,default=16391);p.add_argument('--timeout',type=int,default=300);p.add_argument('--bin-dir',default='target/release');p.add_argument('--output',default='benchmarks/local/agent-pair');a=p.parse_args()
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--model',required=True);p.add_argument('--bootstrap',choices=('compact','full'),default='compact');p.add_argument('--effort',default='xhigh');p.add_argument('--repeats',type=int,default=3);p.add_argument('--rows',type=int,default=16391);p.add_argument('--timeout',type=int,default=300);p.add_argument('--bin-dir',default='target/release');p.add_argument('--output',default='benchmarks/local/agent-pair');a=p.parse_args()
  out=(ROOT/a.output).resolve();out.mkdir(parents=True,exist_ok=False);records=[]
  with tempfile.TemporaryDirectory(prefix='rowtrail-agent-fixture-') as td:
   data=pathlib.Path(td);subprocess.run([str(ROOT/a.bin_dir/'rowtrail-runtime'),'fixtures','--directory',str(data),'--rows',str(a.rows)],check=True,stdout=subprocess.DEVNULL)
@@ -178,5 +196,5 @@ if __name__=='__main__':
   for repeat in range(a.repeats):
    for task in ('explore','handoff'):
     for arm in (('rowtrail','duckdb') if repeat%2==0 else ('duckdb','rowtrail')):records.append(run_trial(a,task,arm,repeat,fixture,out))
-  report={'kind':'real external-agent paired pilot','model':a.model,'reasoning_effort':a.effort,'codex_version':subprocess.check_output(['codex','--version'],text=True).strip(),'duckdb_version':__import__('duckdb').__version__,'rows':a.rows,'fixture_sha256':fixture_hash,'binary_sha256':{n:hashlib.file_digest((ROOT/a.bin_dir/n).open('rb'),'sha256').hexdigest() for n in ('rowtrail','rowtrail-runtime')},'conditions':['Same model/settings, task and input for both arms; fresh agent per task; arm order alternates by repeat.','Both use a persistent Python process and may compose calls, cache values and materialize results. DuckDB connection and temporary tables persist.','Handoff setup materializes the same subset before the agent starts; setup time is reported separately and included in total.','No internal product model calls; models run only in this optional external harness.','I/O counters differ: RowTrail reports physical source/result bytes, DuckDB profiles report original-source scanned rows. Null means not measured, never zero.','Small synthetic pilot; not an adoption study or universal speed claim. Retain failures and usage including cached tokens.','Agent wall time includes CLI/model/tool time. Backend code time and emitted observation bytes are separate; emitted bytes are not total model tokens.'],'records':records}
+  report={'kind':'real external-agent paired pilot','model':a.model,'bootstrap':a.bootstrap,'reasoning_effort':a.effort,'codex_version':subprocess.check_output(['codex','--version'],text=True).strip(),'duckdb_version':__import__('duckdb').__version__,'rows':a.rows,'fixture_sha256':fixture_hash,'binary_sha256':{n:hashlib.file_digest((ROOT/a.bin_dir/n).open('rb'),'sha256').hexdigest() for n in ('rowtrail','rowtrail-runtime')},'conditions':['Same model/settings, task and input for both arms; fresh agent per task; arm order alternates by repeat.','Both use a persistent Python process and may compose calls, cache values and materialize results. DuckDB connection and temporary tables persist.','Handoff setup materializes the same subset before the agent starts; setup time is reported separately and included in total.','No internal product model calls; models run only in this optional external harness.','I/O counters differ: RowTrail reports physical source/result bytes, DuckDB profiles report original-source scanned rows. Null means not measured, never zero.','DuckDB uses profiling_coverage=ALL and one-row fetch lookahead; incomplete profiles remain unmeasured. RowTrail bootstrap mode and helper availability are recorded; do not interpret comparison with alpha.5 as a controlled model-latency A/B.','Small synthetic pilot; not an adoption study or universal speed claim. Retain failures and usage including cached tokens.','Agent wall time includes CLI/model/tool time. Backend code time and emitted observation bytes are separate; emitted bytes are not total model tokens.'],'records':records}
   (out/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')

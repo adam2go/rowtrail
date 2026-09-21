@@ -1,0 +1,122 @@
+{
+  "status": "passed",
+  "integration_scenarios": 73,
+  "rust_tests": 7,
+  "subprocess_crash_scenarios": 8,
+  "reports": {
+    "integration": {
+      "status": "passed",
+      "checks": [
+        "bounded open / explicit Decimal schema / idempotent open",
+        "relative paths resolve in each caller directory, independently of coordinator cwd",
+        "S1 CSV and four-row-group Parquet agree with hand-calculated results",
+        "typed parameters / large integer preservation / fixed revision pagination",
+        "S2 two result-only branches avoid original reads; missing dimension requires original source",
+        "multi-row-group Decimal aggregate matches independent integer reference",
+        "coalesced multi-batch IPC preserves 10,000-row pagination and result-only SQL",
+        "changing Arrow dictionaries remain readable and reusable across engine batches",
+        "export fixed revision with quality sidecar and typed roundtrip",
+        "query idempotency excludes wait but rejects changed semantics",
+        "read-only SQL and explicit source access enforcement",
+        "SQL identifiers cannot impersonate resource errors or invalidate valid sources",
+        "real background submission / external cancellation / confirmed worker exit",
+        "first preview survives eight cancellation races during coalesced result publication",
+        "scan budget exhaustion does not masquerade as empty success",
+        "computation timeout stops execution independently of client waiting",
+        "export reserves input bytes before reading and does not publish on budget failure",
+        "serialized observation budgets and result schema inspection",
+        "large Unicode validation errors obey output budgets and signal truncation",
+        "durable event replay and exclusive cursor",
+        "atomic job snapshot supplies a compatible event replay cursor",
+        "coordinator crash isolates old attempt, preserves committed results, and reports interrupted",
+        "worker crash becomes interrupted with confirmed process exit",
+        "corrupt committed part fails explicitly instead of returning an empty table",
+        "genuine empty result has a schema and final committed revision",
+        "bounded head inspection uses a real limited query and fixed result",
+        "late CSV type failure preserves partial results and propagates quality through queries and export",
+        "multi-file imports conservatively merge quality and empty CSV exports retain headers",
+        "source version mismatch and downstream invalidation",
+        "refresh freezes a new manifest while preserving old result invalidation"
+      ]
+    },
+    "alpha3": {
+      "status": "passed",
+      "checks": [
+        "one-scan typed null/min/max profile; deterministic top-k; scan budgets",
+        "fixed-revision result inspection avoids original reads and rejects floating row inspections",
+        "prepare publishes typed immutable Parquet only on success; idempotency and source independence",
+        "empty prepared tables retain schema; late CSV parse failure never publishes a partial dataset",
+        "TSV preparation preserves delimiter semantics",
+        "multi-file CSV preparation preserves all rows and per-file headers",
+        "same-size same-mtime corruption is rejected in read, saved-result SQL and export",
+        "an external alias cannot downgrade integrity checks on a managed Parquet input",
+        "pin protects ancestors; dry-run is non-destructive; GC creates durable expired-reference errors",
+        "retained query dependencies protect released prepared datasets",
+        "GC protects active job inputs; stopped prepare never exposes an unfinished dataset",
+        "quota admission includes result and spill reservations; terminal jobs release reservations",
+        "join plus partitioned window matches independent integer oracle"
+      ],
+      "binary_sha256": {
+        "rowtrail": "e473127f4a555b70b85beb17ca6da7a484da44b1bfcd8e162b83e97b461acd2a",
+        "rowtrail-runtime": "978b6319b74592e4514eec3efe2a7f2fe657759366e01119c1b6ca9018e57132"
+      }
+    },
+    "alpha4": {
+      "status": "passed",
+      "checks": [
+        "every immutable checkpoint matches a Python integer/Decimal prefix oracle; final snapshot contains one row",
+        "a fixed partial checkpoint can be queried/exported/reopened with partial quality preserved",
+        "preview none writes exactly one final checkpoint",
+        "durable result-ready events describe each committed aggregate revision",
+        "result budget exhaustion keeps the last complete file checkpoint, not half-updated aggregates",
+        "unsupported functions, types, aliases and CSV sources fail before accepting a job",
+        "empty input retains typed count zero and null sum/average",
+        "true cancellation preserves fixed earlier aggregate checkpoints",
+        "worker crash preserves one complete aggregate checkpoint and reports interrupted",
+        "numeric overflow is explicit and never replaces a valid checkpoint with a wrapped sum"
+      ],
+      "binary_sha256": {
+        "rowtrail": "e473127f4a555b70b85beb17ca6da7a484da44b1bfcd8e162b83e97b461acd2a",
+        "rowtrail-runtime": "978b6319b74592e4514eec3efe2a7f2fe657759366e01119c1b6ca9018e57132"
+      }
+    },
+    "alpha5": {
+      "status": "passed",
+      "checks": [
+        "guide and MCP configuration are valid JSON and start no runtime",
+        "every single-file row-group checkpoint matches independent integer/Decimal arithmetic including uneven tail",
+        "coalescing publishes first/final prefixes with unchanged scan bytes; preview none stores one result",
+        "count-only row-group execution preserves row counts with empty column projection",
+        "partial row-group revision remains immutable and reusable without original-source reads",
+        "result and scan budgets preserve only complete committed row-group prefixes",
+        "unsupported fragments and unbounded publication intervals fail explicitly",
+        "zero-row Parquet completes with count zero, typed null and explicit coverage",
+        "managed prepared Parquet retains checksum verification and accurate discovered fragment totals",
+        "cancellation and worker death preserve immutable single-file row-group checkpoints and confirm execution stopped",
+        "fresh-session catalog recovers fixed bindings; pagination excludes later objects and rejects changed filters",
+        "catalog excludes known-invalid results from readable counts and retains explicit expiration tombstones and recovery hints"
+      ],
+      "binary_sha256": {
+        "rowtrail": "e473127f4a555b70b85beb17ca6da7a484da44b1bfcd8e162b83e97b461acd2a",
+        "rowtrail-runtime": "978b6319b74592e4514eec3efe2a7f2fe657759366e01119c1b6ca9018e57132"
+      }
+    },
+    "alpha6": {
+      "status": "passed",
+      "checks": [
+        "compressed parts retain exact nullable Decimal/large integers and checksum-accounted source-free reuse",
+        "encoded-byte budget accepts the exact file size and rejects one byte less without publishing final-only output",
+        "byte-bounded projected pages preserve escaped Unicode names, nulls, Decimal strings and every cursor row",
+        "small and empty uncompressed results keep their original typed observation semantics",
+        "optional compact helper preserves the entire observation, fixed revision and errors while dropping operational detail",
+        "helper deadlines do not cancel or replay jobs and partial failure projections retain coverage and truncation",
+        "fresh transport reads the same immutable compressed revision",
+        "same-size same-mtime compressed corruption fails read, query and export before decoding"
+      ],
+      "binary_sha256": {
+        "rowtrail": "e473127f4a555b70b85beb17ca6da7a484da44b1bfcd8e162b83e97b461acd2a",
+        "rowtrail-runtime": "978b6319b74592e4514eec3efe2a7f2fe657759366e01119c1b6ca9018e57132"
+      }
+    }
+  }
+}
