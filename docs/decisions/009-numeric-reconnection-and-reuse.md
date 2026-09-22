@@ -19,6 +19,9 @@ Partial merge carries the wide state, not a prematurely narrowed answer. Final
 scalar/group/window evaluation checks the declared output range, so partition or
 batch boundaries do not cause Int64 overflow when the complete sum fits. i256
 intermediate exhaustion itself is an error; this is not unbounded arithmetic.
+Common input batches fold with checked i128 arithmetic and flush into i256 on
+overflow or batch end, preserving the same semantics with less per-row work.
+Non-null batches use four independent checked lanes, all merged in i256.
 DISTINCT uses accounted distinct-value state; sliding retraction retains duplicate
 counts. Float SUM retains engine semantics. Interval/duration SUM requires an
 explicit numeric-unit conversion rather than silently wrapping.
@@ -41,7 +44,9 @@ under the new numeric policy. Preserve a stopped full workspace before upgrading
 The socket uses a short private UID/workspace-hash directory under `/tmp`,
 independent of TMPDIR and workspace path length. A coordinator holding the
 workspace lock atomically publishes an owner-private descriptor containing its
-workspace, socket, store ID, PID, API and runtime versions. Clients check file
+workspace, socket, store ID, PID, API and runtime versions. The descriptor is
+ephemeral discovery metadata: complete write plus atomic rename is enough for
+live readers; it does not flush data files. Data/job durability is unchanged. Clients check file
 ownership/permissions/type/size and live peer UID, then compare handshake identity
 and exact runtime version. A descriptor is discovery metadata, not authority over
 a live peer. Stale sockets are replaced only by the workspace-lock owner.

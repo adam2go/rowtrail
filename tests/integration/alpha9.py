@@ -55,6 +55,8 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-alpha9-') as td:
         assert rt.typed_rows(rows)==[[Decimal(9223372036854775808)]]
         assert rt.rows(rt.query("SELECT SUM(n) FROM (VALUES ('9223372036854775807'::BIGINT),(1::BIGINT),(-1::BIGINT)) t(n)"))==[['9223372036854775807']]
         assert rt.rows(rt.query('SELECT SUM(n) FROM (VALUES (NULL::BIGINT)) t(n)'))==[[None]]
+        interval=rt.query("SELECT INTERVAL '1 day' elapsed")
+        assert rt.typed_rows(interval)==rt.rows(interval)
         check('wider Decimal, cancellation within a wide sum, nulls, explicit policy and lossless Python values')
         for sql in [
             "SELECT g,SUM(n) FROM (VALUES (1,'9223372036854775807'::BIGINT),(1,1::BIGINT)) t(g,n) GROUP BY g",
@@ -177,6 +179,12 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-alpha9-') as td:
         finally:
             if previous is None:os.environ.pop('ROWTRAIL_RUNTIME',None)
             else:os.environ['ROWTRAIL_RUNTIME']=previous
+        fake=RowTrail.__new__(RowTrail);fake.usable=True
+        fake.process=subprocess.Popen([sys.executable,'-u','-c',
+            "import sys,json,time; r=json.loads(sys.stdin.readline()); print(json.dumps({'api_version':'1','request_id':r['request_id'],'ok':False,'error':'malformed'}),flush=True); time.sleep(30)"],
+            stdin=subprocess.PIPE,stdout=subprocess.PIPE,text=True)
+        try:fake.call('doctor',{});raise AssertionError('accepted malformed error envelope')
+        except ConnectionError:assert not fake.usable and fake.process.poll() is not None
         check('failed runtime startup retains code, retryability and log path through the Python NDJSON client')
         passed=True
     finally:

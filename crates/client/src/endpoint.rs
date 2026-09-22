@@ -79,9 +79,11 @@ pub fn publish(endpoint: &Endpoint) -> Result<()> {
         .open(&temporary)?;
     let result = (|| -> Result<()> {
         file.write_all(&serde_json::to_vec(endpoint)?)?;
-        file.sync_all()?;
+        // Discovery is ephemeral: after OS failure no coordinator is alive.
+        // Complete write + atomic rename suffices for live readers. Data/jobs
+        // retain their separate durability barriers; do not flush them here.
         std::fs::rename(&temporary, path(&endpoint.workspace))?;
-        std::fs::File::open(&endpoint.workspace)?.sync_all()?;
+
         Ok(())
     })();
     if result.is_err() {

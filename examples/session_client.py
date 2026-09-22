@@ -56,6 +56,15 @@ class RowTrail:
             if (not isinstance(response, dict) or response.get('request_id') != request['request_id']
                     or response.get('api_version') != '1' or type(response.get('ok')) is not bool):
                 raise ConnectionError(f'Mismatched RowTrail response; inspect durable state: {response}')
+            if response['ok']:
+                if 'result' not in response:
+                    raise ConnectionError('Successful RowTrail response is missing its result')
+            else:
+                error = response.get('error')
+                if (not isinstance(error, dict) or not isinstance(error.get('code'), str)
+                        or not isinstance(error.get('message'), str)
+                        or type(error.get('retryable')) is not bool or 'details' not in error):
+                    raise ConnectionError('Malformed RowTrail error envelope; inspect durable state')
         except (OSError, ValueError, ConnectionError):
             self.usable = False
             self.process.kill()
@@ -267,7 +276,7 @@ class RowTrail:
         def convert(value, field):
             kind = field['type']
             if value is None: return None
-            if kind.startswith(('Int','UInt')): return int(value)
+            if kind in ('Int8','Int16','Int32','Int64','UInt8','UInt16','UInt32','UInt64'): return int(value)
             if kind.startswith('Decimal'): return Decimal(value)
             return value
         return [[convert(value,field) for value,field in zip(row,fields)] for row in rows]

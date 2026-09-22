@@ -1,7 +1,7 @@
 #!/bin/sh
 # Install a verified native release without a language runtime or package manager.
 set -eu
-version=${ROWTRAIL_VERSION:-0.1.0-alpha.8}
+version=${ROWTRAIL_VERSION:-0.1.0-beta.1}
 install_dir=${ROWTRAIL_INSTALL_DIR:-"$HOME/.local/bin"}
 case "$version" in ''|*[!A-Za-z0-9.-]*) echo 'Invalid ROWTRAIL_VERSION' >&2; exit 1;; esac
 case "$(uname -s):$(uname -m)" in

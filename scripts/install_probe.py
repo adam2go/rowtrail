@@ -2,6 +2,7 @@
 import hashlib, io, json, os, pathlib, platform, signal, subprocess, tarfile, tempfile, tomllib
 root=pathlib.Path(__file__).resolve().parents[1]
 version=tomllib.loads((root/'Cargo.toml').read_text())['workspace']['package']['version']
+assert 'ROWTRAIL_VERSION:-'+version in (root/'install.sh').read_text()
 archive=next((root/'dist').glob(f'rowtrail-{version}-*.tar.xz'))
 with tempfile.TemporaryDirectory(prefix='rowtrail-install-test-') as directory:
     base=pathlib.Path(directory)
@@ -18,7 +19,7 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-install-test-') as directory:
     finally:
         if coordinator:os.kill(coordinator,signal.SIGTERM)
     package=binary.resolve().parent
-    for name in ('docs/agent-guide.md','docs/agent-quickstart.md','docs/usage.md','examples/session_client.py','examples/quickstart.py'):
+    for name in ('docs/agent-guide.md','docs/agent-quickstart.md','docs/usage.md','docs/numeric-contract.md','examples/session_client.py','examples/quickstart.py'):
         assert (package/name).is_file(), name
     assert subprocess.check_output([str(binary),'python-client'],text=True)==(package/'examples/session_client.py').read_text()
     demo=json.loads(subprocess.check_output(['python3',str(package/'examples/quickstart.py'),'--rowtrail',str(binary),'--directory',str(base/'demo')],text=True))

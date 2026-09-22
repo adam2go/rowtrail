@@ -239,6 +239,73 @@ impl State {
         Ok(())
     }
 }
+// Most numeric SUMs fit i128 even when the declared output does not. Fold
+// batches there with checked addition, flushing into i256 only on overflow or
+// batch end. This avoids i256 arithmetic per row without changing any limit.
+fn add_batch(state: &mut State, array: &ArrayRef, range: &Range) -> Result<()> {
+    macro_rules! fold {
+        ($ty:ty,$convert:expr) => {{
+            let a = array
+                .as_any()
+                .downcast_ref::<PrimitiveArray<$ty>>()
+                .unwrap();
+            if a.null_count() == 0 {
+                // Independent checked lanes let the CPU overlap additions.
+                // Merge in i256, so lanes never introduce a narrow final sum.
+                let mut sums = [0i128; 4];
+                let mut chunks = a.values().chunks_exact(4);
+                for chunk in &mut chunks {
+                    for (sum, value) in sums.iter_mut().zip(chunk) {
+                        let value = ($convert)(*value);
+                        if let Some(total) = sum.checked_add(value) {
+                            *sum = total;
+                        } else {
+                            state.add(i256::from_i128(*sum), 0, range)?;
+                            *sum = value;
+                        }
+                    }
+                }
+                for value in chunks.remainder() {
+                    let value = ($convert)(*value);
+                    if let Some(total) = sums[0].checked_add(value) {
+                        sums[0] = total;
+                    } else {
+                        state.add(i256::from_i128(sums[0]), 0, range)?;
+                        sums[0] = value;
+                    }
+                }
+                for sum in sums {
+                    state.add(i256::from_i128(sum), 0, range)?;
+                }
+                state.add(i256::ZERO, a.len() as u64, range)
+            } else {
+                let mut sum = 0i128;
+                let mut count = 0u64;
+                for v in a.iter().flatten() {
+                    let value = ($convert)(v);
+                    if let Some(total) = sum.checked_add(value) {
+                        sum = total;
+                    } else {
+                        state.add(i256::from_i128(sum), count, range)?;
+                        sum = value;
+                        count = 0;
+                    }
+                    count += 1;
+                }
+                state.add(i256::from_i128(sum), count, range)
+            }
+        }};
+    }
+    match array.data_type() {
+        DataType::Int64 => fold!(Int64Type, |v: i64| v as i128),
+        DataType::UInt64 => fold!(UInt64Type, |v: u64| v as i128),
+        DataType::Decimal32(..) => fold!(Decimal32Type, |v: i32| v as i128),
+        DataType::Decimal64(..) => fold!(Decimal64Type, |v: i64| v as i128),
+        DataType::Decimal128(..) => fold!(Decimal128Type, |v: i128| v),
+        _ => values(array, |_, v| state.add(v, 1, range)),
+    }
+}
+
 // One type dispatch per batch; no per-row ScalarValue allocation.
 fn values(array: &ArrayRef, mut f: impl FnMut(usize, i256) -> Result<()>) -> Result<()> {
     macro_rules! visit {
@@ -298,6 +365,9 @@ impl CheckedAccumulator {
 }
 impl Accumulator for CheckedAccumulator {
     fn update_batch(&mut self, arrays: &[ArrayRef]) -> Result<()> {
+        if self.distinct.is_none() {
+            return add_batch(&mut self.state, &arrays[0], &self.range);
+        }
         values(&arrays[0], |_, v| self.insert(v))
     }
     fn evaluate(&mut self) -> Result<ScalarValue> {
@@ -808,6 +878,37 @@ mod tests {
                     })
                     .is_err()
             );
+        }
+        // Force intermediate i128 overflow in repeated lanes and the nullable
+        // fallback, then cancel it; the representable final answer must survive.
+        let max = 10i128.pow(38) - 1;
+        let raw = std::iter::repeat_n(max, 8)
+            .chain(std::iter::repeat_n(-max, 8))
+            .chain([42])
+            .collect::<Vec<_>>();
+        for nullable in [false, true] {
+            let values = raw
+                .iter()
+                .flat_map(|v| {
+                    if nullable {
+                        vec![Some(*v), None]
+                    } else {
+                        vec![Some(*v)]
+                    }
+                })
+                .collect::<Vec<_>>();
+            let array: ArrayRef = Arc::new(
+                Decimal128Array::from(values)
+                    .with_precision_and_scale(38, 0)
+                    .unwrap(),
+            );
+            let mut sum = CheckedAccumulator::new(DataType::Decimal128(38, 0), "wide batch", false);
+            sum.update_batch(&[array]).unwrap();
+            assert_eq!(
+                sum.evaluate().unwrap(),
+                ScalarValue::Decimal128(Some(42), 38, 0)
+            );
+            assert_eq!(sum.state.count, 17);
         }
         let range = Range::new(DataType::Decimal256(76, 0), "SUM(x)");
         let mut state = State {
