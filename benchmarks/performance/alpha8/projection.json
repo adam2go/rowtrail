@@ -1,0 +1,504 @@
+{
+  "status": "passed",
+  "kind": "wide Parquet, narrow projection, separated column ranges; no model calls",
+  "rows": 65536,
+  "columns": 32,
+  "row_group_size": 2048,
+  "repeats": 7,
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "fixture_sha256": "a7b1e07f099d8afba35315ae1eb026bffebefd7505e543194dc43e1d84f3d493",
+  "fixture_bytes": 16889514,
+  "binary_sha256": {
+    "alpha7": {
+      "rowtrail": "c4b5522684fcbbb000e077232441ce8f3a6b6c410bb9379052dd144cbec7f503",
+      "rowtrail-runtime": "532c3946627f216324913f090b1ded4adbdf00cd832114142e669e542da15b31"
+    },
+    "alpha8": {
+      "rowtrail": "342b33d232b5d30dd242c0659967e5828ff00d0e034db2054a080b64d7ea1267",
+      "rowtrail-runtime": "8b6d9f80e8d68e512be9f5893d1ba6e57777a1786ef0c284631da734a2a31865"
+    }
+  },
+  "sql": "SELECT SUM(CAST(c0 AS DECIMAL(38,0))),SUM(CAST(c31 AS DECIMAL(38,0))),MAX(c0),MIN(c31) FROM t",
+  "expected": [
+    [
+      "302757077950474226138632",
+      "303054596476298376825007",
+      "9223304284546371895",
+      "438863510949676"
+    ]
+  ],
+  "records": [
+    {
+      "variant": "alpha7",
+      "repeat": 0,
+      "total_ms": 30.607374850660563,
+      "open_ms": 21.31508383899927,
+      "query_ms": 9.288250003010035,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.292167,
+        "result_write_ms": 0.031875,
+        "commit_ack_ms": 0.159666,
+        "elapsed_ms": 4.251917,
+        "worker_pid": 20477,
+        "publication_ms": 0.134625,
+        "result_parts": 1,
+        "worker_elapsed_ms": 7.804042,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha8",
+      "repeat": 0,
+      "total_ms": 29.08687526360154,
+      "open_ms": 20.511125214397907,
+      "query_ms": 8.571207989007235,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "target_partitions": 2,
+        "planning_ms": 2.187667,
+        "result_write_ms": 0.034043000000000004,
+        "commit_ack_ms": 0.1445,
+        "elapsed_ms": 3.5952919999999997,
+        "worker_pid": 20480,
+        "publication_ms": 0.120542,
+        "result_parts": 1,
+        "worker_elapsed_ms": 7.163292,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha8",
+      "repeat": 1,
+      "total_ms": 28.51899992674589,
+      "open_ms": 20.03754209727049,
+      "query_ms": 8.47487524151802,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "target_partitions": 2,
+        "planning_ms": 2.12375,
+        "result_write_ms": 0.032916,
+        "commit_ack_ms": 0.148875,
+        "elapsed_ms": 3.481792,
+        "worker_pid": 20483,
+        "publication_ms": 0.124292,
+        "result_parts": 1,
+        "worker_elapsed_ms": 6.97375,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 1,
+      "total_ms": 29.60558421909809,
+      "open_ms": 20.29191702604294,
+      "query_ms": 9.309499990195036,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.131791,
+        "result_write_ms": 0.030458,
+        "commit_ack_ms": 0.165625,
+        "elapsed_ms": 4.0875829999999995,
+        "worker_pid": 20486,
+        "publication_ms": 0.13295900000000002,
+        "result_parts": 1,
+        "worker_elapsed_ms": 7.7905,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 2,
+      "total_ms": 29.475499875843525,
+      "open_ms": 20.109042059630156,
+      "query_ms": 9.36262495815754,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.043375,
+        "result_write_ms": 0.029874,
+        "commit_ack_ms": 0.198834,
+        "elapsed_ms": 4.077208,
+        "worker_pid": 20489,
+        "publication_ms": 0.169458,
+        "result_parts": 1,
+        "worker_elapsed_ms": 7.799,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha8",
+      "repeat": 2,
+      "total_ms": 28.945541940629482,
+      "open_ms": 20.321249961853027,
+      "query_ms": 8.620791137218475,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "target_partitions": 2,
+        "planning_ms": 2.152333,
+        "result_write_ms": 0.03425,
+        "commit_ack_ms": 0.171917,
+        "elapsed_ms": 3.5543329999999997,
+        "worker_pid": 20492,
+        "publication_ms": 0.142458,
+        "result_parts": 1,
+        "worker_elapsed_ms": 7.009958,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha8",
+      "repeat": 3,
+      "total_ms": 28.45087507739663,
+      "open_ms": 20.1366669498384,
+      "query_ms": 8.310749661177397,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "target_partitions": 2,
+        "planning_ms": 2.0405409999999997,
+        "result_write_ms": 0.033,
+        "commit_ack_ms": 0.168625,
+        "elapsed_ms": 3.427041,
+        "worker_pid": 20495,
+        "publication_ms": 0.144166,
+        "result_parts": 1,
+        "worker_elapsed_ms": 6.843458,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 3,
+      "total_ms": 29.300333000719547,
+      "open_ms": 20.272666588425636,
+      "query_ms": 9.023624937981367,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.086583,
+        "result_write_ms": 0.03325,
+        "commit_ack_ms": 0.15895800000000002,
+        "elapsed_ms": 4.0174579999999995,
+        "worker_pid": 20498,
+        "publication_ms": 0.128375,
+        "result_parts": 1,
+        "worker_elapsed_ms": 7.46125,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 4,
+      "total_ms": 29.11491598933935,
+      "open_ms": 20.106874871999025,
+      "query_ms": 9.004584047943354,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.043334,
+        "result_write_ms": 0.029498999999999997,
+        "commit_ack_ms": 0.146542,
+        "elapsed_ms": 3.995,
+        "worker_pid": 20501,
+        "publication_ms": 0.123791,
+        "result_parts": 1,
+        "worker_elapsed_ms": 7.45825,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha8",
+      "repeat": 4,
+      "total_ms": 28.553958050906658,
+      "open_ms": 19.92175029590726,
+      "query_ms": 8.628916926681995,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "target_partitions": 2,
+        "planning_ms": 2.111833,
+        "result_write_ms": 0.032333,
+        "commit_ack_ms": 0.164542,
+        "elapsed_ms": 3.54525,
+        "worker_pid": 20504,
+        "publication_ms": 0.13475,
+        "result_parts": 1,
+        "worker_elapsed_ms": 7.096500000000001,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha8",
+      "repeat": 5,
+      "total_ms": 28.38329179212451,
+      "open_ms": 19.826416857540607,
+      "query_ms": 8.553416933864355,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "target_partitions": 2,
+        "planning_ms": 2.101125,
+        "result_write_ms": 0.031542,
+        "commit_ack_ms": 0.176209,
+        "elapsed_ms": 3.483875,
+        "worker_pid": 20507,
+        "publication_ms": 0.153167,
+        "result_parts": 1,
+        "worker_elapsed_ms": 7.150541,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 5,
+      "total_ms": 31.140790786594152,
+      "open_ms": 20.2933750115335,
+      "query_ms": 10.84270840510726,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.336,
+        "result_write_ms": 0.039209,
+        "commit_ack_ms": 0.23625,
+        "elapsed_ms": 4.932041,
+        "worker_pid": 20510,
+        "publication_ms": 0.195042,
+        "result_parts": 1,
+        "worker_elapsed_ms": 9.208875,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 6,
+      "total_ms": 29.941166285425425,
+      "open_ms": 20.90858342126012,
+      "query_ms": 9.028958156704903,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.049958,
+        "result_write_ms": 0.030417,
+        "commit_ack_ms": 0.17908400000000002,
+        "elapsed_ms": 4.010916,
+        "worker_pid": 20521,
+        "publication_ms": 0.14366600000000002,
+        "result_parts": 1,
+        "worker_elapsed_ms": 7.537875,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha8",
+      "repeat": 6,
+      "total_ms": 28.739625122398138,
+      "open_ms": 20.36008285358548,
+      "query_ms": 8.375625126063824,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "target_partitions": 2,
+        "planning_ms": 2.121292,
+        "result_write_ms": 0.034376000000000004,
+        "commit_ack_ms": 0.191709,
+        "elapsed_ms": 3.561917,
+        "worker_pid": 20524,
+        "publication_ms": 0.16158399999999998,
+        "result_parts": 1,
+        "worker_elapsed_ms": 6.950667,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    }
+  ],
+  "summary": {
+    "alpha7": {
+      "total_ms": 29.60558421909809,
+      "query_ms": 9.288250003010035,
+      "source_read_bytes": 1574716
+    },
+    "alpha8": {
+      "total_ms": 28.553958050906658,
+      "query_ms": 8.553416933864355,
+      "source_read_bytes": 1574716
+    }
+  },
+  "limitations": [
+    "A deliberately wide, small-row-group layout exposes coalesced gap reads; gains depend on layout.",
+    "OS cache not flushed; serial alternating order, same frozen bytes and fresh workspaces.",
+    "Encoded read bytes include query-time footer reads, not open-time metadata or physical device I/O."
+  ]
+}

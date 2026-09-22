@@ -2,8 +2,8 @@
 
 [Home](../README.md) · [Verification and measurements](verification.md)
 
-Updated 2026-09-22 for **0.1.0-alpha.8**. Release candidate: native CI, archive
-verification and final repeated performance records are required before release.
+Updated 2026-09-22 for **0.1.0-alpha.8**. Native builds, checksum installation, migration and repeated performance
+measurements are verified; this remains an engineering preview.
 
 ## Alpha.8
 
@@ -23,11 +23,18 @@ verification and final repeated performance records are required before release.
 - A zero-download example generates orders, saves a labeled branch, reconnects
   with one catalog call plus one query and verifies exact answers independently.
   It is bundled with the stdlib client and agent guides in native archives.
-- Linux build baseline moves to Ubuntu 22.04 / glibc 2.35; the same archive must
-  also pass installation and the demo on Ubuntu 24.04. Installer rejects older
+- Linux build baseline moves to Ubuntu 22.04 / glibc 2.35; the same archive also
+  passes installation and the demo on Ubuntu 24.04. Installer rejects older
   glibc and musl before downloading. macOS arm64 remains supported.
-- No external dependency is added. Larger parts can slow small pages from large
-  saved results; final positive and negative measurements are reported together.
+- No external dependency is added. Native download sizes are 19.23 / 22.56 MB.
+  Default million-row exploration is 231.07 → 142.46 ms (7 alternating trials);
+  the 32 MiB sort is 865.94 → 436.50 ms (5 trials). One-partition exploration also
+  improves. Larger saved-result pages regress by about 1.3 ms; entropy and small
+  queries are essentially unchanged. All samples and tradeoffs are retained.
+- Native builds pass 99 integration scenarios and eight Rust tests each. The
+  installed macOS archive passes the new scenarios, demo and published alpha.7
+  upgrade again. Installer checks actual executables before switching links,
+  including when an explicitly selected older package needs a newer libc.
 
 [Design](decisions/008-bounded-parallelism-and-handoff.md) · [Measurements](verification.md).
 

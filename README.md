@@ -60,9 +60,16 @@ Set `ROWTRAIL_INSTALL_DIR` to choose another directory, or extract an archive
 from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.8).
 Keep `rowtrail` and `rowtrail-runtime` together.
 
-Distribution budgets: **30 MB** per compressed archive, **4.5 MB** per CLI,
-**125 MB** per runtime. Exact native artifact sizes and checksums are published
-in the [release verification](docs/verification.md#native-distribution).
+Verified native sizes (decimal MB):
+
+| Platform | Download `.tar.xz` | CLI | Runtime |
+|---|---:|---:|---:|
+| macOS arm64 | **19.23 MB** | 3.73 MB | 100.10 MB |
+| Linux x86_64 | **22.56 MB** | 4.19 MB | 114.91 MB |
+
+CLI/runtime sizes are uncompressed. Budgets stay **30 MB / 4.5 MB / 125 MB**.
+The same Linux archive is tested on Ubuntu 22.04 and 24.04. Archives include
+agent guides and the optional runnable demo. [Artifact verification](docs/verification.md#native-distribution).
 
 **Workspace upgrade:** alpha.8 upgrades metadata to schema 7. Old runtimes refuse
 an upgraded store; stop its coordinator and retain a full pre-upgrade copy if you
@@ -94,11 +101,13 @@ explicitly stop once it has enough fragment or file coverage.
 
 ## A complete demo, with no data download
 
-After cloning this repository, or inside an extracted native archive:
+With RowTrail on your PATH, run from this repository or an extracted archive:
 
 ```sh
-python3 examples/quickstart.py --rowtrail /absolute/path/to/rowtrail
+python3 examples/quickstart.py
 ```
+
+For an archive without installation, add `--rowtrail "$PWD/rowtrail"`.
 
 This optional stdlib-only example generates **20,003 CSV rows**, discovers fields,
 chooses a region from bounded aggregates, saves its refunds without returning
@@ -132,9 +141,24 @@ are explicit in measurements; direct engines retain their intermediate tables.
 The [verification report](docs/verification.md) records repeated raw timings,
 independent answer checks, native artifact hashes and unsuccessful experiments.
 
+On one Apple arm64 Mac:
+
+| Complete workload, median ms | alpha.7 | alpha.8 |
+|---|---:|---:|
+| 1M-row exploration, defaults (7 alternating trials) | 231.07 | **142.46** |
+| 1M-row sort, 32 MiB engine pool (5 alternating trials) | 865.94 | **436.50** |
+
+That is **38% / 50% less elapsed time**. Defaults use more partitions for large
+scans; direct controls receive matching maximum targets. A separate one-partition
+exploration comparison still improves **234.33 → 197.58 ms**. Small exploration
+and warm scalar queries (about **1.14 ms**) remain essentially unchanged.
+
+![Alpha.8 complete exploration and low-memory sort. Lower is better; exact values and all conditions are in the report.](benchmarks/performance/alpha8/performance.svg)
+
 The changes preserve SQLite FULL commits, file/directory sync, verified parts and
 real worker cancellation. Larger compressed parts reduce commit overhead but can
-make a small read from a large saved result slower. MemoryPool budgets are not
+make a small read from a large saved result slower: the 100-row page grows from
+**0.63 to 1.94 ms** in our million-row fixture. MemoryPool budgets are not
 RSS caps. Package-size budgets remain unchanged.
 
 **Direct engines remain faster.** RowTrail additionally pays for durable jobs,
@@ -143,6 +167,10 @@ persistent DuckDB environment is a strong choice if you already own those
 lifecycles. The latest paired-agent pilot is still alpha.6: all 12 answers correct,
 but RowTrail took more time and cumulative input tokens. Backend improvements and
 the new runnable handoff demo do not establish a model-level latency/token win.
+
+Both native build platforms pass **99 integration scenarios** and **eight Rust
+tests**, including 12 subprocess commit-crash cases. A 5,000-result labeled history
+survives restart; catalog lookup median is **0.56 ms** in that local probe.
 
 [Current evidence](docs/verification.md) · [Alpha.8 raw records](benchmarks/performance/alpha8/) ·
 [Archived alpha.7 report](docs/releases/alpha7-verification.md).
@@ -158,7 +186,7 @@ tracked separately from the roadmap.
 We want a useful tool that stays easy to install, compose and understand.
 Contributions that make the contracts clearer, the package smaller, or a
 complete exploration faster are especially welcome. Start with
-[contributing](CONTRIBUTING.md), [building from source](docs/usage.md#build), or
+[contributing](CONTRIBUTING.md), [launch copy and demo rundown](docs/launch.md), [building from source](docs/usage.md#build), or
 [a reproducible issue](https://github.com/adam2go/rowtrail/issues).
 
 <sub>Meet <a href="docs/brand/README.md">Trail / 小迹</a>, our three-row companion. One question, one result, one more step.</sub>

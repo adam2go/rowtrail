@@ -176,7 +176,7 @@ checks, not repeated latency evidence. [Old](../../benchmarks/performance/alpha7
 The locally printable stdlib client accepts responses as bindings and handles
 mechanical waits, preserves full quality/errors, never silently replays a mutation,
 and never implicitly collects a table. `rows()` only accepts complete exact final
-untruncated observations. [Minimal bootstrap](agent-quickstart.md).
+untruncated observations. [Minimal bootstrap](../agent-quickstart.md).
 
 A manual primary-agent walkthrough used the printed client on 20,003 generated
 CSV orders: discovered the actual schema, found the highest refund-value region,
@@ -222,7 +222,7 @@ derived SQL, and the older runtime refusing the upgraded store.
 Budgets remain 30,000,000 / 4,500,000 / 125,000,000 bytes respectively. No external
 package was added; Cargo.lock changes only the four workspace package versions.
 Linux requires glibc 2.39+. Packages are unsigned engineering previews.
-[Exact provenance and platform resource runs](release-verification.json) ·
+[Exact provenance and platform resource runs](alpha7-verification.json) ·
 [Native check inventory](../../benchmarks/performance/alpha7/verification.json).
 
 The release tag adds later documentation, charts and supplementary measurement

@@ -412,7 +412,7 @@ async fn execute_job(
         drop(stream);
         for source in &spec.sources{source.validate()?}
         Ok(json!({"io":counters.value(),"result_write_bytes":output.written,"rows":output.rows,
-            "target_partitions":crate::engine::target_partitions(spec),
+            "target_partitions":ctx.copied_config().target_partitions(),
             "planning_ms":planned_ms,"result_write_ms":output.write_ms,"commit_ack_ms":output.ack_ms,
             "elapsed_ms":started.elapsed().as_secs_f64()*1000.0,
             "plan":format!("{}",datafusion::physical_plan::display::DisplayableExecutionPlan::with_metrics(plan.as_ref()).indent(true))}))

@@ -56,8 +56,15 @@ rowtrail --version
 [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.8) 下载并解压。
 请将 `rowtrail` 和 `rowtrail-runtime` 放在同一个目录。
 
-压缩包上限继续为 **30 MB**，CLI / 运行时的解压上限为 **4.5 / 125 MB**。
-准确发布大小、校验和与原生验证记录见[验证报告](docs/verification.md#native-distribution)。
+已验证的原生包大小（十进制 MB）：
+
+| 平台 | 压缩下载 `.tar.xz` | CLI | 运行时 |
+|---|---:|---:|---:|
+| macOS arm64 | **19.23 MB** | 3.73 MB | 100.10 MB |
+| Linux x86_64 | **22.56 MB** | 4.19 MB | 114.91 MB |
+
+CLI / 运行时列为解压大小，预算保持 **30 / 4.5 / 125 MB**。同一个 Linux 包在 Ubuntu
+22.04 和 24.04 上验证；包内附带 Agent 指南与可选演示。[原生产物记录](docs/verification.md#native-distribution)。
 
 **工作区升级：** alpha.8 将元数据升级到 schema 7，旧运行时不能打开升级后的工作区；
 如果需要回退，请停止协调器后保留完整的升级前副本。
@@ -84,11 +91,13 @@ rowtrail query --sql "SELECT region, SUM(amount) AS total
 
 ## 不用下载数据的完整演示
 
-克隆仓库后，或在解压的原生包目录中运行：
+将 RowTrail 加入 PATH 后，在仓库或解压的原生包目录中运行：
 
 ```sh
-python3 examples/quickstart.py --rowtrail /absolute/path/to/rowtrail
+python3 examples/quickstart.py
 ```
+
+如果仅解压而没有安装，添加 `--rowtrail "$PWD/rowtrail"`。
 
 这个可选的标准库示例生成 **20,003 行 CSV**，发现字段、按有界聚合选择一个地区、保存
 退款子集而不返回全部明细，然后重新连接。一次标签目录调用即可找回固定结果，下一次
@@ -116,14 +125,31 @@ alpha.8 优化的是完整探索：打开陌生数据、保存子集、从结果
 测试明确记录并行度，对照引擎允许保留中间表。
 [验证报告](docs/verification.md) 保留重复原始计时、独立正确性检查、原生产物哈希与负面实验。
 
+同一台 Apple arm64 Mac 的测量：
+
+| 完整流程，中位数 ms | alpha.7 | alpha.8 |
+|---|---:|---:|
+| 百万行默认探索（7 轮交替） | 231.07 | **142.46** |
+| 百万行排序，32 MiB 引擎池（5 轮交替） | 865.94 | **436.50** |
+
+耗时分别降低约 **38% / 50%**。默认设置会为大扫描选择更多分区，对照也获得相应的最大
+分区目标。另一个全部固定为单分区的探索对照仍从 **234.33 降到 197.58 ms**。
+小数据探索和约 **1.14 ms** 的热会话小查询基本持平。
+
+![alpha.8 完整探索与低内存排序，详细条件与负面结果见报告。](benchmarks/performance/alpha8/performance.svg)
+
 SQLite FULL 提交、文件与目录同步、内容校验和真实取消仍然保留。较大的压缩结果文件
-能减少持久化提交次数，但从大结果读取很小的分页可能变慢；内存池预算也不是 RSS 上限。
+能减少持久化提交次数，但从大结果读取很小的分页可能变慢：百万行结果的 100 行分页从 **0.63 增到 1.94 ms**。
+内存池预算也不是 RSS 上限。
 安装包体积预算不变。
 
 **直接引擎仍然更快。** RowTrail 还承担持久任务、固定结果、校验、进程隔离和有界协议的
 成本。如果已有持久 DuckDB 环境，并能自行管理这些生命周期，它仍是很强的选择。
 最新真实 Agent 配对试验仍为 alpha.6：12 次全部答对，但 RowTrail 耗时更长、累计输入
 token 更多。本轮后端优化和接续演示不能证明模型整体耗时或 token 优势。
+
+两个原生构建平台均通过 **99 项集成场景**和 **8 项 Rust 测试**，其中含 12 种子进程
+提交崩溃场景。5,000 个带标签结果在重启后仍可找回，该本地探测的目录查询中位数为 **0.56 ms**。
 
 [当前证据](docs/verification.md) · [alpha.8 原始记录](benchmarks/performance/alpha8/) ·
 [alpha.7 历史报告](docs/releases/alpha7-verification.md)。
@@ -134,7 +160,7 @@ token 更多。本轮后端优化和接续演示不能证明模型整体耗时�
 SQL 预备计划缓存、原生 MCP Tasks、宿主自动接续/淘汰和远程来源仍未实现。[当前能力与限制](docs/progress.md) 会与规划分开记录。
 
 我们希望它一直容易安装、容易组合、容易理解。欢迎让协议更清楚、安装包更小、完整探索
-更快的贡献。从 [贡献指南](CONTRIBUTING.md)、[源码构建](docs/usage.md#build) 或一个
+更快的贡献。从 [贡献指南](CONTRIBUTING.md)、[宣发文案与演示流程](docs/launch.md)、[源码构建](docs/usage.md#build) 或一个
 [可复现的问题](https://github.com/adam2go/rowtrail/issues) 开始。
 
 <sub>认识 <a href="docs/brand/README.md">Trail / 小迹</a>，我们的三行数据伙伴。一个问题，一个结果，再向前一步。</sub>

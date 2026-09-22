@@ -42,6 +42,18 @@ fi
 [ "$actual" = "$expected" ] || { echo 'SHA-256 mismatch; installation stopped.' >&2; exit 1; }
 tar -xJf "$staging/$archive" -C "$staging"
 [ -f "$staging/$name/rowtrail" ] && [ -f "$staging/$name/rowtrail-runtime" ]
+# Older selected releases may require a newer libc than today's package. Check
+# both actual executables before creating version directories or changing links.
+if ! "$staging/$name/rowtrail" --version > "$staging/version" 2> "$staging/native-error" ||
+   ! "$staging/$name/rowtrail-runtime" --help > /dev/null 2> "$staging/native-error"; then
+    echo 'Native executables cannot run on this system; the existing installation is unchanged.' >&2
+    cat "$staging/native-error" >&2
+    exit 1
+fi
+case "$(cat "$staging/version")" in
+    *" $version") ;;
+    *) echo 'Package version mismatch; the existing installation is unchanged.' >&2; exit 1 ;;
+esac
 mkdir -p "$install_dir"
 install_dir=$(cd "$install_dir" && pwd -P)
 # Retain notices beside immutable versioned binaries. Never overwrite a running

@@ -1,5 +1,5 @@
 """Install the real archive in a private directory; reject a corrupt checksum."""
-import hashlib, json, os, pathlib, platform, signal, subprocess, tempfile, tomllib
+import hashlib, io, json, os, pathlib, platform, signal, subprocess, tarfile, tempfile, tomllib
 root=pathlib.Path(__file__).resolve().parents[1]
 version=tomllib.loads((root/'Cargo.toml').read_text())['workspace']['package']['version']
 archive=next((root/'dist').glob(f'rowtrail-{version}-*.tar.xz'))
@@ -32,6 +32,25 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-install-test-') as directory:
     attempt=subprocess.run(['sh',str(root/'install.sh'),'--from',str(bad)],env=env,capture_output=True,text=True)
     assert attempt.returncode!=0 and 'SHA-256 mismatch' in attempt.stderr,attempt
     assert not (base/'rejected').exists()
+    original=binary.resolve()
+    native_rejections=[]
+    for broken in ('cli','runtime','version'):
+        test_version='0.0.0-broken-'+broken
+        test_archive=base/archive.name.replace(version,test_version)
+        prefix=test_archive.name.removesuffix('.tar.xz')
+        with tarfile.open(test_archive,'w:xz') as tar:
+            for executable in ('rowtrail','rowtrail-runtime'):
+                fails=(broken=='cli' and executable=='rowtrail') or (broken=='runtime' and executable=='rowtrail-runtime')
+                reported='0.0.0-wrong' if broken=='version' else test_version
+                script=('#!/bin/sh\necho synthetic-incompatible-build >&2\nexit 1\n' if fails else '#!/bin/sh\necho "rowtrail-cli '+reported+'"\n').encode()
+                info=tarfile.TarInfo(prefix+'/'+executable);info.size=len(script);info.mode=0o755
+                tar.addfile(info,io.BytesIO(script))
+        digest=hashlib.file_digest(test_archive.open('rb'),'sha256').hexdigest()
+        test_archive.with_name(prefix+'.sha256').write_text(digest+'  '+test_archive.name+'\n')
+        attempt=subprocess.run(['sh',str(root/'install.sh'),'--from',str(test_archive)],env={**env,'ROWTRAIL_VERSION':test_version,'ROWTRAIL_INSTALL_DIR':str(base/'bin')},capture_output=True,text=True)
+        assert attempt.returncode!=0 and 'existing installation is unchanged' in attempt.stderr,attempt
+        assert binary.resolve()==original and not (base/'bin'/prefix).exists()
+        native_rejections.append(broken)
     fake=base/'fake-tools';fake.mkdir()
     (fake/'uname').write_text('#!/bin/sh\ncase "$1" in -s) echo Linux;; -m) echo x86_64;; esac\n')
     (fake/'curl').write_text('#!/bin/sh\necho CURL_CALLED >&2\nexit 99\n')
@@ -48,6 +67,7 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-install-test-') as directory:
             'archive_sha256':hashlib.file_digest(archive.open('rb'),'sha256').hexdigest(),
             'checksum_verified_install':True,'installed_symlink_query':True,'corrupt_archive_rejected':True,
             'bundled_docs_and_printed_client_match':True,'installed_quickstart':{k:v for k,v in demo.items() if k not in ('workspace','saved_binding')},
+            'incompatible_packages_rejected_before_symlink_changes':native_rejections,
             'linux_libc_preflight':preflights}
     out=root/'benchmarks/local/install.json';out.parent.mkdir(parents=True,exist_ok=True);out.write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps(report,indent=2))

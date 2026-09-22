@@ -1,6 +1,7 @@
 # Alpha.8: bounded parallelism and discoverable saved work
 
-Status: candidate; native verification and measurements are recorded separately.
+Status: implemented; native verification and repeated measurements are in
+[the release report](../verification.md).
 
 The alpha.7 primary-agent walkthrough needed three schema probes to recognize a
 saved subset. Its four-partition experiment made a large workload faster, but

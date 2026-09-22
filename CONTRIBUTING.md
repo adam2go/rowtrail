@@ -5,6 +5,17 @@ The aim is a small native tool with clear contracts and fast complete workflows.
 Reproducible bug reports, better agent integrations, smaller distributions and
 measured performance improvements are welcome.
 
+Useful first contributions are a real agent task with a synthetic reproduction,
+a small integration example, a confusing contract explained more clearly, or a
+measurement showing where the complete workflow wastes time. The issue forms
+capture the environment and evidence needed to reproduce a result.
+
+Performance questions currently include small projected reads from large checked
+result parts, preparation amortization on real CSV layouts, and label discovery
+with much larger retained histories. Native targets need native verification,
+size budgets and installation tests. No growth feature is more important than
+correctness, clear observations and easy composition.
+
 Read [current capabilities and limits](docs/progress.md), the
 [agent guide](docs/agent-guide.md) and [engineering rules](AGENTS.md) before
 changing behavior. [Build instructions](docs/usage.md#build) cover Rust 1.94.0 and

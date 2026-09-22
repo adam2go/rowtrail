@@ -191,3 +191,47 @@ recorded JSON. Matplotlib is an optional documentation dependency only.
 `python3 benchmarks/history.py --queries 5000` retains every scalar result in one
 workspace and compares early/late warm windows. It is a single-session growth
 check, separate from alternating latency comparisons and from quota accounting.
+
+## Alpha.8 release matrix
+
+Use Python 3.11+ for the harnesses; only the benchmark virtual environment needs
+`duckdb==1.5.5`. RowTrail has no Python or DuckDB runtime dependency. Old alpha.7
+Linux archives require glibc 2.39; compare on a host compatible with both builds.
+
+```sh
+python3 -m venv /tmp/rowtrail-bench
+/tmp/rowtrail-bench/bin/pip install duckdb==1.5.5
+/tmp/rowtrail-bench/bin/python benchmarks/compare_matrix.py --variant alpha7=/path/to/alpha7 --variant alpha8=target/release --rows 1048576 --repeats 7 --output benchmarks/local/exploration-alpha8.json
+/tmp/rowtrail-bench/bin/python benchmarks/compare_matrix.py --variant alpha7=/path/to/alpha7 --variant alpha8=target/release --variant-partitions alpha8=1 --rows 1048576 --repeats 7 --output benchmarks/local/exploration-alpha8-serial.json
+/tmp/rowtrail-bench/bin/python benchmarks/resource_matrix.py --variant alpha7=/path/to/alpha7 --variant alpha8=target/release --repeats 5
+/tmp/rowtrail-bench/bin/python benchmarks/rescan.py --variant alpha7=/path/to/alpha7 --variant alpha8=target/release --rows 2097152 --repeats 7
+/tmp/rowtrail-bench/bin/python benchmarks/reuse.py --variant alpha7=/path/to/alpha7 --variant alpha8=target/release --repeats 7
+/tmp/rowtrail-bench/bin/python benchmarks/projection.py --variant alpha7=/path/to/alpha7 --variant alpha8=target/release --repeats 7
+python3 benchmarks/latency.py --variant alpha7=/path/to/alpha7 --variant alpha8=target/release --repeats 21 --warm-queries 30
+python3 benchmarks/paging_matrix.py --variant alpha7=/path/to/alpha7 --variant alpha8=target/release --source-rows 1048576 --wide-result --repeats 21
+python3 benchmarks/catalog.py --bin-dir target/release --queries 5000 --lookups 31
+```
+
+Run the 16K exploration and ordinary 16K paging variants as well. Keep timing
+workloads sequential, without concurrent builds. The full resource matrix checks
+every exported sorted ID independently on every trial; its RSS samples are not
+a hard bound. A result file larger than the cache is not a promise of rereads:
+access order and overlapping streams determine the live working set.
+
+`compare.py` now gives direct controls the largest RowTrail partition target in
+that trial (older alpha.7 reports implicitly target one). `--partitions` pins all
+engines; `compare_matrix.py --variant-partitions NAME=N` overrides just one variant,
+useful for an old binary without the new request field. Direct DuckDB/DataFusion
+retain intermediates and default memory allowances; only their thread/partition
+targets are matched, not durability or hard CPU limits. RowTrail answer values
+are checked against DuckDB. The direct DataFusion reference records row counts
+and plan timings, not separately serialized answer values.
+
+The catalog probe retains every labeled result, restarts the coordinator and
+measures exact-label lookup plus a final source-free handoff. It is a single
+history-growth probe, not a model study. The bundled `examples/quickstart.py`
+provides a small deterministic handoff demo with independent answer checks.
+
+[Current measurements](../docs/verification.md) include the small-page regression
+from larger checked parts and the high-entropy case. `plot_alpha8.py` renders
+checked-in JSON using optional Matplotlib; graph rendering is outside timing.

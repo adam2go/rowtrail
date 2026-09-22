@@ -1,0 +1,29 @@
+name: Performance experiment
+description: Make a complete exploration faster or the native package smaller.
+body:
+  - type: textarea
+    id: workload
+    attributes:
+      label: Agent task and reproducible workload
+      description: Which complete task is slow? Include synthetic fixture generation, queries, materialization, reuse and observed rows.
+    validations:
+      required: true
+  - type: textarea
+    id: conditions
+    attributes:
+      label: Conditions and resource budgets
+      description: OS/CPU/RAM, RowTrail version, file layout, partition/thread targets, memory/scan/output budgets and cold/warm process/cache conditions.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Measurements and correctness
+      description: Repeated raw timings, binary hashes, independent answer checks, source/result bytes, peak RSS if relevant, and package sizes. Baselines may retain sessions and intermediates.
+    validations:
+      required: true
+  - type: textarea
+    id: tradeoffs
+    attributes:
+      label: Tradeoffs or hypothesis
+      description: Mention regressions, smaller/larger inputs, negative results, and any effect on durability, quality or cancellation.
