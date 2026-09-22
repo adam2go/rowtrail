@@ -5,7 +5,7 @@
   <p>A small native data tool, built for agents.<br>Ask a question, keep an exact result, and continue from there.</p>
   <p>
     <a href="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml"><img src="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml/badge.svg" alt="Build and verify"></a>
-    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.6"><img src="https://img.shields.io/badge/release-v0.1.0--alpha.6-147D70" alt="Release v0.1.0-alpha.6"></a>
+    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.7"><img src="https://img.shields.io/badge/release-v0.1.0--alpha.7-147D70" alt="Release v0.1.0-alpha.7"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-147D70" alt="Apache-2.0 license"></a>
   </p>
   <p><a href="README.zh-CN.md">简体中文</a> · <a href="#install">Install</a> · <a href="docs/agent-guide.md">Agent guide</a> · <a href="docs/verification.md">Test results</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
@@ -18,10 +18,10 @@ in its context. RowTrail opens local CSV/TSV/Parquet, runs read-only SQL, and ke
 versioned results on disk. The agent gets a bounded, typed observation and can
 branch from a saved result when the next question arrives.
 
-**New in alpha.6:** smaller durable results, fewer publication costs, faster
-bounded pages, and a shorter agent bootstrap. Alternating local comparisons show
-about 14% faster million-row exploration and 60% faster 10K-row paging.
-The native download budget stays at 30 MB.
+**New in alpha.7:** fast durable small queries, fewer repeated reads, and simpler
+agent composition. Local alternating runs reduce warm scalar latency from
+**18.12 ms to 1.19 ms** and five-query exploration time by about
+**67% / 19%** at 16K / 1M rows. No new external dependency; the download budget stays 30 MB.
 
 **Zero internal model calls. No API key. No spreadsheet UI.** Your agent chooses
 the questions and decides when the evidence is sufficient.
@@ -45,12 +45,12 @@ CSV / TSV / Parquet → exact query → saved result → next question
 
 ## Install
 
-**v0.1.0-alpha.6** is an early engineering preview, licensed under Apache-2.0.
+**v0.1.0-alpha.7** is an early engineering preview, licensed under Apache-2.0.
 Native packages are available for **macOS arm64** and **Linux x86_64**
 (Ubuntu 24.04 / glibc 2.39 or newer).
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-alpha.6/install.sh -o /tmp/rowtrail-install.sh
+curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-alpha.7/install.sh -o /tmp/rowtrail-install.sh
 sh /tmp/rowtrail-install.sh
 export PATH="$HOME/.local/bin:$PATH"
 rowtrail --version
@@ -58,18 +58,16 @@ rowtrail --version
 
 The installer verifies SHA-256 and installs a versioned pair in `~/.local/bin`.
 Set `ROWTRAIL_INSTALL_DIR` to choose another directory, or extract an archive
-from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.6).
+from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.7).
 Keep `rowtrail` and `rowtrail-runtime` together.
 
-Verified native release sizes (decimal MB):
+Native artifact verification is pending for this source snapshot. Exact download
+and installed binary sizes will be recorded before release. Budgets remain
+**30 MB** per archive, 4.5 MB per CLI and 125 MB per runtime (decimal).
+[Native verification](docs/verification.md#native-distribution).
 
-| Platform | Download `.tar.xz` | CLI | Runtime |
-|---|---:|---:|---:|
-| macOS arm64 | **19.16 MB** | 3.70 MB | 99.98 MB |
-| Linux x86_64 | **22.42 MB** | 4.13 MB | 114.72 MB |
-
-CLI/runtime are uncompressed sizes. Budgets remain **30 MB** per archive,
-4.5 MB per CLI and 125 MB per runtime. [Native artifact verification](docs/verification.md#native-distribution).
+**Workspace upgrade:** alpha.7 upgrades metadata to schema 6. Old runtimes refuse
+an upgraded store; retain a pre-upgrade copy if you need to keep using alpha.6.
 
 ## Give it a question
 
@@ -107,57 +105,55 @@ explicitly stop once it has enough fragment or file coverage.
 All entries share the same contracts, jobs and result store. Closing a connection
 does not cancel an accepted job. Transport errors never silently replay a
 possibly accepted mutation. The optional [Python bridge](examples/session_client.py)
-uses only the standard library; Python is not a product dependency.
+uses only the standard library; Python is not a product dependency. Print it
+locally with `rowtrail python-client > rowtrail_client.py`. `open` and `query`
+responses can be passed straight into subsequent bindings; mechanical waits need
+no extra model turn. [Small bootstrap](docs/agent-quickstart.md).
 
 ## Measured, with the receipts
 
-Five-query exploration, **seven alternating runs per version**, on one Apple
-arm64 Mac. Median milliseconds; lower is better. Includes opening, materializing,
-branching twice from a saved result, and returning to the original dataset.
+Five-query exploration on one Apple arm64 Mac; seven alternating runs per version,
+median milliseconds. Includes opening, saving a subset, two saved-result branches,
+and returning to the original dataset.
 
 | Entry | 16,384 rows | 1,048,576 rows |
 |---|---:|---:|
-| RowTrail alpha.5 · rerun | 109.46 | 348.38 |
-| **RowTrail alpha.6 · persistent NDJSON** | **110.34** | **298.90** |
-| DuckDB 1.5.5 · persistent session | 10.62 | 92.19 |
-| Direct DataFusion 55.0.0 · persistent session | 4.76 | 59.05 |
+| RowTrail alpha.6 · rerun | 110.33 | 296.09 |
+| **RowTrail alpha.7 · persistent NDJSON** | **36.15** | **239.95** |
+| DuckDB 1.5.5 · persistent session | 8.61 | 95.46 |
+| Direct DataFusion 55.0.0 · persistent session | 4.39 | 63.67 |
 
-Million-row exploration improves by about **14%**; small-input timing is essentially
-unchanged. Direct engines remain faster: RowTrail pays for durability, content
-verification, process isolation and protocol. Baselines retain in-memory tables;
-direct DataFusion startup is excluded. Local timings are not universal guarantees.
+Direct engines remain faster. RowTrail also pays for durable results, verification,
+isolation and protocol; baselines retain in-memory tables and direct DataFusion
+startup is excluded. These are local measurements, not universal guarantees.
 
-- **Less integrity I/O:** the million-row saved result falls from 33.52 MB to
-  **4.22 MB**, about 87% less, and from nine parts to six. Saved branches still
-  verify stored content and read zero original-source bytes.
-- **Faster pages:** 10,000-row fixed reads fall from **21.92 ms to 8.80 ms**,
-  including CLI startup; medians of five runs.
-- **Incompressible data checked:** high-entropy integer materialization plus three
-  saved aggregates falls from 150.03 ms to **138.75 ms**, seven alternating runs.
-- **Resource bounds exercised:** a million-row sort spills 26 times with a 32 MiB
-  engine pool; every exported ID matches the independent oracle. Sampled worker
-  RSS is about 139.7 MB. The engine pool is not an RSS limit.
+- **Cheap durable observations:** warm scalar median **18.12 → 1.19 ms**,
+  P95 20.52 → 1.82 ms, 609 warm queries/version. SQLite FULL commit stays.
+- **Less repeated verification I/O:** three scans of a saved 1M-row result read
+  **19.61 → 4.66 MB**, under the same 8 MiB retained-cache budget, with zero source reads.
+- **Read requested columns:** a 32-column Parquet fixture projecting two columns
+  reads **17.33 → 1.57 MB** in the query. Benefit depends on file layout.
+- **Earlier useful prefixes:** one-file row-group aggregation reaches its first
+  prefix in 7.37 ms and finishes in 22.48 ms. Coverage remains explicit.
 
-Progressive observation remains useful: a single file with 16 row groups returns
-its first prefix in **19.40 ms** and completes in **45.32 ms**, essentially unchanged
-from the alpha.5 rerun. Ordinary SQL still wins when only the final answer matters.
-[All conditions and raw records](docs/verification.md).
+Large pages are essentially unchanged. No cold-start gain is established. A real
+million-row sort still completes with a 32 MiB engine pool and spills 26 times;
+the pool is not an RSS cap. Faster four-partition execution was rejected as a
+default because the same low-memory sort failed. Negative trials are retained.
 
-**Agent efficiency needs its own evidence.** The [minimal bootstrap](docs/agent-quickstart.md),
-on-demand schemas and optional helpers keep full observations in caller code.
-All 12 updated paired trials answer correctly and both arms reuse saved data on
-handoff, but RowTrail is still slower and uses more cumulative input tokens than
-persistent DuckDB. Compared with the historical pilot, exploration improves while
-handoff does not; shorter instructions alone are insufficient.
-[Every trial and limitation](docs/verification.md#real-external-agent-paired-pilot).
+**Agent efficiency needs its own evidence.** New helpers and a manual walkthrough
+make composition easier; they do not prove total model latency/token savings.
+The latest paired pilot remains alpha.6: all 12 answers correct, but slower and
+more cumulative input tokens than persistent DuckDB. [Evidence and limits](docs/verification.md#agent-workflow-evidence).
 
-The local build and both native CI platforms pass **73 integration scenarios**, seven Rust tests including eight
-subprocess commit-crash cases, and MCP/session/SDK/installation/two-version checks.
-Same-size, same-mtime corruption of compressed parts is still rejected.
+The local build passes **88 integration scenarios**, eight Rust tests including
+12 subprocess commit-crash cases and a deterministic broken-ACK regression.
+Inline corruption, quotas, cancellation and one-way upgrades are checked.
+Native release verification is recorded in the report.
 
 [Verification and timing conditions](docs/verification.md) ·
-[Alpha.6 raw records](benchmarks/performance/alpha6/) ·
-[Archived alpha.5 evidence](docs/releases/alpha5-verification.md)
+[Alpha.7 raw records](benchmarks/performance/alpha7/) ·
+[Archived alpha.6 evidence](docs/releases/alpha6-verification.md)
 
 ## What comes next
 

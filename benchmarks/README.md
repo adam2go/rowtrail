@@ -153,3 +153,34 @@ separate source-scan evidence. It is never imported by the product. Raw Codex ev
 stay under ignored `benchmarks/local/`; published records exclude reasoning events
 and replace local paths. Running it consumes model quota. No automatic retry or
 selection of only successful trials.
+
+## Alpha.7: durable latency, narrow reads and code composition
+
+Final raw data is in [performance/alpha7/](performance/alpha7/); the
+[report](../docs/verification.md) includes methods, outliers, limits and rejected
+experiments. Keep old/new executable pairs in separate directories and run serially:
+
+```sh
+python3 benchmarks/latency.py --variant alpha6=/path/alpha6 --variant alpha7=target/release --repeats 21 --warm-queries 30
+/tmp/rowtrail-bench/bin/python benchmarks/compare_matrix.py --variant alpha6=/path/alpha6 --variant alpha7=target/release --rows 1048576 --repeats 7
+/tmp/rowtrail-bench/bin/python benchmarks/rescan.py --variant alpha6=/path/alpha6 --variant alpha7=target/release --repeats 7
+/tmp/rowtrail-bench/bin/python benchmarks/projection.py --variant alpha6=/path/alpha6 --variant alpha7=target/release --repeats 7
+/tmp/rowtrail-bench/bin/python benchmarks/reuse.py --variant alpha6=/path/alpha6 --variant alpha7=target/release --repeats 7
+python3 benchmarks/paging_matrix.py --variant alpha6=/path/alpha6 --variant alpha7=target/release --repeats 21
+/tmp/rowtrail-bench/bin/python benchmarks/rescan.py --variant alpha7=target/release --rows 2097152 --repeats 1
+/tmp/rowtrail-bench/bin/python benchmarks/progressive.py --files 1 --repeats 5
+/tmp/rowtrail-bench/bin/python benchmarks/resources.py
+```
+
+Add `--output path.json` to retain each report separately. Use `--rows 16384` for
+small exploration. Latency reports retain fresh-start/first/warm samples separately;
+warmed samples share workers. Projection uses a deliberately wide uncompressed
+Parquet layout and an independent Python oracle. Rescan tests three logical
+branches, which hand-written SQL could fuse. Paging holds persistent sessions
+and alternates versions; its CLI predecessor remains a different timing boundary.
+Resource/RSS checks are separate from repeated latency studies. CI does not assert
+fragile absolute milliseconds; packaging enforces the existing size budgets.
+
+The manual agent walkthrough is not a new paired-agent comparison. Alpha.6's
+external-agent pilot remains the latest measured model-level evidence. Schema 6
+is a one-way upgrade, verified by `scripts/upgrade_probe.py OLD NEW --old-schema 5`.

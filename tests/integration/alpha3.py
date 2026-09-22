@@ -110,15 +110,14 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-alpha3-') as td:
         # Mutate bytes while preserving inode, size and mtime: identities alone cannot detect this.
         isolated = query({},'SELECT CAST(12345 AS BIGINT) AS value')
         db = sqlite3.connect(ws/'metadata.sqlite')
-        part = pathlib.Path(db.execute('SELECT path FROM parts WHERE result_id=?',(ref(isolated)['result_ref'],)).fetchone()[0])
-        assert hashlib.file_digest(part.open('rb'),'sha256').hexdigest()==db.execute('SELECT checksum FROM parts WHERE path=?',(str(part),)).fetchone()[0]
-        stat = part.stat(); payload=bytearray(part.read_bytes());payload[len(payload)//2]^=1;part.write_bytes(payload);os.utime(part,ns=(stat.st_atime_ns,stat.st_mtime_ns))
+        from part_fixture import corrupt_part
+        corrupt_part(db, ref(isolated)['result_ref'])
         corrupt_query=query({'t':ref(isolated)},'SELECT * FROM t',success=False)
         assert corrupt_query['job']['error']['code']=='RESULT_CORRUPT',corrupt_query
         corrupt_export=wait(call('export',{**ref(isolated),'format':'parquet','destination':str(base/'corrupt.parquet')}),False)
         assert corrupt_export['job']['error']['code']=='RESULT_CORRUPT' and not (base/'corrupt.parquet').exists(),corrupt_export
         assert call('read',ref(isolated),ok=False)['error']['code']=='RESULT_CORRUPT'
-        check('same-size same-mtime corruption is rejected in read, saved-result SQL and export')
+        check('same-size stored-part corruption is rejected in read, saved-result SQL and export')
         tamper_prepared=call('prepare',{'source':bind(ts)});tamper_done=wait(tamper_prepared)
         part=pathlib.Path(db.execute('SELECT path FROM parts WHERE result_id=?',(tamper_done['job']['result_ref'],)).fetchone()[0])
         external_alias=call('open',{'source':str(part)})

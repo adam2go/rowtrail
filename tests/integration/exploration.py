@@ -258,8 +258,8 @@ try:
     check('worker crash becomes interrupted with confirmed process exit')
     _,damaged=query({},'SELECT CAST(42 AS BIGINT) n')
     with sqlite3.connect(workspace/'metadata.sqlite') as connection:
-        path=pathlib.Path(connection.execute('SELECT path FROM parts WHERE result_id=?',(damaged['job']['result_ref'],)).fetchone()[0])
-    raw=bytearray(path.read_bytes());raw[len(raw)//2]^=1;path.write_bytes(raw)
+        from part_fixture import corrupt_part
+        corrupt_part(connection, damaged['job']['result_ref'])
     corrupt=call('read',rb(damaged),ok=False)
     assert corrupt['error']['code']=='RESULT_CORRUPT',corrupt
     check('corrupt committed part fails explicitly instead of returning an empty table')

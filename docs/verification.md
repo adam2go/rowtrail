@@ -1,238 +1,199 @@
-# Verification: alpha.6
+# Verification: alpha.7
 
-[Home](../README.md) · [Current limits](progress.md) · [Agent contracts](agent-guide.md)
+[Home](../README.md) · [Agent contracts](agent-guide.md) · [Current limits](progress.md)
 
-This report separates repeated local timings, correctness, external-agent evidence
-and native artifact provenance. Historical [alpha.5 verification](releases/alpha5-verification.md)
-and [release provenance](releases/alpha5-verification.json) remain archived.
+Alpha.7 reduces durable small-result overhead, repeated verified reads and agent
+orchestration. This report separates backend timing, correctness, manual use and
+native artifact verification. [Alpha.6 report](releases/alpha6-verification.md) and
+[provenance](releases/alpha6-verification.json) are archived.
 
-## Correctness
+## Correctness and migration
 
-The local release build and both native CI platforms pass **73 integration scenarios**: 30 foundation,
-13 alpha.3, ten alpha.4, twelve alpha.5 and eight alpha.6. Seven Rust tests include
-exact page-byte accounting and eight subprocess publication-crash scenarios.
-Formatting, Clippy, dependency boundaries, MCP/session/SDK, installation and
-same-size corruption checks pass. [New checks](../tests/integration/alpha6.py).
+The final local release build passes **88 integration scenarios**: 30 foundation,
+13 alpha.3, ten alpha.4, twelve alpha.5, eight alpha.6 and fifteen alpha.7.
+**Eight Rust tests** include twelve subprocess publication-crash cases and a
+deterministic real-pipe regression for worker death before acknowledgement.
+Formatting, Clippy, dependency boundaries, MCP/session, the benchmark-profile
+guard and the real alpha.6 → alpha.7 upgrade probe pass. Native CI status is below.
 
-| Alpha.6 coverage | What is checked |
-|---|---|
-| Encoded integrity | File size/SHA-256, exact nullable Decimal and large IDs, zero source bytes on reuse |
-| Storage budget | Exact encoded size succeeds; one byte less fails without a final-only result |
-| Page bounds | Three byte budgets, escaped Unicode projected names, nulls, exact numbers, all cursor rows |
-| Small/empty results | Plain IPC retains schema, typed nulls and empty completion |
-| Compact projection | Full observation, fixed revision, state and error remain available |
-| Wait semantics | Deadline never cancels/replays; transport error propagates; partial failure retains quality |
-| Reconnection | Fresh transport reads the same immutable compressed revision |
-| Corruption | Same-size same-mtime changes fail read, query and export before decoding |
+[Alpha.7 checks](../tests/integration/alpha7.py) cover inline and mixed storage,
+nullable exact values and large integers, SQLite corruption, quota/GC, restart,
+three saved scans within one-pass byte budget, bounded source reads, literal file
+names, code composition and transport failures without replay. Checks preserve
+partial source coverage and reject treating truncated rows as a complete answer.
+The real-pipe test preserves a committed revision while marking the lost worker
+interrupted and confirming its exit; cancellation and budget finish rules remain.
 
-[Two-version storage probe](../benchmarks/performance/alpha6/storage-compat.json):
-alpha.6 reads alpha.5's plain parts and fixed partial revisions; alpha.5 reads and
-queries new compressed parts; alpha.6 can then read that derived result. Metadata
-stays schema 5. Upgrades from schema 3/4 retain alpha.5's one-way migration rules.
+**Metadata upgrades once to schema 6; old runtimes refuse upgraded workspaces.**
+[The two-binary probe](../benchmarks/performance/alpha7/upgrade-local.json) preserves
+old fixed results and a partial checkpoint, then queries an old result with the
+new runtime. Copy a workspace before upgrading if you need to keep using alpha.6.
+No new external dependency was added. [Design](decisions/007-agent-workflow-performance.md).
 
 ## Complete exploration
 
-One Apple arm64 Mac, macOS 26.6.2, 24 GiB RAM, 14 logical CPUs. Seven serial
-repeats per binary, reversing binary order on alternate repeats; fresh workspace,
-persistent NDJSON/engine session, identical deterministic Parquet bytes. OS cache
-is not flushed. No concurrent local builds or timing workloads.
+One Apple arm64 Mac, macOS 26.6.2, 24 GiB RAM, 14 logical CPUs, Rust 1.94.0 release.
+Seven serial, alternating runs per version; fresh workspaces and persistent native
+sessions; identical deterministic fixture bytes. OS caches are not flushed. No
+concurrent local build or timing workload. Fixture generation and cleanup are
+outside timing; session/coordinator startup and open are included.
 
-The workflow opens input, groups by region, saves non-null rows, groups the saved
-result, counts positive saved rows, then returns to the source for another dimension.
-The DuckDB and direct DataFusion baselines retain intermediate tables in memory.
-Correctness is compared across engines; integer/Decimal fixture checks also run
-in the integration suite. Direct DataFusion engine time excludes process startup;
-its process wall time is retained in the raw reports.
+Five queries: aggregate by region, save a non-null subset, group saved rows, count
+saved positives, return to the original product dimension. Persistent DuckDB
+1.5.5 and direct DataFusion 55.0.0 retain in-memory intermediate tables. Both use
+one thread/partition, as does RowTrail. Direct DataFusion excludes process startup;
+its separate process wall time is retained. All engines agree on answers.
 
-| Backend | 16,384 rows, ms | 1,048,576 rows, ms |
+| Backend, median ms | 16,384 rows | 1,048,576 rows |
 |---|---:|---:|
-| alpha.5 rerun | 109.46 | 348.38 |
-| alpha.6 | 110.34 | 298.90 |
-| Persistent DuckDB 1.5.5 (alpha.6 trial arm) | 10.62 | 92.19 |
-| Direct DataFusion 55.0.0 (alpha.6 trial arm) | 4.76 | 59.05 |
+| alpha.6 rerun | 110.33 | 296.09 |
+| alpha.7 | **36.15** | **239.95** |
+| Persistent DuckDB, alpha.7 trial arm | 8.61 | 95.46 |
+| Direct DataFusion, alpha.7 trial arm | 4.39 | 63.67 |
 
-Million-row elapsed time drops **14.2%**. Small-input time is essentially unchanged
-(+0.8% in this sample). The control engines have nearly equal medians across the
-old/new arms. RowTrail still pays for disk durability, verification, process
-isolation and protocol; this is not a claim to beat an in-process SQL engine.
-[16K raw runs](../benchmarks/performance/alpha6/exploration-16384.json) ·
-[1M raw runs](../benchmarks/performance/alpha6/exploration-1048576.json).
+Elapsed time is 67.2% / 19.0% lower. Direct engines remain faster; RowTrail also
+pays for durable acceptance/results, content verification, isolation and protocol.
+Small control-engine times vary between arms (DuckDB 10.46 vs 8.61 ms);
+this is a local sample, not universal superiority or an exact causal decomposition.
+[16K raw](../benchmarks/performance/alpha7/exploration-16384.json) ·
+[1M raw](../benchmarks/performance/alpha7/exploration-1048576.json).
 
-| Million-row stage, median ms | alpha.5 | alpha.6 |
+## Small durable queries
+
+Twenty-one alternating sessions per version, thirty exact scalar queries each.
+The first query starts a worker; the remaining **609 warmed samples** share their
+session and worker. Every answer checks an integer above JavaScript's safe range.
+P95 is nearest-rank over observed samples, not a service-level guarantee or 609
+independent cold runs. CLI protocol transfer and Python decoding are included.
+
+| Measurement, ms | alpha.6 | alpha.7 |
 |---|---:|---:|
-| Original region aggregate | 62.52 | 63.29 |
-| Materialize non-null subset | 154.82 | 124.74 |
-| Group saved subset | 45.08 | 36.89 |
-| Count saved positives | 32.79 | 22.89 |
-| Original product aggregate | 33.17 | 32.14 |
+| Fresh CLI/coordinator startup median | 19.83 | 20.57 |
+| First query median | 27.97 | 8.56 |
+| Warm query median | 18.12 | **1.19** |
+| Warm query P95 | 20.52 | **1.82** |
 
-The 986,895-row saved subset falls from **33,517,954 to 4,217,972 bytes** (87.4%
-less), nine parts to six. Each saved branch reads zero original bytes and verifies
-all stored result bytes. Summed per-workflow writer time has medians 97.01 →
-85.54 ms; acknowledgement time 82.70 → 67.32 ms. Publication time inside an
-acknowledgement is not added a second time. No file sync or SQLite FULL commit
-was disabled. [Design and bounds](decisions/006-result-performance.md).
+Warm median time is 93.4% lower. There is **no demonstrated cold-start gain**.
+Arrow parts up to 128 KiB now commit their descriptor and checksum-verified BLOB
+in one SQLite FULL transaction, avoiding separate small-file durability operations.
+Acknowledgement still follows durable commit; large parts retain file sync and
+atomic publication. [All samples](../benchmarks/performance/alpha7/latency.json).
 
-## Compression tradeoffs and difficult input
+## Read less, retain bounded verified bytes
 
-The [experiment inventory](../benchmarks/performance/alpha6/experiments/README.md)
-retains plain, buffered, Zstd-fast, LZ4, Zstd-level-1 and larger-part trials with
-binary hashes. Preliminary trials are not interleaved; use the final alternating
-matrix above for the headline. Compression-only variants did not deliver the
-whole final gain. Tiny rows stay plain IPC; Arrow keeps raw buffers if compression
-would expand them. Compression can still cost CPU on difficult data.
+A job-local LRU holds at most **8 MiB encoded bytes / 128 entries**, replacing a
+single-part cache under the same byte allowance. Three UNION ALL branches scan a
+saved 1,048,576-row result: exact Decimal sums and large IDs match Python. Seven
+alternating runs; both versions store 4,655,338 bytes in nine parts.
 
-A separate seeded Python generator creates 131,072 rows with eight high-entropy
-63-bit integer columns. Python computes exact sums; SQL explicitly casts to
-Decimal(38,0) before summing to avoid a 64-bit accumulator overflow.
-Ordinary SQL Int64/UInt64 sums inherit the engine's wrapping semantics; preserving
-JSON integers as strings does not widen the SQL accumulator. The progressive
-analyze contract explicitly rejects overflow. DuckDB only
-converts the CSV fixture to Parquet outside timing. Materialization plus three
-saved aggregates takes **150.03 → 138.75 ms**, seven alternating repeats (7.5%
-lower). All sums match Python and all saved branches read zero source bytes.
-[Raw high-entropy runs](../benchmarks/performance/alpha6/entropy-reuse.json).
+- Rescan stage: **69.91 → 31.24 ms**.
+- Complete materialize-and-rescan workflow: 255.51 → 211.16 ms.
+- Saved-result bytes read: **19,605,074 → 4,655,338**; zero original-source bytes.
 
-## Paging and progressive observations
+The SQL can be hand-fused into one conditional aggregate; this fixture tests reuse
+inside a repeated-scan plan, not optimal SQL. Each new job rechecks stored bytes.
+Cache hits return captured verified bytes; corruption is never hidden across jobs.
+[Raw rescans](../benchmarks/performance/alpha7/rescan.json).
 
-Fixed sorted 16,384-row results; five warm-cache CLI reads per size. Each row is
-checked against the exact expected ID. This includes CLI startup; it is not an
-external-agent experiment. Schemas and quality are retained in every response.
+An additional two-million-row check stores 9,290,682 bytes in 17 parts,
+above the cache budget; retained cache peaks at 8,163,766 bytes.
+Interleaved branches share bytes here; this does not guarantee no rereads under a
+worst-case sequential access pattern. In-flight slices and codec/engine buffers
+are separate from retained cache entries. [Bound check](../benchmarks/performance/alpha7/cache-eviction.json).
 
-| Returned rows | alpha.5, ms | alpha.6, ms |
+A deliberately wide Parquet fixture has 65,536 rows, 32 seeded high-entropy Int64
+columns and 2,048-row groups. Querying two distant columns reads exact requested
+ranges rather than inter-column gaps for range batches up to 8 MiB.
+
+| Wide projection, median | alpha.6 | alpha.7 |
 |---|---:|---:|
-| 100 | 3.82 | 3.53 |
-| 1,000 | 5.15 | 3.83 |
-| 10,000 | 21.92 | 8.80 |
+| Query source bytes | 17,331,136 | **1,574,716** |
+| Query time, ms | 31.81 | 9.71 |
+| Open plus query, ms | 52.34 | 29.44 |
 
-The 10K-row page is **59.8% faster**. [Old reads](../benchmarks/performance/alpha6/paging-alpha5.json) ·
-[new reads](../benchmarks/performance/alpha6/paging-alpha6.json).
+That is 90.9% fewer query-read bytes for this layout, including query footers but
+excluding open's metadata reads. Counters are application reads, not physical
+device I/O. A pre-range prototype reads the same 17,331,136 bytes; other prototype
+changes prevent attributing its total latency difference solely to ranges.
+Managed parts still require whole-part verification. The range batch reserves
+bytes before reading; its bounded buffers are outside the engine pool.
+[Projection raw](../benchmarks/performance/alpha7/projection.json).
 
-A one-file, 16-row-group million-row aggregate remains stable: progressive first
-observation 19.93 → 19.40 ms; final completion 45.89 → 45.32 ms (five repeats).
-Ordinary final-only SQL completes in 34.96 → 34.26 ms. Progressive mode is for
-earlier complete-prefix evidence; it does not turn a prefix into an estimate.
-[Old progressive runs](../benchmarks/performance/alpha6/progressive-alpha5.json) ·
-[new progressive runs](../benchmarks/performance/alpha6/progressive-alpha6.json).
+A separate 131,072-row, eight-column high-entropy fixture materializes and runs
+three saved aggregates in **142.14 → 97.90 ms** (seven alternating runs).
+Python supplies exact integer sums; SQL casts to Decimal(38,0). Ordinary Int64/
+UInt64 SUM retains the engine's overflow semantics; wire precision does not widen
+an accumulator. [Raw](../benchmarks/performance/alpha7/entropy-reuse.json).
 
-## Above-pool execution and memory
+## Paging, progressive work and resources
 
-A separate real coordinator/worker sorts 1,048,576 rows from a 228,139,988-byte
-Parquet input with a **32 MiB engine pool**. Both versions spill 26 times, then
-export every ID; Python independently specifies the entire sort order and DuckDB
-reads the export. This is one resource-verification run per version, not a repeated
-latency study. The text payload contains repeated content and compresses well;
-see the high-entropy workload for a different case.
+Twenty-one alternating persistent-session reads per size, transfer/JSON parsing
+included, materialization and startup excluded; all returned IDs checked exactly.
 
-| Resource run | alpha.5 | alpha.6 |
+| Page rows, median ms | alpha.6 | alpha.7 |
 |---|---:|---:|
-| Sort wall time, ms | 1,300.86 | 886.18 |
-| Export wall time, ms | 319.06 | 256.07 |
-| Stored bytes | 215,294,080 | 12,964,230 |
-| Parts | 64 | 43 |
-| Largest encoded part, bytes | 3,363,970 | 305,114 |
-| Sampled worker peak RSS, bytes | 141,246,464 | 139,689,984 |
+| 100 | 0.374 | 0.346 |
+| 1,000 | 0.734 | 0.700 |
+| 10,000 | 5.505 | 5.419 |
 
-RSS is sampled with `ps`, not a hard bound or an exact peak. Engine pools exclude
-codec buffers, IPC arrays, the writer buffer and the existing single verified-part
-cache. No whole-result memory cache was added. [Old resource run](../benchmarks/performance/alpha6/resources-alpha5.json) ·
-[new resource run](../benchmarks/performance/alpha6/resources-alpha6.json).
+Reusing the coordinator's SQLite connection removes a small fixed inline-read
+cost; 10K pages are essentially unchanged. Earlier sequential CLI samples varied
+and did not show a paging gain; they are retained in the experiment inventory.
+[Persistent raw and P95](../benchmarks/performance/alpha7/paging-matrix.json).
 
-## Real external-agent paired pilot
+A one-file, 16-row-group million-row progressive aggregate (five runs/version,
+measured in separate batches) reaches its first prefix in
+20.63 → **7.37 ms** and final completion in
+46.65 → **22.48 ms**. Ordinary final-only SQL completes in
+35.12 → 19.93 ms. Checkpoint coalescing is unchanged at 50 ms;
+actual counts depend on completion speed, so these are not equal checkpoint-frequency
+runs. Every observed prefix and final result matches Python arithmetic.
+[Old](../benchmarks/performance/alpha7/progressive-alpha6.json) ·
+[new](../benchmarks/performance/alpha7/progressive-alpha7.json).
 
-The same requested model/settings as alpha.5 were used: GPT-6 Astra, xhigh,
-Codex CLI 0.154.0-alpha.6.2, 16,391 rows, two tasks, three repeats per backend.
-All **12 planned trials passed** the independent integer-cent/large-ID oracle.
-Both arms retain a Python environment and may compose calls/materialize results.
-RowTrail receives the published minimal bootstrap and optional helpers; DuckDB
-remains a persistent connection. There are no internal product model calls.
+One resource check per version sorts 1,048,576 rows from 228,139,988 Parquet bytes
+under a **32 MiB engine pool** and exports every ID, checked against a Python sort.
+Alpha.7 spills 26 times, produces 43 parts (largest 305,114 bytes), and samples
+worker RSS of 144,801,792 bytes. Sort/export take 929.08 / 263.47 ms.
+The pool is **not an RSS limit**; sampling can miss the true peak. These are resource
+checks, not repeated latency evidence. [Old](../benchmarks/performance/alpha7/resources-alpha6.json) ·
+[new](../benchmarks/performance/alpha7/resources-alpha7.json).
 
-| Task / arm | Correct | Total seconds | Code calls | Backend code ms | Bridge bytes | Input tokens (cached subset) |
-|---|---:|---:|---:|---:|---:|---:|
-| explore / rowtrail | 3/3 | 72.94 | 5 | 57.70 | 6,945 | 116,608 (96,384) |
-| explore / duckdb | 3/3 | 52.90 | 3 | 10.27 | 900 | 75,981 (58,880) |
-| handoff / rowtrail | 3/3 | 62.07 | 5 | 36.48 | 7,893 | 117,217 (97,280) |
-| handoff / duckdb | 3/3 | 37.30 | 3 | 6.39 | 623 | 74,487 (58,112) |
+## Agent workflow evidence
 
-These are medians. Input usage is cumulative across the turn, includes cached
-input and CLI system/tool scaffolding, and is not peak context. Bridge bytes
-include schemas printed through `rt.schema`; separate USAGE.md reads and CLI
-scaffolding are excluded. The alpha.5 harness used a separate static schema file,
-so the bridge byte totals are not directly comparable between versions.
+The locally printable stdlib client accepts responses as bindings and handles
+mechanical waits, preserves full quality/errors, never silently replays a mutation,
+and never implicitly collects a table. `rows()` only accepts complete exact final
+untruncated observations. [Minimal bootstrap](agent-quickstart.md).
 
-RowTrail exploration reads the original source in **2 / 2 / 3 jobs**; DuckDB scans
-it in **3 / 2 / 3 statements**, with **49,173 / 32,782 / 49,173 scanned rows**.
-All handoff trials reuse the saved subset: RowTrail original bytes are zero, and
-DuckDB has zero source scan rows and zero original-source query statements.
-DuckDB physical byte counts remain unmeasured; metadata-only reads are distinct
-from scanned rows. Every successful recorded DuckDB statement has a profile.
-The profile guard covers scalar fetches, metadata-only counts, materialization,
-mixed fetch methods and catalog queries without whole-result collection.
+A manual primary-agent walkthrough used the printed client on 20,003 generated
+CSV orders: discovered the actual schema, found the highest refund-value region,
+saved 1,531 rows with a zero-row observation, and returned three channel totals.
+A fresh process recovered the subset from the catalog and computed exact count,
+large-ID minimum and Decimal sum, reading zero original bytes. Python independently
+checked the values. **It still needed three metadata-only schema inspections to
+identify the opaque catalog result.** Better result descriptions and bounded schema
+hints are a useful next improvement. [Walkthrough record](../benchmarks/performance/alpha7/dogfood.json).
 
-RowTrail remains slower and uses more cumulative input tokens than persistent
-DuckDB in both tasks. Against the historical alpha.5 pilot, exploration changes
-from 96.63 to 72.94 seconds and 181,085 to 116,608 input tokens; handoff changes
-from 55.49 to 62.07 seconds and 113,009 to 117,217 input tokens. Thus the shorter
-bootstrap did not improve both tasks. The prompt/bootstrap and profiling changed,
-and model/network variation is substantial: this is an observational comparison,
-not proof that an engine or documentation change caused a model-latency reduction.
-Further agent efficiency work needs fewer discovery/decision turns and more
-representative tasks; these small samples do not establish adoption or superiority.
+This is manual use, **not a new paired agent evaluation**. The latest actual paired
+pilot remains [alpha.6's twelve trials](releases/alpha6-verification.md#real-external-agent-paired-pilot):
+all correct, but RowTrail slower and using more cumulative input tokens than
+persistent DuckDB. Backend gains and helpers do not prove overall agent latency
+or token gains. The product continues to make zero model calls.
 
-[All trials, responses, errors and usage](../benchmarks/performance/alpha6/agent-pair/report.json) ·
-[Summary and conditions](../benchmarks/performance/alpha6/agent-pair/summary.json) ·
-[Prompts and setup](../benchmarks/performance/alpha6/agent-pair/README.md).
-There were no selective trial retries. Raw reasoning stays local; the public
-report retains non-reasoning tool/answer events. The optional harness uses
-[documented JSON event/output-schema execution](https://learn.chatgpt.com/docs/non-interactive-mode).
+## Rejected experiments
+
+Higher query parallelism improved one million-row workflow but failed the same
+32 MiB sort; adaptive startup polling had inconsistent benefit. Neither ships.
+The [inventory](../benchmarks/performance/alpha7/experiments/README.md) retains
+failed, negative and intermediate trials, including binary hashes. Do not replace
+final measurements with the fastest candidate sample.
 
 ## Native distribution
 
-[Linux x86_64 and macOS arm64 native CI](https://github.com/adam2go/rowtrail/actions/runs/35628707262) passed at source commit
-`ab5df279e579925640178f5c25e5b5374da7d336`. Downloaded archives match their SHA-256/size manifests; extracted binary
-hashes match the tested binaries. License contents and all distribution budgets
-were checked independently. The actual macOS package was installed and passed
-all eight alpha.6 scenarios, exact large-integer SQL, row-group exploration and
-fresh-session workspace handoff.
-
-[Published alpha.5 ↔ native alpha.6 compatibility](../benchmarks/performance/alpha6/storage-compat-native-macos.json)
-checks plain/compressed parts, fixed partial revisions and derived SQL in both
-directions. Metadata remains schema 5.
-
-| Platform | Compressed bytes | CLI bytes | Runtime bytes |
-|---|---:|---:|---:|
-| macOS arm64 | 19,161,256 | 3,700,672 | 99,984,576 |
-| Linux x86_64 | 22,416,688 | 4,134,792 | 114,718,208 |
-
-Budgets remain 30,000,000 / 4,500,000 / 125,000,000 bytes respectively. No external
-package was added; 299 dependency declarations/notices remain. Apache-2.0 and
-upstream notices stay in every archive. Linux requires glibc 2.39+. Packages are
-unsigned engineering previews. [Exact provenance and platform resource runs](release-verification.json) ·
-[Native check inventory](../benchmarks/performance/alpha6/verification.json).
-The release tag includes later documentation/measurement updates; executable
-sources, installer and CI checks match the verified source commit. Bundled docs
-are the CI-time candidate snapshot; the repository has the completed report.
-
-## Reproduce
-
-```sh
-scripts/cargo-local.sh build --release --locked
-scripts/cargo-local.sh clippy --locked --workspace --all-targets -- -D warnings
-scripts/cargo-local.sh test --release --locked --workspace
-python3 tests/integration/alpha6.py
-python3 scripts/storage_compat_probe.py /path/to/alpha5/bin target/release
-python3 -m venv benchmarks/local/venv
-benchmarks/local/venv/bin/pip install duckdb==1.5.5
-benchmarks/local/venv/bin/python benchmarks/compare_matrix.py --variant alpha5=/path/to/alpha5/bin --variant alpha6=target/release --rows 1048576 --repeats 7 --output benchmarks/local/exploration.json
-benchmarks/local/venv/bin/python benchmarks/reuse.py --variant alpha5=/path/to/alpha5/bin --variant alpha6=target/release --repeats 7
-python3 benchmarks/paging.py
-benchmarks/local/venv/bin/python benchmarks/resources.py
-benchmarks/local/venv/bin/python tests/benchmark_harness.py
-benchmarks/local/venv/bin/python benchmarks/agent_pair.py --model gpt-6-astra --effort xhigh --repeats 3 --bootstrap compact --output benchmarks/local/new-agent-pair
-python3 scripts/package.py
-python3 scripts/install_probe.py
-```
-
-The agent pilot requires an authenticated external Codex CLI and records every
-planned trial without silent retries. It is optional and excluded from native CI.
-The product requires neither a model account nor Python/DuckDB.
+Native alpha.7 CI and independent archive verification are pending for this source
+snapshot. Final release provenance and exact sizes will be recorded here before
+publishing. Budgets remain 30,000,000 archive bytes, 4,500,000 CLI bytes and
+125,000,000 runtime bytes. Supported builds are macOS arm64 and Ubuntu 24.04
+x86_64 (glibc 2.39+); Windows is not supported. Local timings above use local
+release builds; downloaded CI binaries have separately recorded hashes.

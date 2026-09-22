@@ -1,6 +1,6 @@
 """Verify one-way metadata upgrades using actual old and new binaries."""
 import argparse,json,os,pathlib,signal,sqlite3,subprocess,tempfile,time
-p=argparse.ArgumentParser();p.add_argument('old_bin_dir');p.add_argument('new_bin_dir');p.add_argument('--old-schema',default='3');p.add_argument('--new-schema',default='5');p.add_argument('--report',default='benchmarks/local/upgrade.json');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('old_bin_dir');p.add_argument('new_bin_dir');p.add_argument('--old-schema',default='3');p.add_argument('--new-schema',default='6');p.add_argument('--report',default='benchmarks/local/upgrade.json');a=p.parse_args()
 old=pathlib.Path(a.old_bin_dir).resolve();new=pathlib.Path(a.new_bin_dir).resolve();pids=[]
 with tempfile.TemporaryDirectory(prefix='rowtrail-upgrade-') as td:
  ws=pathlib.Path(td)/'workspace'
@@ -28,14 +28,16 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-upgrade-') as td:
    while analysis['job']['state']=='running':analysis=call(old,'control',{'action':'wait','ref':analysis['job']['id'],'wait_ms':1000})
    assert analysis['job']['state']=='completed',analysis
    partial={'result_ref':analysis['job']['result_ref'],'revision':1}
-   assert call(old,'read',partial)['rows']==[['8']]
+   old_checkpoint=call(old,'read',partial)
+   assert old_checkpoint['quality']['coverage']['kind']=='partial'
+   assert 0<int(old_checkpoint['rows'][0][0])<=8
   old_pid=call(old,'doctor',{})['coordinator_pid'];pids.append(old_pid);stop(old_pid);pids.remove(old_pid)
   assert call(new,'read',ref)['rows']==[['9007199254740993']]
   with sqlite3.connect(ws/'metadata.sqlite') as c:assert c.execute("SELECT value FROM meta WHERE key='schema_version'").fetchone()[0]==a.new_schema
   if partial:
    checkpoint=call(new,'read',partial)
-   assert checkpoint['rows']==[['8']] and checkpoint['quality']['coverage']['kind']=='partial'
-   assert checkpoint['quality']['coverage']['input_coverage']['unit']=='manifest_file'
+   assert checkpoint['rows']==old_checkpoint['rows'] and checkpoint['quality']==old_checkpoint['quality']
+   assert checkpoint['quality']['coverage']['input_coverage']['unit']==('parquet_row_group' if int(a.old_schema)>=5 else 'manifest_file')
 
   fresh=call(new,'query',{'bindings':{'t':ref},'sql':'SELECT n+1 AS n FROM t','execution':{'wait_ms':1000}})
   assert fresh['job']['state']=='completed'

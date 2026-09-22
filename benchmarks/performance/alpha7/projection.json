@@ -1,0 +1,688 @@
+{
+  "status": "passed",
+  "kind": "wide Parquet, narrow projection, separated column ranges; no model calls",
+  "rows": 65536,
+  "columns": 32,
+  "row_group_size": 2048,
+  "repeats": 7,
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "fixture_sha256": "a7b1e07f099d8afba35315ae1eb026bffebefd7505e543194dc43e1d84f3d493",
+  "fixture_bytes": 16889514,
+  "binary_sha256": {
+    "alpha6": {
+      "rowtrail": "e473127f4a555b70b85beb17ca6da7a484da44b1bfcd8e162b83e97b461acd2a",
+      "rowtrail-runtime": "978b6319b74592e4514eec3efe2a7f2fe657759366e01119c1b6ca9018e57132"
+    },
+    "before_ranges": {
+      "rowtrail": "e473127f4a555b70b85beb17ca6da7a484da44b1bfcd8e162b83e97b461acd2a",
+      "rowtrail-runtime": "e7e78570758d3541455b142e411d4b9dd3e39867f47716a030405665bab85ae3"
+    },
+    "alpha7": {
+      "rowtrail": "c4b5522684fcbbb000e077232441ce8f3a6b6c410bb9379052dd144cbec7f503",
+      "rowtrail-runtime": "532c3946627f216324913f090b1ded4adbdf00cd832114142e669e542da15b31"
+    }
+  },
+  "sql": "SELECT SUM(CAST(c0 AS DECIMAL(38,0))),SUM(CAST(c31 AS DECIMAL(38,0))),MAX(c0),MIN(c31) FROM t",
+  "expected": [
+    [
+      "302757077950474226138632",
+      "303054596476298376825007",
+      "9223304284546371895",
+      "438863510949676"
+    ]
+  ],
+  "records": [
+    {
+      "variant": "alpha6",
+      "repeat": 0,
+      "total_ms": 55.13716675341129,
+      "open_ms": 21.09516691416502,
+      "query_ms": 34.03691714629531,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.4659999999999997,
+        "result_write_ms": 7.868542000000001,
+        "commit_ack_ms": 9.5865,
+        "elapsed_ms": 25.762333,
+        "worker_pid": 71052,
+        "publication_ms": 9.531375,
+        "result_parts": 1,
+        "worker_elapsed_ms": 29.449541999999997,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "before_ranges",
+      "repeat": 0,
+      "total_ms": 170.77024979516864,
+      "open_ms": 62.52891710028052,
+      "query_ms": 108.23612473905087,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 84.693375,
+        "result_write_ms": 0.606126,
+        "commit_ack_ms": 0.234375,
+        "elapsed_ms": 97.031333,
+        "worker_pid": 71059,
+        "publication_ms": 0.194625,
+        "result_parts": 1,
+        "worker_elapsed_ms": 103.387958,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 0,
+      "total_ms": 29.631834011524916,
+      "open_ms": 20.172833930701017,
+      "query_ms": 9.454666171222925,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.207041,
+        "result_write_ms": 0.034042,
+        "commit_ack_ms": 0.162333,
+        "elapsed_ms": 4.297916,
+        "worker_pid": 71062,
+        "publication_ms": 0.132917,
+        "result_parts": 1,
+        "worker_elapsed_ms": 7.940083,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 1,
+      "total_ms": 29.33241706341505,
+      "open_ms": 19.504624884575605,
+      "query_ms": 9.822249878197908,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.2070000000000003,
+        "result_write_ms": 0.031167,
+        "commit_ack_ms": 0.192708,
+        "elapsed_ms": 4.244999999999999,
+        "worker_pid": 71065,
+        "publication_ms": 0.156958,
+        "result_parts": 1,
+        "worker_elapsed_ms": 8.233042,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "before_ranges",
+      "repeat": 1,
+      "total_ms": 33.59066694974899,
+      "open_ms": 19.98449955135584,
+      "query_ms": 13.601916842162609,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.247125,
+        "result_write_ms": 0.041042,
+        "commit_ack_ms": 0.228167,
+        "elapsed_ms": 8.161208,
+        "worker_pid": 71068,
+        "publication_ms": 0.186167,
+        "result_parts": 1,
+        "worker_elapsed_ms": 11.90925,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha6",
+      "repeat": 1,
+      "total_ms": 53.12999989837408,
+      "open_ms": 20.6752079539001,
+      "query_ms": 32.45095815509558,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.2119169999999997,
+        "result_write_ms": 6.131417,
+        "commit_ack_ms": 9.133542,
+        "elapsed_ms": 23.105667,
+        "worker_pid": 71071,
+        "publication_ms": 9.092625,
+        "result_parts": 1,
+        "worker_elapsed_ms": 26.823917,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha6",
+      "repeat": 2,
+      "total_ms": 47.852374613285065,
+      "open_ms": 20.777917001396418,
+      "query_ms": 27.06958306953311,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.329916,
+        "result_write_ms": 5.0662080000000005,
+        "commit_ack_ms": 8.162542,
+        "elapsed_ms": 21.114833,
+        "worker_pid": 71074,
+        "publication_ms": 8.112875,
+        "result_parts": 1,
+        "worker_elapsed_ms": 25.335375,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "before_ranges",
+      "repeat": 2,
+      "total_ms": 34.85791711136699,
+      "open_ms": 20.66537505015731,
+      "query_ms": 14.188500121235847,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.7433750000000003,
+        "result_write_ms": 0.034917,
+        "commit_ack_ms": 0.212083,
+        "elapsed_ms": 8.474709,
+        "worker_pid": 71077,
+        "publication_ms": 0.171,
+        "result_parts": 1,
+        "worker_elapsed_ms": 12.350458,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 2,
+      "total_ms": 28.627249877899885,
+      "open_ms": 18.91445880755782,
+      "query_ms": 9.708959143608809,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.238458,
+        "result_write_ms": 0.033166,
+        "commit_ack_ms": 0.19125,
+        "elapsed_ms": 4.4142920000000005,
+        "worker_pid": 71080,
+        "publication_ms": 0.16025,
+        "result_parts": 1,
+        "worker_elapsed_ms": 8.113584,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 3,
+      "total_ms": 29.489915817975998,
+      "open_ms": 19.896207842975855,
+      "query_ms": 9.589958004653454,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.222333,
+        "result_write_ms": 0.033542,
+        "commit_ack_ms": 0.148042,
+        "elapsed_ms": 4.375541,
+        "worker_pid": 71083,
+        "publication_ms": 0.125666,
+        "result_parts": 1,
+        "worker_elapsed_ms": 8.066458,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "before_ranges",
+      "repeat": 3,
+      "total_ms": 34.00012478232384,
+      "open_ms": 20.087957847863436,
+      "query_ms": 13.90762533992529,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.279667,
+        "result_write_ms": 0.036708,
+        "commit_ack_ms": 0.216792,
+        "elapsed_ms": 8.278875,
+        "worker_pid": 71086,
+        "publication_ms": 0.16775,
+        "result_parts": 1,
+        "worker_elapsed_ms": 12.115958,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha6",
+      "repeat": 3,
+      "total_ms": 52.61449981480837,
+      "open_ms": 20.80337470397353,
+      "query_ms": 31.80729178711772,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.218333,
+        "result_write_ms": 6.890291,
+        "commit_ack_ms": 9.6235,
+        "elapsed_ms": 24.457791,
+        "worker_pid": 71089,
+        "publication_ms": 9.587583,
+        "result_parts": 1,
+        "worker_elapsed_ms": 28.103917,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha6",
+      "repeat": 4,
+      "total_ms": 50.24445801973343,
+      "open_ms": 20.57962492108345,
+      "query_ms": 29.66050012037158,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.296208,
+        "result_write_ms": 5.644208,
+        "commit_ack_ms": 9.893042,
+        "elapsed_ms": 23.327208,
+        "worker_pid": 71092,
+        "publication_ms": 9.850666,
+        "result_parts": 1,
+        "worker_elapsed_ms": 27.699083,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "before_ranges",
+      "repeat": 4,
+      "total_ms": 34.34158302843571,
+      "open_ms": 20.648458041250706,
+      "query_ms": 13.68908304721117,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.392292,
+        "result_write_ms": 0.034751,
+        "commit_ack_ms": 0.182042,
+        "elapsed_ms": 7.842417000000001,
+        "worker_pid": 71095,
+        "publication_ms": 0.151459,
+        "result_parts": 1,
+        "worker_elapsed_ms": 11.71025,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 4,
+      "total_ms": 29.443124774843454,
+      "open_ms": 19.840541761368513,
+      "query_ms": 9.598792064934969,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.1795,
+        "result_write_ms": 0.031792,
+        "commit_ack_ms": 0.186833,
+        "elapsed_ms": 4.287208,
+        "worker_pid": 71098,
+        "publication_ms": 0.156875,
+        "result_parts": 1,
+        "worker_elapsed_ms": 8.02725,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 5,
+      "total_ms": 28.80716696381569,
+      "open_ms": 18.924542237073183,
+      "query_ms": 9.87733295187354,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.181041,
+        "result_write_ms": 0.031958,
+        "commit_ack_ms": 0.228833,
+        "elapsed_ms": 4.344416,
+        "worker_pid": 71101,
+        "publication_ms": 0.198333,
+        "result_parts": 1,
+        "worker_elapsed_ms": 8.088415999999999,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "before_ranges",
+      "repeat": 5,
+      "total_ms": 33.27500028535724,
+      "open_ms": 20.286708138883114,
+      "query_ms": 12.983791064471006,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.222417,
+        "result_write_ms": 0.041249999999999995,
+        "commit_ack_ms": 0.222666,
+        "elapsed_ms": 7.419667,
+        "worker_pid": 71104,
+        "publication_ms": 0.172209,
+        "result_parts": 1,
+        "worker_elapsed_ms": 11.182708,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha6",
+      "repeat": 5,
+      "total_ms": 52.34116688370705,
+      "open_ms": 20.483333617448807,
+      "query_ms": 31.85416664928198,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.247167,
+        "result_write_ms": 7.323458,
+        "commit_ack_ms": 9.360125,
+        "elapsed_ms": 24.3265,
+        "worker_pid": 71107,
+        "publication_ms": 9.323458,
+        "result_parts": 1,
+        "worker_elapsed_ms": 30.04325,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha6",
+      "repeat": 6,
+      "total_ms": 49.77879161015153,
+      "open_ms": 19.105332903563976,
+      "query_ms": 30.668041203171015,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.343417,
+        "result_write_ms": 6.484791,
+        "commit_ack_ms": 9.403334,
+        "elapsed_ms": 23.981167000000003,
+        "worker_pid": 71110,
+        "publication_ms": 9.352958,
+        "result_parts": 1,
+        "worker_elapsed_ms": 28.69175,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "before_ranges",
+      "repeat": 6,
+      "total_ms": 38.32854190841317,
+      "open_ms": 20.727749913930893,
+      "query_ms": 17.5951668061316,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 3.610792,
+        "result_write_ms": 0.040458999999999995,
+        "commit_ack_ms": 0.345667,
+        "elapsed_ms": 11.201292,
+        "worker_pid": 71113,
+        "publication_ms": 0.291333,
+        "result_parts": 1,
+        "worker_elapsed_ms": 15.128666,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 6,
+      "total_ms": 30.8680422604084,
+      "open_ms": 20.41475009173155,
+      "query_ms": 10.447666980326176,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.284042,
+        "result_write_ms": 0.033666,
+        "commit_ack_ms": 0.234041,
+        "elapsed_ms": 4.54025,
+        "worker_pid": 71116,
+        "publication_ms": 0.202166,
+        "result_parts": 1,
+        "worker_elapsed_ms": 8.677624999999999,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    }
+  ],
+  "summary": {
+    "alpha6": {
+      "total_ms": 52.34116688370705,
+      "query_ms": 31.80729178711772,
+      "source_read_bytes": 17331136
+    },
+    "before_ranges": {
+      "total_ms": 34.34158302843571,
+      "query_ms": 13.90762533992529,
+      "source_read_bytes": 17331136
+    },
+    "alpha7": {
+      "total_ms": 29.443124774843454,
+      "query_ms": 9.708959143608809,
+      "source_read_bytes": 1574716
+    }
+  },
+  "limitations": [
+    "A deliberately wide, small-row-group layout exposes coalesced gap reads; gains depend on layout.",
+    "OS cache not flushed; serial alternating order, same frozen bytes and fresh workspaces.",
+    "Encoded read bytes include query-time footer reads, not open-time metadata or physical device I/O."
+  ]
+}

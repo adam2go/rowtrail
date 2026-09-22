@@ -14,39 +14,25 @@ parser.add_argument("--rowtrail", default="rowtrail")
 args = parser.parse_args()
 
 
-def calculate(bindings, sql):
-    result = call("query", {"bindings": bindings, "sql": sql,
-                           "execution": {"wait_ms": 1000, "run_timeout_ms": 30000}})
-    while result["job"]["state"] in ("queued", "running", "stopping"):
-        result = call("control", {"action": "wait", "ref": result["job"]["id"],
-                                  "wait_ms": 1000})
-    if result["job"]["state"] != "completed":
-        raise RuntimeError(result["job"])
-    reference = {"result_ref": result["job"]["result_ref"],
-                 "revision": result["readable_revision"]}
-    return reference, result["job"]["metrics"]
-
-
 with RowTrail(args.rowtrail, args.workspace) as client:
-    call = client.call
-    opened = call("open", {"source": args.source})
-    source = {"dataset_ref": opened["dataset_ref"], "manifest_ref": opened["manifest_ref"]}
-    saved, materialization = calculate(
-        {"original": source},
+    source = client.open(args.source)
+    saved = client.query(
         "SELECT id, region, amount FROM original WHERE amount IS NOT NULL",
+        {"original": source},
+        execution={"output": {"max_rows": 0, "max_bytes": 8192}},
     )
-    grouped, group_metrics = calculate(
-        {"saved": saved},
+    grouped = client.query(
         "SELECT region, SUM(amount) AS total FROM saved GROUP BY region ORDER BY region NULLS LAST",
+        {"saved": saved},
     )
-    positive, count_metrics = calculate(
-        {"saved": saved}, "SELECT COUNT(*) AS positive_rows FROM saved WHERE amount > 0",
+    positive = client.query(
+        "SELECT COUNT(*) AS positive_rows FROM saved WHERE amount > 0", {"saved": saved},
     )
     print(json.dumps({
-        "source": source,
-        "saved_result": saved,
-        "region_totals": call("read", {**grouped, "max_rows": 10}),
-        "positive_count": call("read", positive),
-        "materialization_io": materialization["io"],
-        "branch_io": [group_metrics["io"], count_metrics["io"]],
+        "source": client.binding(source),
+        "saved_result": client.binding(saved),
+        "region_totals": client.observe(grouped),
+        "positive_count": client.observe(positive),
+        "materialization_io": saved["job"]["metrics"]["io"],
+        "branch_io": [r["job"]["metrics"]["io"] for r in (grouped, positive)],
     }, ensure_ascii=False, indent=2))

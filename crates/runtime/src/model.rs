@@ -40,6 +40,9 @@ pub struct Part {
     pub rows: usize,
     pub checksum: String,
     pub schema: Schema,
+    /// Hex encoded IPC, bounded to INLINE_LIMIT decoded bytes.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub inline_data: Option<String>,
     #[serde(default)]
     pub checkpoint: Option<Checkpoint>,
 }

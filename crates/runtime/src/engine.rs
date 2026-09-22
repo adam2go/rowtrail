@@ -71,7 +71,14 @@ pub async fn plan(
         let paths = input
             .files
             .iter()
-            .map(|f| ListingTableUrl::parse(f.path.to_str().unwrap()))
+            .map(|f| {
+                let url = url::Url::from_file_path(&f.path).map_err(|_| {
+                    datafusion::common::DataFusionError::Plan("invalid frozen file path".into())
+                })?;
+                // Frozen paths are literal file names, including [, *, # and ?.
+                // Inline result paths are virtual and must not require stat().
+                ListingTableUrl::try_new(url, None)
+            })
             .collect::<datafusion::common::Result<Vec<_>>>()?;
         let options = ListingOptions::new(format).with_file_extension("");
         let provider = ListingTable::try_new(

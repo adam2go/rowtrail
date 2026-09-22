@@ -52,7 +52,15 @@ objects and accepted jobs persist independently of the connection.
   the client never automatically replays a potentially accepted mutation.
 
 The Python [bridge](../examples/session_client.py) and [workflow](../examples/explore.py)
-need only the standard library and are optional. The bridge also has `schema(method)`,
+need only the standard library and are optional. The installed CLI prints the
+same bridge with `rowtrail python-client > rowtrail_client.py`; no network or
+package installation is needed. `open(source)` and `query(sql, bindings)` retain
+full responses and accept previous responses or catalog items as fixed bindings.
+`query` submits once, waits mechanically, and fetches one bounded page only when
+needed. It raises `JobNotCompleted` with the full `.response` on failure or a
+helper deadline. `rows(response)` requires a valid, exact, final, complete,
+untruncated included observation; it does not automatically paginate. For partial
+or asynchronous work use `call`, `finish`, `observe`, and explicit bounded reads. The bridge also has `schema(method)`,
 `finish(response, timeout=30)` and `observe(response)`: discover locally, wait
 mechanically, and print a compact job view while keeping the full response in
 code. Always check the returned state; a helper deadline does not cancel a job.
@@ -159,11 +167,15 @@ set `fragment_unit:"manifest_file", checkpoint_interval_ms:0`.
 Details: [row-group design](decisions/005-row-groups-and-reconnection.md) and
 [arithmetic contract](decisions/004-progressive-file-aggregation.md).
 
-Metadata upgrades once from schema 3/4 to 5. Existing fixed revisions remain
-readable, but runtimes before alpha.5 refuse an upgraded workspace. Back up a workspace
-before upgrading if you need to keep using the old runtime.
+Alpha.7 upgrades metadata once from schema 3/4/5 to 6. Existing fixed revisions
+remain readable. Alpha.6 and earlier runtimes refuse an upgraded store: retain a
+workspace backup if you need to keep using an older runtime.
 
-Alpha.6 keeps metadata schema 5 and reads existing plain IPC parts. Larger new
-result parts can use Zstd IPC compression; alpha.5 already includes its decoder.
-Stored byte/scan budgets count encoded bytes. Verification still reads whole
-parts, so projection does not eliminate integrity I/O.
+Arrow IPC parts up to 128 KiB of encoded data now live in SQLite, committed with
+their descriptors; larger parts retain the durable file path and optional Zstd
+compression. Both count against result and managed-data quotas. GC deletes inline
+BLOBs but SQLite may reuse freed pages without shrinking its physical file.
+Database/WAL overhead remains outside the logical quota. Verification reads whole
+parts, so projection does not eliminate integrity I/O. The existing 8 MiB
+verified cache now holds multiple parts (up to 128) within one job. New jobs
+reverify bytes; there is no cross-job cache that bypasses corruption detection.

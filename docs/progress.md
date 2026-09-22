@@ -2,10 +2,38 @@
 
 [Home](../README.md) · [Verification and measurements](verification.md)
 
-Updated 2026-09-22 for **0.1.0-alpha.6**. This iteration
-reduces result storage/verification I/O and page construction cost while keeping
-durable publication, bounded buffers and explicit agent contracts.
+Updated 2026-09-22 for **0.1.0-alpha.7**. This iteration makes durable
+small observations cheaper, avoids unnecessary reads and simplifies agent code.
 It does not claim completion of all M2B–M6 roadmap work.
+
+## Alpha.7
+
+- Arrow parts up to 128 KiB store their checked bytes and descriptor atomically
+  in SQLite FULL; large parts keep file durability. A bounded staging buffer spills
+  once. Inline bytes count against quotas and disappear with dependency-safe GC.
+- One-way schema 6 upgrade preserves old fixed results and partial checkpoints;
+  old runtimes refuse an upgraded workspace. Keep a pre-upgrade copy for rollback.
+- Exact bounded Parquet ranges avoid reading gaps between projected columns.
+  A job-local LRU retains up to 8 MiB / 128 verified parts, with hit/miss/peak
+  counters; every new job revalidates. No cross-job result cache was added.
+- Native responses include ready-to-use bindings. The optional locally printable
+  stdlib client adds open/query/binding/rows, mechanical waiting without replay,
+  and guards against treating partial/truncated observations as complete answers.
+- Fifteen new integration scenarios; 88 total. Eight Rust tests include twelve
+  publication-crash cases and a deterministic broken ACK pipe. Faster publication
+  exposed a worker-loss classification race; the fix preserves committed revisions.
+- Seven alternating local runs: 16K exploration 110.33 → 36.15 ms; 1M exploration
+  296.09 → 239.95 ms. Warm scalar median 18.12 → 1.19 ms. Wide two-column projection
+  reads 17.33 → 1.57 MB. Final reports retain all samples and binary hashes.
+- Higher default parallelism was rejected after failing the 32 MiB sort. Adaptive
+  startup polling had inconsistent benefit and was reverted. No new dependency.
+- A primary-agent walkthrough uses printed helpers, saves without exposing rows,
+  and reconnects with zero original reads. It reveals remaining catalog discovery
+  work; no new fair paired-agent latency/token advantage is claimed.
+
+[Design](decisions/007-agent-workflow-performance.md) · [Measurements](verification.md).
+Native release verification is pending for this source snapshot; final archive
+sizes and provenance will be recorded before publication.
 
 ## Alpha.6
 
@@ -30,11 +58,11 @@ It does not claim completion of all M2B–M6 roadmap work.
   All 12 updated paired tasks pass, but RowTrail still uses more time/tokens than
   persistent DuckDB; shorter setup improves the exploration sample, not handoff.
 
-[Design](decisions/006-result-performance.md) · [Measurements](verification.md).
+[Design](decisions/006-result-performance.md) · [Measurements](releases/alpha6-verification.md).
 Native [macOS/Linux CI](https://github.com/adam2go/rowtrail/actions/runs/35628707262) and independent artifact verification passed.
 Installed packages pass the alpha.6 scenarios and bidirectional compatibility with
 published alpha.5. Downloads are 19.16 / 22.42 MB (decimal).
-[Provenance](release-verification.json).
+[Provenance](releases/alpha6-verification.json).
 
 ## Alpha.5
 
@@ -130,6 +158,11 @@ database and HTTP dependencies. Apache-2.0, dependency notices and distribution
 size budgets remain mandatory. [Alpha.2 history](releases/alpha2-progress.md).
 
 ## Limits and remaining work
+
+- Reconnected agents still see opaque catalog result IDs and may need several
+  schema-only inspections. Bounded column/purpose hints and representative paired
+  agent tasks are the next workflow work. Query parallelism needs resource-aware
+  controls and broad low-memory verification before increasing the default.
 
 - Ordinary SQL follows DataFusion type semantics: an Int64/UInt64 SUM can wrap
   when its accumulator overflows. Cast inputs to Decimal(38,0) when a wider sum

@@ -1,0 +1,392 @@
+{
+  "kind": "manual primary-agent walkthrough; generated fixture; not an external-agent paired trial",
+  "status": "passed",
+  "rows": 20003,
+  "printed_client_sha256": "a0fba23410caa50fbb6e997fece7a7a17c397928e8ec4fcf69f045ac5b64cc4e",
+  "binary_sha256": {
+    "rowtrail": "c4b5522684fcbbb000e077232441ce8f3a6b6c410bb9379052dd144cbec7f503",
+    "rowtrail-runtime": "532c3946627f216324913f090b1ded4adbdf00cd832114142e669e542da15b31"
+  },
+  "summary": {
+    "job_id": "job_3a7b5612bb6c4f4fa2961ce6c4ef3baf",
+    "result_ref": "res_3da1cc12d96e4747bd02d126c177d689",
+    "view_ref": "vw_948aa9fcf2e7485ab165878310a257c9",
+    "scope_ref": "scope_2ad30617915c40c888f82ce7bbfb998d",
+    "job": {
+      "prepared": null,
+      "id": "job_3a7b5612bb6c4f4fa2961ce6c4ef3baf",
+      "state": "completed",
+      "phase": "completed",
+      "result_ref": "res_3da1cc12d96e4747bd02d126c177d689",
+      "scope_ref": "scope_2ad30617915c40c888f82ce7bbfb998d",
+      "readable_revision": 1,
+      "error": null,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 772437,
+          "source_read_bytes": 772437,
+          "result_read_bytes": 0,
+          "read_requests": 1,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1642,
+        "rows": 4,
+        "planning_ms": 2.77725,
+        "result_write_ms": 0.035375,
+        "commit_ack_ms": 0.193167,
+        "elapsed_ms": 5.396583,
+        "worker_pid": 71480,
+        "publication_ms": 0.162292,
+        "result_parts": 1,
+        "worker_elapsed_ms": 9.613917,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      },
+      "created_ms": 1790046123597,
+      "started_ms": 1790046123598,
+      "finished_ms": 1790046123608,
+      "stop_requested": null
+    },
+    "readable_revision": 1,
+    "observation": {
+      "result_ref": "res_3da1cc12d96e4747bd02d126c177d689",
+      "revision": 1,
+      "schema": [
+        {
+          "name": "region",
+          "type": "Utf8",
+          "nullable": true
+        },
+        {
+          "name": "orders",
+          "type": "Int64",
+          "nullable": false
+        },
+        {
+          "name": "refunds",
+          "type": "Decimal128(38, 0)",
+          "nullable": true
+        },
+        {
+          "name": "refund_cents",
+          "type": "Decimal128(38, 0)",
+          "nullable": true
+        }
+      ],
+      "rows": [
+        [
+          "west",
+          "5017",
+          "1531",
+          "390963025"
+        ],
+        [
+          "east",
+          "5046",
+          "206",
+          "54172938"
+        ],
+        [
+          "north",
+          "5010",
+          "204",
+          "53405820"
+        ],
+        [
+          "south",
+          "4930",
+          "185",
+          "42888357"
+        ]
+      ],
+      "quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "complete",
+          "scope_ref": "scope_2ad30617915c40c888f82ce7bbfb998d"
+        },
+        "final_for_request": true,
+        "source_consistency": "best_effort",
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_ee4e40efd2ae48e79b1e36a390e3aa9d",
+              "manifest_ref": "mf_a074f734e63049a0a812522262cce9d9"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete"
+            }
+          }
+        ]
+      },
+      "validity": "valid",
+      "job_state": "completed",
+      "presentation": {
+        "returned_rows": 4,
+        "has_more": false
+      },
+      "next_cursor": null,
+      "read_metrics": {
+        "checksum_bytes": 1642,
+        "part_file_bytes_opened": 0,
+        "inline_bytes_loaded": 1642
+      }
+    },
+    "binding": {
+      "result_ref": "res_3da1cc12d96e4747bd02d126c177d689",
+      "revision": 1
+    },
+    "next_actions": [
+      "query"
+    ]
+  },
+  "saved_observation_rows": 0,
+  "saved_rows": 1531,
+  "breakdown": {
+    "job_id": "job_8b35c73d4e424e159ac4df1a295a9c5d",
+    "result_ref": "res_f4d70c82df9b4d9c9be6c0ae34576399",
+    "view_ref": "vw_50ec009806414ee392efc7183d8c4fe8",
+    "scope_ref": "scope_8376c711012f43fb8a1fb6e2b4ff03eb",
+    "job": {
+      "prepared": null,
+      "id": "job_8b35c73d4e424e159ac4df1a295a9c5d",
+      "state": "completed",
+      "phase": "completed",
+      "result_ref": "res_f4d70c82df9b4d9c9be6c0ae34576399",
+      "scope_ref": "scope_8376c711012f43fb8a1fb6e2b4ff03eb",
+      "readable_revision": 1,
+      "error": null,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 12906,
+          "source_read_bytes": 0,
+          "result_read_bytes": 12906,
+          "read_requests": 2,
+          "verified_cache_hits": 1,
+          "verified_cache_misses": 1,
+          "verified_cache_peak_bytes": 12906
+        },
+        "result_write_bytes": 1074,
+        "rows": 3,
+        "planning_ms": 0.907459,
+        "result_write_ms": 0.012,
+        "commit_ack_ms": 0.12208299999999998,
+        "elapsed_ms": 1.173334,
+        "worker_pid": 71480,
+        "publication_ms": 0.100333,
+        "result_parts": 1,
+        "worker_elapsed_ms": 1.322166,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": true,
+        "plan_available": true
+      },
+      "created_ms": 1790046123613,
+      "started_ms": 1790046123613,
+      "finished_ms": 1790046123615,
+      "stop_requested": null
+    },
+    "readable_revision": 1,
+    "observation": {
+      "result_ref": "res_f4d70c82df9b4d9c9be6c0ae34576399",
+      "revision": 1,
+      "schema": [
+        {
+          "name": "channel",
+          "type": "Utf8",
+          "nullable": true
+        },
+        {
+          "name": "refund_cents",
+          "type": "Decimal128(38, 0)",
+          "nullable": true
+        }
+      ],
+      "rows": [
+        [
+          "mobile",
+          "133587947"
+        ],
+        [
+          "web",
+          "130477397"
+        ],
+        [
+          "partner",
+          "126897681"
+        ]
+      ],
+      "quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "complete",
+          "scope_ref": "scope_8376c711012f43fb8a1fb6e2b4ff03eb"
+        },
+        "final_for_request": true,
+        "source_consistency": "immutable_materialized",
+        "lineage": [
+          {
+            "binding": {
+              "result_ref": "res_4c81545e641f474f81674839807e307a",
+              "revision": 1
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_1c5bf6099a544ceca7f1c5506a5ec1c8"
+            }
+          }
+        ]
+      },
+      "validity": "valid",
+      "job_state": "completed",
+      "presentation": {
+        "returned_rows": 3,
+        "has_more": false
+      },
+      "next_cursor": null,
+      "read_metrics": {
+        "checksum_bytes": 1074,
+        "part_file_bytes_opened": 0,
+        "inline_bytes_loaded": 1074
+      }
+    },
+    "binding": {
+      "result_ref": "res_f4d70c82df9b4d9c9be6c0ae34576399",
+      "revision": 1
+    },
+    "next_actions": [
+      "query"
+    ]
+  },
+  "fresh_process_catalog_items": 3,
+  "schema_only_inspections": 3,
+  "handoff": {
+    "job_id": "job_a29e1c7572a8448eae331d38f24bccfa",
+    "result_ref": "res_33f26aa365f147a5b9dee90a98c7aed5",
+    "view_ref": "vw_f519b34b8f384921b51f97c6003c3250",
+    "scope_ref": "scope_5ac3aa2b0fca485aa28a816a07546d88",
+    "job": {
+      "prepared": null,
+      "id": "job_a29e1c7572a8448eae331d38f24bccfa",
+      "state": "completed",
+      "phase": "completed",
+      "result_ref": "res_33f26aa365f147a5b9dee90a98c7aed5",
+      "scope_ref": "scope_5ac3aa2b0fca485aa28a816a07546d88",
+      "readable_revision": 1,
+      "error": null,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 12906,
+          "source_read_bytes": 0,
+          "result_read_bytes": 12906,
+          "read_requests": 2,
+          "verified_cache_hits": 1,
+          "verified_cache_misses": 1,
+          "verified_cache_peak_bytes": 12906
+        },
+        "result_write_bytes": 1274,
+        "rows": 1,
+        "planning_ms": 2.278667,
+        "result_write_ms": 0.027541000000000003,
+        "commit_ack_ms": 0.180667,
+        "elapsed_ms": 2.6655,
+        "worker_pid": 71826,
+        "publication_ms": 0.157917,
+        "result_parts": 1,
+        "worker_elapsed_ms": 6.896542,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      },
+      "created_ms": 1790046205522,
+      "started_ms": 1790046205523,
+      "finished_ms": 1790046205530,
+      "stop_requested": null
+    },
+    "readable_revision": 1,
+    "observation": {
+      "result_ref": "res_33f26aa365f147a5b9dee90a98c7aed5",
+      "revision": 1,
+      "schema": [
+        {
+          "name": "n",
+          "type": "Int64",
+          "nullable": false
+        },
+        {
+          "name": "first_id",
+          "type": "Int64",
+          "nullable": true
+        },
+        {
+          "name": "cents",
+          "type": "Decimal128(38, 0)",
+          "nullable": true
+        }
+      ],
+      "rows": [
+        [
+          "1531",
+          "9007199254740997",
+          "390963025"
+        ]
+      ],
+      "quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "complete",
+          "scope_ref": "scope_5ac3aa2b0fca485aa28a816a07546d88"
+        },
+        "final_for_request": true,
+        "source_consistency": "immutable_materialized",
+        "lineage": [
+          {
+            "binding": {
+              "result_ref": "res_4c81545e641f474f81674839807e307a",
+              "revision": 1
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_1c5bf6099a544ceca7f1c5506a5ec1c8"
+            }
+          }
+        ]
+      },
+      "validity": "valid",
+      "job_state": "completed",
+      "presentation": {
+        "returned_rows": 1,
+        "has_more": false
+      },
+      "next_cursor": null,
+      "read_metrics": {
+        "checksum_bytes": 1274,
+        "part_file_bytes_opened": 0,
+        "inline_bytes_loaded": 1274
+      }
+    },
+    "binding": {
+      "result_ref": "res_33f26aa365f147a5b9dee90a98c7aed5",
+      "revision": 1
+    },
+    "next_actions": [
+      "query"
+    ]
+  },
+  "independent_integer_oracle": true,
+  "notes": [
+    "CSV open infers only a bounded prefix; complete SQL query validates its needed data.",
+    "Schemas discovered from real responses; no source rows printed.",
+    "Saved responses used directly as fixed bindings; bounded zero-row observation on materialization.",
+    "Fresh process finds saved table by three bounded schema inspections; opaque catalog entries still add discovery work.",
+    "No new model-vs-model timing/token comparison; no claims of general agent superiority."
+  ]
+}

@@ -54,12 +54,16 @@ impl Db {
             CREATE TABLE IF NOT EXISTS results(id TEXT PRIMARY KEY,job_id TEXT NOT NULL REFERENCES jobs(id),schema TEXT,quality TEXT NOT NULL,head INTEGER NOT NULL DEFAULT 0,validity TEXT NOT NULL DEFAULT 'valid');
             CREATE TABLE IF NOT EXISTS revisions(result_id TEXT NOT NULL REFERENCES results(id),revision INTEGER NOT NULL,cutoff INTEGER NOT NULL,rows INTEGER NOT NULL,quality TEXT NOT NULL,PRIMARY KEY(result_id,revision));
             CREATE TABLE IF NOT EXISTS parts(result_id TEXT NOT NULL REFERENCES results(id),seq INTEGER NOT NULL,path TEXT NOT NULL,rows INTEGER NOT NULL,bytes INTEGER NOT NULL,checksum TEXT NOT NULL,identity TEXT NOT NULL,PRIMARY KEY(result_id,seq));
+            CREATE TABLE IF NOT EXISTS inline_parts(result_id TEXT NOT NULL,seq INTEGER NOT NULL,data BLOB NOT NULL,PRIMARY KEY(result_id,seq),FOREIGN KEY(result_id,seq) REFERENCES parts(result_id,seq) ON DELETE CASCADE);
             CREATE TABLE IF NOT EXISTS analysis_progress(result_id TEXT PRIMARY KEY,progress TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS checkpoints(result_id TEXT NOT NULL,revision INTEGER NOT NULL,part_seq INTEGER NOT NULL,PRIMARY KEY(result_id,revision));
             CREATE TABLE IF NOT EXISTS events(seq INTEGER PRIMARY KEY AUTOINCREMENT,event_id TEXT UNIQUE NOT NULL,job_id TEXT NOT NULL,kind TEXT NOT NULL,payload TEXT NOT NULL,created INTEGER NOT NULL);
             CREATE INDEX IF NOT EXISTS events_job ON events(job_id,seq);
+            CREATE INDEX IF NOT EXISTS jobs_queue ON jobs(state,created,id);
+            CREATE INDEX IF NOT EXISTS objects_kind ON objects(kind);
             CREATE TABLE IF NOT EXISTS idempotency(key TEXT PRIMARY KEY,hash TEXT NOT NULL,response TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS deps(child TEXT NOT NULL,parent TEXT NOT NULL,PRIMARY KEY(child,parent));
+            CREATE INDEX IF NOT EXISTS deps_parent ON deps(parent,child);
             CREATE TABLE IF NOT EXISTS retention(object TEXT PRIMARY KEY,released INTEGER NOT NULL);
             CREATE TABLE IF NOT EXISTS pins(object TEXT NOT NULL,owner TEXT NOT NULL,PRIMARY KEY(object,owner));")?;
         c.execute(
@@ -67,7 +71,7 @@ impl Db {
             [id("store")],
         )?;
         c.execute(
-            "INSERT OR IGNORE INTO meta VALUES('schema_version','5')",
+            "INSERT OR IGNORE INTO meta VALUES('schema_version','6')",
             [],
         )?;
         let version: String = c.query_row(
@@ -76,15 +80,15 @@ impl Db {
             |r| r.get(0),
         )?;
         ensure!(
-            matches!(version.as_str(), "3" | "4" | "5"),
+            matches!(version.as_str(), "3" | "4" | "5" | "6"),
             "PROTOCOL_VERSION_MISMATCH: metadata schema"
         );
-        // Upgrade atomically; old runtimes must reject the new analysis contract.
-        if version != "5" {
+        // Upgrade atomically; older runtimes cannot interpret inline result parts.
+        if version != "6" {
             c.execute_batch("BEGIN IMMEDIATE;
                 UPDATE jobs SET spec=json_set(spec,'$.analysis.fragment_unit','manifest_file','$.analysis.checkpoint_interval_ms',0)
                   WHERE json_type(spec,'$.analysis')='object' AND json_type(spec,'$.analysis.fragment_unit') IS NULL;
-                UPDATE meta SET value='5' WHERE key='schema_version'; COMMIT;")?;
+                UPDATE meta SET value='6' WHERE key='schema_version'; COMMIT;")?;
         }
         let store_id = c.query_row("SELECT value FROM meta WHERE key='store_id'", [], |r| {
             r.get(0)
@@ -313,10 +317,6 @@ impl Db {
             "INVALID_ARGUMENT: invalid staging descriptor"
         );
         let dir = self.workspace.join("store").join(&spec.result_ref);
-        if part.seq == 0 {
-            std::fs::create_dir_all(&dir)?;
-            File::open(self.workspace.join("store"))?.sync_all()?;
-        }
         let saved_schema: String = tx.query_row(
             "SELECT schema FROM results WHERE id=?",
             [&spec.result_ref],
@@ -328,27 +328,70 @@ impl Db {
             "RESULT_CORRUPT: part schema differs from result schema"
         );
         let dest = dir.join(format!("{:012}.{extension}", part.seq));
-        if staging.exists() {
-            ensure!(
-                !std::fs::symlink_metadata(&staging)?
-                    .file_type()
-                    .is_symlink(),
-                "INVALID_ARGUMENT: symlink part"
-            );
-            ensure!(
-                std::fs::metadata(&staging)?.len() == part.bytes,
-                "RESULT_CORRUPT: size mismatch"
-            );
-            std::fs::rename(&staging, &dest)?;
-            #[cfg(test)]
-            crate::publication_tests::fault("after_part_rename");
-            File::open(&dir)?.sync_all()?;
+        let inline = part
+            .inline_data
+            .as_ref()
+            .map(|raw| -> Result<Vec<u8>> {
+                ensure!(
+                    spec.prepared.is_none()
+                        && part.bytes <= crate::results::INLINE_LIMIT as u64
+                        && raw.len() == part.bytes as usize * 2,
+                    "RESULT_CORRUPT: inline descriptor"
+                );
+                let bytes = hex::decode(raw)?;
+                use sha2::{Digest, Sha256};
+                ensure!(
+                    hex::encode(Sha256::digest(&bytes)) == part.checksum,
+                    "RESULT_CORRUPT: inline checksum"
+                );
+                Ok(bytes)
+            })
+            .transpose()?;
+        let identity = if inline.is_some() {
+            crate::sources::SourceFile {
+                path: dest.clone(),
+                size: part.bytes,
+                device: 0,
+                inode: 0,
+                mtime_sec: 0,
+                mtime_nsec: 0,
+                rows: Some(part.rows as u64),
+                row_groups: None,
+                checksum: Some(part.checksum.clone()),
+                inline: Some(crate::sources::InlineSource {
+                    database: self.workspace.join("metadata.sqlite"),
+                    result_ref: spec.result_ref.clone(),
+                    seq: part.seq,
+                }),
+            }
         } else {
-            ensure!(
-                dest.exists() && std::fs::metadata(&dest)?.len() == part.bytes,
-                "RESULT_UNAVAILABLE"
-            )
-        }
+            if part.seq == 0 || !dir.exists() {
+                std::fs::create_dir_all(&dir)?;
+                File::open(self.workspace.join("store"))?.sync_all()?;
+            }
+            if staging.exists() {
+                ensure!(
+                    !std::fs::symlink_metadata(&staging)?
+                        .file_type()
+                        .is_symlink(),
+                    "INVALID_ARGUMENT: symlink part"
+                );
+                ensure!(
+                    std::fs::metadata(&staging)?.len() == part.bytes,
+                    "RESULT_CORRUPT: size mismatch"
+                );
+                std::fs::rename(&staging, &dest)?;
+                #[cfg(test)]
+                crate::publication_tests::fault("after_part_rename");
+                File::open(&dir)?.sync_all()?;
+            } else {
+                ensure!(
+                    dest.exists() && std::fs::metadata(&dest)?.len() == part.bytes,
+                    "RESULT_UNAVAILABLE"
+                )
+            }
+            crate::sources::SourceFile::inspect(&dest)?
+        };
         tx.execute(
             "INSERT INTO parts VALUES(?,?,?,?,?,?,?)",
             params![
@@ -358,9 +401,17 @@ impl Db {
                 part.rows,
                 part.bytes,
                 part.checksum,
-                serde_json::to_string(&crate::sources::SourceFile::inspect(&dest)?)?
+                serde_json::to_string(&identity)?
             ],
         )?;
+        if let Some(bytes) = inline {
+            tx.execute(
+                "INSERT INTO inline_parts VALUES(?,?,?)",
+                params![spec.result_ref, part.seq, bytes],
+            )?;
+            #[cfg(test)]
+            crate::publication_tests::fault("before_inline_commit");
+        }
         ensure!(
             spec.analysis.is_some() == part.checkpoint.is_some(),
             "RESULT_CORRUPT: checkpoint descriptor"

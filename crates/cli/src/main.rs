@@ -37,6 +37,8 @@ enum Command {
     Doctor,
     /// Print concise machine-readable integration guidance without starting a runtime.
     Guide,
+    /// Print the optional standard-library Python client; no runtime is started.
+    PythonClient,
     /// Print a stdio MCP configuration; does not modify host configuration.
     McpConfig,
     /// Send a contract request from a JSON file or stdin (-).
@@ -417,6 +419,10 @@ async fn run(args: Args) -> Result<i32> {
         .workspace
         .or_else(|| std::env::var_os("ROWTRAIL_WORKSPACE").map(PathBuf::from))
         .unwrap_or_else(|| PathBuf::from(".rowtrail"));
+    if matches!(args.command, Command::PythonClient) {
+        print!("{}", include_str!("../../../examples/session_client.py"));
+        return Ok(0);
+    }
     if matches!(args.command, Command::Guide) {
         println!("{}", include_str!("guide.json").trim());
         return Ok(0);
@@ -602,6 +608,7 @@ async fn run(args: Args) -> Result<i32> {
         | Command::Mcp
         | Command::Session
         | Command::Guide
+        | Command::PythonClient
         | Command::McpConfig => unreachable!(),
     };
     if args.idempotency_key.is_some() {

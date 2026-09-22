@@ -13,6 +13,50 @@ use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use std::{fs::File, io::Read, path::PathBuf};
 
+pub const INLINE_LIMIT: usize = 128 * 1024;
+
+/// SQLite page/WAL overhead is outside the encoded result-byte counter.
+pub fn verified_part(file: &crate::sources::SourceFile, checksum: &str) -> Result<Vec<u8>> {
+    let Some(part) = &file.inline else {
+        return verified_bytes(&file.path, file.size, checksum);
+    };
+    ensure!(
+        file.size <= INLINE_LIMIT as u64,
+        "RESULT_CORRUPT: oversized inline part"
+    );
+    let c = rusqlite::Connection::open_with_flags(
+        &part.database,
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX,
+    )?;
+    c.busy_timeout(std::time::Duration::from_secs(5))?;
+    verified_inline(&c, part, file.size, checksum)
+}
+
+fn verified_inline(
+    c: &rusqlite::Connection,
+    part: &crate::sources::InlineSource,
+    size: u64,
+    checksum: &str,
+) -> Result<Vec<u8>> {
+    ensure!(
+        size <= INLINE_LIMIT as u64,
+        "RESULT_CORRUPT: oversized inline part"
+    );
+    let bytes: Option<Vec<u8>> = c
+        .prepare_cached(
+            "SELECT data FROM inline_parts WHERE result_id=? AND seq=? AND length(data)=?",
+        )?
+        .query_row(params![part.result_ref, part.seq, size], |r| r.get(0))
+        .optional()?;
+    let bytes =
+        bytes.ok_or_else(|| anyhow::anyhow!("RESULT_CORRUPT: missing or resized inline part"))?;
+    ensure!(
+        hex::encode(Sha256::digest(&bytes)) == checksum,
+        "RESULT_CORRUPT: checksum mismatch"
+    );
+    Ok(bytes)
+}
+
 pub struct Snapshot {
     pub schema: Schema,
     pub quality: Value,
@@ -228,9 +272,10 @@ pub fn read(db: &Db, p: &ReadParams) -> Result<Value> {
     let mut returned = 0;
     let mut bytes_verified = 0;
     let mut bytes_read = 0;
+    let mut inline_bytes = 0;
     let mut rows = Vec::new();
     let mut row_bytes = 0;
-    'parts: for (path, size, hash, part_rows, _identity) in &snap.parts {
+    'parts: for (_path, size, hash, part_rows, identity) in &snap.parts {
         if position + part_rows <= start {
             position += part_rows;
             continue;
@@ -238,10 +283,22 @@ pub fn read(db: &Db, p: &ReadParams) -> Result<Value> {
         if returned >= p.max_rows {
             break;
         }
-        let bytes = verified_bytes(path, *size, hash)?;
+        let bytes = if let Some(part) = &identity.inline {
+            ensure!(
+                part.database == db.workspace.join("metadata.sqlite"),
+                "RESULT_CORRUPT: inline database identity"
+            );
+            verified_inline(&db.conn.lock().unwrap(), part, *size, hash)?
+        } else {
+            verified_part(identity, hash)?
+        };
         bytes_verified += bytes.len() as u64;
         let reader = FileReader::try_new(std::io::Cursor::new(bytes), Some(indices.clone()))?;
-        bytes_read += size;
+        if identity.inline.is_some() {
+            inline_bytes += size;
+        } else {
+            bytes_read += size;
+        }
         for batch in reader {
             let batch = batch?;
             let options = FormatOptions::default().with_display_error(true);
@@ -291,8 +348,7 @@ pub fn read(db: &Db, p: &ReadParams) -> Result<Value> {
         json!({"returned_rows":returned,"has_more":start+(returned as u64)<snap.rows});
     response["next_cursor"] = cursor_for(start + returned as u64)?;
     response["rows"] = json!(rows);
-    response["read_metrics"] =
-        json!({"checksum_bytes":bytes_verified,"part_file_bytes_opened":bytes_read});
+    response["read_metrics"] = json!({"checksum_bytes":bytes_verified,"part_file_bytes_opened":bytes_read,"inline_bytes_loaded":inline_bytes});
     ensure!(
         serde_json::to_vec(&response)?.len() + 128 <= p.max_bytes,
         "OUTPUT_BUDGET_TOO_SMALL"

@@ -1,0 +1,79 @@
+{
+  "status": "passed",
+  "kind": "three logical scans of a saved result in one exact SQL job; no model calls",
+  "rows": 2097152,
+  "repeats": 1,
+  "machine": "macOS-26.6.2-arm64-arm-64bit",
+  "fixture_sha256": "96222787b4130ef23b53e1d0d507b4746230a1adc8f46f980b55e62c032c8c99",
+  "binary_sha256": {
+    "alpha7": {
+      "rowtrail": "c87f1f316b89546b4b391d9c4f3a07f16dca763f40f1cb31a99dda3bcd0ce606",
+      "rowtrail-runtime": "28965125cb487c91fba09653d6363594beb91c01806166361aa552b5571d7a0f"
+    }
+  },
+  "sql": "SELECT 'missing' kind, COUNT(*) n, SUM(CAST(id AS DECIMAL(38,0))) ids FROM saved WHERE amount IS NULL\nUNION ALL SELECT 'negative', COUNT(*), SUM(CAST(id AS DECIMAL(38,0))) FROM saved WHERE amount < 0\nUNION ALL SELECT 'nonnegative', COUNT(*), SUM(CAST(id AS DECIMAL(38,0))) FROM saved WHERE amount >= 0\nORDER BY kind",
+  "expected": [
+    [
+      "missing",
+      "123362",
+      "1111146114592711885763"
+    ],
+    [
+      "negative",
+      "986451",
+      "8885160713072433742929"
+    ],
+    [
+      "nonnegative",
+      "987339",
+      "8893159106012459530220"
+    ]
+  ],
+  "records": [
+    {
+      "variant": "alpha7",
+      "repeat": 0,
+      "total_ms": 352.88587491959333,
+      "open_and_materialize_ms": 298.07237489148974,
+      "rescan_ms": 54.8007907345891,
+      "stored_bytes": 9290682,
+      "result_parts": 17,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 9290682,
+          "source_read_bytes": 0,
+          "result_read_bytes": 9290682,
+          "read_requests": 156,
+          "verified_cache_hits": 139,
+          "verified_cache_misses": 17,
+          "verified_cache_peak_bytes": 8163766
+        },
+        "result_write_bytes": 1322,
+        "rows": 3,
+        "planning_ms": 3.724541,
+        "result_write_ms": 0.018499,
+        "commit_ack_ms": 0.206458,
+        "elapsed_ms": 52.86525,
+        "worker_pid": 63153,
+        "publication_ms": 0.167667,
+        "result_parts": 1,
+        "worker_elapsed_ms": 53.136208,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": true,
+        "plan_available": true
+      }
+    }
+  ],
+  "summary": {
+    "alpha7": {
+      "total_ms": 352.88587491959333,
+      "rescan_ms": 54.8007907345891
+    }
+  },
+  "limitations": [
+    "OS cache not flushed; serial alternating order, fresh workspace/session per trial.",
+    "Caches are job-local and byte-bounded; this does not measure cross-job caching.",
+    "A hand-fused conditional aggregation could avoid these logical rescans; this fixture measures reuse of a repeated scan plan, not optimal SQL."
+  ]
+}

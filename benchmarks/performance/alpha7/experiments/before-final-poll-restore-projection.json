@@ -1,0 +1,688 @@
+{
+  "status": "passed",
+  "kind": "wide Parquet, narrow projection, separated column ranges; no model calls",
+  "rows": 65536,
+  "columns": 32,
+  "row_group_size": 2048,
+  "repeats": 7,
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "fixture_sha256": "a7b1e07f099d8afba35315ae1eb026bffebefd7505e543194dc43e1d84f3d493",
+  "fixture_bytes": 16889514,
+  "binary_sha256": {
+    "alpha6": {
+      "rowtrail": "e473127f4a555b70b85beb17ca6da7a484da44b1bfcd8e162b83e97b461acd2a",
+      "rowtrail-runtime": "978b6319b74592e4514eec3efe2a7f2fe657759366e01119c1b6ca9018e57132"
+    },
+    "before_ranges": {
+      "rowtrail": "e473127f4a555b70b85beb17ca6da7a484da44b1bfcd8e162b83e97b461acd2a",
+      "rowtrail-runtime": "e7e78570758d3541455b142e411d4b9dd3e39867f47716a030405665bab85ae3"
+    },
+    "alpha7": {
+      "rowtrail": "c87f1f316b89546b4b391d9c4f3a07f16dca763f40f1cb31a99dda3bcd0ce606",
+      "rowtrail-runtime": "5c274587ad5e66f880ad5ac701c3be6cdec4cd3dc526d160a17c9f5dd7ae7bb5"
+    }
+  },
+  "sql": "SELECT SUM(CAST(c0 AS DECIMAL(38,0))),SUM(CAST(c31 AS DECIMAL(38,0))),MAX(c0),MIN(c31) FROM t",
+  "expected": [
+    [
+      "302757077950474226138632",
+      "303054596476298376825007",
+      "9223304284546371895",
+      "438863510949676"
+    ]
+  ],
+  "records": [
+    {
+      "variant": "alpha6",
+      "repeat": 0,
+      "total_ms": 61.01183267310262,
+      "open_ms": 21.05179103091359,
+      "query_ms": 39.956041146069765,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 3.702042,
+        "result_write_ms": 9.557208,
+        "commit_ack_ms": 11.051667,
+        "elapsed_ms": 29.809958,
+        "worker_pid": 65038,
+        "publication_ms": 10.99325,
+        "result_parts": 1,
+        "worker_elapsed_ms": 38.352042,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "before_ranges",
+      "repeat": 0,
+      "total_ms": 165.74466694146395,
+      "open_ms": 61.70070776715875,
+      "query_ms": 104.03745761141181,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 81.913917,
+        "result_write_ms": 0.582458,
+        "commit_ack_ms": 0.218875,
+        "elapsed_ms": 93.700459,
+        "worker_pid": 65041,
+        "publication_ms": 0.177083,
+        "result_parts": 1,
+        "worker_elapsed_ms": 99.379709,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 0,
+      "total_ms": 22.716667037457228,
+      "open_ms": 13.72837508097291,
+      "query_ms": 8.98500019684434,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.087458,
+        "result_write_ms": 0.027624000000000003,
+        "commit_ack_ms": 0.175208,
+        "elapsed_ms": 4.1218330000000005,
+        "worker_pid": 65044,
+        "publication_ms": 0.145625,
+        "result_parts": 1,
+        "worker_elapsed_ms": 7.54175,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 1,
+      "total_ms": 22.140999790281057,
+      "open_ms": 13.364790938794613,
+      "query_ms": 8.770499844104052,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 1.980125,
+        "result_write_ms": 0.029083,
+        "commit_ack_ms": 0.158167,
+        "elapsed_ms": 3.89525,
+        "worker_pid": 65047,
+        "publication_ms": 0.12812500000000002,
+        "result_parts": 1,
+        "worker_elapsed_ms": 7.369291,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "before_ranges",
+      "repeat": 1,
+      "total_ms": 32.25454222410917,
+      "open_ms": 19.57895839586854,
+      "query_ms": 12.672083918005228,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.149667,
+        "result_write_ms": 0.033167,
+        "commit_ack_ms": 0.191375,
+        "elapsed_ms": 7.415417,
+        "worker_pid": 65050,
+        "publication_ms": 0.159084,
+        "result_parts": 1,
+        "worker_elapsed_ms": 11.0525,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha6",
+      "repeat": 1,
+      "total_ms": 51.4450422488153,
+      "open_ms": 20.292125176638365,
+      "query_ms": 31.148916110396385,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.1452910000000003,
+        "result_write_ms": 7.489124,
+        "commit_ack_ms": 9.137333,
+        "elapsed_ms": 23.818916,
+        "worker_pid": 65053,
+        "publication_ms": 9.082417,
+        "result_parts": 1,
+        "worker_elapsed_ms": 27.261416,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha6",
+      "repeat": 2,
+      "total_ms": 48.49283304065466,
+      "open_ms": 20.317499991506338,
+      "query_ms": 28.171375393867493,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.267708,
+        "result_write_ms": 5.775500999999999,
+        "commit_ack_ms": 9.198834,
+        "elapsed_ms": 22.578917,
+        "worker_pid": 65056,
+        "publication_ms": 9.142084,
+        "result_parts": 1,
+        "worker_elapsed_ms": 26.57225,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "before_ranges",
+      "repeat": 2,
+      "total_ms": 34.29912496358156,
+      "open_ms": 20.917499903589487,
+      "query_ms": 13.377833180129528,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.307709,
+        "result_write_ms": 0.036000000000000004,
+        "commit_ack_ms": 0.216125,
+        "elapsed_ms": 7.855,
+        "worker_pid": 65059,
+        "publication_ms": 0.176125,
+        "result_parts": 1,
+        "worker_elapsed_ms": 11.701041,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 2,
+      "total_ms": 22.667082957923412,
+      "open_ms": 13.564332854002714,
+      "query_ms": 9.096084162592888,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.067083,
+        "result_write_ms": 0.02975,
+        "commit_ack_ms": 0.178041,
+        "elapsed_ms": 4.041833,
+        "worker_pid": 65062,
+        "publication_ms": 0.146167,
+        "result_parts": 1,
+        "worker_elapsed_ms": 7.623541,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 3,
+      "total_ms": 22.24570792168379,
+      "open_ms": 13.613875024020672,
+      "query_ms": 8.628749754279852,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 1.972333,
+        "result_write_ms": 0.029541,
+        "commit_ack_ms": 0.170917,
+        "elapsed_ms": 3.896583,
+        "worker_pid": 65065,
+        "publication_ms": 0.141042,
+        "result_parts": 1,
+        "worker_elapsed_ms": 7.310042,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "before_ranges",
+      "repeat": 3,
+      "total_ms": 32.05512510612607,
+      "open_ms": 19.647125154733658,
+      "query_ms": 12.404833920300007,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.184125,
+        "result_write_ms": 0.039167,
+        "commit_ack_ms": 0.209125,
+        "elapsed_ms": 7.415125,
+        "worker_pid": 65068,
+        "publication_ms": 0.170666,
+        "result_parts": 1,
+        "worker_elapsed_ms": 10.788084,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha6",
+      "repeat": 3,
+      "total_ms": 51.10112531110644,
+      "open_ms": 20.61800006777048,
+      "query_ms": 30.47829121351242,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.153583,
+        "result_write_ms": 6.91725,
+        "commit_ack_ms": 9.378334,
+        "elapsed_ms": 23.336333,
+        "worker_pid": 65071,
+        "publication_ms": 9.327875,
+        "result_parts": 1,
+        "worker_elapsed_ms": 28.83775,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha6",
+      "repeat": 4,
+      "total_ms": 49.1737499833107,
+      "open_ms": 20.672958809882402,
+      "query_ms": 28.496916871517897,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.252667,
+        "result_write_ms": 6.007959,
+        "commit_ack_ms": 9.028333,
+        "elapsed_ms": 22.545292,
+        "worker_pid": 65074,
+        "publication_ms": 8.982333,
+        "result_parts": 1,
+        "worker_elapsed_ms": 26.732916999999997,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "before_ranges",
+      "repeat": 4,
+      "total_ms": 33.939416985958815,
+      "open_ms": 20.401499699801207,
+      "query_ms": 13.533500023186207,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.3388340000000003,
+        "result_write_ms": 0.036084,
+        "commit_ack_ms": 0.182542,
+        "elapsed_ms": 7.881834,
+        "worker_pid": 65077,
+        "publication_ms": 0.147917,
+        "result_parts": 1,
+        "worker_elapsed_ms": 11.835667,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 4,
+      "total_ms": 22.83474989235401,
+      "open_ms": 13.772583100944757,
+      "query_ms": 9.058292023837566,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.104167,
+        "result_write_ms": 0.028041999999999997,
+        "commit_ack_ms": 0.173666,
+        "elapsed_ms": 4.065625,
+        "worker_pid": 65080,
+        "publication_ms": 0.138166,
+        "result_parts": 1,
+        "worker_elapsed_ms": 7.585166,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 5,
+      "total_ms": 22.26529223844409,
+      "open_ms": 13.445958960801363,
+      "query_ms": 8.815625216811895,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 1.984417,
+        "result_write_ms": 0.028875,
+        "commit_ack_ms": 0.185333,
+        "elapsed_ms": 3.971625,
+        "worker_pid": 65083,
+        "publication_ms": 0.15175,
+        "result_parts": 1,
+        "worker_elapsed_ms": 7.450375,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "before_ranges",
+      "repeat": 5,
+      "total_ms": 32.31133287772536,
+      "open_ms": 19.737916067242622,
+      "query_ms": 12.569624930620193,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.448625,
+        "result_write_ms": 0.03325,
+        "commit_ack_ms": 0.196334,
+        "elapsed_ms": 7.616124999999999,
+        "worker_pid": 65086,
+        "publication_ms": 0.141292,
+        "result_parts": 1,
+        "worker_elapsed_ms": 10.978542,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha6",
+      "repeat": 5,
+      "total_ms": 49.83716690912843,
+      "open_ms": 20.20341670140624,
+      "query_ms": 29.629542026668787,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.161292,
+        "result_write_ms": 6.013626,
+        "commit_ack_ms": 9.116959,
+        "elapsed_ms": 22.261958,
+        "worker_pid": 65089,
+        "publication_ms": 9.057333,
+        "result_parts": 1,
+        "worker_elapsed_ms": 25.701,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha6",
+      "repeat": 6,
+      "total_ms": 48.21283323690295,
+      "open_ms": 20.73562517762184,
+      "query_ms": 27.473457623273134,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.260709,
+        "result_write_ms": 5.3082080000000005,
+        "commit_ack_ms": 8.876083999999999,
+        "elapsed_ms": 21.742084,
+        "worker_pid": 65092,
+        "publication_ms": 8.828417,
+        "result_parts": 1,
+        "worker_elapsed_ms": 25.741542,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "before_ranges",
+      "repeat": 6,
+      "total_ms": 34.042208921164274,
+      "open_ms": 20.716999657452106,
+      "query_ms": 13.32162506878376,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 17331136,
+          "source_read_bytes": 17331136,
+          "result_read_bytes": 0,
+          "read_requests": 33
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.327167,
+        "result_write_ms": 0.034498999999999995,
+        "commit_ack_ms": 0.205167,
+        "elapsed_ms": 7.823125,
+        "worker_pid": 65095,
+        "publication_ms": 0.165375,
+        "result_parts": 1,
+        "worker_elapsed_ms": 11.643667,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 6,
+      "total_ms": 22.66745874658227,
+      "open_ms": 13.722499832510948,
+      "query_ms": 8.941375184804201,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 1574716,
+          "source_read_bytes": 1574716,
+          "result_read_bytes": 0,
+          "read_requests": 65,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 1578,
+        "rows": 1,
+        "planning_ms": 2.0582909999999996,
+        "result_write_ms": 0.026332,
+        "commit_ack_ms": 0.16674999999999998,
+        "elapsed_ms": 3.959083000000001,
+        "worker_pid": 65098,
+        "publication_ms": 0.137083,
+        "result_parts": 1,
+        "worker_elapsed_ms": 7.509792,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "plan_available": true
+      }
+    }
+  ],
+  "summary": {
+    "alpha6": {
+      "total_ms": 49.83716690912843,
+      "query_ms": 29.629542026668787,
+      "source_read_bytes": 17331136
+    },
+    "before_ranges": {
+      "total_ms": 33.939416985958815,
+      "query_ms": 13.32162506878376,
+      "source_read_bytes": 17331136
+    },
+    "alpha7": {
+      "total_ms": 22.667082957923412,
+      "query_ms": 8.941375184804201,
+      "source_read_bytes": 1574716
+    }
+  },
+  "limitations": [
+    "A deliberately wide, small-row-group layout exposes coalesced gap reads; gains depend on layout.",
+    "OS cache not flushed; serial alternating order, same frozen bytes and fresh workspaces.",
+    "Encoded read bytes include query-time footer reads, not open-time metadata or physical device I/O."
+  ]
+}

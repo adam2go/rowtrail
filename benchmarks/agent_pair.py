@@ -28,6 +28,10 @@ def oracle(rows,task):
  return {'region':region,'region_total':money(totals[region]),'product':product,'product_total':money(products[product]),'positive_count':str(len(positive)),'min_positive_id':str(min(v[0] for v in positive)),'null_region_total':money(sum(v[3] for v in values if v[1] is None and v[3] is not None))}
 
 class LoggedRowTrail:
+ open=RowTrail.open
+ query=RowTrail.query
+ binding=staticmethod(RowTrail.binding)
+ rows=staticmethod(RowTrail.rows)
  finish=RowTrail.finish
  schema=RowTrail.schema
  observe=staticmethod(RowTrail.observe)
@@ -104,7 +108,7 @@ def run_trial(a,task,arm,repeat,fixture,out):
     assert result['job']['state']=='completed';backend.reconnect()
    backend.calls.clear()
    docs=(ROOT/('docs/agent-quickstart.md' if a.bootstrap=='compact' else 'docs/agent-guide.md')).read_text()
-   notes='The persistent environment provides rt.call(method, params), returning the result object or raising an error. rt.schema(method) discovers a single local request contract. rt.finish(response) waits mechanically; rt.observe(response) projects a compact job view. rt.reconnect() creates a fresh transport without replaying any calls.\n'+docs
+   notes='The persistent environment provides rt.open(source), rt.query(sql, bindings), rt.binding(response), rt.rows(response), and rt.call(method, params). Full responses remain available; rows requires complete exact untruncated observations. rt.schema(method) discovers a single local request contract. rt.finish(response) waits mechanically; rt.observe(response) projects a compact job view. rt.reconnect() creates a fresh transport without replaying any calls.\n'+docs
    if a.bootstrap=='full':
     schemas={name:json.loads(subprocess.check_output([str(ROOT/a.bin_dir/'rowtrail'),'schema',name])) for name in ('open','inspect','query','read','control','workspace')}
     (base/'schemas.json').write_text(json.dumps(schemas));notes+='\nFull request schemas are also available in schemas.json.\n'

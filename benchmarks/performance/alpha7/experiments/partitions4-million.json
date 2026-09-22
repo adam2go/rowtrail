@@ -1,0 +1,2307 @@
+{
+  "status": "passed",
+  "kind": "alternating binary order; complete five-query exploration with persistent sessions",
+  "rows": 1048576,
+  "repeats": 5,
+  "variants": {
+    "serial": {
+      "kind": "deterministic execution comparison; no model calls",
+      "os": "macOS-26.6.2-arm64-arm-64bit",
+      "machine": "arm64",
+      "binary_sha256": {
+        "rowtrail": "c87f1f316b89546b4b391d9c4f3a07f16dca763f40f1cb31a99dda3bcd0ce606",
+        "rowtrail-runtime": "5c274587ad5e66f880ad5ac701c3be6cdec4cd3dc526d160a17c9f5dd7ae7bb5"
+      },
+      "entry": "session",
+      "fixture_rows": 1048576,
+      "fixture_sha256": "5dbf86141275746ec6c17443c01f31b889ab685f9224084e53423a4748bc096d",
+      "fixture_bytes": 228139988,
+      "cache": "OS cache not flushed; fresh RowTrail workspace and persistent engine sessions per repeat",
+      "limitations": [
+        "This is not a same-Agent paired adoption experiment.",
+        "The baseline engines are allowed to retain intermediate tables in memory; RowTrail pays for disk durability and process isolation.",
+        "CLI startup is included for RowTrail; direct DataFusion process wall time is also recorded separately.",
+        "No claim of stable performance advantage is justified by these small local trials."
+      ]
+    },
+    "partitions4": {
+      "kind": "deterministic execution comparison; no model calls",
+      "os": "macOS-26.6.2-arm64-arm-64bit",
+      "machine": "arm64",
+      "binary_sha256": {
+        "rowtrail": "c87f1f316b89546b4b391d9c4f3a07f16dca763f40f1cb31a99dda3bcd0ce606",
+        "rowtrail-runtime": "9c5758483a415fb4a3dca3228d4ddd49fa55b2a1451cf7182ec05d8bc885c1e2"
+      },
+      "entry": "session",
+      "fixture_rows": 1048576,
+      "fixture_sha256": "5dbf86141275746ec6c17443c01f31b889ab685f9224084e53423a4748bc096d",
+      "fixture_bytes": 228139988,
+      "cache": "OS cache not flushed; fresh RowTrail workspace and persistent engine sessions per repeat",
+      "limitations": [
+        "This is not a same-Agent paired adoption experiment.",
+        "The baseline engines are allowed to retain intermediate tables in memory; RowTrail pays for disk durability and process isolation.",
+        "CLI startup is included for RowTrail; direct DataFusion process wall time is also recorded separately.",
+        "No claim of stable performance advantage is justified by these small local trials."
+      ]
+    }
+  },
+  "records": [
+    {
+      "variant": "serial",
+      "repeat": 0,
+      "rowtrail": {
+        "backend": "rowtrail",
+        "total_ms": 776.4534158632159,
+        "open_ms": 512.1893328614533,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 56.65925005450845,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 10123383,
+                "source_read_bytes": 10123383,
+                "result_read_bytes": 0,
+                "read_requests": 513,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 1410,
+              "rows": 4,
+              "planning_ms": 15.361583,
+              "result_write_ms": 0.068166,
+              "commit_ack_ms": 0.254125,
+              "elapsed_ms": 49.582875,
+              "worker_pid": 66584,
+              "publication_ms": 0.204291,
+              "result_parts": 1,
+              "worker_elapsed_ms": 54.61575,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": false,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 156.58649988472462,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 20097399,
+                "source_read_bytes": 20097399,
+                "result_read_bytes": 0,
+                "read_requests": 769,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 4217972,
+              "rows": 986895,
+              "planning_ms": 1.697208,
+              "result_write_ms": 86.369833,
+              "commit_ack_ms": 34.9755,
+              "elapsed_ms": 153.878458,
+              "worker_pid": 66584,
+              "publication_ms": 34.779001,
+              "result_parts": 6,
+              "worker_elapsed_ms": 154.314541,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 23.940750397741795,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4217972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4217972,
+                "read_requests": 19,
+                "verified_cache_hits": 13,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4217972
+              },
+              "result_write_bytes": 1082,
+              "rows": 4,
+              "planning_ms": 1.546958,
+              "result_write_ms": 0.011667,
+              "commit_ack_ms": 0.157834,
+              "elapsed_ms": 22.590541,
+              "worker_pid": 66584,
+              "publication_ms": 0.125042,
+              "result_parts": 1,
+              "worker_elapsed_ms": 22.756042,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 9.150166995823383,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4217972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4217972,
+                "read_requests": 19,
+                "verified_cache_hits": 13,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4217972
+              },
+              "result_write_bytes": 770,
+              "rows": 1,
+              "planning_ms": 1.498917,
+              "result_write_ms": 0.008167,
+              "commit_ack_ms": 0.111416,
+              "elapsed_ms": 8.033959,
+              "worker_pid": 66584,
+              "publication_ms": 0.093542,
+              "result_parts": 1,
+              "worker_elapsed_ms": 8.173583,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 17.908917274326086,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 669184,
+                "source_read_bytes": 669184,
+                "result_read_bytes": 0,
+                "read_requests": 257,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 1074,
+              "rows": 2,
+              "planning_ms": 1.181542,
+              "result_write_ms": 0.012458,
+              "commit_ack_ms": 0.174125,
+              "elapsed_ms": 16.707625,
+              "worker_pid": 66584,
+              "publication_ms": 0.146375,
+              "result_parts": 1,
+              "worker_elapsed_ms": 16.988375,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          }
+        ],
+        "entry": "session",
+        "intermediate_storage": "durable Arrow parts"
+      },
+      "duckdb": {
+        "backend": "duckdb",
+        "version": "1.5.5",
+        "total_ms": 106.16345796734095,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 21.6414169408381
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 50.91758305206895
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 11.383583769202232
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 1.4712498523294926
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 5.594208836555481
+          }
+        ],
+        "intermediate_storage": "persistent in-process temp table"
+      },
+      "datafusion": {
+        "backend": "direct_datafusion_55.0.0",
+        "total_ms": 61.4825,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 22.064332999999998,
+            "plan": "ProjectionExec: expr=[region@0 as region, sum(t.amount)@1 as sum(t.amount), count(Int64(1))@2 as count(*)], metrics=[output_rows=4, elapsed_compute=333ns, output_bytes=224.0 B, output_batches=1, expr_0_eval_time=42ns, expr_1_eval_time=41ns, expr_2_eval_time=1ns]\n  AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(t.amount), count(Int64(1))], metrics=[output_rows=4, elapsed_compute=6.08ms, output_bytes=224.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=114.58\u00b5s, aggregation_time=5.84ms, emitting_time=8.17\u00b5s, time_calculating_group_ids=54.62\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[region, amount], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=26.09\u00b5s, output_bytes=48.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=9.60 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=2ns, metadata_load_time=6.38\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=45.21\u00b5s, time_elapsed_processing=8.85ms, time_elapsed_scanning_total=20.61ms, time_elapsed_scanning_until_data=128.42\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=4.21% (9.60 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "rows": 986895,
+            "elapsed_ms": 22.242166,
+            "plan": "FilterExec: amount@2 IS NOT NULL, metrics=[output_rows=986.9 K, elapsed_compute=4.70ms, output_bytes=37.9 MB, output_batches=121, selectivity=94.12% (986.9 K/1.05 M)]\n  DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[id, region, amount], file_type=parquet, predicate=amount@3 IS NOT NULL, pruning_predicate=amount_null_count@1 != row_count@0, required_guarantees=[], metrics=[output_rows=1.05 M, elapsed_compute=29.34\u00b5s, output_bytes=64.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=256 total \u2192 256 matched, page_index_rows_pruned=1.05 M total \u2192 1.05 M matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=19.57 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=461.75\u00b5s, metadata_load_time=5.54\u00b5s, page_index_eval_time=221.50\u00b5s, row_pushdown_eval_time=3ns, statistics_eval_time=17.96\u00b5s, time_elapsed_opening=566.08\u00b5s, time_elapsed_processing=11.22ms, time_elapsed_scanning_total=21.29ms, time_elapsed_scanning_until_data=82.04\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=8.58% (19.57 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 4.823208,
+            "plan": "AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(saved.amount)], metrics=[output_rows=4, elapsed_compute=4.35ms, output_bytes=192.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=6.42\u00b5s, aggregation_time=4.30ms, emitting_time=4.04\u00b5s, time_calculating_group_ids=19.57\u00b5s]\n  DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "rows": 1,
+            "elapsed_ms": 0.7825840000000001,
+            "plan": "ProjectionExec: expr=[count(Int64(1))@0 as count(*)], metrics=[output_rows=1, elapsed_compute=209ns, output_bytes=8.0 B, output_batches=1, expr_0_eval_time=41ns]\n  AggregateExec: mode=Single, gby=[], aggr=[count(Int64(1))], metrics=[output_rows=1, elapsed_compute=57.83\u00b5s, output_bytes=8.0 B, output_batches=1]\n    FilterExec: amount@0 > 0.00, projection=[], metrics=[output_rows=493.2 K, elapsed_compute=340.21\u00b5s, output_bytes=0.0 B, output_batches=79, selectivity=49.97% (493.2 K/986.9 K)]\n      DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "rows": 2,
+            "elapsed_ms": 9.976916000000001,
+            "plan": "ProjectionExec: expr=[product@0 as product, count(Int64(1))@1 as count(*)], metrics=[output_rows=2, elapsed_compute=375ns, output_bytes=96.0 B, output_batches=1, expr_0_eval_time=167ns, expr_1_eval_time=42ns]\n  AggregateExec: mode=Single, gby=[product@0 as product], aggr=[count(Int64(1))], metrics=[output_rows=2, elapsed_compute=3.35ms, output_bytes=96.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=124.33\u00b5s, aggregation_time=3.10ms, emitting_time=875ns, time_calculating_group_ids=64.83\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[product], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=22.09\u00b5s, output_bytes=32.0 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=144.9 K, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=2ns, metadata_load_time=10.50\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=35.04\u00b5s, time_elapsed_processing=1.91ms, time_elapsed_scanning_total=9.66ms, time_elapsed_scanning_until_data=36.38\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=0.06% (144.9 K/228.1 M)]\n"
+          }
+        ],
+        "intermediate_storage": "persistent in-process MemTable",
+        "process_wall_ms": 69.63687483221292
+      }
+    },
+    {
+      "variant": "partitions4",
+      "repeat": 0,
+      "rowtrail": {
+        "backend": "rowtrail",
+        "total_ms": 489.41566701978445,
+        "open_ms": 303.0546670779586,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 40.36241630092263,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 10123383,
+                "source_read_bytes": 10123383,
+                "result_read_bytes": 0,
+                "read_requests": 513,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 2866,
+              "rows": 4,
+              "planning_ms": 16.556708,
+              "result_write_ms": 0.07574900000000001,
+              "commit_ack_ms": 0.27345800000000003,
+              "elapsed_ms": 32.993375,
+              "worker_pid": 66601,
+              "publication_ms": 0.218541,
+              "result_parts": 1,
+              "worker_elapsed_ms": 38.392416,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": false,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 110.21716706454754,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 20097399,
+                "source_read_bytes": 20097399,
+                "result_read_bytes": 0,
+                "read_requests": 769,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 4215972,
+              "rows": 986895,
+              "planning_ms": 1.675333,
+              "result_write_ms": 72.23449799999997,
+              "commit_ack_ms": 31.237624,
+              "elapsed_ms": 107.44725,
+              "worker_pid": 66601,
+              "publication_ms": 31.017957,
+              "result_parts": 6,
+              "worker_elapsed_ms": 107.862666,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 19.422207958996296,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4215972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4215972,
+                "read_requests": 28,
+                "verified_cache_hits": 22,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4215972
+              },
+              "result_write_bytes": 2282,
+              "rows": 4,
+              "planning_ms": 1.579792,
+              "result_write_ms": 0.019416,
+              "commit_ack_ms": 0.191958,
+              "elapsed_ms": 17.946167,
+              "worker_pid": 66601,
+              "publication_ms": 0.159708,
+              "result_parts": 1,
+              "worker_elapsed_ms": 18.147625,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 8.154749870300293,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4215972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4215972,
+                "read_requests": 28,
+                "verified_cache_hits": 22,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4215972
+              },
+              "result_write_bytes": 770,
+              "rows": 1,
+              "planning_ms": 1.617625,
+              "result_write_ms": 0.008333,
+              "commit_ack_ms": 0.119542,
+              "elapsed_ms": 6.878209,
+              "worker_pid": 66601,
+              "publication_ms": 0.103459,
+              "result_parts": 1,
+              "worker_elapsed_ms": 7.0446670000000005,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 8.188833948224783,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 669184,
+                "source_read_bytes": 669184,
+                "result_read_bytes": 0,
+                "read_requests": 257,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 1674,
+              "rows": 2,
+              "planning_ms": 1.2284590000000002,
+              "result_write_ms": 0.012333,
+              "commit_ack_ms": 0.126375,
+              "elapsed_ms": 7.0005,
+              "worker_pid": 66601,
+              "publication_ms": 0.109834,
+              "result_parts": 1,
+              "worker_elapsed_ms": 7.302375,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          }
+        ],
+        "entry": "session",
+        "intermediate_storage": "durable Arrow parts"
+      },
+      "duckdb": {
+        "backend": "duckdb",
+        "version": "1.5.5",
+        "total_ms": 92.73358294740319,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 16.589791979640722
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 48.43241721391678
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 10.636792052537203
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 1.6165412962436676
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 5.6004999205470085
+          }
+        ],
+        "intermediate_storage": "persistent in-process temp table"
+      },
+      "datafusion": {
+        "backend": "direct_datafusion_55.0.0",
+        "total_ms": 61.154458000000005,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 21.263375,
+            "plan": "ProjectionExec: expr=[region@0 as region, sum(t.amount)@1 as sum(t.amount), count(Int64(1))@2 as count(*)], metrics=[output_rows=4, elapsed_compute=333ns, output_bytes=224.0 B, output_batches=1, expr_0_eval_time=42ns, expr_1_eval_time=41ns, expr_2_eval_time=42ns]\n  AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(t.amount), count(Int64(1))], metrics=[output_rows=4, elapsed_compute=5.85ms, output_bytes=224.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=113.21\u00b5s, aggregation_time=5.62ms, emitting_time=7.75\u00b5s, time_calculating_group_ids=54.04\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[region, amount], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=29.09\u00b5s, output_bytes=48.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=9.60 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=85ns, metadata_load_time=6.92\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=46.62\u00b5s, time_elapsed_processing=8.77ms, time_elapsed_scanning_total=19.74ms, time_elapsed_scanning_until_data=130.04\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=4.21% (9.60 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "rows": 986895,
+            "elapsed_ms": 22.556292,
+            "plan": "FilterExec: amount@2 IS NOT NULL, metrics=[output_rows=986.9 K, elapsed_compute=4.61ms, output_bytes=37.9 MB, output_batches=121, selectivity=94.12% (986.9 K/1.05 M)]\n  DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[id, region, amount], file_type=parquet, predicate=amount@3 IS NOT NULL, pruning_predicate=amount_null_count@1 != row_count@0, required_guarantees=[], metrics=[output_rows=1.05 M, elapsed_compute=33.46\u00b5s, output_bytes=64.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=256 total \u2192 256 matched, page_index_rows_pruned=1.05 M total \u2192 1.05 M matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=19.57 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=454.50\u00b5s, metadata_load_time=4.79\u00b5s, page_index_eval_time=215.13\u00b5s, row_pushdown_eval_time=3ns, statistics_eval_time=18.29\u00b5s, time_elapsed_opening=550.25\u00b5s, time_elapsed_processing=11.31ms, time_elapsed_scanning_total=21.64ms, time_elapsed_scanning_until_data=79.79\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=8.58% (19.57 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 4.735417,
+            "plan": "AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(saved.amount)], metrics=[output_rows=4, elapsed_compute=4.21ms, output_bytes=192.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=7.20\u00b5s, aggregation_time=4.16ms, emitting_time=2.25\u00b5s, time_calculating_group_ids=21.83\u00b5s]\n  DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "rows": 1,
+            "elapsed_ms": 0.79425,
+            "plan": "ProjectionExec: expr=[count(Int64(1))@0 as count(*)], metrics=[output_rows=1, elapsed_compute=208ns, output_bytes=8.0 B, output_batches=1, expr_0_eval_time=42ns]\n  AggregateExec: mode=Single, gby=[], aggr=[count(Int64(1))], metrics=[output_rows=1, elapsed_compute=51.91\u00b5s, output_bytes=8.0 B, output_batches=1]\n    FilterExec: amount@0 > 0.00, projection=[], metrics=[output_rows=493.2 K, elapsed_compute=344.59\u00b5s, output_bytes=0.0 B, output_batches=79, selectivity=49.97% (493.2 K/986.9 K)]\n      DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "rows": 2,
+            "elapsed_ms": 10.199584,
+            "plan": "ProjectionExec: expr=[product@0 as product, count(Int64(1))@1 as count(*)], metrics=[output_rows=2, elapsed_compute=458ns, output_bytes=96.0 B, output_batches=1, expr_0_eval_time=125ns, expr_1_eval_time=1ns]\n  AggregateExec: mode=Single, gby=[product@0 as product], aggr=[count(Int64(1))], metrics=[output_rows=2, elapsed_compute=3.38ms, output_bytes=96.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=129.12\u00b5s, aggregation_time=3.12ms, emitting_time=875ns, time_calculating_group_ids=57.71\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[product], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=22.54\u00b5s, output_bytes=32.0 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=144.9 K, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=2ns, metadata_load_time=13.33\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=38.71\u00b5s, time_elapsed_processing=1.89ms, time_elapsed_scanning_total=9.87ms, time_elapsed_scanning_until_data=34.42\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=0.06% (144.9 K/228.1 M)]\n"
+          }
+        ],
+        "intermediate_storage": "persistent in-process MemTable",
+        "process_wall_ms": 68.65804176777601
+      }
+    },
+    {
+      "variant": "partitions4",
+      "repeat": 1,
+      "rowtrail": {
+        "backend": "rowtrail",
+        "total_ms": 175.97054177895188,
+        "open_ms": 12.721625156700611,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 20.31741663813591,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 10123383,
+                "source_read_bytes": 10123383,
+                "result_read_bytes": 0,
+                "read_requests": 513,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 2866,
+              "rows": 4,
+              "planning_ms": 2.7395,
+              "result_write_ms": 0.036166,
+              "commit_ack_ms": 0.201916,
+              "elapsed_ms": 15.166458,
+              "worker_pid": 66617,
+              "publication_ms": 0.17008299999999998,
+              "result_parts": 1,
+              "worker_elapsed_ms": 18.961333,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": false,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 107.65604116022587,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 20097399,
+                "source_read_bytes": 20097399,
+                "result_read_bytes": 0,
+                "read_requests": 769,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 4215972,
+              "rows": 986895,
+              "planning_ms": 1.237375,
+              "result_write_ms": 68.72749899999997,
+              "commit_ack_ms": 33.495918,
+              "elapsed_ms": 105.153709,
+              "worker_pid": 66617,
+              "publication_ms": 33.283584,
+              "result_parts": 6,
+              "worker_elapsed_ms": 105.530791,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 19.05412506312132,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4215972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4215972,
+                "read_requests": 28,
+                "verified_cache_hits": 22,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4215972
+              },
+              "result_write_bytes": 2282,
+              "rows": 4,
+              "planning_ms": 1.3771250000000002,
+              "result_write_ms": 0.019042,
+              "commit_ack_ms": 0.190584,
+              "elapsed_ms": 17.582666,
+              "worker_pid": 66617,
+              "publication_ms": 0.159958,
+              "result_parts": 1,
+              "worker_elapsed_ms": 17.783707999999997,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 8.12945794314146,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4215972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4215972,
+                "read_requests": 28,
+                "verified_cache_hits": 22,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4215972
+              },
+              "result_write_bytes": 770,
+              "rows": 1,
+              "planning_ms": 1.238541,
+              "result_write_ms": 0.009666,
+              "commit_ack_ms": 0.123875,
+              "elapsed_ms": 6.883249999999999,
+              "worker_pid": 66617,
+              "publication_ms": 0.102333,
+              "result_parts": 1,
+              "worker_elapsed_ms": 7.038375,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 8.07670783251524,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 669184,
+                "source_read_bytes": 669184,
+                "result_read_bytes": 0,
+                "read_requests": 257,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 1674,
+              "rows": 2,
+              "planning_ms": 1.200625,
+              "result_write_ms": 0.012083,
+              "commit_ack_ms": 0.12354099999999998,
+              "elapsed_ms": 6.92775,
+              "worker_pid": 66617,
+              "publication_ms": 0.10825,
+              "result_parts": 1,
+              "worker_elapsed_ms": 7.249666,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          }
+        ],
+        "entry": "session",
+        "intermediate_storage": "durable Arrow parts"
+      },
+      "duckdb": {
+        "backend": "duckdb",
+        "version": "1.5.5",
+        "total_ms": 92.41183428093791,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 16.6811253875494
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 47.88870923221111
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 10.676625184714794
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 1.8451246432960033
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 5.58000011369586
+          }
+        ],
+        "intermediate_storage": "persistent in-process temp table"
+      },
+      "datafusion": {
+        "backend": "direct_datafusion_55.0.0",
+        "total_ms": 60.545708,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 21.577958000000002,
+            "plan": "ProjectionExec: expr=[region@0 as region, sum(t.amount)@1 as sum(t.amount), count(Int64(1))@2 as count(*)], metrics=[output_rows=4, elapsed_compute=375ns, output_bytes=224.0 B, output_batches=1, expr_0_eval_time=83ns, expr_1_eval_time=42ns, expr_2_eval_time=1ns]\n  AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(t.amount), count(Int64(1))], metrics=[output_rows=4, elapsed_compute=6.05ms, output_bytes=224.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=117.86\u00b5s, aggregation_time=5.81ms, emitting_time=7.42\u00b5s, time_calculating_group_ids=56.63\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[region, amount], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=30.12\u00b5s, output_bytes=48.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=9.60 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=85ns, metadata_load_time=6.79\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=44.71\u00b5s, time_elapsed_processing=8.87ms, time_elapsed_scanning_total=20.11ms, time_elapsed_scanning_until_data=113.04\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=4.21% (9.60 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "rows": 986895,
+            "elapsed_ms": 21.956542,
+            "plan": "FilterExec: amount@2 IS NOT NULL, metrics=[output_rows=986.9 K, elapsed_compute=4.59ms, output_bytes=37.9 MB, output_batches=121, selectivity=94.12% (986.9 K/1.05 M)]\n  DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[id, region, amount], file_type=parquet, predicate=amount@3 IS NOT NULL, pruning_predicate=amount_null_count@1 != row_count@0, required_guarantees=[], metrics=[output_rows=1.05 M, elapsed_compute=32.67\u00b5s, output_bytes=64.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=256 total \u2192 256 matched, page_index_rows_pruned=1.05 M total \u2192 1.05 M matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=19.57 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=454.21\u00b5s, metadata_load_time=8.38\u00b5s, page_index_eval_time=213.88\u00b5s, row_pushdown_eval_time=3ns, statistics_eval_time=15.96\u00b5s, time_elapsed_opening=554.00\u00b5s, time_elapsed_processing=11.09ms, time_elapsed_scanning_total=21.06ms, time_elapsed_scanning_until_data=81.79\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=8.58% (19.57 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 4.701959,
+            "plan": "AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(saved.amount)], metrics=[output_rows=4, elapsed_compute=4.29ms, output_bytes=192.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=17.09\u00b5s, aggregation_time=4.23ms, emitting_time=2.71\u00b5s, time_calculating_group_ids=22.58\u00b5s]\n  DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "rows": 1,
+            "elapsed_ms": 0.795667,
+            "plan": "ProjectionExec: expr=[count(Int64(1))@0 as count(*)], metrics=[output_rows=1, elapsed_compute=208ns, output_bytes=8.0 B, output_batches=1, expr_0_eval_time=42ns]\n  AggregateExec: mode=Single, gby=[], aggr=[count(Int64(1))], metrics=[output_rows=1, elapsed_compute=52.21\u00b5s, output_bytes=8.0 B, output_batches=1]\n    FilterExec: amount@0 > 0.00, projection=[], metrics=[output_rows=493.2 K, elapsed_compute=343.87\u00b5s, output_bytes=0.0 B, output_batches=79, selectivity=49.97% (493.2 K/986.9 K)]\n      DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "rows": 2,
+            "elapsed_ms": 9.942209,
+            "plan": "ProjectionExec: expr=[product@0 as product, count(Int64(1))@1 as count(*)], metrics=[output_rows=2, elapsed_compute=334ns, output_bytes=96.0 B, output_batches=1, expr_0_eval_time=167ns, expr_1_eval_time=41ns]\n  AggregateExec: mode=Single, gby=[product@0 as product], aggr=[count(Int64(1))], metrics=[output_rows=2, elapsed_compute=3.39ms, output_bytes=96.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=132.46\u00b5s, aggregation_time=3.14ms, emitting_time=750ns, time_calculating_group_ids=60.37\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[product], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=27.50\u00b5s, output_bytes=32.0 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=144.9 K, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=42ns, metadata_load_time=11.88\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=35.92\u00b5s, time_elapsed_processing=1.90ms, time_elapsed_scanning_total=9.62ms, time_elapsed_scanning_until_data=35.54\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=0.06% (144.9 K/228.1 M)]\n"
+          }
+        ],
+        "intermediate_storage": "persistent in-process MemTable",
+        "process_wall_ms": 68.02133284509182
+      }
+    },
+    {
+      "variant": "serial",
+      "repeat": 1,
+      "rowtrail": {
+        "backend": "rowtrail",
+        "total_ms": 235.05966691300273,
+        "open_ms": 19.355500116944313,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 38.40879211202264,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 10123383,
+                "source_read_bytes": 10123383,
+                "result_read_bytes": 0,
+                "read_requests": 513,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 1410,
+              "rows": 4,
+              "planning_ms": 2.80925,
+              "result_write_ms": 0.032417,
+              "commit_ack_ms": 0.207292,
+              "elapsed_ms": 33.08625,
+              "worker_pid": 66625,
+              "publication_ms": 0.169291,
+              "result_parts": 1,
+              "worker_elapsed_ms": 37.046292,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": false,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 127.13908404111862,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 20097399,
+                "source_read_bytes": 20097399,
+                "result_read_bytes": 0,
+                "read_requests": 769,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 4217972,
+              "rows": 986895,
+              "planning_ms": 1.267333,
+              "result_write_ms": 66.08483299999999,
+              "commit_ack_ms": 30.092791,
+              "elapsed_ms": 124.913291,
+              "worker_pid": 66625,
+              "publication_ms": 29.873125,
+              "result_parts": 6,
+              "worker_elapsed_ms": 125.247166,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 23.02375016734004,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4217972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4217972,
+                "read_requests": 19,
+                "verified_cache_hits": 13,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4217972
+              },
+              "result_write_bytes": 1082,
+              "rows": 4,
+              "planning_ms": 1.303958,
+              "result_write_ms": 0.013708,
+              "commit_ack_ms": 0.192166,
+              "elapsed_ms": 21.702416,
+              "worker_pid": 66625,
+              "publication_ms": 0.151583,
+              "result_parts": 1,
+              "worker_elapsed_ms": 21.86,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 9.053042158484459,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4217972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4217972,
+                "read_requests": 19,
+                "verified_cache_hits": 13,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4217972
+              },
+              "result_write_bytes": 770,
+              "rows": 1,
+              "planning_ms": 1.203583,
+              "result_write_ms": 0.008543,
+              "commit_ack_ms": 0.121458,
+              "elapsed_ms": 7.858292,
+              "worker_pid": 66625,
+              "publication_ms": 0.1015,
+              "result_parts": 1,
+              "worker_elapsed_ms": 7.994125,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 18.06683372706175,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 669184,
+                "source_read_bytes": 669184,
+                "result_read_bytes": 0,
+                "read_requests": 257,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 1074,
+              "rows": 2,
+              "planning_ms": 1.207917,
+              "result_write_ms": 0.009792,
+              "commit_ack_ms": 0.131958,
+              "elapsed_ms": 16.980209,
+              "worker_pid": 66625,
+              "publication_ms": 0.112916,
+              "result_parts": 1,
+              "worker_elapsed_ms": 17.228458,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          }
+        ],
+        "entry": "session",
+        "intermediate_storage": "durable Arrow parts"
+      },
+      "duckdb": {
+        "backend": "duckdb",
+        "version": "1.5.5",
+        "total_ms": 92.31308288872242,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 16.661417204886675
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 48.2438332401216
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 10.374084115028381
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 1.8488327041268349
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 5.523583386093378
+          }
+        ],
+        "intermediate_storage": "persistent in-process temp table"
+      },
+      "datafusion": {
+        "backend": "direct_datafusion_55.0.0",
+        "total_ms": 61.558,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 22.057707999999998,
+            "plan": "ProjectionExec: expr=[region@0 as region, sum(t.amount)@1 as sum(t.amount), count(Int64(1))@2 as count(*)], metrics=[output_rows=4, elapsed_compute=500ns, output_bytes=224.0 B, output_batches=1, expr_0_eval_time=167ns, expr_1_eval_time=41ns, expr_2_eval_time=42ns]\n  AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(t.amount), count(Int64(1))], metrics=[output_rows=4, elapsed_compute=6.14ms, output_bytes=224.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=118.71\u00b5s, aggregation_time=5.89ms, emitting_time=8.33\u00b5s, time_calculating_group_ids=68.42\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[region, amount], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=30.96\u00b5s, output_bytes=48.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=9.60 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=43ns, metadata_load_time=6.58\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=45.50\u00b5s, time_elapsed_processing=9.01ms, time_elapsed_scanning_total=20.54ms, time_elapsed_scanning_until_data=111.04\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=4.21% (9.60 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "rows": 986895,
+            "elapsed_ms": 22.349792,
+            "plan": "FilterExec: amount@2 IS NOT NULL, metrics=[output_rows=986.9 K, elapsed_compute=4.65ms, output_bytes=37.9 MB, output_batches=121, selectivity=94.12% (986.9 K/1.05 M)]\n  DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[id, region, amount], file_type=parquet, predicate=amount@3 IS NOT NULL, pruning_predicate=amount_null_count@1 != row_count@0, required_guarantees=[], metrics=[output_rows=1.05 M, elapsed_compute=28.24\u00b5s, output_bytes=64.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=256 total \u2192 256 matched, page_index_rows_pruned=1.05 M total \u2192 1.05 M matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=19.57 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=453.34\u00b5s, metadata_load_time=7.92\u00b5s, page_index_eval_time=212.96\u00b5s, row_pushdown_eval_time=3ns, statistics_eval_time=19.00\u00b5s, time_elapsed_opening=554.75\u00b5s, time_elapsed_processing=11.32ms, time_elapsed_scanning_total=21.44ms, time_elapsed_scanning_until_data=81.46\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=8.58% (19.57 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 4.751542,
+            "plan": "AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(saved.amount)], metrics=[output_rows=4, elapsed_compute=4.31ms, output_bytes=192.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=7.24\u00b5s, aggregation_time=4.26ms, emitting_time=2.17\u00b5s, time_calculating_group_ids=20.30\u00b5s]\n  DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "rows": 1,
+            "elapsed_ms": 0.7995,
+            "plan": "ProjectionExec: expr=[count(Int64(1))@0 as count(*)], metrics=[output_rows=1, elapsed_compute=333ns, output_bytes=8.0 B, output_batches=1, expr_0_eval_time=42ns]\n  AggregateExec: mode=Single, gby=[], aggr=[count(Int64(1))], metrics=[output_rows=1, elapsed_compute=51.41\u00b5s, output_bytes=8.0 B, output_batches=1]\n    FilterExec: amount@0 > 0.00, projection=[], metrics=[output_rows=493.2 K, elapsed_compute=340.92\u00b5s, output_bytes=0.0 B, output_batches=79, selectivity=49.97% (493.2 K/986.9 K)]\n      DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "rows": 2,
+            "elapsed_ms": 10.004667,
+            "plan": "ProjectionExec: expr=[product@0 as product, count(Int64(1))@1 as count(*)], metrics=[output_rows=2, elapsed_compute=375ns, output_bytes=96.0 B, output_batches=1, expr_0_eval_time=167ns, expr_1_eval_time=41ns]\n  AggregateExec: mode=Single, gby=[product@0 as product], aggr=[count(Int64(1))], metrics=[output_rows=2, elapsed_compute=3.37ms, output_bytes=96.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=133.16\u00b5s, aggregation_time=3.12ms, emitting_time=1.00\u00b5s, time_calculating_group_ids=59.66\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[product], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=22.75\u00b5s, output_bytes=32.0 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=144.9 K, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=43ns, metadata_load_time=13.33\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=36.04\u00b5s, time_elapsed_processing=1.88ms, time_elapsed_scanning_total=9.64ms, time_elapsed_scanning_until_data=38.46\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=0.06% (144.9 K/228.1 M)]\n"
+          }
+        ],
+        "intermediate_storage": "persistent in-process MemTable",
+        "process_wall_ms": 69.06620785593987
+      }
+    },
+    {
+      "variant": "serial",
+      "repeat": 2,
+      "rowtrail": {
+        "backend": "rowtrail",
+        "total_ms": 230.10116629302502,
+        "open_ms": 13.317957986146212,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 38.31416694447398,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 10123383,
+                "source_read_bytes": 10123383,
+                "result_read_bytes": 0,
+                "read_requests": 513,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 1410,
+              "rows": 4,
+              "planning_ms": 2.753042,
+              "result_write_ms": 0.032,
+              "commit_ack_ms": 0.200042,
+              "elapsed_ms": 33.062042,
+              "worker_pid": 66641,
+              "publication_ms": 0.16483399999999998,
+              "result_parts": 1,
+              "worker_elapsed_ms": 36.87975,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": false,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 128.2952083274722,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 20097399,
+                "source_read_bytes": 20097399,
+                "result_read_bytes": 0,
+                "read_requests": 769,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 4217972,
+              "rows": 986895,
+              "planning_ms": 1.239583,
+              "result_write_ms": 64.78362600000003,
+              "commit_ack_ms": 32.067458,
+              "elapsed_ms": 125.810375,
+              "worker_pid": 66641,
+              "publication_ms": 31.847917,
+              "result_parts": 6,
+              "worker_elapsed_ms": 126.166625,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 22.89216686040163,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4217972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4217972,
+                "read_requests": 19,
+                "verified_cache_hits": 13,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4217972
+              },
+              "result_write_bytes": 1082,
+              "rows": 4,
+              "planning_ms": 1.313958,
+              "result_write_ms": 0.011625,
+              "commit_ack_ms": 0.183958,
+              "elapsed_ms": 21.59,
+              "worker_pid": 66641,
+              "publication_ms": 0.152583,
+              "result_parts": 1,
+              "worker_elapsed_ms": 21.739083,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 8.98549985140562,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4217972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4217972,
+                "read_requests": 19,
+                "verified_cache_hits": 13,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4217972
+              },
+              "result_write_bytes": 770,
+              "rows": 1,
+              "planning_ms": 1.1695,
+              "result_write_ms": 0.008208,
+              "commit_ack_ms": 0.129209,
+              "elapsed_ms": 7.885208,
+              "worker_pid": 66641,
+              "publication_ms": 0.107792,
+              "result_parts": 1,
+              "worker_elapsed_ms": 8.024167,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 18.281999975442886,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 669184,
+                "source_read_bytes": 669184,
+                "result_read_bytes": 0,
+                "read_requests": 257,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 1074,
+              "rows": 2,
+              "planning_ms": 1.21425,
+              "result_write_ms": 0.009917,
+              "commit_ack_ms": 0.155584,
+              "elapsed_ms": 17.08275,
+              "worker_pid": 66641,
+              "publication_ms": 0.1325,
+              "result_parts": 1,
+              "worker_elapsed_ms": 17.333667000000002,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          }
+        ],
+        "entry": "session",
+        "intermediate_storage": "durable Arrow parts"
+      },
+      "duckdb": {
+        "backend": "duckdb",
+        "version": "1.5.5",
+        "total_ms": 93.15070882439613,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 16.583125106990337
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 49.020708072930574
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 10.590167250484228
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 1.6046250239014626
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 5.545790772885084
+          }
+        ],
+        "intermediate_storage": "persistent in-process temp table"
+      },
+      "datafusion": {
+        "backend": "direct_datafusion_55.0.0",
+        "total_ms": 61.404834,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 21.733999999999998,
+            "plan": "ProjectionExec: expr=[region@0 as region, sum(t.amount)@1 as sum(t.amount), count(Int64(1))@2 as count(*)], metrics=[output_rows=4, elapsed_compute=375ns, output_bytes=224.0 B, output_batches=1, expr_0_eval_time=42ns, expr_1_eval_time=42ns, expr_2_eval_time=1ns]\n  AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(t.amount), count(Int64(1))], metrics=[output_rows=4, elapsed_compute=6.12ms, output_bytes=224.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=114.05\u00b5s, aggregation_time=5.88ms, emitting_time=8.25\u00b5s, time_calculating_group_ids=58.18\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[region, amount], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=27.47\u00b5s, output_bytes=48.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=9.60 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=2ns, metadata_load_time=6.96\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=45.58\u00b5s, time_elapsed_processing=8.94ms, time_elapsed_scanning_total=20.26ms, time_elapsed_scanning_until_data=121.92\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=4.21% (9.60 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "rows": 986895,
+            "elapsed_ms": 22.441375,
+            "plan": "FilterExec: amount@2 IS NOT NULL, metrics=[output_rows=986.9 K, elapsed_compute=4.77ms, output_bytes=37.9 MB, output_batches=121, selectivity=94.12% (986.9 K/1.05 M)]\n  DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[id, region, amount], file_type=parquet, predicate=amount@3 IS NOT NULL, pruning_predicate=amount_null_count@1 != row_count@0, required_guarantees=[], metrics=[output_rows=1.05 M, elapsed_compute=30.46\u00b5s, output_bytes=64.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=256 total \u2192 256 matched, page_index_rows_pruned=1.05 M total \u2192 1.05 M matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=19.57 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=447.25\u00b5s, metadata_load_time=5.63\u00b5s, page_index_eval_time=210.17\u00b5s, row_pushdown_eval_time=3ns, statistics_eval_time=17.21\u00b5s, time_elapsed_opening=546.04\u00b5s, time_elapsed_processing=11.25ms, time_elapsed_scanning_total=21.54ms, time_elapsed_scanning_until_data=82.62\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=8.58% (19.57 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 4.819,
+            "plan": "AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(saved.amount)], metrics=[output_rows=4, elapsed_compute=4.34ms, output_bytes=192.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=6.79\u00b5s, aggregation_time=4.29ms, emitting_time=2.12\u00b5s, time_calculating_group_ids=21.21\u00b5s]\n  DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "rows": 1,
+            "elapsed_ms": 0.8137920000000001,
+            "plan": "ProjectionExec: expr=[count(Int64(1))@0 as count(*)], metrics=[output_rows=1, elapsed_compute=208ns, output_bytes=8.0 B, output_batches=1, expr_0_eval_time=42ns]\n  AggregateExec: mode=Single, gby=[], aggr=[count(Int64(1))], metrics=[output_rows=1, elapsed_compute=52.97\u00b5s, output_bytes=8.0 B, output_batches=1]\n    FilterExec: amount@0 > 0.00, projection=[], metrics=[output_rows=493.2 K, elapsed_compute=347.34\u00b5s, output_bytes=0.0 B, output_batches=79, selectivity=49.97% (493.2 K/986.9 K)]\n      DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "rows": 2,
+            "elapsed_ms": 9.987124999999999,
+            "plan": "ProjectionExec: expr=[product@0 as product, count(Int64(1))@1 as count(*)], metrics=[output_rows=2, elapsed_compute=334ns, output_bytes=96.0 B, output_batches=1, expr_0_eval_time=167ns, expr_1_eval_time=41ns]\n  AggregateExec: mode=Single, gby=[product@0 as product], aggr=[count(Int64(1))], metrics=[output_rows=2, elapsed_compute=3.31ms, output_bytes=96.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=125.71\u00b5s, aggregation_time=3.06ms, emitting_time=1.00\u00b5s, time_calculating_group_ids=61.13\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[product], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=40.99\u00b5s, output_bytes=32.0 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=144.9 K, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=2ns, metadata_load_time=16.79\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=42.29\u00b5s, time_elapsed_processing=1.96ms, time_elapsed_scanning_total=9.66ms, time_elapsed_scanning_until_data=32.38\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=0.06% (144.9 K/228.1 M)]\n"
+          }
+        ],
+        "intermediate_storage": "persistent in-process MemTable",
+        "process_wall_ms": 69.30054211989045
+      }
+    },
+    {
+      "variant": "partitions4",
+      "repeat": 2,
+      "rowtrail": {
+        "backend": "rowtrail",
+        "total_ms": 184.64416591450572,
+        "open_ms": 19.0631658770144,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 20.52824990823865,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 10123383,
+                "source_read_bytes": 10123383,
+                "result_read_bytes": 0,
+                "read_requests": 513,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 2866,
+              "rows": 4,
+              "planning_ms": 2.7842499999999997,
+              "result_write_ms": 0.037374,
+              "commit_ack_ms": 0.181167,
+              "elapsed_ms": 15.28925,
+              "worker_pid": 66649,
+              "publication_ms": 0.152167,
+              "result_parts": 1,
+              "worker_elapsed_ms": 19.14325,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": false,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 109.64112496003509,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 20097399,
+                "source_read_bytes": 20097399,
+                "result_read_bytes": 0,
+                "read_requests": 769,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 4215972,
+              "rows": 986895,
+              "planning_ms": 1.2581669999999998,
+              "result_write_ms": 68.931582,
+              "commit_ack_ms": 35.262831999999996,
+              "elapsed_ms": 107.149208,
+              "worker_pid": 66649,
+              "publication_ms": 35.025791999999996,
+              "result_parts": 6,
+              "worker_elapsed_ms": 107.5265,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 19.700458738952875,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4215972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4215972,
+                "read_requests": 28,
+                "verified_cache_hits": 22,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4215972
+              },
+              "result_write_bytes": 2282,
+              "rows": 4,
+              "planning_ms": 1.470958,
+              "result_write_ms": 0.016292,
+              "commit_ack_ms": 0.158583,
+              "elapsed_ms": 18.255457999999997,
+              "worker_pid": 66649,
+              "publication_ms": 0.131334,
+              "result_parts": 1,
+              "worker_elapsed_ms": 18.451875,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 7.409541867673397,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4215972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4215972,
+                "read_requests": 28,
+                "verified_cache_hits": 22,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4215972
+              },
+              "result_write_bytes": 770,
+              "rows": 1,
+              "planning_ms": 1.20675,
+              "result_write_ms": 0.010042,
+              "commit_ack_ms": 0.146791,
+              "elapsed_ms": 6.138917,
+              "worker_pid": 66649,
+              "publication_ms": 0.12125,
+              "result_parts": 1,
+              "worker_elapsed_ms": 6.2946670000000005,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 8.288083132356405,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 669184,
+                "source_read_bytes": 669184,
+                "result_read_bytes": 0,
+                "read_requests": 257,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 1674,
+              "rows": 2,
+              "planning_ms": 1.238917,
+              "result_write_ms": 0.012209,
+              "commit_ack_ms": 0.131875,
+              "elapsed_ms": 7.068667,
+              "worker_pid": 66649,
+              "publication_ms": 0.109166,
+              "result_parts": 1,
+              "worker_elapsed_ms": 7.394875000000001,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          }
+        ],
+        "entry": "session",
+        "intermediate_storage": "durable Arrow parts"
+      },
+      "duckdb": {
+        "backend": "duckdb",
+        "version": "1.5.5",
+        "total_ms": 94.45429127663374,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 16.830250155180693
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 48.49462490528822
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 11.430792044848204
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 1.8532909452915192
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 5.491666030138731
+          }
+        ],
+        "intermediate_storage": "persistent in-process temp table"
+      },
+      "datafusion": {
+        "backend": "direct_datafusion_55.0.0",
+        "total_ms": 61.622707999999996,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 21.853292,
+            "plan": "ProjectionExec: expr=[region@0 as region, sum(t.amount)@1 as sum(t.amount), count(Int64(1))@2 as count(*)], metrics=[output_rows=4, elapsed_compute=416ns, output_bytes=224.0 B, output_batches=1, expr_0_eval_time=84ns, expr_1_eval_time=1ns, expr_2_eval_time=1ns]\n  AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(t.amount), count(Int64(1))], metrics=[output_rows=4, elapsed_compute=6.09ms, output_bytes=224.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=113.96\u00b5s, aggregation_time=5.86ms, emitting_time=7.92\u00b5s, time_calculating_group_ids=55.25\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[region, amount], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=28.17\u00b5s, output_bytes=48.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=9.60 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=2ns, metadata_load_time=6.54\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=46.46\u00b5s, time_elapsed_processing=9.02ms, time_elapsed_scanning_total=20.36ms, time_elapsed_scanning_until_data=112.08\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=4.21% (9.60 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "rows": 986895,
+            "elapsed_ms": 22.592125,
+            "plan": "FilterExec: amount@2 IS NOT NULL, metrics=[output_rows=986.9 K, elapsed_compute=4.62ms, output_bytes=37.9 MB, output_batches=121, selectivity=94.12% (986.9 K/1.05 M)]\n  DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[id, region, amount], file_type=parquet, predicate=amount@3 IS NOT NULL, pruning_predicate=amount_null_count@1 != row_count@0, required_guarantees=[], metrics=[output_rows=1.05 M, elapsed_compute=32.75\u00b5s, output_bytes=64.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=256 total \u2192 256 matched, page_index_rows_pruned=1.05 M total \u2192 1.05 M matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=19.57 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=448.83\u00b5s, metadata_load_time=7.63\u00b5s, page_index_eval_time=210.25\u00b5s, row_pushdown_eval_time=3ns, statistics_eval_time=16.13\u00b5s, time_elapsed_opening=546.21\u00b5s, time_elapsed_processing=11.55ms, time_elapsed_scanning_total=21.68ms, time_elapsed_scanning_until_data=80.50\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=8.58% (19.57 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 4.676709000000001,
+            "plan": "AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(saved.amount)], metrics=[output_rows=4, elapsed_compute=4.27ms, output_bytes=192.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=6.75\u00b5s, aggregation_time=4.22ms, emitting_time=4.58\u00b5s, time_calculating_group_ids=21.17\u00b5s]\n  DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "rows": 1,
+            "elapsed_ms": 0.786208,
+            "plan": "ProjectionExec: expr=[count(Int64(1))@0 as count(*)], metrics=[output_rows=1, elapsed_compute=250ns, output_bytes=8.0 B, output_batches=1, expr_0_eval_time=84ns]\n  AggregateExec: mode=Single, gby=[], aggr=[count(Int64(1))], metrics=[output_rows=1, elapsed_compute=50.66\u00b5s, output_bytes=8.0 B, output_batches=1]\n    FilterExec: amount@0 > 0.00, projection=[], metrics=[output_rows=493.2 K, elapsed_compute=342.96\u00b5s, output_bytes=0.0 B, output_batches=79, selectivity=49.97% (493.2 K/986.9 K)]\n      DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "rows": 2,
+            "elapsed_ms": 10.117332999999999,
+            "plan": "ProjectionExec: expr=[product@0 as product, count(Int64(1))@1 as count(*)], metrics=[output_rows=2, elapsed_compute=417ns, output_bytes=96.0 B, output_batches=1, expr_0_eval_time=166ns, expr_1_eval_time=42ns]\n  AggregateExec: mode=Single, gby=[product@0 as product], aggr=[count(Int64(1))], metrics=[output_rows=2, elapsed_compute=3.32ms, output_bytes=96.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=131.63\u00b5s, aggregation_time=3.06ms, emitting_time=958ns, time_calculating_group_ids=66.47\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[product], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=31.00\u00b5s, output_bytes=32.0 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=144.9 K, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=2ns, metadata_load_time=12.84\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=38.17\u00b5s, time_elapsed_processing=1.94ms, time_elapsed_scanning_total=9.77ms, time_elapsed_scanning_until_data=35.50\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=0.06% (144.9 K/228.1 M)]\n"
+          }
+        ],
+        "intermediate_storage": "persistent in-process MemTable",
+        "process_wall_ms": 69.65804193168879
+      }
+    },
+    {
+      "variant": "partitions4",
+      "repeat": 3,
+      "rowtrail": {
+        "backend": "rowtrail",
+        "total_ms": 181.63995863869786,
+        "open_ms": 17.76162488386035,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 20.064457785338163,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 10123383,
+                "source_read_bytes": 10123383,
+                "result_read_bytes": 0,
+                "read_requests": 513,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 2866,
+              "rows": 4,
+              "planning_ms": 2.685167,
+              "result_write_ms": 0.036376000000000006,
+              "commit_ack_ms": 0.219541,
+              "elapsed_ms": 14.947084,
+              "worker_pid": 66657,
+              "publication_ms": 0.18325,
+              "result_parts": 1,
+              "worker_elapsed_ms": 18.726791,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": false,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 109.61083322763443,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 20097399,
+                "source_read_bytes": 20097399,
+                "result_read_bytes": 0,
+                "read_requests": 769,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 4215972,
+              "rows": 986895,
+              "planning_ms": 1.251167,
+              "result_write_ms": 68.48938000000001,
+              "commit_ack_ms": 35.683376,
+              "elapsed_ms": 107.081375,
+              "worker_pid": 66657,
+              "publication_ms": 35.424791,
+              "result_parts": 6,
+              "worker_elapsed_ms": 107.466208,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 18.342250026762486,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4215972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4215972,
+                "read_requests": 28,
+                "verified_cache_hits": 22,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4215972
+              },
+              "result_write_bytes": 2282,
+              "rows": 4,
+              "planning_ms": 1.4285420000000002,
+              "result_write_ms": 0.0165,
+              "commit_ack_ms": 0.201334,
+              "elapsed_ms": 16.873124999999998,
+              "worker_pid": 66657,
+              "publication_ms": 0.167458,
+              "result_parts": 1,
+              "worker_elapsed_ms": 17.061291999999998,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 7.798625156283379,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4215972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4215972,
+                "read_requests": 28,
+                "verified_cache_hits": 22,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4215972
+              },
+              "result_write_bytes": 770,
+              "rows": 1,
+              "planning_ms": 1.303958,
+              "result_write_ms": 0.007833999999999999,
+              "commit_ack_ms": 0.13975,
+              "elapsed_ms": 6.496625,
+              "worker_pid": 66657,
+              "publication_ms": 0.122958,
+              "result_parts": 1,
+              "worker_elapsed_ms": 6.64975,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 8.046791888773441,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 669184,
+                "source_read_bytes": 669184,
+                "result_read_bytes": 0,
+                "read_requests": 257,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 1674,
+              "rows": 2,
+              "planning_ms": 1.264,
+              "result_write_ms": 0.012917,
+              "commit_ack_ms": 0.13774999999999998,
+              "elapsed_ms": 6.8612910000000005,
+              "worker_pid": 66657,
+              "publication_ms": 0.120083,
+              "result_parts": 1,
+              "worker_elapsed_ms": 7.190959,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          }
+        ],
+        "entry": "session",
+        "intermediate_storage": "durable Arrow parts"
+      },
+      "duckdb": {
+        "backend": "duckdb",
+        "version": "1.5.5",
+        "total_ms": 92.86120906472206,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 16.549166291952133
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 48.4398752450943
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 10.621750261634588
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 1.8614172004163265
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 5.67087484523654
+          }
+        ],
+        "intermediate_storage": "persistent in-process temp table"
+      },
+      "datafusion": {
+        "backend": "direct_datafusion_55.0.0",
+        "total_ms": 61.092875,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 21.765916999999998,
+            "plan": "ProjectionExec: expr=[region@0 as region, sum(t.amount)@1 as sum(t.amount), count(Int64(1))@2 as count(*)], metrics=[output_rows=4, elapsed_compute=334ns, output_bytes=224.0 B, output_batches=1, expr_0_eval_time=42ns, expr_1_eval_time=42ns, expr_2_eval_time=1ns]\n  AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(t.amount), count(Int64(1))], metrics=[output_rows=4, elapsed_compute=6.08ms, output_bytes=224.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=115.17\u00b5s, aggregation_time=5.84ms, emitting_time=7.25\u00b5s, time_calculating_group_ids=56.20\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[region, amount], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=26.49\u00b5s, output_bytes=48.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=9.60 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=42ns, metadata_load_time=7.21\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=47.67\u00b5s, time_elapsed_processing=8.92ms, time_elapsed_scanning_total=20.28ms, time_elapsed_scanning_until_data=113.50\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=4.21% (9.60 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "rows": 986895,
+            "elapsed_ms": 22.221334,
+            "plan": "FilterExec: amount@2 IS NOT NULL, metrics=[output_rows=986.9 K, elapsed_compute=4.60ms, output_bytes=37.9 MB, output_batches=121, selectivity=94.12% (986.9 K/1.05 M)]\n  DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[id, region, amount], file_type=parquet, predicate=amount@3 IS NOT NULL, pruning_predicate=amount_null_count@1 != row_count@0, required_guarantees=[], metrics=[output_rows=1.05 M, elapsed_compute=30.71\u00b5s, output_bytes=64.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=256 total \u2192 256 matched, page_index_rows_pruned=1.05 M total \u2192 1.05 M matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=19.57 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=452.42\u00b5s, metadata_load_time=4.79\u00b5s, page_index_eval_time=220.00\u00b5s, row_pushdown_eval_time=3ns, statistics_eval_time=16.79\u00b5s, time_elapsed_opening=554.29\u00b5s, time_elapsed_processing=11.21ms, time_elapsed_scanning_total=21.34ms, time_elapsed_scanning_until_data=77.46\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=8.58% (19.57 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 4.7292499999999995,
+            "plan": "AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(saved.amount)], metrics=[output_rows=4, elapsed_compute=4.30ms, output_bytes=192.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=6.88\u00b5s, aggregation_time=4.25ms, emitting_time=4.46\u00b5s, time_calculating_group_ids=20.50\u00b5s]\n  DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "rows": 1,
+            "elapsed_ms": 0.8007920000000001,
+            "plan": "ProjectionExec: expr=[count(Int64(1))@0 as count(*)], metrics=[output_rows=1, elapsed_compute=167ns, output_bytes=8.0 B, output_batches=1, expr_0_eval_time=42ns]\n  AggregateExec: mode=Single, gby=[], aggr=[count(Int64(1))], metrics=[output_rows=1, elapsed_compute=63.30\u00b5s, output_bytes=8.0 B, output_batches=1]\n    FilterExec: amount@0 > 0.00, projection=[], metrics=[output_rows=493.2 K, elapsed_compute=343.88\u00b5s, output_bytes=0.0 B, output_batches=79, selectivity=49.97% (493.2 K/986.9 K)]\n      DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "rows": 2,
+            "elapsed_ms": 9.986500000000001,
+            "plan": "ProjectionExec: expr=[product@0 as product, count(Int64(1))@1 as count(*)], metrics=[output_rows=2, elapsed_compute=333ns, output_bytes=96.0 B, output_batches=1, expr_0_eval_time=125ns, expr_1_eval_time=42ns]\n  AggregateExec: mode=Single, gby=[product@0 as product], aggr=[count(Int64(1))], metrics=[output_rows=2, elapsed_compute=3.43ms, output_bytes=96.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=128.05\u00b5s, aggregation_time=3.17ms, emitting_time=1.08\u00b5s, time_calculating_group_ids=64.38\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[product], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=23.18\u00b5s, output_bytes=32.0 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=144.9 K, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=2ns, metadata_load_time=12.59\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=37.67\u00b5s, time_elapsed_processing=1.90ms, time_elapsed_scanning_total=9.66ms, time_elapsed_scanning_until_data=34.96\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=0.06% (144.9 K/228.1 M)]\n"
+          }
+        ],
+        "intermediate_storage": "persistent in-process MemTable",
+        "process_wall_ms": 68.82404210045934
+      }
+    },
+    {
+      "variant": "serial",
+      "repeat": 3,
+      "rowtrail": {
+        "backend": "rowtrail",
+        "total_ms": 238.63429110497236,
+        "open_ms": 19.10224976018071,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 39.256499614566565,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 10123383,
+                "source_read_bytes": 10123383,
+                "result_read_bytes": 0,
+                "read_requests": 513,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 1410,
+              "rows": 4,
+              "planning_ms": 2.756375,
+              "result_write_ms": 0.03375,
+              "commit_ack_ms": 0.35,
+              "elapsed_ms": 33.858083,
+              "worker_pid": 66673,
+              "publication_ms": 0.30779100000000004,
+              "result_parts": 1,
+              "worker_elapsed_ms": 37.786417,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": false,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 129.4308747164905,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 20097399,
+                "source_read_bytes": 20097399,
+                "result_read_bytes": 0,
+                "read_requests": 769,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 4217972,
+              "rows": 986895,
+              "planning_ms": 1.382917,
+              "result_write_ms": 58.02504200000002,
+              "commit_ack_ms": 39.96875,
+              "elapsed_ms": 127.079625,
+              "worker_pid": 66673,
+              "publication_ms": 39.776792,
+              "result_parts": 6,
+              "worker_elapsed_ms": 127.406417,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 23.44366582110524,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4217972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4217972,
+                "read_requests": 19,
+                "verified_cache_hits": 13,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4217972
+              },
+              "result_write_bytes": 1082,
+              "rows": 4,
+              "planning_ms": 1.314834,
+              "result_write_ms": 0.012542,
+              "commit_ack_ms": 0.176916,
+              "elapsed_ms": 22.079084,
+              "worker_pid": 66673,
+              "publication_ms": 0.150375,
+              "result_parts": 1,
+              "worker_elapsed_ms": 22.231833,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 9.0637500397861,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4217972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4217972,
+                "read_requests": 19,
+                "verified_cache_hits": 13,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4217972
+              },
+              "result_write_bytes": 770,
+              "rows": 1,
+              "planning_ms": 1.169583,
+              "result_write_ms": 0.008166,
+              "commit_ack_ms": 0.123167,
+              "elapsed_ms": 7.870791,
+              "worker_pid": 66673,
+              "publication_ms": 0.103167,
+              "result_parts": 1,
+              "worker_elapsed_ms": 8.014125,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 18.32233276218176,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 669184,
+                "source_read_bytes": 669184,
+                "result_read_bytes": 0,
+                "read_requests": 257,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 1074,
+              "rows": 2,
+              "planning_ms": 1.243375,
+              "result_write_ms": 0.00875,
+              "commit_ack_ms": 0.158375,
+              "elapsed_ms": 17.2,
+              "worker_pid": 66673,
+              "publication_ms": 0.134083,
+              "result_parts": 1,
+              "worker_elapsed_ms": 17.467582999999998,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          }
+        ],
+        "entry": "session",
+        "intermediate_storage": "durable Arrow parts"
+      },
+      "duckdb": {
+        "backend": "duckdb",
+        "version": "1.5.5",
+        "total_ms": 93.27012486755848,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 16.674083657562733
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 49.07391732558608
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 10.635000187903643
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 1.600916963070631
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 5.562124773859978
+          }
+        ],
+        "intermediate_storage": "persistent in-process temp table"
+      },
+      "datafusion": {
+        "backend": "direct_datafusion_55.0.0",
+        "total_ms": 61.344584,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 22.068,
+            "plan": "ProjectionExec: expr=[region@0 as region, sum(t.amount)@1 as sum(t.amount), count(Int64(1))@2 as count(*)], metrics=[output_rows=4, elapsed_compute=458ns, output_bytes=224.0 B, output_batches=1, expr_0_eval_time=208ns, expr_1_eval_time=41ns, expr_2_eval_time=1ns]\n  AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(t.amount), count(Int64(1))], metrics=[output_rows=4, elapsed_compute=6.17ms, output_bytes=224.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=120.65\u00b5s, aggregation_time=5.93ms, emitting_time=7.38\u00b5s, time_calculating_group_ids=57.21\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[region, amount], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=27.42\u00b5s, output_bytes=48.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=9.60 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=42ns, metadata_load_time=6.67\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=47.50\u00b5s, time_elapsed_processing=9.01ms, time_elapsed_scanning_total=20.60ms, time_elapsed_scanning_until_data=116.79\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=4.21% (9.60 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "rows": 986895,
+            "elapsed_ms": 22.117083,
+            "plan": "FilterExec: amount@2 IS NOT NULL, metrics=[output_rows=986.9 K, elapsed_compute=4.64ms, output_bytes=37.9 MB, output_batches=121, selectivity=94.12% (986.9 K/1.05 M)]\n  DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[id, region, amount], file_type=parquet, predicate=amount@3 IS NOT NULL, pruning_predicate=amount_null_count@1 != row_count@0, required_guarantees=[], metrics=[output_rows=1.05 M, elapsed_compute=29.71\u00b5s, output_bytes=64.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=256 total \u2192 256 matched, page_index_rows_pruned=1.05 M total \u2192 1.05 M matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=19.57 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=446.71\u00b5s, metadata_load_time=4.83\u00b5s, page_index_eval_time=209.13\u00b5s, row_pushdown_eval_time=3ns, statistics_eval_time=16.71\u00b5s, time_elapsed_opening=556.67\u00b5s, time_elapsed_processing=11.17ms, time_elapsed_scanning_total=21.21ms, time_elapsed_scanning_until_data=81.54\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=8.58% (19.57 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 4.809,
+            "plan": "AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(saved.amount)], metrics=[output_rows=4, elapsed_compute=4.34ms, output_bytes=192.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=6.05\u00b5s, aggregation_time=4.30ms, emitting_time=1.88\u00b5s, time_calculating_group_ids=19.83\u00b5s]\n  DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "rows": 1,
+            "elapsed_ms": 0.8099580000000001,
+            "plan": "ProjectionExec: expr=[count(Int64(1))@0 as count(*)], metrics=[output_rows=1, elapsed_compute=208ns, output_bytes=8.0 B, output_batches=1, expr_0_eval_time=42ns]\n  AggregateExec: mode=Single, gby=[], aggr=[count(Int64(1))], metrics=[output_rows=1, elapsed_compute=50.33\u00b5s, output_bytes=8.0 B, output_batches=1]\n    FilterExec: amount@0 > 0.00, projection=[], metrics=[output_rows=493.2 K, elapsed_compute=354.50\u00b5s, output_bytes=0.0 B, output_batches=79, selectivity=49.97% (493.2 K/986.9 K)]\n      DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "rows": 2,
+            "elapsed_ms": 9.955625,
+            "plan": "ProjectionExec: expr=[product@0 as product, count(Int64(1))@1 as count(*)], metrics=[output_rows=2, elapsed_compute=375ns, output_bytes=96.0 B, output_batches=1, expr_0_eval_time=125ns, expr_1_eval_time=42ns]\n  AggregateExec: mode=Single, gby=[product@0 as product], aggr=[count(Int64(1))], metrics=[output_rows=2, elapsed_compute=3.36ms, output_bytes=96.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=133.28\u00b5s, aggregation_time=3.11ms, emitting_time=917ns, time_calculating_group_ids=60.71\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[product], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=23.18\u00b5s, output_bytes=32.0 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=144.9 K, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=2ns, metadata_load_time=13.54\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=47.21\u00b5s, time_elapsed_processing=1.90ms, time_elapsed_scanning_total=9.61ms, time_elapsed_scanning_until_data=36.08\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=0.06% (144.9 K/228.1 M)]\n"
+          }
+        ],
+        "intermediate_storage": "persistent in-process MemTable",
+        "process_wall_ms": 68.85079108178616
+      }
+    },
+    {
+      "variant": "serial",
+      "repeat": 4,
+      "rowtrail": {
+        "backend": "rowtrail",
+        "total_ms": 226.68937500566244,
+        "open_ms": 19.193042069673538,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 38.330540992319584,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 10123383,
+                "source_read_bytes": 10123383,
+                "result_read_bytes": 0,
+                "read_requests": 513,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 1410,
+              "rows": 4,
+              "planning_ms": 2.800292,
+              "result_write_ms": 0.03925,
+              "commit_ack_ms": 0.208875,
+              "elapsed_ms": 32.797417,
+              "worker_pid": 66681,
+              "publication_ms": 0.169291,
+              "result_parts": 1,
+              "worker_elapsed_ms": 36.899417,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": false,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 119.71895815804601,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 20097399,
+                "source_read_bytes": 20097399,
+                "result_read_bytes": 0,
+                "read_requests": 769,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 4217972,
+              "rows": 986895,
+              "planning_ms": 1.297667,
+              "result_write_ms": 58.22941999999997,
+              "commit_ack_ms": 30.262,
+              "elapsed_ms": 117.390792,
+              "worker_pid": 66681,
+              "publication_ms": 30.058413999999996,
+              "result_parts": 6,
+              "worker_elapsed_ms": 117.731875,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 22.785750217735767,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4217972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4217972,
+                "read_requests": 19,
+                "verified_cache_hits": 13,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4217972
+              },
+              "result_write_bytes": 1082,
+              "rows": 4,
+              "planning_ms": 1.274292,
+              "result_write_ms": 0.009543,
+              "commit_ack_ms": 0.17029100000000005,
+              "elapsed_ms": 21.394292,
+              "worker_pid": 66681,
+              "publication_ms": 0.142083,
+              "result_parts": 1,
+              "worker_elapsed_ms": 21.547584,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 9.049374610185623,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4217972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4217972,
+                "read_requests": 19,
+                "verified_cache_hits": 13,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4217972
+              },
+              "result_write_bytes": 770,
+              "rows": 1,
+              "planning_ms": 1.142667,
+              "result_write_ms": 0.007457999999999999,
+              "commit_ack_ms": 0.12425,
+              "elapsed_ms": 7.845332999999999,
+              "worker_pid": 66681,
+              "publication_ms": 0.104375,
+              "result_parts": 1,
+              "worker_elapsed_ms": 7.998125,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 17.598125152289867,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 669184,
+                "source_read_bytes": 669184,
+                "result_read_bytes": 0,
+                "read_requests": 257,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 1074,
+              "rows": 2,
+              "planning_ms": 1.16975,
+              "result_write_ms": 0.008417000000000001,
+              "commit_ack_ms": 0.12825,
+              "elapsed_ms": 16.500417,
+              "worker_pid": 66681,
+              "publication_ms": 0.110875,
+              "result_parts": 1,
+              "worker_elapsed_ms": 16.763209,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          }
+        ],
+        "entry": "session",
+        "intermediate_storage": "durable Arrow parts"
+      },
+      "duckdb": {
+        "backend": "duckdb",
+        "version": "1.5.5",
+        "total_ms": 93.42649998143315,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 16.86208415776491
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 48.57429163530469
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 10.681916028261185
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 1.8652081489562988
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 5.705458112061024
+          }
+        ],
+        "intermediate_storage": "persistent in-process temp table"
+      },
+      "datafusion": {
+        "backend": "direct_datafusion_55.0.0",
+        "total_ms": 61.6755,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 21.967582999999998,
+            "plan": "ProjectionExec: expr=[region@0 as region, sum(t.amount)@1 as sum(t.amount), count(Int64(1))@2 as count(*)], metrics=[output_rows=4, elapsed_compute=375ns, output_bytes=224.0 B, output_batches=1, expr_0_eval_time=83ns, expr_1_eval_time=1ns, expr_2_eval_time=41ns]\n  AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(t.amount), count(Int64(1))], metrics=[output_rows=4, elapsed_compute=6.14ms, output_bytes=224.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=129.10\u00b5s, aggregation_time=5.89ms, emitting_time=7.46\u00b5s, time_calculating_group_ids=54.28\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[region, amount], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=28.41\u00b5s, output_bytes=48.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=9.60 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=43ns, metadata_load_time=6.71\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=46.00\u00b5s, time_elapsed_processing=9.04ms, time_elapsed_scanning_total=20.48ms, time_elapsed_scanning_until_data=110.88\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=4.21% (9.60 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "rows": 986895,
+            "elapsed_ms": 22.724042,
+            "plan": "FilterExec: amount@2 IS NOT NULL, metrics=[output_rows=986.9 K, elapsed_compute=4.72ms, output_bytes=37.9 MB, output_batches=121, selectivity=94.12% (986.9 K/1.05 M)]\n  DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[id, region, amount], file_type=parquet, predicate=amount@3 IS NOT NULL, pruning_predicate=amount_null_count@1 != row_count@0, required_guarantees=[], metrics=[output_rows=1.05 M, elapsed_compute=29.09\u00b5s, output_bytes=64.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=256 total \u2192 256 matched, page_index_rows_pruned=1.05 M total \u2192 1.05 M matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=19.57 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=466.38\u00b5s, metadata_load_time=4.63\u00b5s, page_index_eval_time=220.34\u00b5s, row_pushdown_eval_time=3ns, statistics_eval_time=16.50\u00b5s, time_elapsed_opening=560.21\u00b5s, time_elapsed_processing=11.45ms, time_elapsed_scanning_total=21.81ms, time_elapsed_scanning_until_data=76.25\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=8.58% (19.57 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 4.703417,
+            "plan": "AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(saved.amount)], metrics=[output_rows=4, elapsed_compute=4.29ms, output_bytes=192.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=23.39\u00b5s, aggregation_time=4.22ms, emitting_time=4.62\u00b5s, time_calculating_group_ids=20.33\u00b5s]\n  DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "rows": 1,
+            "elapsed_ms": 0.808333,
+            "plan": "ProjectionExec: expr=[count(Int64(1))@0 as count(*)], metrics=[output_rows=1, elapsed_compute=250ns, output_bytes=8.0 B, output_batches=1, expr_0_eval_time=42ns]\n  AggregateExec: mode=Single, gby=[], aggr=[count(Int64(1))], metrics=[output_rows=1, elapsed_compute=52.76\u00b5s, output_bytes=8.0 B, output_batches=1]\n    FilterExec: amount@0 > 0.00, projection=[], metrics=[output_rows=493.2 K, elapsed_compute=354.38\u00b5s, output_bytes=0.0 B, output_batches=79, selectivity=49.97% (493.2 K/986.9 K)]\n      DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "rows": 2,
+            "elapsed_ms": 9.891583,
+            "plan": "ProjectionExec: expr=[product@0 as product, count(Int64(1))@1 as count(*)], metrics=[output_rows=2, elapsed_compute=375ns, output_bytes=96.0 B, output_batches=1, expr_0_eval_time=125ns, expr_1_eval_time=42ns]\n  AggregateExec: mode=Single, gby=[product@0 as product], aggr=[count(Int64(1))], metrics=[output_rows=2, elapsed_compute=3.39ms, output_bytes=96.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=130.92\u00b5s, aggregation_time=3.13ms, emitting_time=875ns, time_calculating_group_ids=74.04\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[product], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=23.29\u00b5s, output_bytes=32.0 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=144.9 K, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=2ns, metadata_load_time=13.50\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=40.79\u00b5s, time_elapsed_processing=1.86ms, time_elapsed_scanning_total=9.56ms, time_elapsed_scanning_until_data=33.04\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=0.06% (144.9 K/228.1 M)]\n"
+          }
+        ],
+        "intermediate_storage": "persistent in-process MemTable",
+        "process_wall_ms": 69.37345769256353
+      }
+    },
+    {
+      "variant": "partitions4",
+      "repeat": 4,
+      "rowtrail": {
+        "backend": "rowtrail",
+        "total_ms": 169.7879172861576,
+        "open_ms": 13.274583034217358,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 20.795667078346014,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 10123383,
+                "source_read_bytes": 10123383,
+                "result_read_bytes": 0,
+                "read_requests": 513,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 2866,
+              "rows": 4,
+              "planning_ms": 2.786167,
+              "result_write_ms": 0.036084000000000005,
+              "commit_ack_ms": 0.175291,
+              "elapsed_ms": 15.429542,
+              "worker_pid": 66697,
+              "publication_ms": 0.145959,
+              "result_parts": 1,
+              "worker_elapsed_ms": 19.391292,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": false,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 100.92570865526795,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 20097399,
+                "source_read_bytes": 20097399,
+                "result_read_bytes": 0,
+                "read_requests": 769,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 4215972,
+              "rows": 986895,
+              "planning_ms": 1.287458,
+              "result_write_ms": 65.12328900000001,
+              "commit_ack_ms": 30.373209999999997,
+              "elapsed_ms": 98.478833,
+              "worker_pid": 66697,
+              "publication_ms": 30.148792,
+              "result_parts": 6,
+              "worker_elapsed_ms": 98.854666,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 18.876541405916214,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4215972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4215972,
+                "read_requests": 28,
+                "verified_cache_hits": 22,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4215972
+              },
+              "result_write_bytes": 2282,
+              "rows": 4,
+              "planning_ms": 1.363958,
+              "result_write_ms": 0.017668,
+              "commit_ack_ms": 0.205375,
+              "elapsed_ms": 17.49625,
+              "worker_pid": 66697,
+              "publication_ms": 0.172833,
+              "result_parts": 1,
+              "worker_elapsed_ms": 17.6925,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 8.051624987274408,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 4215972,
+                "source_read_bytes": 0,
+                "result_read_bytes": 4215972,
+                "read_requests": 28,
+                "verified_cache_hits": 22,
+                "verified_cache_misses": 6,
+                "verified_cache_peak_bytes": 4215972
+              },
+              "result_write_bytes": 770,
+              "rows": 1,
+              "planning_ms": 1.210959,
+              "result_write_ms": 0.00875,
+              "commit_ack_ms": 0.116667,
+              "elapsed_ms": 6.863542000000001,
+              "worker_pid": 66697,
+              "publication_ms": 0.101709,
+              "result_parts": 1,
+              "worker_elapsed_ms": 7.008249999999999,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 7.848000153899193,
+            "metrics": {
+              "io": {
+                "reserved_read_bytes": 669184,
+                "source_read_bytes": 669184,
+                "result_read_bytes": 0,
+                "read_requests": 257,
+                "verified_cache_hits": 0,
+                "verified_cache_misses": 0,
+                "verified_cache_peak_bytes": 0
+              },
+              "result_write_bytes": 1674,
+              "rows": 2,
+              "planning_ms": 1.198375,
+              "result_write_ms": 0.011125,
+              "commit_ack_ms": 0.119792,
+              "elapsed_ms": 6.739417,
+              "worker_pid": 66697,
+              "publication_ms": 0.103834,
+              "result_parts": 1,
+              "worker_elapsed_ms": 7.055625,
+              "execution_stopped": true,
+              "worker_exit_confirmed": false,
+              "worker_reused": true,
+              "plan_available": true
+            }
+          }
+        ],
+        "entry": "session",
+        "intermediate_storage": "durable Arrow parts"
+      },
+      "duckdb": {
+        "backend": "duckdb",
+        "version": "1.5.5",
+        "total_ms": 92.21224999055266,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "elapsed_ms": 16.581208910793066
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "elapsed_ms": 47.989209182560444
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "elapsed_ms": 10.655665770173073
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "elapsed_ms": 1.6077919863164425
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "elapsed_ms": 5.59754204005003
+          }
+        ],
+        "intermediate_storage": "persistent in-process temp table"
+      },
+      "datafusion": {
+        "backend": "direct_datafusion_55.0.0",
+        "total_ms": 61.63175,
+        "stages": [
+          {
+            "query": "SELECT region, SUM(amount), COUNT(*) FROM t GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 21.734333000000003,
+            "plan": "ProjectionExec: expr=[region@0 as region, sum(t.amount)@1 as sum(t.amount), count(Int64(1))@2 as count(*)], metrics=[output_rows=4, elapsed_compute=375ns, output_bytes=224.0 B, output_batches=1, expr_0_eval_time=84ns, expr_1_eval_time=1ns, expr_2_eval_time=42ns]\n  AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(t.amount), count(Int64(1))], metrics=[output_rows=4, elapsed_compute=6.10ms, output_bytes=224.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=114.83\u00b5s, aggregation_time=5.86ms, emitting_time=7.88\u00b5s, time_calculating_group_ids=58.49\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[region, amount], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=25.30\u00b5s, output_bytes=48.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=9.60 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=42ns, metadata_load_time=6.54\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=46.33\u00b5s, time_elapsed_processing=8.91ms, time_elapsed_scanning_total=20.25ms, time_elapsed_scanning_until_data=111.50\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=4.21% (9.60 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT id, region, amount FROM t WHERE amount IS NOT NULL",
+            "rows": 986895,
+            "elapsed_ms": 22.74,
+            "plan": "FilterExec: amount@2 IS NOT NULL, metrics=[output_rows=986.9 K, elapsed_compute=4.64ms, output_bytes=37.9 MB, output_batches=121, selectivity=94.12% (986.9 K/1.05 M)]\n  DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[id, region, amount], file_type=parquet, predicate=amount@3 IS NOT NULL, pruning_predicate=amount_null_count@1 != row_count@0, required_guarantees=[], metrics=[output_rows=1.05 M, elapsed_compute=31.29\u00b5s, output_bytes=64.3 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=256 total \u2192 256 matched, page_index_rows_pruned=1.05 M total \u2192 1.05 M matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=19.57 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=458.92\u00b5s, metadata_load_time=5.21\u00b5s, page_index_eval_time=219.92\u00b5s, row_pushdown_eval_time=3ns, statistics_eval_time=16.25\u00b5s, time_elapsed_opening=553.62\u00b5s, time_elapsed_processing=11.45ms, time_elapsed_scanning_total=21.85ms, time_elapsed_scanning_until_data=79.38\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=8.58% (19.57 M/228.1 M)]\n"
+          },
+          {
+            "query": "SELECT region, SUM(amount) FROM saved GROUP BY region",
+            "rows": 4,
+            "elapsed_ms": 4.6705000000000005,
+            "plan": "AggregateExec: mode=Single, gby=[region@0 as region], aggr=[sum(saved.amount)], metrics=[output_rows=4, elapsed_compute=4.25ms, output_bytes=192.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=6.71\u00b5s, aggregation_time=4.20ms, emitting_time=2.17\u00b5s, time_calculating_group_ids=19.83\u00b5s]\n  DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT COUNT(*) FROM saved WHERE amount > 0",
+            "rows": 1,
+            "elapsed_ms": 0.804167,
+            "plan": "ProjectionExec: expr=[count(Int64(1))@0 as count(*)], metrics=[output_rows=1, elapsed_compute=208ns, output_bytes=8.0 B, output_batches=1, expr_0_eval_time=83ns]\n  AggregateExec: mode=Single, gby=[], aggr=[count(Int64(1))], metrics=[output_rows=1, elapsed_compute=52.17\u00b5s, output_bytes=8.0 B, output_batches=1]\n    FilterExec: amount@0 > 0.00, projection=[], metrics=[output_rows=493.2 K, elapsed_compute=339.41\u00b5s, output_bytes=0.0 B, output_batches=79, selectivity=49.97% (493.2 K/986.9 K)]\n      DataSourceExec: partitions=1, partition_sizes=[121], metrics=[]\n"
+          },
+          {
+            "query": "SELECT product, COUNT(*) FROM t GROUP BY product",
+            "rows": 2,
+            "elapsed_ms": 10.089875,
+            "plan": "ProjectionExec: expr=[product@0 as product, count(Int64(1))@1 as count(*)], metrics=[output_rows=2, elapsed_compute=417ns, output_bytes=96.0 B, output_batches=1, expr_0_eval_time=166ns, expr_1_eval_time=42ns]\n  AggregateExec: mode=Single, gby=[product@0 as product], aggr=[count(Int64(1))], metrics=[output_rows=2, elapsed_compute=3.31ms, output_bytes=96.0 B, output_batches=1, spill_count=0, spilled_bytes=0.0 B, spilled_rows=0, aggregate_arguments_time=130.21\u00b5s, aggregation_time=3.05ms, emitting_time=958ns, time_calculating_group_ids=64.67\u00b5s]\n    DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[product], file_type=parquet, metrics=[output_rows=1.05 M, elapsed_compute=24.13\u00b5s, output_bytes=32.0 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=144.9 K, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=2ns, metadata_load_time=12.38\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=37.17\u00b5s, time_elapsed_processing=1.87ms, time_elapsed_scanning_total=9.76ms, time_elapsed_scanning_until_data=48.75\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=0.06% (144.9 K/228.1 M)]\n"
+          }
+        ],
+        "intermediate_storage": "persistent in-process MemTable",
+        "process_wall_ms": 69.36387484893203
+      }
+    }
+  ],
+  "summary_ms": {
+    "serial": {
+      "rowtrail": 235.05966691300273,
+      "duckdb": 93.27012486755848,
+      "datafusion": 61.4825
+    },
+    "partitions4": {
+      "rowtrail": 181.63995863869786,
+      "duckdb": 92.73358294740319,
+      "datafusion": 61.154458000000005
+    }
+  },
+  "limitations": [
+    "Order reverses on alternating repeats; each trial has a fresh workspace and freshly generated identical deterministic input.",
+    "OS cache is not flushed. Fixtures, process cleanup and report writing are outside the measured workflow.",
+    "No concurrent local builds or benchmark processes. Direct engines retain intermediate tables; RowTrail persists them. No model calls."
+  ]
+}

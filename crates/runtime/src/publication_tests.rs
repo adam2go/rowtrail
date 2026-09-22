@@ -24,6 +24,7 @@ fn fault_child() {
     };
     let workspace = PathBuf::from(root);
     let prepared = std::env::var("ROWTRAIL_TEST_PREPARE").is_ok();
+    let inline = std::env::var("ROWTRAIL_TEST_INLINE").is_ok();
     let rt = tokio::runtime::Runtime::new().unwrap();
     rt.block_on(async {
         for dir in ["store", "staging", "spill", "logs"] {
@@ -82,6 +83,9 @@ fn fault_child() {
             writer.into_inner().unwrap().sync_all().unwrap();
         }
         let bytes = std::fs::read(&path).unwrap();
+        if inline {
+            std::fs::remove_file(&path).unwrap();
+        }
         db.publish(
             &spec,
             &Part {
@@ -89,8 +93,9 @@ fn fault_child() {
                 path,
                 bytes: bytes.len() as u64,
                 rows: 1,
-                checksum: hex::encode(Sha256::digest(bytes)),
+                checksum: hex::encode(Sha256::digest(&bytes)),
                 schema,
+                inline_data: inline.then(|| hex::encode(&bytes)),
                 checkpoint: None,
             },
         )
@@ -102,9 +107,13 @@ fn fault_child() {
 
 #[test]
 fn commits_survive_crash_at_each_publication_boundary() {
-    for prepared in [false, true] {
+    for (prepared, inline) in [(false, false), (true, false), (false, true)] {
         for point in [
-            "after_part_rename",
+            if inline {
+                "before_inline_commit"
+            } else {
+                "after_part_rename"
+            },
             "after_part_commit",
             "before_final_commit",
             "after_final_commit",
@@ -114,6 +123,9 @@ fn commits_survive_crash_at_each_publication_boundary() {
             cmd.args(["--exact", "publication_tests::fault_child", "--nocapture"])
                 .env("ROWTRAIL_TEST_COMMIT_WORKSPACE", temp.path())
                 .env("ROWTRAIL_TEST_COMMIT_FAULT", point);
+            if inline {
+                cmd.env("ROWTRAIL_TEST_INLINE", "1");
+            }
             if prepared {
                 cmd.env("ROWTRAIL_TEST_PREPARE", "1");
             }
@@ -144,6 +156,15 @@ fn commits_survive_crash_at_each_publication_boundary() {
             );
             if prepared {
                 assert_eq!(db.object("mf_test").is_ok(), completed, "{point}");
+            } else if point == "before_inline_commit" {
+                assert!(crate::results::snapshot(&db, &result, None).is_err());
+                let count: u64 = db
+                    .conn
+                    .lock()
+                    .unwrap()
+                    .query_row("SELECT COUNT(*) FROM inline_parts", [], |r| r.get(0))
+                    .unwrap();
+                assert_eq!(count, 0, "uncommitted bytes survived rollback");
             } else if point == "after_part_rename" {
                 assert!(crate::results::snapshot(&db, &result, None).is_err());
                 assert_eq!(

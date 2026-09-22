@@ -13,13 +13,13 @@ use std::{
     time::Duration,
 };
 
-pub struct HashWriter {
-    pub file: BufWriter<File>,
+pub struct HashWriter<W = BufWriter<File>> {
+    pub file: W,
     pub hash: Sha256,
     pub bytes: u64,
     pub limit: u64,
 }
-impl Write for HashWriter {
+impl<W: Write> Write for HashWriter<W> {
     fn write(&mut self, b: &[u8]) -> std::io::Result<usize> {
         if self.bytes.saturating_add(b.len() as u64) > self.limit {
             return Err(std::io::Error::other(
@@ -52,9 +52,59 @@ async fn message(value: &WorkerMessage) -> Result<()> {
 const PART_TARGET: u64 = 6 * 1024 * 1024;
 const PART_LIMIT: u64 = 8 * 1024 * 1024;
 const PART_BATCH_LIMIT: usize = 128;
+
+// Spill once when the inline limit is crossed. Large writes never accumulate
+// in this buffer, and file publication keeps the existing sync guarantees.
+struct StagedFile {
+    path: std::path::PathBuf,
+    memory: Vec<u8>,
+    disk: Option<BufWriter<File>>,
+    inline: bool,
+}
+impl StagedFile {
+    fn finish(mut self) -> Result<Option<String>> {
+        if let Some(file) = &mut self.disk {
+            file.flush()?;
+            file.get_ref().sync_all()?;
+            Ok(None)
+        } else {
+            Ok(Some(hex::encode(self.memory)))
+        }
+    }
+}
+impl Write for StagedFile {
+    fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+        if self.disk.is_none() {
+            if self.inline
+                && self.memory.len().saturating_add(bytes.len()) <= crate::results::INLINE_LIMIT
+            {
+                self.memory.extend_from_slice(bytes);
+                return Ok(bytes.len());
+            }
+            std::fs::create_dir_all(self.path.parent().unwrap())?;
+            let mut file = BufWriter::with_capacity(
+                64 * 1024,
+                OpenOptions::new()
+                    .write(true)
+                    .create_new(true)
+                    .open(&self.path)?,
+            );
+            file.write_all(&self.memory)?;
+            self.memory = Vec::new();
+            self.disk = Some(file);
+        }
+        self.disk.as_mut().unwrap().write(bytes)
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        if let Some(file) = &mut self.disk {
+            file.flush()?;
+        }
+        Ok(())
+    }
+}
 enum PartWriter {
-    Arrow(FileWriter<HashWriter>),
-    Parquet(parquet::arrow::ArrowWriter<HashWriter>),
+    Arrow(FileWriter<HashWriter<StagedFile>>),
+    Parquet(parquet::arrow::ArrowWriter<HashWriter<StagedFile>>),
 }
 struct StagedPart {
     writer: PartWriter,
@@ -73,7 +123,6 @@ impl StagedPart {
         compress: bool,
     ) -> Result<Self> {
         let dir = spec.workspace.join("staging").join(&spec.attempt);
-        std::fs::create_dir_all(&dir)?;
         let extension = if spec.prepared.is_some() {
             "parquet"
         } else {
@@ -81,13 +130,12 @@ impl StagedPart {
         };
         let path = dir.join(format!("{seq:012}.{extension}"));
         let output = HashWriter {
-            file: BufWriter::with_capacity(
-                64 * 1024,
-                OpenOptions::new()
-                    .write(true)
-                    .create_new(true)
-                    .open(&path)?,
-            ),
+            file: StagedFile {
+                path: path.clone(),
+                memory: Vec::new(),
+                disk: None,
+                inline: spec.prepared.is_none(),
+            },
             hash: Sha256::new(),
             bytes: 0,
             limit: remaining.min(PART_LIMIT),
@@ -149,7 +197,7 @@ impl StagedPart {
             PartWriter::Parquet(w) => w.into_inner()?,
         };
         output.flush()?;
-        output.file.get_ref().sync_all()?;
+        let inline_data = output.file.finish()?;
         Ok(Part {
             seq,
             path: self.path,
@@ -157,6 +205,7 @@ impl StagedPart {
             rows: self.rows,
             checksum: hex::encode(output.hash.finalize()),
             schema: schema.clone(),
+            inline_data,
             checkpoint: None,
         })
     }
@@ -416,9 +465,8 @@ async fn export(spec: &JobSpec, counters: &crate::store::Counters) -> Result<ser
                     .filter(|n| *n <= p.execution.scan_bytes)
             })
             .map_err(|_| anyhow::anyhow!("RESOURCE_EXHAUSTED: export scan byte budget"))?;
-        let bytes = crate::results::verified_bytes(
-            &part.path,
-            part.size,
+        let bytes = crate::results::verified_part(
+            part,
             part.checksum
                 .as_deref()
                 .ok_or_else(|| anyhow::anyhow!("RESULT_CORRUPT: missing checksum"))?,

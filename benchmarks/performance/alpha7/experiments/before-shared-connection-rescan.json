@@ -1,0 +1,508 @@
+{
+  "status": "passed",
+  "kind": "three logical scans of a saved result in one exact SQL job; no model calls",
+  "rows": 1048576,
+  "repeats": 7,
+  "machine": "macOS-26.6.2-arm64-arm-64bit",
+  "fixture_sha256": "5dbf86141275746ec6c17443c01f31b889ab685f9224084e53423a4748bc096d",
+  "binary_sha256": {
+    "alpha6": {
+      "rowtrail": "e473127f4a555b70b85beb17ca6da7a484da44b1bfcd8e162b83e97b461acd2a",
+      "rowtrail-runtime": "978b6319b74592e4514eec3efe2a7f2fe657759366e01119c1b6ca9018e57132"
+    },
+    "alpha7": {
+      "rowtrail": "c87f1f316b89546b4b391d9c4f3a07f16dca763f40f1cb31a99dda3bcd0ce606",
+      "rowtrail-runtime": "28965125cb487c91fba09653d6363594beb91c01806166361aa552b5571d7a0f"
+    }
+  },
+  "sql": "SELECT 'missing' kind, COUNT(*) n, SUM(CAST(id AS DECIMAL(38,0))) ids FROM saved WHERE amount IS NULL\nUNION ALL SELECT 'negative', COUNT(*), SUM(CAST(id AS DECIMAL(38,0))) FROM saved WHERE amount < 0\nUNION ALL SELECT 'nonnegative', COUNT(*), SUM(CAST(id AS DECIMAL(38,0))) FROM saved WHERE amount >= 0\nORDER BY kind",
+  "expected": [
+    [
+      "missing",
+      "61681",
+      "555573057264017303913"
+    ],
+    [
+      "negative",
+      "493226",
+      "4442584859877239674350"
+    ],
+    [
+      "nonnegative",
+      "493669",
+      "4446575049147789787305"
+    ]
+  ],
+  "records": [
+    {
+      "variant": "alpha6",
+      "repeat": 0,
+      "total_ms": 256.21566735208035,
+      "open_and_materialize_ms": 185.91120932251215,
+      "rescan_ms": 70.29366726055741,
+      "stored_bytes": 4655338,
+      "result_parts": 9,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 19605074,
+          "source_read_bytes": 0,
+          "result_read_bytes": 19605074,
+          "read_requests": 84
+        },
+        "result_write_bytes": 1322,
+        "rows": 3,
+        "planning_ms": 3.860416,
+        "result_write_ms": 5.210875,
+        "commit_ack_ms": 8.798583,
+        "elapsed_ms": 68.307458,
+        "worker_pid": 62384,
+        "publication_ms": 8.758208999999999,
+        "result_parts": 1,
+        "worker_elapsed_ms": 68.60362500000001,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": true,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 0,
+      "total_ms": 212.71491702646017,
+      "open_and_materialize_ms": 181.43854197114706,
+      "rescan_ms": 31.265500001609325,
+      "stored_bytes": 4655338,
+      "result_parts": 9,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 4655338,
+          "source_read_bytes": 0,
+          "result_read_bytes": 4655338,
+          "read_requests": 84,
+          "verified_cache_hits": 75,
+          "verified_cache_misses": 9,
+          "verified_cache_peak_bytes": 4655338
+        },
+        "result_write_bytes": 1322,
+        "rows": 3,
+        "planning_ms": 3.266,
+        "result_write_ms": 0.017125,
+        "commit_ack_ms": 0.194333,
+        "elapsed_ms": 29.207125,
+        "worker_pid": 62387,
+        "publication_ms": 0.157625,
+        "result_parts": 1,
+        "worker_elapsed_ms": 29.460458,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": true,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 1,
+      "total_ms": 214.14541685953736,
+      "open_and_materialize_ms": 182.73650016635656,
+      "rescan_ms": 31.398165971040726,
+      "stored_bytes": 4655338,
+      "result_parts": 9,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 4655338,
+          "source_read_bytes": 0,
+          "result_read_bytes": 4655338,
+          "read_requests": 84,
+          "verified_cache_hits": 75,
+          "verified_cache_misses": 9,
+          "verified_cache_peak_bytes": 4655338
+        },
+        "result_write_bytes": 1322,
+        "rows": 3,
+        "planning_ms": 3.2821249999999997,
+        "result_write_ms": 0.015916,
+        "commit_ack_ms": 0.221291,
+        "elapsed_ms": 29.505833,
+        "worker_pid": 62390,
+        "publication_ms": 0.188958,
+        "result_parts": 1,
+        "worker_elapsed_ms": 29.76225,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": true,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha6",
+      "repeat": 1,
+      "total_ms": 259.8024173639715,
+      "open_and_materialize_ms": 189.83525037765503,
+      "rescan_ms": 69.95704211294651,
+      "stored_bytes": 4655338,
+      "result_parts": 9,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 19605074,
+          "source_read_bytes": 0,
+          "result_read_bytes": 19605074,
+          "read_requests": 84
+        },
+        "result_write_bytes": 1322,
+        "rows": 3,
+        "planning_ms": 3.323167,
+        "result_write_ms": 5.068959,
+        "commit_ack_ms": 9.220292,
+        "elapsed_ms": 68.055792,
+        "worker_pid": 62393,
+        "publication_ms": 9.187583,
+        "result_parts": 1,
+        "worker_elapsed_ms": 68.346292,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": true,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha6",
+      "repeat": 2,
+      "total_ms": 258.25208332389593,
+      "open_and_materialize_ms": 187.1311250142753,
+      "rescan_ms": 71.11204229295254,
+      "stored_bytes": 4655338,
+      "result_parts": 9,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 19605074,
+          "source_read_bytes": 0,
+          "result_read_bytes": 19605074,
+          "read_requests": 84
+        },
+        "result_write_bytes": 1322,
+        "rows": 3,
+        "planning_ms": 3.268542,
+        "result_write_ms": 4.970001,
+        "commit_ack_ms": 10.142833,
+        "elapsed_ms": 69.239542,
+        "worker_pid": 62404,
+        "publication_ms": 10.107042,
+        "result_parts": 1,
+        "worker_elapsed_ms": 69.509166,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": true,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 2,
+      "total_ms": 215.1146661490202,
+      "open_and_materialize_ms": 183.31462517380714,
+      "rescan_ms": 31.7887500859797,
+      "stored_bytes": 4655338,
+      "result_parts": 9,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 4655338,
+          "source_read_bytes": 0,
+          "result_read_bytes": 4655338,
+          "read_requests": 84,
+          "verified_cache_hits": 75,
+          "verified_cache_misses": 9,
+          "verified_cache_peak_bytes": 4655338
+        },
+        "result_write_bytes": 1322,
+        "rows": 3,
+        "planning_ms": 3.2777499999999997,
+        "result_write_ms": 0.017666,
+        "commit_ack_ms": 0.201208,
+        "elapsed_ms": 29.600667,
+        "worker_pid": 62407,
+        "publication_ms": 0.168834,
+        "result_parts": 1,
+        "worker_elapsed_ms": 29.87475,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": true,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 3,
+      "total_ms": 219.500333070755,
+      "open_and_materialize_ms": 185.310167260468,
+      "rescan_ms": 34.177291207015514,
+      "stored_bytes": 4655338,
+      "result_parts": 9,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 4655338,
+          "source_read_bytes": 0,
+          "result_read_bytes": 4655338,
+          "read_requests": 84,
+          "verified_cache_hits": 75,
+          "verified_cache_misses": 9,
+          "verified_cache_peak_bytes": 4655338
+        },
+        "result_write_bytes": 1322,
+        "rows": 3,
+        "planning_ms": 3.227708,
+        "result_write_ms": 0.022,
+        "commit_ack_ms": 0.31366700000000003,
+        "elapsed_ms": 32.079917,
+        "worker_pid": 62410,
+        "publication_ms": 0.258583,
+        "result_parts": 1,
+        "worker_elapsed_ms": 32.396208,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": true,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha6",
+      "repeat": 3,
+      "total_ms": 257.4965409003198,
+      "open_and_materialize_ms": 188.11845825985074,
+      "rescan_ms": 69.36708325520158,
+      "stored_bytes": 4655338,
+      "result_parts": 9,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 19605074,
+          "source_read_bytes": 0,
+          "result_read_bytes": 19605074,
+          "read_requests": 84
+        },
+        "result_write_bytes": 1322,
+        "rows": 3,
+        "planning_ms": 3.2207920000000003,
+        "result_write_ms": 4.634124,
+        "commit_ack_ms": 10.345792,
+        "elapsed_ms": 67.689875,
+        "worker_pid": 62419,
+        "publication_ms": 10.319167,
+        "result_parts": 1,
+        "worker_elapsed_ms": 67.94529200000001,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": true,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha6",
+      "repeat": 4,
+      "total_ms": 260.1632918231189,
+      "open_and_materialize_ms": 190.6689591705799,
+      "rescan_ms": 69.4829998537898,
+      "stored_bytes": 4655338,
+      "result_parts": 9,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 19605074,
+          "source_read_bytes": 0,
+          "result_read_bytes": 19605074,
+          "read_requests": 84
+        },
+        "result_write_bytes": 1322,
+        "rows": 3,
+        "planning_ms": 3.193791,
+        "result_write_ms": 5.503875,
+        "commit_ack_ms": 9.542916,
+        "elapsed_ms": 67.765416,
+        "worker_pid": 62422,
+        "publication_ms": 9.518417,
+        "result_parts": 1,
+        "worker_elapsed_ms": 68.02624999999999,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": true,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 4,
+      "total_ms": 217.94387511909008,
+      "open_and_materialize_ms": 186.27800000831485,
+      "rescan_ms": 31.65295859798789,
+      "stored_bytes": 4655338,
+      "result_parts": 9,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 4655338,
+          "source_read_bytes": 0,
+          "result_read_bytes": 4655338,
+          "read_requests": 84,
+          "verified_cache_hits": 75,
+          "verified_cache_misses": 9,
+          "verified_cache_peak_bytes": 4655338
+        },
+        "result_write_bytes": 1322,
+        "rows": 3,
+        "planning_ms": 3.291625,
+        "result_write_ms": 0.014625,
+        "commit_ack_ms": 0.215,
+        "elapsed_ms": 29.723542,
+        "worker_pid": 62425,
+        "publication_ms": 0.182833,
+        "result_parts": 1,
+        "worker_elapsed_ms": 29.970457999999997,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": true,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 5,
+      "total_ms": 215.74787516146898,
+      "open_and_materialize_ms": 182.57670802995563,
+      "rescan_ms": 33.16154237836599,
+      "stored_bytes": 4655338,
+      "result_parts": 9,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 4655338,
+          "source_read_bytes": 0,
+          "result_read_bytes": 4655338,
+          "read_requests": 84,
+          "verified_cache_hits": 75,
+          "verified_cache_misses": 9,
+          "verified_cache_peak_bytes": 4655338
+        },
+        "result_write_bytes": 1322,
+        "rows": 3,
+        "planning_ms": 3.232333,
+        "result_write_ms": 0.018125,
+        "commit_ack_ms": 0.210167,
+        "elapsed_ms": 31.211042000000003,
+        "worker_pid": 62428,
+        "publication_ms": 0.177083,
+        "result_parts": 1,
+        "worker_elapsed_ms": 31.48325,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": true,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha6",
+      "repeat": 5,
+      "total_ms": 264.4510418176651,
+      "open_and_materialize_ms": 193.43275018036366,
+      "rescan_ms": 71.00483309477568,
+      "stored_bytes": 4655338,
+      "result_parts": 9,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 19605074,
+          "source_read_bytes": 0,
+          "result_read_bytes": 19605074,
+          "read_requests": 84
+        },
+        "result_write_bytes": 1322,
+        "rows": 3,
+        "planning_ms": 3.194458,
+        "result_write_ms": 5.251125,
+        "commit_ack_ms": 10.23675,
+        "elapsed_ms": 69.145583,
+        "worker_pid": 62431,
+        "publication_ms": 10.177917,
+        "result_parts": 1,
+        "worker_elapsed_ms": 69.43408299999999,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": true,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha6",
+      "repeat": 6,
+      "total_ms": 258.74749990180135,
+      "open_and_materialize_ms": 189.22408390790224,
+      "rescan_ms": 69.5113749243319,
+      "stored_bytes": 4655338,
+      "result_parts": 9,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 19605074,
+          "source_read_bytes": 0,
+          "result_read_bytes": 19605074,
+          "read_requests": 84
+        },
+        "result_write_bytes": 1322,
+        "rows": 3,
+        "planning_ms": 3.24525,
+        "result_write_ms": 5.443709,
+        "commit_ack_ms": 9.473166,
+        "elapsed_ms": 67.777958,
+        "worker_pid": 62442,
+        "publication_ms": 9.445584,
+        "result_parts": 1,
+        "worker_elapsed_ms": 68.029709,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": true,
+        "plan_available": true
+      }
+    },
+    {
+      "variant": "alpha7",
+      "repeat": 6,
+      "total_ms": 198.2869589701295,
+      "open_and_materialize_ms": 167.26641729474068,
+      "rescan_ms": 31.007417012006044,
+      "stored_bytes": 4655338,
+      "result_parts": 9,
+      "metrics": {
+        "io": {
+          "reserved_read_bytes": 4655338,
+          "source_read_bytes": 0,
+          "result_read_bytes": 4655338,
+          "read_requests": 84,
+          "verified_cache_hits": 75,
+          "verified_cache_misses": 9,
+          "verified_cache_peak_bytes": 4655338
+        },
+        "result_write_bytes": 1322,
+        "rows": 3,
+        "planning_ms": 3.1722080000000004,
+        "result_write_ms": 0.016708,
+        "commit_ack_ms": 0.174,
+        "elapsed_ms": 28.86275,
+        "worker_pid": 62445,
+        "publication_ms": 0.14316700000000002,
+        "result_parts": 1,
+        "worker_elapsed_ms": 29.130458,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": true,
+        "plan_available": true
+      }
+    }
+  ],
+  "summary": {
+    "alpha6": {
+      "total_ms": 258.74749990180135,
+      "rescan_ms": 69.95704211294651
+    },
+    "alpha7": {
+      "total_ms": 215.1146661490202,
+      "rescan_ms": 31.65295859798789
+    }
+  },
+  "limitations": [
+    "OS cache not flushed; serial alternating order, fresh workspace/session per trial.",
+    "Caches are job-local and byte-bounded; this does not measure cross-job caching.",
+    "A hand-fused conditional aggregation could avoid these logical rescans; this fixture measures reuse of a repeated scan plan, not optimal SQL."
+  ]
+}

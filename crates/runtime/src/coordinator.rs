@@ -66,15 +66,7 @@ pub async fn serve(workspace: &Path) -> Result<()> {
             match scheduler_db.queued() {
                 Ok(Some(spec)) => {
                     scheduler_busy.store(1, Ordering::SeqCst);
-                    if let Err(e) = run_job(&scheduler_db, &spec, &mut worker).await {
-                        terminate(&mut worker).await;
-                        let _ = scheduler_db.finish(
-                            &spec,
-                            "failed",
-                            Some(json!({"code":"WORKER_LOST","message":format!("{e:#}")})),
-                            json!({"execution_stopped":true,"worker_exit_confirmed":true}),
-                        );
-                    }
+                    run_job_with_recovery(&scheduler_db, &spec, &mut worker).await;
                     if let Err(e) = crate::storage::clean_attempt(&scheduler_db, &spec) {
                         eprintln!("cleanup error: {e:#}");
                     }
@@ -137,6 +129,32 @@ async fn terminate(worker: &mut Option<Worker>) {
     if let Some(mut worker) = worker.take() {
         let _ = worker.child.start_kill();
         let _ = worker.child.wait().await;
+    }
+}
+async fn run_job_with_recovery(db: &Db, spec: &JobSpec, worker: &mut Option<Worker>) {
+    if let Err(e) = run_job(db, spec, worker).await {
+        terminate(worker).await;
+        // A worker may die after committing a part but before its
+        // acknowledgement. Treat a broken control pipe like EOF;
+        // the committed revision remains readable, never replayed.
+        let state = if e.downcast_ref::<std::io::Error>().is_some_and(|error| {
+            matches!(
+                error.kind(),
+                std::io::ErrorKind::BrokenPipe
+                    | std::io::ErrorKind::ConnectionReset
+                    | std::io::ErrorKind::UnexpectedEof
+            )
+        }) {
+            "interrupted"
+        } else {
+            "failed"
+        };
+        let _ = db.finish(
+            spec,
+            state,
+            Some(json!({"code":"WORKER_LOST","message":format!("{e:#}")})),
+            json!({"execution_stopped":true,"worker_exit_confirmed":true}),
+        );
     }
 }
 async fn run_job(db: &Db, spec: &JobSpec, pool: &mut Option<Worker>) -> Result<()> {
@@ -256,4 +274,112 @@ async fn run_job(db: &Db, spec: &JobSpec, pool: &mut Option<Worker>) -> Result<(
         let _ = std::fs::remove_dir_all(db.workspace.join(root).join(&spec.attempt));
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use arrow::{
+        array::Int64Array,
+        datatypes::{DataType, Field, Schema},
+        record_batch::RecordBatch,
+    };
+    use sha2::{Digest, Sha256};
+
+    #[tokio::test]
+    async fn broken_ack_pipe_preserves_committed_revision_as_interrupted() {
+        let temp = tempfile::tempdir().unwrap();
+        for dir in ["store", "staging", "spill", "logs"] {
+            std::fs::create_dir(temp.path().join(dir)).unwrap();
+        }
+        let db = Arc::new(Db::open(temp.path()).unwrap());
+        let accepted = crate::api::dispatch(
+            db.clone(),
+            rowtrail_contracts::Request::new(
+                "query",
+                json!({"bindings":{},"sql":"SELECT 7","execution":{"wait_ms":0}}),
+            ),
+        )
+        .await;
+        assert!(accepted.ok);
+        let spec = db.queued().unwrap().unwrap();
+        let schema = Schema::new(vec![Field::new("n", DataType::Int64, false)]);
+        let batch = RecordBatch::try_new(
+            Arc::new(schema.clone()),
+            vec![Arc::new(Int64Array::from(vec![7]))],
+        )
+        .unwrap();
+        let mut writer = arrow::ipc::writer::FileWriter::try_new(Vec::new(), &schema).unwrap();
+        writer.write(&batch).unwrap();
+        writer.finish().unwrap();
+        let bytes = writer.into_inner().unwrap();
+        let messages = [
+            WorkerMessage::Schema {
+                schema: schema.clone(),
+            },
+            WorkerMessage::Part {
+                part: crate::model::Part {
+                    seq: 0,
+                    path: temp
+                        .path()
+                        .join("staging")
+                        .join(&spec.attempt)
+                        .join("000000000000.arrow"),
+                    bytes: bytes.len() as u64,
+                    rows: 1,
+                    checksum: hex::encode(Sha256::digest(&bytes)),
+                    schema,
+                    inline_data: Some(hex::encode(bytes)),
+                    checkpoint: None,
+                },
+            },
+        ];
+        let frames = temp.path().join("frames");
+        std::fs::write(
+            &frames,
+            messages
+                .iter()
+                .map(|v| serde_json::to_string(v).unwrap() + "\n")
+                .collect::<String>(),
+        )
+        .unwrap();
+        // A real pipe: consume the initial job, then close the ACK reader before
+        // emitting a valid part. This deterministically hits the publication race.
+        let mut child = Command::new("sh")
+            .args([
+                "-c",
+                "IFS= read -r job; exec 0<&-; cat \"$1\"",
+                "worker-test",
+            ])
+            .arg(frames)
+            .stdin(std::process::Stdio::piped())
+            .stdout(std::process::Stdio::piped())
+            .kill_on_drop(true)
+            .spawn()
+            .unwrap();
+        let input = child.stdin.take().unwrap();
+        let lines = BufReader::new(child.stdout.take().unwrap()).lines();
+        let mut worker = Some(Worker {
+            child,
+            input,
+            lines,
+            token: "worker_test".into(),
+            uses: 0,
+        });
+        run_job_with_recovery(&db, &spec, &mut worker).await;
+        assert!(worker.is_none());
+        let state = db.job(&spec.job_id).unwrap();
+        assert_eq!(state["state"], "interrupted");
+        assert_eq!(state["metrics"]["worker_exit_confirmed"], true);
+        let read = crate::api::dispatch(
+            db,
+            rowtrail_contracts::Request::new(
+                "read",
+                json!({"result_ref":spec.result_ref,"revision":1}),
+            ),
+        )
+        .await;
+        assert!(read.ok, "{read:?}");
+        assert_eq!(read.result.unwrap()["rows"], json!([["7"]]));
+    }
 }

@@ -30,6 +30,14 @@ pub struct SourceFile {
     /// Managed files carry a content digest; external sources use identity checks.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub checksum: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub inline: Option<InlineSource>,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InlineSource {
+    pub database: PathBuf,
+    pub result_ref: String,
+    pub seq: u64,
 }
 impl SourceFile {
     pub fn inspect(path: &Path) -> Result<Self> {
@@ -48,9 +56,19 @@ impl SourceFile {
             rows: None,
             row_groups: None,
             checksum: None,
+            inline: None,
         })
     }
     pub fn validate(&self) -> Result<()> {
+        if self.inline.is_some() {
+            // Synthetic paths name immutable database parts. Verify their exact
+            // bytes against the frozen digest on every read instead of stat().
+            ensure!(
+                self.size <= crate::results::INLINE_LIMIT as u64,
+                "RESULT_CORRUPT: oversized inline part"
+            );
+            return Ok(());
+        }
         let now = Self::inspect(&self.path)
             .map_err(|e| anyhow::anyhow!("SOURCE_CHANGED: {}: {e}", self.path.display()))?;
         ensure!(

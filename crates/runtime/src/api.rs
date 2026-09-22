@@ -92,7 +92,7 @@ fn remember(c: &rusqlite::Connection, req: &Request, v: &Value) -> Result<()> {
     Ok(())
 }
 pub fn capabilities() -> Value {
-    json!({"api_version":"1","metadata_schema":"5; one-way upgrade from 3/4","progressive_aggregation":{"fragment_unit":"parquet_row_group","fragment_units":["parquet_row_group","manifest_file"],"checkpoint_interval_ms":50,"aggregate_limit":16,"numeric_inputs":"Int64, UInt64, Decimal128 scale 0..6","sum":"Decimal128(38,input_scale)","avg":"Decimal128(38,6), truncation toward zero","group_by":false,"sampling":false},"formats":["csv","tsv","parquet"],"source":"local","sql":"DataFusion 55.0.0 read-only SELECT; explicit bindings","analysis":["inspect:null_count","inspect:min_max","inspect:top_k","analyze:count","analyze:sum","analyze:avg"],"entries":["cli","ndjson_session","mcp_stdio","rust_sdk"],"workspace_summary":"bounded metadata catalog with fixed bindings and store-scoped cursor; no source scan","prepare":"explicit streaming CSV/TSV to managed Parquet; atomic dataset visibility","workspace_quota":"managed data plus conservative result/spill reservations; excludes SQLite, logs and external exports","verified_part_cache_bytes":8388608,"result_part_target_bytes":4194304,"result_part_max_bytes":8388608,"native_tasks":false,"automatic_resume":false,"source_consistency":"best_effort","result_storage":"immutable Arrow IPC files","max_frame_bytes":FRAME_LIMIT,"minimum_error_budget_bytes":512,"max_output_bytes":FRAME_LIMIT-512,"max_output_rows":10000,"max_manifest_files":128,"max_directory_entries":4096,"default_parallel_jobs":1,"cancellation":"cooperative signal with forced worker termination after 300ms","engine_memory_limit":"MemoryPool; not RSS hard limit","scan_limit":"byte reservation before local reads","result_retention":"retained by default; explicit pin/release and dependency-safe workspace gc","event_retention":"until workspace removal; no event pruning yet","unsupported":["Windows","remote","sampling","native_tasks","automatic_resume","union_by_name","binary_inline","RSS_hard_limit"]})
+    json!({"api_version":"1","metadata_schema":"6; one-way upgrade from 3/4/5","progressive_aggregation":{"fragment_unit":"parquet_row_group","fragment_units":["parquet_row_group","manifest_file"],"checkpoint_interval_ms":50,"aggregate_limit":16,"numeric_inputs":"Int64, UInt64, Decimal128 scale 0..6","sum":"Decimal128(38,input_scale)","avg":"Decimal128(38,6), truncation toward zero","group_by":false,"sampling":false},"formats":["csv","tsv","parquet"],"source":"local","sql":"DataFusion 55.0.0 read-only SELECT; explicit bindings","analysis":["inspect:null_count","inspect:min_max","inspect:top_k","analyze:count","analyze:sum","analyze:avg"],"entries":["cli","ndjson_session","mcp_stdio","rust_sdk"],"workspace_summary":"bounded metadata catalog with fixed bindings and store-scoped cursor; no source scan","prepare":"explicit streaming CSV/TSV to managed Parquet; atomic dataset visibility","workspace_quota":"managed data plus conservative result/spill reservations; excludes SQLite/WAL overhead, logs and external exports","verified_part_cache_bytes":8388608,"result_part_target_bytes":6291456,"inline_result_part_max_bytes":131072,"result_part_max_bytes":8388608,"native_tasks":false,"automatic_resume":false,"source_consistency":"best_effort","result_storage":"immutable Arrow IPC; parts up to 128 KiB in SQLite, larger parts in files","max_frame_bytes":FRAME_LIMIT,"minimum_error_budget_bytes":512,"max_output_bytes":FRAME_LIMIT-512,"max_output_rows":10000,"max_manifest_files":128,"max_directory_entries":4096,"default_parallel_jobs":1,"cancellation":"cooperative signal with forced worker termination after 300ms","engine_memory_limit":"MemoryPool; not RSS hard limit","scan_limit":"byte reservation before local reads","result_retention":"retained by default; explicit pin/release and dependency-safe workspace gc","event_retention":"until workspace removal; no event pruning yet","unsupported":["Windows","remote","sampling","native_tasks","automatic_resume","union_by_name","binary_inline","RSS_hard_limit"]})
 }
 fn validate_execution(e: &Execution) -> Result<()> {
     ensure!(
@@ -520,7 +520,7 @@ fn open_response(db: &Db, manifest: &str, budget: &OutputBudget) -> Result<Value
     let raw = db.object(manifest)?;
     let m: Manifest = serde_json::from_value(raw.clone())?;
     let mut fields = vec![];
-    let mut response = json!({"dataset_ref":m.dataset_ref,"manifest_ref":m.id,"schema_ref":m.id,"format":m.format,"discovery":"complete","schema_origin":m.schema_origin,"schema_status":if m.schema_origin=="inferred"{"inferred_unvalidated_tail"}else{"declared"},"field_count":m.schema.fields().len(),"fields":[],"source_consistency":"best_effort","validity":raw["validity"],"metadata_read_bytes":m.metadata_bytes,"inferred_rows":m.inferred_rows,"file_count":m.files.len(),"rows":m.files.iter().map(|f|f.rows).collect::<Option<Vec<_>>>().map(|v|v.iter().sum::<u64>()),"next_field_offset":null});
+    let mut response = json!({"binding":{"dataset_ref":m.dataset_ref,"manifest_ref":m.id},"dataset_ref":m.dataset_ref,"manifest_ref":m.id,"schema_ref":m.id,"format":m.format,"discovery":"complete","schema_origin":m.schema_origin,"schema_status":if m.schema_origin=="inferred"{"inferred_unvalidated_tail"}else{"declared"},"field_count":m.schema.fields().len(),"fields":[],"source_consistency":"best_effort","validity":raw["validity"],"metadata_read_bytes":m.metadata_bytes,"inferred_rows":m.inferred_rows,"file_count":m.files.len(),"rows":m.files.iter().map(|f|f.rows).collect::<Option<Vec<_>>>().map(|v|v.iter().sum::<u64>()),"next_field_offset":null});
     ensure!(
         budget.max_bytes <= FRAME_LIMIT - 512 && budget.max_rows <= 10000,
         "INVALID_ARGUMENT: output budget"
@@ -798,14 +798,11 @@ async fn wait_response(
     refs["job"] = state.clone();
     refs["readable_revision"] = state["readable_revision"].clone();
     refs["observation"] = Value::Null;
-    let mut actions = vec![];
-    if state["readable_revision"].is_number() {
-        actions.push("read");
-    }
-    if !terminal(state["state"].as_str().unwrap()) {
-        actions.extend(["wait", "cancel"]);
-    }
-    refs["next_actions"] = json!(actions);
+    refs["binding"] = if let Some(revision) = state["readable_revision"].as_u64() {
+        json!({"result_ref":state["result_ref"],"revision":revision})
+    } else {
+        Value::Null
+    };
     if let (Some(budget), Some(revision)) = (output, state["readable_revision"].as_u64()) {
         let p = ReadParams {
             result_ref: state["result_ref"].as_str().unwrap().into(),
@@ -819,6 +816,18 @@ async fn wait_response(
             refs["observation"] = observation;
         }
     }
+    let mut actions = vec![];
+    if state["readable_revision"].is_number() {
+        if refs["observation"].is_null() || refs["observation"]["presentation"]["has_more"] == true
+        {
+            actions.push("read");
+        }
+        actions.push("query");
+    }
+    if !terminal(state["state"].as_str().unwrap()) {
+        actions.extend(["wait", "cancel"]);
+    }
+    refs["next_actions"] = json!(actions);
     Ok(refs)
 }
 #[derive(serde::Serialize, serde::Deserialize)]
