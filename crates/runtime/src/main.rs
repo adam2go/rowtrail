@@ -6,12 +6,14 @@ mod db;
 mod engine;
 mod errors;
 mod model;
+mod numeric;
 mod prepare;
 mod probe;
 mod profile;
 #[cfg(test)]
 mod publication_tests;
 mod results;
+mod saved_arrow;
 mod sources;
 mod storage;
 mod store;

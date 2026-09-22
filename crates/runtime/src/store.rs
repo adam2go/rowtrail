@@ -21,6 +21,7 @@ pub struct Counters {
     cache_hits: AtomicU64,
     cache_misses: AtomicU64,
     cache_peak: AtomicU64,
+    verified_load_ns: AtomicU64,
     failure: std::sync::Mutex<Option<&'static str>>,
 }
 impl Counters {
@@ -37,7 +38,7 @@ impl Counters {
     }
 
     pub fn value(&self) -> serde_json::Value {
-        serde_json::json!({"reserved_read_bytes":self.reserved.load(Ordering::Relaxed),"source_read_bytes":self.source_bytes.load(Ordering::Relaxed),"result_read_bytes":self.result_bytes.load(Ordering::Relaxed),"read_requests":self.requests.load(Ordering::Relaxed),"verified_cache_hits":self.cache_hits.load(Ordering::Relaxed),"verified_cache_misses":self.cache_misses.load(Ordering::Relaxed),"verified_cache_peak_bytes":self.cache_peak.load(Ordering::Relaxed)})
+        serde_json::json!({"reserved_read_bytes":self.reserved.load(Ordering::Relaxed),"source_read_bytes":self.source_bytes.load(Ordering::Relaxed),"result_read_bytes":self.result_bytes.load(Ordering::Relaxed),"read_requests":self.requests.load(Ordering::Relaxed),"verified_cache_hits":self.cache_hits.load(Ordering::Relaxed),"verified_cache_misses":self.cache_misses.load(Ordering::Relaxed),"verified_cache_peak_bytes":self.cache_peak.load(Ordering::Relaxed),"verified_part_load_ms":self.verified_load_ns.load(Ordering::Relaxed) as f64 / 1_000_000.0})
     }
 }
 #[derive(Debug)]
@@ -257,12 +258,17 @@ impl ObjectStore for CountStore {
                     .map_err(|_| self.counters.exhausted())?;
                 let identity = identity.clone();
                 let checksum = checksum.clone();
+                let loaded_at = std::time::Instant::now();
                 let bytes = tokio::task::spawn_blocking(move || {
                     crate::results::verified_part(&identity, &checksum)
                 })
                 .await
                 .map_err(err)?
                 .map_err(|e| self.counters.record_failure(e))?;
+                self.counters.verified_load_ns.fetch_add(
+                    loaded_at.elapsed().as_nanos().min(u64::MAX as u128) as u64,
+                    Ordering::Relaxed,
+                );
                 self.counters
                     .result_bytes
                     .fetch_add(bytes.len() as u64, Ordering::Relaxed);

@@ -92,7 +92,7 @@ fn remember(c: &rusqlite::Connection, req: &Request, v: &Value) -> Result<()> {
     Ok(())
 }
 pub fn capabilities() -> Value {
-    json!({"api_version":"1","metadata_schema":"7; one-way upgrade from 3/4/5/6","progressive_aggregation":{"fragment_unit":"parquet_row_group","fragment_units":["parquet_row_group","manifest_file"],"checkpoint_interval_ms":50,"aggregate_limit":16,"numeric_inputs":"Int64, UInt64, Decimal128 scale 0..6","sum":"Decimal128(38,input_scale)","avg":"Decimal128(38,6), truncation toward zero","group_by":false,"sampling":false},"formats":["csv","tsv","parquet"],"source":"local","sql":"DataFusion 55.0.0 read-only SELECT; explicit bindings","analysis":["inspect:null_count","inspect:min_max","inspect:top_k","analyze:count","analyze:sum","analyze:avg"],"entries":["cli","ndjson_session","mcp_stdio","rust_sdk"],"workspace_summary":"bounded metadata catalog with exact label filter, fixed bindings, row counts and bounded field hints; store-scoped cursor; no source scan","query_parallelism":{"auto_max":4,"serial_below_input_bytes":16777216,"pool_bytes_per_parallel_partition":67108864,"explicit_target_partitions":"1..8; requires 64 MiB per partition when greater than one","target_not_thread_limit":true},"prepare":"explicit streaming CSV/TSV to managed Parquet; atomic dataset visibility","workspace_quota":"managed data plus conservative result/spill reservations; excludes SQLite/WAL overhead, logs and external exports","verified_part_cache_bytes":8388608,"result_part_target_bytes":6291456,"result_part_target_basis":"encoded IPC plus next batch array memory; prepared Parquet keeps input-memory target","inline_result_part_max_bytes":131072,"result_part_max_bytes":8388608,"native_tasks":false,"automatic_resume":false,"source_consistency":"best_effort","result_storage":"immutable Arrow IPC; parts up to 128 KiB in SQLite, larger parts in files","max_frame_bytes":FRAME_LIMIT,"minimum_error_budget_bytes":512,"max_output_bytes":FRAME_LIMIT-512,"max_output_rows":10000,"max_manifest_files":128,"max_directory_entries":4096,"default_parallel_jobs":1,"cancellation":"cooperative signal with forced worker termination after 300ms","engine_memory_limit":"MemoryPool; not RSS hard limit","scan_limit":"byte reservation before local reads","result_retention":"retained by default; explicit pin/release and dependency-safe workspace gc","event_retention":"until workspace removal; no event pruning yet","unsupported":["Windows","remote","sampling","native_tasks","automatic_resume","union_by_name","binary_inline","RSS_hard_limit"]})
+    json!({"api_version":"1","metadata_schema":"8; one-way upgrade from 3/4/5/6/7","numeric":crate::numeric::policy(),"progressive_aggregation":{"fragment_unit":"parquet_row_group","fragment_units":["parquet_row_group","manifest_file"],"checkpoint_interval_ms":50,"aggregate_limit":16,"numeric_inputs":"Int64, UInt64, Decimal128 scale 0..6","sum":"Decimal128(38,input_scale)","avg":"Decimal128(38,6), truncation toward zero","group_by":false,"sampling":false},"formats":["csv","tsv","parquet"],"source":"local","sql":"DataFusion 55.0.0 read-only SELECT; explicit bindings","analysis":["inspect:null_count","inspect:min_max","inspect:top_k","analyze:count","analyze:sum","analyze:avg"],"entries":["cli","ndjson_session","mcp_stdio","rust_sdk"],"workspace_summary":"bounded metadata catalog with exact label filter, fixed bindings, row counts and bounded field hints; store-scoped cursor; no source scan","query_parallelism":{"auto_max":4,"serial_below_input_bytes":16777216,"pool_bytes_per_parallel_partition":67108864,"explicit_target_partitions":"1..8; requires 64 MiB per partition when greater than one","target_not_thread_limit":true},"prepare":"explicit streaming CSV/TSV to managed Parquet; atomic dataset visibility","workspace_quota":"managed data plus conservative result/spill reservations; excludes SQLite/WAL overhead, logs and external exports","saved_result_scan":"whole IPC parts; separate files remain parallel; each new job verifies again","verified_part_cache_bytes":8388608,"result_part_target_bytes":6291456,"result_part_target_basis":"encoded IPC plus next batch array memory; prepared Parquet keeps input-memory target","inline_result_part_max_bytes":131072,"result_part_max_bytes":8388608,"native_tasks":false,"automatic_resume":false,"source_consistency":"best_effort","result_storage":"immutable Arrow IPC; parts up to 128 KiB in SQLite, larger parts in files","max_frame_bytes":FRAME_LIMIT,"minimum_error_budget_bytes":512,"max_output_bytes":FRAME_LIMIT-512,"max_output_rows":10000,"max_manifest_files":128,"max_directory_entries":4096,"default_parallel_jobs":1,"cancellation":"cooperative signal with forced worker termination after 300ms","engine_memory_limit":"MemoryPool; not RSS hard limit","scan_limit":"byte reservation before local reads","result_retention":"retained by default; explicit pin/release and dependency-safe workspace gc","event_retention":"until workspace removal; no event pruning yet","unsupported":["Windows","remote","sampling","native_tasks","automatic_resume","union_by_name","binary_inline","RSS_hard_limit"]})
 }
 fn validate_execution(e: &Execution) -> Result<()> {
     if let Some(n) = e.target_partitions {
@@ -233,7 +233,12 @@ async fn dispatch_inner(db: Arc<Db>, req: Request) -> Response {
         Err(e) => {
             let message = format!("{e:#}");
             let code = crate::errors::code(&e, "INTERNAL_ERROR");
-            Response::failure(&req, ApiError::new(code, message))
+            let mut error = ApiError::new(code, message);
+            let details = crate::errors::details(&e);
+            if details != json!({}) {
+                error.details = details;
+            }
+            Response::failure(&req, error)
         }
     }
 }
@@ -704,10 +709,10 @@ fn resolve(
         };
         partial |= input.quality["coverage"]["kind"] != "complete";
         estimate |= input.quality["accuracy"] != "exact";
-        lineage.push(json!({"binding":binding,"accuracy":input.quality["accuracy"],"coverage":input.quality["coverage"]}));
+        lineage.push(json!({"binding":binding,"accuracy":input.quality["accuracy"],"coverage":input.quality["coverage"],"numeric":input.quality.get("numeric").cloned().unwrap_or(json!({"policy":"unknown"}))}));
         inputs.insert(alias.clone(), input);
     }
-    let quality = json!({"accuracy":if estimate{"estimate"}else{"exact"},"coverage":{"kind":if partial{"partial"}else{"complete"}},"final_for_request":false,"source_consistency":if sources.is_empty(){"immutable_materialized"}else{"best_effort"},"lineage":lineage});
+    let quality = json!({"accuracy":if estimate{"estimate"}else{"exact"},"coverage":{"kind":if partial{"partial"}else{"complete"}},"final_for_request":false,"source_consistency":if sources.is_empty(){"immutable_materialized"}else{"best_effort"},"numeric":{"policy":"rowtrail-numeric-v1","other_sql":"engine_semantics","input_provenance":if lineage.iter().all(|v|v["numeric"]["policy"]=="rowtrail-numeric-v1" && v["numeric"]["input_provenance"]=="declared"){"declared"}else{"unknown"}},"lineage":lineage});
     Ok((inputs, sources, quality))
 }
 fn submit(

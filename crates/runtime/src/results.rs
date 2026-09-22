@@ -301,6 +301,7 @@ pub fn read(db: &Db, p: &ReadParams) -> Result<Value> {
         }
         for batch in reader {
             let batch = batch?;
+            crate::numeric::validate_batch(&batch)?;
             let options = FormatOptions::default().with_display_error(true);
             let formatters = batch
                 .columns()

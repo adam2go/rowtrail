@@ -1,0 +1,855 @@
+{
+  "version": "0.1.0-alpha.8",
+  "status": "verified",
+  "verified_source_commit": "4d8e37b202c9bc294c9a0a5ac05d580f04fed38c",
+  "ci_run": "https://github.com/adam2go/rowtrail/actions/runs/35696150110",
+  "platforms": [
+    "Ubuntu 22.04 x86_64",
+    "macOS 14 arm64"
+  ],
+  "same_linux_archive_on_ubuntu24_verified": true,
+  "per_platform": {
+    "integration_scenarios": 99,
+    "rust_tests_including_subprocess_harness": 9,
+    "subprocess_crash_scenarios": 12,
+    "deterministic_broken_ack_regression": true,
+    "format_clippy_dependency_boundaries": true,
+    "mcp_session_sdk": true,
+    "benchmark_profile_guard": true,
+    "archive_install_and_checksum_rejection": true
+  },
+  "artifact_sha256_verified_locally": true,
+  "artifact_binaries_match_test_hashes": true,
+  "bundled_guides_client_demo_and_notices_match": true,
+  "artifacts": [
+    {
+      "version": "0.1.0-alpha.8",
+      "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.35",
+      "artifact": "rowtrail-0.1.0-alpha.8-x86_64-unknown-linux-gnu.tar.xz",
+      "sha256": "6209fd215fb1663cc31784f2315f4709086d38fcf80edab89078bbfbd3d25401",
+      "compressed_bytes": 22600156,
+      "binary_bytes": {
+        "rowtrail": 4185696,
+        "rowtrail-runtime": 114905864
+      },
+      "compression": "xz level 6",
+      "size_budget_passed": true,
+      "binary_sha256": {
+        "rowtrail": "ef87692acb77e917b5780b7c3b36429348d99cac8db9842e7eb024aeda403963",
+        "rowtrail-runtime": "723c585bb4aa72545173697a7d05ef94d9c43e4f2a76ab06735743e5a20855af"
+      },
+      "notice_files_checked": 557
+    },
+    {
+      "version": "0.1.0-alpha.8",
+      "platform": "macOS-14.8.9-arm64-arm-64bit",
+      "artifact": "rowtrail-0.1.0-alpha.8-aarch64-apple-darwin.tar.xz",
+      "sha256": "2c45b04b91922d3b1a81db20218190fdce780425224c3dc04fb0e3b7a2135d81",
+      "compressed_bytes": 19203588,
+      "binary_bytes": {
+        "rowtrail": 3733632,
+        "rowtrail-runtime": 100083712
+      },
+      "compression": "xz level 6",
+      "size_budget_passed": true,
+      "binary_sha256": {
+        "rowtrail": "95271dbbf48b078eea2974cbb82742e9206c707cda6ffc59a9087c9f6e4c5d9c",
+        "rowtrail-runtime": "79ff822a1bd4ed52aedfe4ccc4ad03f85022f01d2bcf1b9056a0080de37650d3"
+      },
+      "notice_files_checked": 557
+    }
+  ],
+  "reports": {
+    "linux": {
+      "integration": {
+        "status": "passed",
+        "checks": [
+          "bounded open / explicit Decimal schema / idempotent open",
+          "relative paths resolve in each caller directory, independently of coordinator cwd",
+          "S1 CSV and four-row-group Parquet agree with hand-calculated results",
+          "typed parameters / large integer preservation / fixed revision pagination",
+          "S2 two result-only branches avoid original reads; missing dimension requires original source",
+          "multi-row-group Decimal aggregate matches independent integer reference",
+          "coalesced multi-batch IPC preserves 10,000-row pagination and result-only SQL",
+          "changing Arrow dictionaries remain readable and reusable across engine batches",
+          "export fixed revision with quality sidecar and typed roundtrip",
+          "query idempotency excludes wait but rejects changed semantics",
+          "read-only SQL and explicit source access enforcement",
+          "SQL identifiers cannot impersonate resource errors or invalidate valid sources",
+          "real background submission / external cancellation / confirmed worker exit",
+          "first preview survives eight cancellation races during coalesced result publication",
+          "scan budget exhaustion does not masquerade as empty success",
+          "computation timeout stops execution independently of client waiting",
+          "export reserves input bytes before reading and does not publish on budget failure",
+          "serialized observation budgets and result schema inspection",
+          "large Unicode validation errors obey output budgets and signal truncation",
+          "durable event replay and exclusive cursor",
+          "atomic job snapshot supplies a compatible event replay cursor",
+          "coordinator crash isolates old attempt, preserves committed results, and reports interrupted",
+          "worker crash becomes interrupted with confirmed process exit",
+          "corrupt committed part fails explicitly instead of returning an empty table",
+          "genuine empty result has a schema and final committed revision",
+          "bounded head inspection uses a real limited query and fixed result",
+          "late CSV type failure preserves partial results and propagates quality through queries and export",
+          "multi-file imports conservatively merge quality and empty CSV exports retain headers",
+          "source version mismatch and downstream invalidation",
+          "refresh freezes a new manifest while preserving old result invalidation"
+        ]
+      },
+      "alpha3": {
+        "status": "passed",
+        "checks": [
+          "one-scan typed null/min/max profile; deterministic top-k; scan budgets",
+          "fixed-revision result inspection avoids original reads and rejects floating row inspections",
+          "prepare publishes typed immutable Parquet only on success; idempotency and source independence",
+          "empty prepared tables retain schema; late CSV parse failure never publishes a partial dataset",
+          "TSV preparation preserves delimiter semantics",
+          "multi-file CSV preparation preserves all rows and per-file headers",
+          "same-size stored-part corruption is rejected in read, saved-result SQL and export",
+          "an external alias cannot downgrade integrity checks on a managed Parquet input",
+          "pin protects ancestors; dry-run is non-destructive; GC creates durable expired-reference errors",
+          "retained query dependencies protect released prepared datasets",
+          "GC protects active job inputs; stopped prepare never exposes an unfinished dataset",
+          "quota admission includes result and spill reservations; terminal jobs release reservations",
+          "join plus partitioned window matches independent integer oracle"
+        ],
+        "binary_sha256": {
+          "rowtrail": "ef87692acb77e917b5780b7c3b36429348d99cac8db9842e7eb024aeda403963",
+          "rowtrail-runtime": "723c585bb4aa72545173697a7d05ef94d9c43e4f2a76ab06735743e5a20855af"
+        }
+      },
+      "alpha4": {
+        "status": "passed",
+        "checks": [
+          "every immutable checkpoint matches a Python integer/Decimal prefix oracle; final snapshot contains one row",
+          "a fixed partial checkpoint can be queried/exported/reopened with partial quality preserved",
+          "preview none writes exactly one final checkpoint",
+          "durable result-ready events describe each committed aggregate revision",
+          "result budget exhaustion keeps the last complete file checkpoint, not half-updated aggregates",
+          "unsupported functions, types, aliases and CSV sources fail before accepting a job",
+          "empty input retains typed count zero and null sum/average",
+          "true cancellation preserves fixed earlier aggregate checkpoints",
+          "worker crash preserves one complete aggregate checkpoint and reports interrupted",
+          "numeric overflow is explicit and never replaces a valid checkpoint with a wrapped sum"
+        ],
+        "binary_sha256": {
+          "rowtrail": "ef87692acb77e917b5780b7c3b36429348d99cac8db9842e7eb024aeda403963",
+          "rowtrail-runtime": "723c585bb4aa72545173697a7d05ef94d9c43e4f2a76ab06735743e5a20855af"
+        }
+      },
+      "alpha5": {
+        "status": "passed",
+        "checks": [
+          "guide and MCP configuration are valid JSON and start no runtime",
+          "every single-file row-group checkpoint matches independent integer/Decimal arithmetic including uneven tail",
+          "coalescing publishes first/final prefixes with unchanged scan bytes; preview none stores one result",
+          "count-only row-group execution preserves row counts with empty column projection",
+          "partial row-group revision remains immutable and reusable without original-source reads",
+          "result and scan budgets preserve only complete committed row-group prefixes",
+          "unsupported fragments and unbounded publication intervals fail explicitly",
+          "zero-row Parquet completes with count zero, typed null and explicit coverage",
+          "managed prepared Parquet retains checksum verification and accurate discovered fragment totals",
+          "cancellation and worker death preserve immutable single-file row-group checkpoints and confirm execution stopped",
+          "fresh-session catalog recovers fixed bindings; pagination excludes later objects and rejects changed filters",
+          "catalog excludes known-invalid results from readable counts and retains explicit expiration tombstones and recovery hints"
+        ],
+        "binary_sha256": {
+          "rowtrail": "ef87692acb77e917b5780b7c3b36429348d99cac8db9842e7eb024aeda403963",
+          "rowtrail-runtime": "723c585bb4aa72545173697a7d05ef94d9c43e4f2a76ab06735743e5a20855af"
+        }
+      },
+      "alpha6": {
+        "status": "passed",
+        "checks": [
+          "compressed parts retain exact nullable Decimal/large integers and checksum-accounted source-free reuse",
+          "encoded-byte budget accepts the exact file size and rejects one byte less without publishing final-only output",
+          "byte-bounded projected pages preserve escaped Unicode names, nulls, Decimal strings and every cursor row",
+          "small and empty uncompressed results keep their original typed observation semantics",
+          "optional compact helper preserves the entire observation, fixed revision and errors while dropping operational detail",
+          "helper deadlines do not cancel or replay jobs and partial failure projections retain coverage and truncation",
+          "fresh transport reads the same immutable compressed revision",
+          "same-size same-mtime compressed corruption fails read, query and export before decoding"
+        ],
+        "binary_sha256": {
+          "rowtrail": "ef87692acb77e917b5780b7c3b36429348d99cac8db9842e7eb024aeda403963",
+          "rowtrail-runtime": "723c585bb4aa72545173697a7d05ef94d9c43e4f2a76ab06735743e5a20855af"
+        }
+      },
+      "alpha7": {
+        "status": "passed",
+        "checks": [
+          "installed CLI supplies the stdlib client without a runtime or workspace",
+          "frozen source paths with spaces and glob/URL characters remain literal file names",
+          "small Arrow data is checksummed in SQLite with exact types and native fixed bindings",
+          "one code-level query composes responses without redundant read/schema calls and waits mechanically",
+          "inline results export through all three formats and reopen with exact values",
+          "inline data obeys the encoded byte limit and cannot publish an incomplete final answer",
+          "mixed inline/file results preserve all rows and source-free fixed-result reuse",
+          "three logical scans share verified parts inside one job under a one-pass byte budget",
+          "guarded rows reject real partial-source and truncated observations without hiding their metadata",
+          "composition preserves failure responses and refuses unresolved or invalid fixed revisions",
+          "mismatched transport responses poison the client without replaying an ambiguous mutation",
+          "coordinator restart and catalog handoff preserve inline result identity and values",
+          "same-sized SQLite corruption fails read, saved SQL and export after earlier successful reuse",
+          "GC expires references and reclaims quota-accounted inline bytes with their descriptors",
+          "batched source ranges reserve scan bytes before I/O and retain hard scan limits"
+        ],
+        "binary_sha256": {
+          "rowtrail": "ef87692acb77e917b5780b7c3b36429348d99cac8db9842e7eb024aeda403963",
+          "rowtrail-runtime": "723c585bb4aa72545173697a7d05ef94d9c43e4f2a76ab06735743e5a20855af"
+        }
+      },
+      "alpha8": {
+        "status": "passed",
+        "checks": [
+          "dataset labels, bounded exact field hints, known/unknown row counts and refresh preservation",
+          "fresh session identifies and reuses a saved result in one catalog plus one query, without schema probes or source bytes",
+          "duplicate labels remain distinct fixed bindings; filtered cursor freezes membership and rejects filter changes",
+          "wide and long Unicode schemas preserve exact names or explicitly omit them within catalog byte budgets",
+          "invalid labels fail before admission; idempotent labels keep their result and reject changed requests",
+          "labels and schema hints do not turn expired results into readable bindings",
+          "small/8 MiB queries stay serial and large automatic plans report their bounded partition target",
+          "one/two/four partition aggregates and hash joins agree with independent integer/Decimal/null arithmetic",
+          "parallel wide sort preserves the independently computed ordering of every exported observation row",
+          "unsafe partition/pool combinations fail before admission and concurrent scans obey the shared byte budget",
+          "parallel cancellation confirms worker exit; the next query starts cleanly without replay"
+        ],
+        "binary_sha256": {
+          "rowtrail": "ef87692acb77e917b5780b7c3b36429348d99cac8db9842e7eb024aeda403963",
+          "rowtrail-runtime": "723c585bb4aa72545173697a7d05ef94d9c43e4f2a76ab06735743e5a20855af"
+        }
+      }
+    },
+    "macos": {
+      "integration": {
+        "status": "passed",
+        "checks": [
+          "bounded open / explicit Decimal schema / idempotent open",
+          "relative paths resolve in each caller directory, independently of coordinator cwd",
+          "S1 CSV and four-row-group Parquet agree with hand-calculated results",
+          "typed parameters / large integer preservation / fixed revision pagination",
+          "S2 two result-only branches avoid original reads; missing dimension requires original source",
+          "multi-row-group Decimal aggregate matches independent integer reference",
+          "coalesced multi-batch IPC preserves 10,000-row pagination and result-only SQL",
+          "changing Arrow dictionaries remain readable and reusable across engine batches",
+          "export fixed revision with quality sidecar and typed roundtrip",
+          "query idempotency excludes wait but rejects changed semantics",
+          "read-only SQL and explicit source access enforcement",
+          "SQL identifiers cannot impersonate resource errors or invalidate valid sources",
+          "real background submission / external cancellation / confirmed worker exit",
+          "first preview survives eight cancellation races during coalesced result publication",
+          "scan budget exhaustion does not masquerade as empty success",
+          "computation timeout stops execution independently of client waiting",
+          "export reserves input bytes before reading and does not publish on budget failure",
+          "serialized observation budgets and result schema inspection",
+          "large Unicode validation errors obey output budgets and signal truncation",
+          "durable event replay and exclusive cursor",
+          "atomic job snapshot supplies a compatible event replay cursor",
+          "coordinator crash isolates old attempt, preserves committed results, and reports interrupted",
+          "worker crash becomes interrupted with confirmed process exit",
+          "corrupt committed part fails explicitly instead of returning an empty table",
+          "genuine empty result has a schema and final committed revision",
+          "bounded head inspection uses a real limited query and fixed result",
+          "late CSV type failure preserves partial results and propagates quality through queries and export",
+          "multi-file imports conservatively merge quality and empty CSV exports retain headers",
+          "source version mismatch and downstream invalidation",
+          "refresh freezes a new manifest while preserving old result invalidation"
+        ]
+      },
+      "alpha3": {
+        "status": "passed",
+        "checks": [
+          "one-scan typed null/min/max profile; deterministic top-k; scan budgets",
+          "fixed-revision result inspection avoids original reads and rejects floating row inspections",
+          "prepare publishes typed immutable Parquet only on success; idempotency and source independence",
+          "empty prepared tables retain schema; late CSV parse failure never publishes a partial dataset",
+          "TSV preparation preserves delimiter semantics",
+          "multi-file CSV preparation preserves all rows and per-file headers",
+          "same-size stored-part corruption is rejected in read, saved-result SQL and export",
+          "an external alias cannot downgrade integrity checks on a managed Parquet input",
+          "pin protects ancestors; dry-run is non-destructive; GC creates durable expired-reference errors",
+          "retained query dependencies protect released prepared datasets",
+          "GC protects active job inputs; stopped prepare never exposes an unfinished dataset",
+          "quota admission includes result and spill reservations; terminal jobs release reservations",
+          "join plus partitioned window matches independent integer oracle"
+        ],
+        "binary_sha256": {
+          "rowtrail": "95271dbbf48b078eea2974cbb82742e9206c707cda6ffc59a9087c9f6e4c5d9c",
+          "rowtrail-runtime": "79ff822a1bd4ed52aedfe4ccc4ad03f85022f01d2bcf1b9056a0080de37650d3"
+        }
+      },
+      "alpha4": {
+        "status": "passed",
+        "checks": [
+          "every immutable checkpoint matches a Python integer/Decimal prefix oracle; final snapshot contains one row",
+          "a fixed partial checkpoint can be queried/exported/reopened with partial quality preserved",
+          "preview none writes exactly one final checkpoint",
+          "durable result-ready events describe each committed aggregate revision",
+          "result budget exhaustion keeps the last complete file checkpoint, not half-updated aggregates",
+          "unsupported functions, types, aliases and CSV sources fail before accepting a job",
+          "empty input retains typed count zero and null sum/average",
+          "true cancellation preserves fixed earlier aggregate checkpoints",
+          "worker crash preserves one complete aggregate checkpoint and reports interrupted",
+          "numeric overflow is explicit and never replaces a valid checkpoint with a wrapped sum"
+        ],
+        "binary_sha256": {
+          "rowtrail": "95271dbbf48b078eea2974cbb82742e9206c707cda6ffc59a9087c9f6e4c5d9c",
+          "rowtrail-runtime": "79ff822a1bd4ed52aedfe4ccc4ad03f85022f01d2bcf1b9056a0080de37650d3"
+        }
+      },
+      "alpha5": {
+        "status": "passed",
+        "checks": [
+          "guide and MCP configuration are valid JSON and start no runtime",
+          "every single-file row-group checkpoint matches independent integer/Decimal arithmetic including uneven tail",
+          "coalescing publishes first/final prefixes with unchanged scan bytes; preview none stores one result",
+          "count-only row-group execution preserves row counts with empty column projection",
+          "partial row-group revision remains immutable and reusable without original-source reads",
+          "result and scan budgets preserve only complete committed row-group prefixes",
+          "unsupported fragments and unbounded publication intervals fail explicitly",
+          "zero-row Parquet completes with count zero, typed null and explicit coverage",
+          "managed prepared Parquet retains checksum verification and accurate discovered fragment totals",
+          "cancellation and worker death preserve immutable single-file row-group checkpoints and confirm execution stopped",
+          "fresh-session catalog recovers fixed bindings; pagination excludes later objects and rejects changed filters",
+          "catalog excludes known-invalid results from readable counts and retains explicit expiration tombstones and recovery hints"
+        ],
+        "binary_sha256": {
+          "rowtrail": "95271dbbf48b078eea2974cbb82742e9206c707cda6ffc59a9087c9f6e4c5d9c",
+          "rowtrail-runtime": "79ff822a1bd4ed52aedfe4ccc4ad03f85022f01d2bcf1b9056a0080de37650d3"
+        }
+      },
+      "alpha6": {
+        "status": "passed",
+        "checks": [
+          "compressed parts retain exact nullable Decimal/large integers and checksum-accounted source-free reuse",
+          "encoded-byte budget accepts the exact file size and rejects one byte less without publishing final-only output",
+          "byte-bounded projected pages preserve escaped Unicode names, nulls, Decimal strings and every cursor row",
+          "small and empty uncompressed results keep their original typed observation semantics",
+          "optional compact helper preserves the entire observation, fixed revision and errors while dropping operational detail",
+          "helper deadlines do not cancel or replay jobs and partial failure projections retain coverage and truncation",
+          "fresh transport reads the same immutable compressed revision",
+          "same-size same-mtime compressed corruption fails read, query and export before decoding"
+        ],
+        "binary_sha256": {
+          "rowtrail": "95271dbbf48b078eea2974cbb82742e9206c707cda6ffc59a9087c9f6e4c5d9c",
+          "rowtrail-runtime": "79ff822a1bd4ed52aedfe4ccc4ad03f85022f01d2bcf1b9056a0080de37650d3"
+        }
+      },
+      "alpha7": {
+        "status": "passed",
+        "checks": [
+          "installed CLI supplies the stdlib client without a runtime or workspace",
+          "frozen source paths with spaces and glob/URL characters remain literal file names",
+          "small Arrow data is checksummed in SQLite with exact types and native fixed bindings",
+          "one code-level query composes responses without redundant read/schema calls and waits mechanically",
+          "inline results export through all three formats and reopen with exact values",
+          "inline data obeys the encoded byte limit and cannot publish an incomplete final answer",
+          "mixed inline/file results preserve all rows and source-free fixed-result reuse",
+          "three logical scans share verified parts inside one job under a one-pass byte budget",
+          "guarded rows reject real partial-source and truncated observations without hiding their metadata",
+          "composition preserves failure responses and refuses unresolved or invalid fixed revisions",
+          "mismatched transport responses poison the client without replaying an ambiguous mutation",
+          "coordinator restart and catalog handoff preserve inline result identity and values",
+          "same-sized SQLite corruption fails read, saved SQL and export after earlier successful reuse",
+          "GC expires references and reclaims quota-accounted inline bytes with their descriptors",
+          "batched source ranges reserve scan bytes before I/O and retain hard scan limits"
+        ],
+        "binary_sha256": {
+          "rowtrail": "95271dbbf48b078eea2974cbb82742e9206c707cda6ffc59a9087c9f6e4c5d9c",
+          "rowtrail-runtime": "79ff822a1bd4ed52aedfe4ccc4ad03f85022f01d2bcf1b9056a0080de37650d3"
+        }
+      },
+      "alpha8": {
+        "status": "passed",
+        "checks": [
+          "dataset labels, bounded exact field hints, known/unknown row counts and refresh preservation",
+          "fresh session identifies and reuses a saved result in one catalog plus one query, without schema probes or source bytes",
+          "duplicate labels remain distinct fixed bindings; filtered cursor freezes membership and rejects filter changes",
+          "wide and long Unicode schemas preserve exact names or explicitly omit them within catalog byte budgets",
+          "invalid labels fail before admission; idempotent labels keep their result and reject changed requests",
+          "labels and schema hints do not turn expired results into readable bindings",
+          "small/8 MiB queries stay serial and large automatic plans report their bounded partition target",
+          "one/two/four partition aggregates and hash joins agree with independent integer/Decimal/null arithmetic",
+          "parallel wide sort preserves the independently computed ordering of every exported observation row",
+          "unsafe partition/pool combinations fail before admission and concurrent scans obey the shared byte budget",
+          "parallel cancellation confirms worker exit; the next query starts cleanly without replay"
+        ],
+        "binary_sha256": {
+          "rowtrail": "95271dbbf48b078eea2974cbb82742e9206c707cda6ffc59a9087c9f6e4c5d9c",
+          "rowtrail-runtime": "79ff822a1bd4ed52aedfe4ccc4ad03f85022f01d2bcf1b9056a0080de37650d3"
+        }
+      }
+    }
+  },
+  "out_of_core": {
+    "linux": {
+      "status": "passed",
+      "os": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.35",
+      "rows": 1048576,
+      "fixture_sha256": "5dbf86141275746ec6c17443c01f31b889ab685f9224084e53423a4748bc096d",
+      "source_bytes": 228139988,
+      "engine_pool_bytes": 33554432,
+      "sampled_worker_peak_rss_bytes": 155123712,
+      "rss_note": "ps samples while waiting; not a hard bound or exact process peak",
+      "sort_wall_ms_including_observation": 1475.0049169999784,
+      "export_wall_ms": 1556.9057369999655,
+      "spill_count": 26,
+      "result_parts": 5,
+      "largest_part_bytes": 3034082,
+      "all_exported_ids_match_independent_sort": true,
+      "sort_metrics": {
+        "io": {
+          "reserved_read_bytes": 218653184,
+          "source_read_bytes": 218653184,
+          "result_read_bytes": 0,
+          "read_requests": 513,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 12946522,
+        "rows": 1048576,
+        "target_partitions": 1,
+        "planning_ms": 5.323555,
+        "result_write_ms": 238.13342200000008,
+        "commit_ack_ms": 5.266319,
+        "elapsed_ms": 1458.558526,
+        "plan": "SortExec: expr=[payload@1 ASC NULLS LAST, id@0 DESC], preserve_partitioning=[false], metrics=[output_rows=1.05 M, elapsed_compute=338.98ms, output_bytes=205.0 MB, output_batches=128, spill_count=26, spilled_bytes=577.3 MB, spilled_rows=2.95 M]\n  DataSourceExec: file_groups={1 group: [[<fixture>/data/many.parquet:0..228139988]]}, projection=[id, payload], file_type=parquet, sort_order_for_reorder=[payload@1 ASC NULLS LAST, id@0 DESC], metrics=[output_rows=1.05 M, elapsed_compute=208.84\u00b5s, output_bytes=217.0 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=218.1 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=51ns, metadata_load_time=15.86\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=169.07\u00b5s, time_elapsed_processing=127.31ms, time_elapsed_scanning_total=591.30ms, time_elapsed_scanning_until_data=1.98ms, output_rows_skew=0%, scan_efficiency_ratio=95.61% (218.1 M/228.1 M)]\n",
+        "publication_ms": 4.877441,
+        "result_parts": 5,
+        "worker_elapsed_ms": 1462.6031269999999,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "worker_pid": 7231
+      },
+      "export_metrics": {
+        "destination": "<fixture>/sorted.parquet",
+        "manifest": "<fixture>/sorted.parquet.rowtrail.json",
+        "rows": 1048576,
+        "bytes": 215270121,
+        "io": {
+          "reserved_read_bytes": 12946522,
+          "source_read_bytes": 0,
+          "result_read_bytes": 12946522,
+          "read_requests": 5,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "worker_pid": 7231,
+        "worker_reused": true,
+        "publication_ms": 0.0,
+        "result_parts": 0,
+        "worker_elapsed_ms": 1553.254584,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false
+      },
+      "binary_sha256": {
+        "rowtrail": "ef87692acb77e917b5780b7c3b36429348d99cac8db9842e7eb024aeda403963",
+        "rowtrail-runtime": "723c585bb4aa72545173697a7d05ef94d9c43e4f2a76ab06735743e5a20855af"
+      }
+    },
+    "macos": {
+      "status": "passed",
+      "os": "macOS-14.8.9-arm64-arm-64bit",
+      "rows": 1048576,
+      "fixture_sha256": "5dbf86141275746ec6c17443c01f31b889ab685f9224084e53423a4748bc096d",
+      "source_bytes": 228139988,
+      "engine_pool_bytes": 33554432,
+      "sampled_worker_peak_rss_bytes": 141852672,
+      "rss_note": "ps samples while waiting; not a hard bound or exact process peak",
+      "sort_wall_ms_including_observation": 1293.3557910000673,
+      "export_wall_ms": 466.44724999987375,
+      "spill_count": 26,
+      "result_parts": 6,
+      "largest_part_bytes": 2526570,
+      "all_exported_ids_match_independent_sort": true,
+      "sort_metrics": {
+        "io": {
+          "reserved_read_bytes": 218653184,
+          "source_read_bytes": 218653184,
+          "result_read_bytes": 0,
+          "read_requests": 513,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "result_write_bytes": 12946988,
+        "rows": 1048576,
+        "target_partitions": 1,
+        "planning_ms": 4.182209,
+        "result_write_ms": 225.7412960000001,
+        "commit_ack_ms": 15.881417,
+        "elapsed_ms": 1279.7285,
+        "plan": "SortExec: expr=[payload@1 ASC NULLS LAST, id@0 DESC], preserve_partitioning=[false], metrics=[output_rows=1.05 M, elapsed_compute=416.25ms, output_bytes=205.0 MB, output_batches=128, spill_count=26, spilled_bytes=577.3 MB, spilled_rows=2.95 M]\n  DataSourceExec: file_groups={1 group: [[private<fixture>/data/many.parquet:0..228139988]]}, projection=[id, payload], file_type=parquet, sort_order_for_reorder=[payload@1 ASC NULLS LAST, id@0 DESC], metrics=[output_rows=1.05 M, elapsed_compute=410.79\u00b5s, output_bytes=217.0 MB, output_batches=256, files_ranges_pruned_statistics=1 total \u2192 1 matched, row_groups_pruned_statistics=256 total \u2192 256 matched, row_groups_pruned_bloom_filter=256 total \u2192 256 matched, page_index_pages_pruned=0 total \u2192 0 matched, page_index_rows_pruned=0 total \u2192 0 matched, limit_pruned_row_groups=0 total \u2192 0 matched, batches_split=0, bytes_scanned=218.1 M, file_open_errors=0, file_scan_errors=0, files_opened=1, files_processed=1, num_predicate_creation_errors=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_pruned_dynamic_filter=0, predicate_cache_inner_records=0, predicate_cache_records=0, bloom_filter_eval_time=126ns, metadata_load_time=42.79\u00b5s, page_index_eval_time=2ns, row_pushdown_eval_time=2ns, statistics_eval_time=2ns, time_elapsed_opening=360.62\u00b5s, time_elapsed_processing=97.62ms, time_elapsed_scanning_total=413.99ms, time_elapsed_scanning_until_data=736.79\u00b5s, output_rows_skew=0%, scan_efficiency_ratio=95.61% (218.1 M/228.1 M)]\n",
+        "publication_ms": 14.773667,
+        "result_parts": 6,
+        "worker_elapsed_ms": 1285.097792,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false,
+        "worker_reused": false,
+        "worker_pid": 16903
+      },
+      "export_metrics": {
+        "destination": "<fixture>/sorted.parquet",
+        "manifest": "<fixture>/sorted.parquet.rowtrail.json",
+        "rows": 1048576,
+        "bytes": 215270121,
+        "io": {
+          "reserved_read_bytes": 12946988,
+          "source_read_bytes": 0,
+          "result_read_bytes": 12946988,
+          "read_requests": 6,
+          "verified_cache_hits": 0,
+          "verified_cache_misses": 0,
+          "verified_cache_peak_bytes": 0
+        },
+        "worker_pid": 16903,
+        "worker_reused": true,
+        "publication_ms": 0.0,
+        "result_parts": 0,
+        "worker_elapsed_ms": 461.805375,
+        "execution_stopped": true,
+        "worker_exit_confirmed": false
+      },
+      "binary_sha256": {
+        "rowtrail": "95271dbbf48b078eea2974cbb82742e9206c707cda6ffc59a9087c9f6e4c5d9c",
+        "rowtrail-runtime": "79ff822a1bd4ed52aedfe4ccc4ad03f85022f01d2bcf1b9056a0080de37650d3"
+      }
+    }
+  },
+  "native_installs": {
+    "linux": {
+      "status": "passed",
+      "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.35",
+      "version": "0.1.0-alpha.8",
+      "archive_sha256": "6209fd215fb1663cc31784f2315f4709086d38fcf80edab89078bbfbd3d25401",
+      "checksum_verified_install": true,
+      "installed_symlink_query": true,
+      "corrupt_archive_rejected": true,
+      "bundled_docs_and_printed_client_match": true,
+      "installed_quickstart": {
+        "status": "passed",
+        "input_rows": 20003,
+        "question": "Which region has the highest refunded value, and through which channels?",
+        "refunds_by_region_cents": [
+          [
+            "east",
+            "1930407"
+          ],
+          [
+            "north",
+            "1920667"
+          ],
+          [
+            "south",
+            "1925653"
+          ],
+          [
+            "west",
+            "1925537"
+          ]
+        ],
+        "chosen_region": "east",
+        "saved_label": "demo refunds: east",
+        "saved_rows": 385,
+        "channel_totals_cents": [
+          [
+            "app",
+            "630463"
+          ],
+          [
+            "store",
+            "643469"
+          ],
+          [
+            "web",
+            "656475"
+          ]
+        ],
+        "handoff_columns": [
+          "n",
+          "first_id",
+          "cents"
+        ],
+        "handoff_rows": [
+          [
+            "385",
+            "9007199254740993",
+            "1930407"
+          ]
+        ],
+        "handoff_calls": [
+          "workspace summary",
+          "query"
+        ],
+        "handoff_original_source_bytes": 0,
+        "checks": "Python integer oracle; exact/final/complete/untruncated guards; IDs above 2^53",
+        "continue": "Use this workspace and label to query the retained result. Labels are descriptive, not unique IDs."
+      },
+      "incompatible_packages_rejected_before_symlink_changes": [
+        "cli",
+        "runtime",
+        "version"
+      ],
+      "linux_libc_preflight": [
+        {
+          "reported_libc": "glibc 2.34",
+          "download_allowed": false
+        },
+        {
+          "reported_libc": "glibc 2.35",
+          "download_allowed": true
+        },
+        {
+          "reported_libc": "glibc 2.39",
+          "download_allowed": true
+        },
+        {
+          "reported_libc": "musl 1.2.5",
+          "download_allowed": false
+        },
+        {
+          "reported_libc": "",
+          "download_allowed": false
+        }
+      ]
+    },
+    "macos": {
+      "status": "passed",
+      "platform": "macOS-14.8.9-arm64-arm-64bit",
+      "version": "0.1.0-alpha.8",
+      "archive_sha256": "2c45b04b91922d3b1a81db20218190fdce780425224c3dc04fb0e3b7a2135d81",
+      "checksum_verified_install": true,
+      "installed_symlink_query": true,
+      "corrupt_archive_rejected": true,
+      "bundled_docs_and_printed_client_match": true,
+      "installed_quickstart": {
+        "status": "passed",
+        "input_rows": 20003,
+        "question": "Which region has the highest refunded value, and through which channels?",
+        "refunds_by_region_cents": [
+          [
+            "east",
+            "1930407"
+          ],
+          [
+            "north",
+            "1920667"
+          ],
+          [
+            "south",
+            "1925653"
+          ],
+          [
+            "west",
+            "1925537"
+          ]
+        ],
+        "chosen_region": "east",
+        "saved_label": "demo refunds: east",
+        "saved_rows": 385,
+        "channel_totals_cents": [
+          [
+            "app",
+            "630463"
+          ],
+          [
+            "store",
+            "643469"
+          ],
+          [
+            "web",
+            "656475"
+          ]
+        ],
+        "handoff_columns": [
+          "n",
+          "first_id",
+          "cents"
+        ],
+        "handoff_rows": [
+          [
+            "385",
+            "9007199254740993",
+            "1930407"
+          ]
+        ],
+        "handoff_calls": [
+          "workspace summary",
+          "query"
+        ],
+        "handoff_original_source_bytes": 0,
+        "checks": "Python integer oracle; exact/final/complete/untruncated guards; IDs above 2^53",
+        "continue": "Use this workspace and label to query the retained result. Labels are descriptive, not unique IDs."
+      },
+      "incompatible_packages_rejected_before_symlink_changes": [
+        "cli",
+        "runtime",
+        "version"
+      ],
+      "linux_libc_preflight": [
+        {
+          "reported_libc": "glibc 2.34",
+          "download_allowed": false
+        },
+        {
+          "reported_libc": "glibc 2.35",
+          "download_allowed": true
+        },
+        {
+          "reported_libc": "glibc 2.39",
+          "download_allowed": true
+        },
+        {
+          "reported_libc": "musl 1.2.5",
+          "download_allowed": false
+        },
+        {
+          "reported_libc": "",
+          "download_allowed": false
+        }
+      ]
+    }
+  },
+  "linux_compatibility": {
+    "status": "passed",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "version": "0.1.0-alpha.8",
+    "archive_sha256": "6209fd215fb1663cc31784f2315f4709086d38fcf80edab89078bbfbd3d25401",
+    "checksum_verified_install": true,
+    "installed_symlink_query": true,
+    "corrupt_archive_rejected": true,
+    "bundled_docs_and_printed_client_match": true,
+    "installed_quickstart": {
+      "status": "passed",
+      "input_rows": 20003,
+      "question": "Which region has the highest refunded value, and through which channels?",
+      "refunds_by_region_cents": [
+        [
+          "east",
+          "1930407"
+        ],
+        [
+          "north",
+          "1920667"
+        ],
+        [
+          "south",
+          "1925653"
+        ],
+        [
+          "west",
+          "1925537"
+        ]
+      ],
+      "chosen_region": "east",
+      "saved_label": "demo refunds: east",
+      "saved_rows": 385,
+      "channel_totals_cents": [
+        [
+          "app",
+          "630463"
+        ],
+        [
+          "store",
+          "643469"
+        ],
+        [
+          "web",
+          "656475"
+        ]
+      ],
+      "handoff_columns": [
+        "n",
+        "first_id",
+        "cents"
+      ],
+      "handoff_rows": [
+        [
+          "385",
+          "9007199254740993",
+          "1930407"
+        ]
+      ],
+      "handoff_calls": [
+        "workspace summary",
+        "query"
+      ],
+      "handoff_original_source_bytes": 0,
+      "checks": "Python integer oracle; exact/final/complete/untruncated guards; IDs above 2^53",
+      "continue": "Use this workspace and label to query the retained result. Labels are descriptive, not unique IDs."
+    },
+    "incompatible_packages_rejected_before_symlink_changes": [
+      "cli",
+      "runtime",
+      "version"
+    ],
+    "linux_libc_preflight": [
+      {
+        "reported_libc": "glibc 2.34",
+        "download_allowed": false
+      },
+      {
+        "reported_libc": "glibc 2.35",
+        "download_allowed": true
+      },
+      {
+        "reported_libc": "glibc 2.39",
+        "download_allowed": true
+      },
+      {
+        "reported_libc": "musl 1.2.5",
+        "download_allowed": false
+      },
+      {
+        "reported_libc": "",
+        "download_allowed": false
+      }
+    ]
+  },
+  "documentation_provenance": "Archive documents reflect the verified build source. Later release-report/README updates on the tag do not change these executable bytes.",
+  "mac_ci_archive_installed_alpha8_scenarios": 11,
+  "mac_ci_archive_demo_and_printed_client_verified": true,
+  "mac_ci_archive_one_way_upgrade_from_published_alpha7": true,
+  "public_release": {
+    "url": "https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.8",
+    "published_at": "2026-09-22T07:03:27Z",
+    "prerelease": true,
+    "assets": [
+      {
+        "name": "rowtrail-0.1.0-alpha.8-aarch64-apple-darwin.json",
+        "size": 404,
+        "digest": "sha256:6351aba383f9f2d9f5380178deae491bef620777571f831607edf9e7f372065a"
+      },
+      {
+        "name": "rowtrail-0.1.0-alpha.8-aarch64-apple-darwin.sha256",
+        "size": 117,
+        "digest": "sha256:870c46361bc0476a864390ce70a6cde3fa901690050bf4a5dae2a0434fd59cfc"
+      },
+      {
+        "name": "rowtrail-0.1.0-alpha.8-aarch64-apple-darwin.tar.xz",
+        "size": 19203588,
+        "digest": "sha256:2c45b04b91922d3b1a81db20218190fdce780425224c3dc04fb0e3b7a2135d81"
+      },
+      {
+        "name": "rowtrail-0.1.0-alpha.8-x86_64-unknown-linux-gnu.json",
+        "size": 424,
+        "digest": "sha256:3fd134f812ce31dbcb77bc5db55a159e24fbb3729a435551af17795bcdc5a783"
+      },
+      {
+        "name": "rowtrail-0.1.0-alpha.8-x86_64-unknown-linux-gnu.sha256",
+        "size": 121,
+        "digest": "sha256:de35c6f1916124b59f1255de76e58c990bc94da4e521f7fb859020ea72727c1e"
+      },
+      {
+        "name": "rowtrail-0.1.0-alpha.8-x86_64-unknown-linux-gnu.tar.xz",
+        "size": 22600156,
+        "digest": "sha256:6209fd215fb1663cc31784f2315f4709086d38fcf80edab89078bbfbd3d25401"
+      }
+    ]
+  },
+  "public_macos_network_install_and_demo_verified": true,
+  "public_install_report": "../benchmarks/performance/alpha8/public-install.json"
+}

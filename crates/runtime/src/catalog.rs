@@ -162,7 +162,7 @@ pub fn summary(db: &Db, p: WorkspaceParams) -> Result<Value> {
                             .map(|s| schema_hint(&s))
                     })
                     .transpose()?;
-                json!({"kind":kind,"ref":id,"label":label,"schema_hint":hint,"row_count":rows,"binding":if head>0 {json!({"result_ref":id,"revision":head})}else{Value::Null},"stored_validity":validity,"scope_ref":scope,"quality":{"accuracy":quality["accuracy"],"coverage":quality["coverage"],"final_for_request":quality["final_for_request"]},"next_actions":if head>0 && validity=="valid" {vec!["read","query","export","release"]}else{vec![]}})
+                json!({"kind":kind,"ref":id,"label":label,"schema_hint":hint,"row_count":rows,"binding":if head>0 {json!({"result_ref":id,"revision":head})}else{Value::Null},"stored_validity":validity,"scope_ref":scope,"quality":{"accuracy":quality["accuracy"],"coverage":quality["coverage"],"final_for_request":quality["final_for_request"],"numeric":quality.get("numeric").cloned().unwrap_or(json!({"policy":"unknown"}))},"next_actions":if head>0 && validity=="valid" {vec!["read","query","export","release"]}else{vec![]}})
             }
             _ => {
                 let (state,result,head,error):(String,String,u64,Option<String>)=tx.query_row("SELECT j.state,j.result_ref,r.head,json_extract(j.error,'$.code') FROM jobs j JOIN results r ON r.id=j.result_ref WHERE j.id=?",[id],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?,r.get(3)?)))?;

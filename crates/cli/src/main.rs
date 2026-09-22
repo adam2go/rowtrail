@@ -374,7 +374,7 @@ impl ServerHandler for Mcp {
                 (serde_json::to_value(r).unwrap(), error)
             }
             Err(e) => (
-                json!({"api_version":"1","ok":false,"error":{"code":"CONNECTION_ERROR","message":format!("{e:#}")}}),
+                json!({"api_version":"1","ok":false,"error":rowtrail_client::endpoint::api_error(&e, "CONNECTION_ERROR")}),
                 true,
             ),
         };
@@ -390,7 +390,8 @@ async fn session(workspace: PathBuf) -> Result<i32> {
     use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt};
     let mut input = tokio::io::BufReader::new(tokio::io::stdin());
     let mut output = tokio::io::stdout();
-    let mut session = Client::new(workspace)?.session().await?;
+    let client = Client::new(workspace);
+    let mut session = None;
     loop {
         let mut line = Vec::new();
         let n = (&mut input)
@@ -406,7 +407,29 @@ async fn session(workspace: PathBuf) -> Result<i32> {
         );
         let request = serde_json::from_slice::<Request>(&line);
         let response = match request {
-            Ok(request) => session.call(&request).await?,
+            Ok(request) => {
+                let result = async {
+                    if session.is_none() {
+                        let client = client.as_ref().map_err(|e| anyhow::anyhow!("{e:#}"))?;
+                        session = Some(client.session().await?);
+                    }
+                    session.as_mut().unwrap().call(&request).await
+                }
+                .await;
+                match result {
+                    Ok(response) => response,
+                    Err(error) => {
+                        let mut typed =
+                            rowtrail_client::endpoint::api_error(&error, "CONNECTION_ERROR");
+                        typed.details["session_unusable"] = json!(true);
+                        let response = Response::failure(&request, typed);
+                        output.write_all(&serde_json::to_vec(&response)?).await?;
+                        output.write_all(b"\n").await?;
+                        output.flush().await?;
+                        return Ok(5);
+                    }
+                }
+            }
             Err(_) => Response::failure(
                 &Request::new("invalid", json!({})),
                 ApiError::new(
@@ -646,7 +669,8 @@ async fn main() {
         Ok(code) => code,
         Err(e) => {
             let req = Request::new("cli", json!({}));
-            let response = Response::failure(&req, ApiError::new("CLI_ERROR", format!("{e:#}")));
+            let response =
+                Response::failure(&req, rowtrail_client::endpoint::api_error(&e, "CLI_ERROR"));
             println!("{}", serde_json::to_string(&response).unwrap());
             5
         }

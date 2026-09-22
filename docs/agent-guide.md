@@ -204,3 +204,50 @@ coalesce compressible output, within the same 8 MiB encoded/128-batch limits.
 First available previews and 50 ms flush remain. Fewer durable commits make large
 materialization cheaper; reading a small page from a larger part still verifies
 that whole part. See the measured tradeoffs in [verification](verification.md).
+
+## Checked numerics and stable reconnection (beta.1)
+
+New SQL jobs declare numeric policy v1. Integer/Decimal SUM is checked across
+ordinary, grouped, DISTINCT, window and partial-merge paths. Decimal precision is
+validated before persistence, observation and export. `ARITHMETIC_OVERFLOW`
+keeps the operation/type/expression and recovery guidance in the durable job.
+Other SQL arithmetic retains engine semantics; `accuracy: exact` concerns
+sampling. Missing policy on old results means unknown. Read the
+[numeric contract](numeric-contract.md) before treating numbers as certified.
+
+A short private socket address is independent of TMPDIR. The workspace endpoint
+descriptor and live handshake are checked against UID, workspace, store and
+runtime version. Changing TMPDIR reconnects to the same coordinator. An old
+coordinator must finish and exit before upgrading; close its sessions and allow
+its 60-second idle exit. No client kills active jobs or silently replays mutations.
+Typed connection errors include the workspace, descriptor and runtime-log path.
+
+The optional stdlib client supports `prepare`, `inspect`, `export`, `find` and
+`pages`. Preparation returns a usable dataset through `binding(response)`;
+scanning inspection and export keep complete durable job responses. `find(label)`
+requires exactly one valid, final saved result (or `kind='dataset'`). It rejects
+zero matches, duplicate labels, expired entries and partial revisions.
+
+```python
+from session_client import RowTrail, RowTrailError, PageBudgetExceeded
+with RowTrail(workspace='/private/workspace') as rt:
+    source = rt.open('/data/orders.csv')
+    prepared = rt.prepare(source)
+    profile = rt.inspect(prepared, checks=['null_count', 'min_max'], columns=['amount'])
+    branch = rt.query('SELECT * FROM t WHERE amount > 0', {'t': prepared},
+                      label='positive orders', execution={'output': {'max_rows': 0}})
+    rt.export(branch, '/data/positive.parquet')
+    # A later process can use rt.find('positive orders') as the same fixed binding.
+    for page in rt.pages(branch, columns=['amount'], max_rows=5000,
+                         max_bytes=262144, max_pages=10):
+        consume(page)  # preserve schema, quality and the fixed revision
+```
+
+`pages` requires total row/response-byte/page limits; it never collects all rows.
+EOF ends normally. A limit reached before EOF raises `PageBudgetExceeded` with
+consumed counts and the resume cursor; resume explicitly with the same columns
+and binding. Byte accounting includes complete UTF-8 response envelopes.
+`RowTrailError` exposes `code`, `retryable`, `details` and `response`.
+`JobNotCompleted.response` retains the durable job for timeout/failure recovery.
+`typed_rows` optionally creates Python integer/Decimal values without float
+conversion, while retaining the original response.

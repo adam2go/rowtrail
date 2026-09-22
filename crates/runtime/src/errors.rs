@@ -1,6 +1,12 @@
 //! Classify actual error causes, never arbitrary substrings in SQL or field names.
 pub fn code(error: &anyhow::Error, fallback: &'static str) -> &'static str {
     for cause in error.chain() {
+        if cause
+            .downcast_ref::<crate::numeric::NumericError>()
+            .is_some()
+        {
+            return "ARITHMETIC_OVERFLOW";
+        }
         if matches!(
             cause.downcast_ref::<datafusion::common::DataFusionError>(),
             Some(datafusion::common::DataFusionError::ResourcesExhausted(_))
@@ -34,6 +40,17 @@ pub fn code(error: &anyhow::Error, fallback: &'static str) -> &'static str {
         }
     }
     fallback
+}
+
+pub fn details(error: &anyhow::Error) -> serde_json::Value {
+    error
+        .chain()
+        .find_map(|cause| {
+            cause
+                .downcast_ref::<crate::numeric::NumericError>()
+                .map(|e| e.details())
+        })
+        .unwrap_or_else(|| serde_json::json!({}))
 }
 
 #[cfg(test)]

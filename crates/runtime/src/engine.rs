@@ -7,7 +7,7 @@ use anyhow::{Result, ensure};
 use datafusion::{
     common::ScalarValue,
     datasource::{
-        file_format::{FileFormat, arrow::ArrowFormat, csv::CsvFormat, parquet::ParquetFormat},
+        file_format::{FileFormat, csv::CsvFormat, parquet::ParquetFormat},
         listing::{ListingOptions, ListingTable, ListingTableConfig, ListingTableUrl},
     },
     execution::{context::SQLOptions, runtime_env::RuntimeEnvBuilder},
@@ -69,10 +69,13 @@ pub async fn plan(
             .with_batch_size(8192),
         runtime,
     );
+    ctx.register_udaf(datafusion_expr::AggregateUDF::from(
+        crate::numeric::CheckedSum::new(),
+    ));
     for (alias, input) in &spec.inputs {
         let format: Arc<dyn FileFormat> = match input.format.as_str() {
             "parquet" => Arc::new(ParquetFormat::default()),
-            "arrow" => Arc::new(ArrowFormat),
+            "arrow" => Arc::new(crate::saved_arrow::SavedArrowFormat),
             _ => Arc::new(
                 CsvFormat::default()
                     .with_has_header(input.header)

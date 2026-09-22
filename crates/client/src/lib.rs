@@ -1,9 +1,13 @@
 //! Lightweight local client. This crate deliberately has no engine dependency.
+pub mod endpoint;
 use anyhow::{Context, Result, ensure};
 use rowtrail_contracts::{API_VERSION, FRAME_LIMIT, Request, Response};
 use sha2::{Digest, Sha256};
 use std::{
-    os::unix::{fs::PermissionsExt, process::CommandExt},
+    os::unix::{
+        fs::{MetadataExt, PermissionsExt},
+        process::CommandExt,
+    },
     path::{Path, PathBuf},
     time::Duration,
 };
@@ -19,17 +23,20 @@ pub fn workspace_path(path: &Path) -> Result<PathBuf> {
     }
     let path = path.canonicalize()?;
     ensure!(
-        std::fs::metadata(&path)?.permissions().mode() & 0o077 == 0,
+        std::fs::metadata(&path)?.permissions().mode() & 0o077 == 0
+            && std::fs::metadata(&path)?.uid() == unsafe { libc::geteuid() },
         "workspace must be accessible only by its owner (chmod 700)"
     );
     Ok(path)
 }
 pub fn socket_path(workspace: &Path) -> PathBuf {
+    socket_in(workspace, Path::new("/tmp"))
+}
+fn socket_in(workspace: &Path, root: &Path) -> PathBuf {
     // A private short directory avoids Unix sockaddr path length limits.
     let key = hex::encode(Sha256::digest(workspace.as_os_str().as_encoded_bytes()));
     let uid = unsafe { libc::geteuid() };
-    std::env::temp_dir()
-        .join(format!("rowtrail-{uid}-{}", &key[..20]))
+    root.join(format!("rowtrail-{uid}-{}", &key[..20]))
         .join("runtime.sock")
 }
 pub async fn send(stream: &mut UnixStream, value: &impl serde::Serialize) -> Result<()> {
@@ -58,8 +65,15 @@ impl Client {
     }
     async fn connect(&self) -> Result<UnixStream> {
         let socket = socket_path(&self.workspace);
+        endpoint::load(&self.workspace)?;
         if let Ok(s) = UnixStream::connect(&socket).await {
             return Ok(s);
+        }
+        let legacy = socket_in(&self.workspace, &std::env::temp_dir());
+        if legacy != socket
+            && let Ok(stream) = UnixStream::connect(&legacy).await
+        {
+            return Ok(stream);
         }
         let runtime = std::env::var_os("ROWTRAIL_RUNTIME")
             .map(PathBuf::from)
@@ -86,9 +100,15 @@ impl Client {
                 Ok(())
             });
         }
-        let mut child = command
-            .spawn()
-            .with_context(|| format!("cannot start {}", runtime.display()))?;
+        let mut child = command.spawn().map_err(|e| {
+            endpoint::failure(
+                &self.workspace,
+                "RUNTIME_START_FAILED",
+                format!("cannot start {}: {e}", runtime.display()),
+                false,
+            )
+        })?;
+        let mut competing_owner = false;
         for _ in 0..500 {
             tokio::time::sleep(Duration::from_millis(10)).await;
             if let Ok(s) = UnixStream::connect(&socket).await {
@@ -98,19 +118,24 @@ impl Client {
                 });
                 return Ok(s);
             }
-            if let Some(status) = child.try_wait()?
-                && !status.success()
-            {
-                anyhow::bail!(
-                    "runtime startup failed; inspect {}",
-                    logs.join("runtime.log").display()
-                )
+            if let Some(status) = child.try_wait()? {
+                if !status.success() {
+                    return Err(endpoint::failure(
+                        &self.workspace,
+                        "RUNTIME_START_FAILED",
+                        "runtime exited before publishing an endpoint",
+                        false,
+                    )
+                    .into());
+                }
+                competing_owner = true;
             }
         }
-        anyhow::bail!(
-            "runtime startup timed out; inspect {}",
-            logs.join("runtime.log").display()
-        )
+
+        std::thread::spawn(move || {
+            let _ = child.wait();
+        });
+        Err(endpoint::failure(&self.workspace,if competing_owner {"WORKSPACE_BUSY"} else {"RUNTIME_UNAVAILABLE"},"No compatible endpoint after 5 seconds; a competing coordinator may own the workspace lock",true).into())
     }
     /// Open one checked connection for a sequence of agent operations.
     pub async fn session(&self) -> Result<Session> {
@@ -119,16 +144,62 @@ impl Client {
             stream.peer_cred()?.uid() == unsafe { libc::geteuid() },
             "unauthorized local runtime"
         );
-        send(
-            &mut stream,
-            &Request::new("handshake", serde_json::json!({})),
-        )
-        .await?;
-        let hello: Response = receive(&mut stream).await?;
-        ensure!(
-            hello.ok && hello.api_version == API_VERSION,
-            "PROTOCOL_VERSION_MISMATCH"
-        );
+        let request = Request::new("handshake", serde_json::json!({}));
+        let hello: Response = tokio::time::timeout(Duration::from_secs(5), async {
+            send(&mut stream, &request).await?;
+            receive(&mut stream).await
+        })
+        .await
+        .map_err(|_| {
+            endpoint::failure(
+                &self.workspace,
+                "RUNTIME_UNAVAILABLE",
+                "handshake timed out",
+                true,
+            )
+        })??;
+        if !hello.ok || hello.api_version != API_VERSION || hello.request_id != request.request_id {
+            return Err(endpoint::failure(
+                &self.workspace,
+                "PROTOCOL_VERSION_MISMATCH",
+                "invalid handshake response",
+                false,
+            )
+            .into());
+        }
+        let result = hello.result.as_ref().context("missing handshake result")?;
+        if result["workspace"] != serde_json::to_value(&self.workspace)? {
+            return Err(endpoint::failure(
+                &self.workspace,
+                "ENDPOINT_INVALID",
+                "handshake workspace mismatch",
+                false,
+            )
+            .into());
+        }
+        if result["runtime_version"] != env!("CARGO_PKG_VERSION") {
+            return Err(endpoint::failure(&self.workspace,"RUNTIME_VERSION_MISMATCH","running coordinator and client versions differ; close old sessions and wait for idle exit",false).into());
+        }
+        let descriptor = endpoint::load(&self.workspace)?.ok_or_else(|| {
+            endpoint::failure(
+                &self.workspace,
+                "ENDPOINT_INVALID",
+                "runtime did not publish its descriptor",
+                true,
+            )
+        })?;
+        if result["store_id"] != descriptor.store_id
+            || result["coordinator_pid"] != descriptor.pid
+            || result["runtime_version"] != descriptor.runtime_version
+        {
+            return Err(endpoint::failure(
+                &self.workspace,
+                "ENDPOINT_INVALID",
+                "descriptor and live runtime identities differ",
+                true,
+            )
+            .into());
+        }
         Ok(Session {
             stream: Some(stream),
         })
@@ -158,13 +229,25 @@ impl Session {
         })
         .await??;
         ensure!(
-            response.api_version == API_VERSION,
+            response.api_version == API_VERSION && response_matches(&request, &response),
             "PROTOCOL_VERSION_MISMATCH"
         );
         self.stream = Some(stream);
         Ok(response)
     }
 }
+fn response_matches(request: &Request, response: &Response) -> bool {
+    response.request_id == request.request_id
+        || (!response.ok
+            && response
+                .error
+                .as_ref()
+                .is_some_and(|e| e.details["request_id_truncated"] == true)
+            && !response.request_id.is_empty()
+            && response.request_id.len() < request.request_id.len()
+            && request.request_id.starts_with(&response.request_id))
+}
+
 fn normalize(request: &Request) -> Result<Request> {
     // A shared coordinator's cwd is unrelated to later callers' working directories.
     let mut request = request.clone();
@@ -187,6 +270,44 @@ fn normalize(request: &Request) -> Result<Request> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[tokio::test]
+    async fn mismatched_response_poisons_session_without_replay() {
+        let (client, mut server) = UnixStream::pair().unwrap();
+        let mut session = Session {
+            stream: Some(client),
+        };
+        let peer = tokio::spawn(async move {
+            let mut request: Request = receive(&mut server).await.unwrap();
+            request.request_id = "different-request".into();
+            send(
+                &mut server,
+                &Response::success(&request, serde_json::json!({})),
+            )
+            .await
+            .unwrap();
+            assert!(receive::<Request>(&mut server).await.is_err());
+        });
+        assert!(
+            session
+                .call(&Request::new("query", serde_json::json!({})))
+                .await
+                .is_err()
+        );
+        assert!(session.stream.is_none());
+        peer.await.unwrap();
+        let request = Request::new("doctor", serde_json::json!({}));
+        let mut response = Response::failure(
+            &request,
+            rowtrail_contracts::ApiError::new("INVALID_ARGUMENT", "bounded error"),
+        );
+        response.request_id.truncate(4);
+        assert!(!response_matches(&request, &response));
+        response.error.as_mut().unwrap().details["request_id_truncated"] = serde_json::json!(true);
+        assert!(response_matches(&request, &response));
+        response.ok = true;
+        assert!(!response_matches(&request, &response));
+    }
 
     #[tokio::test]
     async fn cancelling_rpc_closes_session_without_replay() {

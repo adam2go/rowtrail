@@ -79,6 +79,8 @@ pub enum WorkerMessage {
     Failed {
         code: String,
         message: String,
+        #[serde(default)]
+        details: Value,
         metrics: Value,
     },
 }

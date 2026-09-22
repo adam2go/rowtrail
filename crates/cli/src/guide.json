@@ -24,9 +24,9 @@
     "Release unused results, inspect workspace gc dry-run, then explicitly apply collection. Retained descendants protect their inputs."
   ],
   "quality": "Read accuracy, coverage, final_for_request and presentation separately. Completing a query on a partial result does not make its original-source coverage complete.",
-  "numbers": "Int64, UInt64 and Decimal values are JSON strings with declared schema types. Preserve exact arithmetic. Progressive avg is Decimal128(38,6), truncated toward zero.",
+  "numbers": "Int64, UInt64 and Decimal are JSON strings with declared types. SQL integer/Decimal SUM is checked (numeric policy rowtrail-numeric-v1); Decimal output precision is checked. Other SQL arithmetic retains engine semantics. accuracy=exact describes sampling, not arbitrary-precision arithmetic. Old missing policies are unknown. Progressive avg is Decimal128(38,6), truncated toward zero.",
   "budgets": "Waiting, computation, memory, scanning, stored results and output have separate limits. Engine memory is not a process RSS hard cap.",
   "retry": "After ambiguous transport failure, inspect durable state or deliberately reuse the original idempotency key. Never silently replay a possibly accepted mutation.",
-  "capabilities": "Use doctor for the running coordinator's actual capabilities. A still-running old coordinator retains its old version. No internal model calls or automatic host resume.",
+  "capabilities": "Use doctor for actual capabilities. Client and coordinator versions must match; close old sessions and allow idle exit before upgrading. Stable workspace endpoints do not depend on TMPDIR. No internal model calls or automatic host resume.",
   "composition": "The optional stdlib Python client offers open(source), query(sql, bindings), binding(response), observe(response), and guarded rows(response). Compose known steps in code; query waits mechanically without replay and preserves full observations. Raw call(method, params) remains available."
 }

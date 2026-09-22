@@ -2,8 +2,34 @@
 
 [Home](../README.md) · [Verification and measurements](verification.md)
 
-Updated 2026-09-22 for **0.1.0-alpha.8**. Native builds, checksum installation, migration and repeated performance
-measurements are verified; this remains an engineering preview.
+Updated 2026-09-23 for **0.1.0-beta.1**. Local acceptance passed; final native
+build verification and publication are in progress.
+
+## Beta.1
+
+- Checked integer/Decimal SQL SUM across scalar, grouped, DISTINCT, sliding-window
+  and real partial-merge paths. Wide checked state avoids batch-dependent narrow
+  overflow. Decimal precision is guarded before persistence, read and export.
+- Numeric policy v1 separates sampling exactness from finite SQL arithmetic.
+  Structured overflow errors retain operation/type/expression and recovery.
+  Old revisions remain immutable; unknown numeric provenance is never recertified.
+- Stable short workspace sockets ignore TMPDIR. A private endpoint descriptor and
+  live handshake check UID, workspace, store, PID and runtime version. Typed
+  connection failures expose recovery paths without replaying accepted work.
+- The optional stdlib client composes prepare/inspect/export, strict unique label
+  lookup, explicitly budgeted paging and lossless int/Decimal conversion. Exceptions
+  retain full durable state and distinguish pagination exhaustion from EOF.
+- Saved IPC files stay whole during scanning; separate files remain parallel.
+  This removes format sniffing and repeated full-part verification from range
+  partitioning while retaining the job-local 8 MiB cache and all durability rules.
+- Schema 8 upgrades 3/4/5/6/7 and excludes old runtimes. Local tests preserve old
+  fixed and partial revisions and reject invalid old Decimal display/export.
+- 112 local integration scenarios and 14 Rust tests pass, including the original
+  subprocess publication/cancellation tests. New native CI gates also fetch the
+  checksum-pinned published alpha.8 package and test its real upgrade.
+
+[Decision](decisions/009-numeric-reconnection-and-reuse.md) ·
+[Numeric contract](numeric-contract.md) · [Verification](verification.md).
 
 ## Alpha.8
 
@@ -211,21 +237,14 @@ size budgets remain mandatory. [Alpha.2 history](releases/alpha2-progress.md).
   agent tasks. Whole-workspace catalog counts still grow with retained history;
   broader above-memory parallel workloads need further verification.
 
-- Ordinary SQL follows DataFusion type semantics: an Int64/UInt64 SUM can wrap
-  when its accumulator overflows. Decimal(38,0) can represent a wider integer sum
-  only while it fits the declared precision. Ordinary SQL can also produce a
-  Decimal exceeding that precision, and its displayed value can be incorrect.
-  Overflow can still be marked exact/complete and accepted by the current client:
-  those checks do not certify arithmetic safety. Checked numeric aggregation and
-  explicit numeric-quality semantics are priority correctness work. This is
-  separate from JSON number preservation and from analyze aggregates, which
-  explicitly reject overflow.
-
-- Runtime socket discovery currently depends on the caller's TMPDIR. Changing
-  TMPDIR while a coordinator owns the same workspace can cause a startup timeout
-  instead of reconnecting. Keep the environment consistent when reusing that
-  workspace; stable endpoint discovery and actionable connection errors remain
-  priority reliability work. Transport failures must never silently replay jobs.
+- Integer/Decimal SQL SUM and Decimal publication boundaries are checked in beta.1.
+  Other SQL arithmetic (including AVG, scalar expressions, casts and floating-point
+  SUM) retains engine semantics. An old wrapped integer cannot be identified from
+  its saved value alone. Missing legacy numeric policy means unknown; see the
+  [numeric contract](numeric-contract.md).
+- New coordinators reconnect independently of TMPDIR. An already-running old
+  coordinator must finish and exit before a new version can own its workspace;
+  clients report version/endpoint errors instead of killing active jobs.
 
 - Further progressive work: sampling/estimates, reusable accumulator states and
   interrupted-run continuation are not implemented. `analyze` reports fragment-prefix coverage; ordinary SQL previews remain output
@@ -266,6 +285,8 @@ python3 tests/integration/alpha5.py
 python3 tests/integration/alpha6.py
 python3 tests/integration/alpha7.py
 python3 tests/integration/alpha8.py
+python3 tests/integration/alpha9.py
+python3 scripts/previous_release_probe.py
 python3 scripts/check_boundaries.py
 python3 scripts/mcp_probe.py target/release/rowtrail
 python3 scripts/session_probe.py target/release/rowtrail

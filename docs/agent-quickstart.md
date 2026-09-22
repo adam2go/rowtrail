@@ -47,3 +47,14 @@ An included observation needs no extra read. Partial checkpoints are exact only
 for their stated prefix, and a completed query on one keeps partial coverage.
 After a transport failure, reconnect and inspect durable state; never silently
 replay a mutation. See [the full guide](agent-guide.md) for MCP and raw NDJSON.
+
+Beta.1 adds `rt.find(label)` for a strict unique saved-result lookup; it rejects
+missing/duplicate/expired/nonfinal matches. `prepare`/`inspect`/`export` compose
+without extra dependencies. `pages` requires total rows, response bytes and pages;
+exhaustion before EOF is a resumable error. `RowTrailError` retains structured
+code/details and the response. See [the full helper contract](agent-guide.md).
+
+Integer/Decimal SQL SUM now checks overflow; Decimal output precision is guarded.
+Other SQL arithmetic retains engine semantics. `accuracy=exact` describes sampling,
+not arbitrary-precision arithmetic. Old results without numeric policy are unknown;
+[numeric policy v1](numeric-contract.md) explains the scope and legacy behavior.

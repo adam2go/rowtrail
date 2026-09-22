@@ -5,7 +5,7 @@
   <p>为 Agent 而生的小型原生数据工具。<br>提出问题，保存精确结果，沿着结果继续探索。</p>
   <p>
     <a href="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml"><img src="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml/badge.svg" alt="构建与验证"></a>
-    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.8"><img src="https://img.shields.io/badge/release-v0.1.0--alpha.8-147D70" alt="v0.1.0-alpha.8 版本"></a>
+    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.1"><img src="https://img.shields.io/badge/release-v0.1.0--beta.1-147D70" alt="v0.1.0-beta.1 版本"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-147D70" alt="Apache-2.0 许可证"></a>
   </p>
   <p><a href="README.md">English</a> · <a href="#安装">安装</a> · <a href="docs/agent-guide.md">Agent 接入</a> · <a href="docs/verification.md">测试报告</a> · <a href="CONTRIBUTING.md">参与贡献</a></p>
@@ -17,7 +17,8 @@ Agent 探索一张大表，不应该先把整张表塞进上下文。RowTrail �
 执行只读 SQL，把带固定版本的结果留在磁盘。Agent 按预算读取带类型的观察，下一次追问
 可以直接从保存的结果继续。
 
-**alpha.8 聚焦更快地保存大结果、按资源预算选择 SQL 并行度，以及可按标签找回的中间结果。**
+**beta.1 补齐受检整数/Decimal SUM、跨 TMPDIR 稳定重连、轻量客户端，并减少保存结果的重复读取。**
+当前候选版已通过本地验收，原生构建与发布仍在验证中。
 不新增外部依赖，压缩安装包预算继续保持 **30 MB**。
 
 **内部零模型调用，无需 API Key，没有表格界面。** 问什么、证据够不够，由你的 Agent 判断。
@@ -41,11 +42,11 @@ CSV / TSV / Parquet → 精确查询 → 保存结果 → 继续追问
 
 ## 安装
 
-当前 **v0.1.0-alpha.8** 是工程预览版，采用 Apache-2.0 许可证。
+当前候选版 **v0.1.0-beta.1** 采用 Apache-2.0 许可证；下列安装命令在发布产物上传后生效。
 原生包支持 **macOS arm64** 和 **Linux x86_64**（Ubuntu 22.04 / glibc 2.35 及以上）。
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-alpha.8/install.sh -o /tmp/rowtrail-install.sh
+curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-beta.1/install.sh -o /tmp/rowtrail-install.sh
 sh /tmp/rowtrail-install.sh
 export PATH="$HOME/.local/bin:$PATH"
 rowtrail --version
@@ -53,21 +54,16 @@ rowtrail --version
 
 安装器校验 SHA-256，默认安装版本化的二进制组合到 `~/.local/bin`。
 可设置 `ROWTRAIL_INSTALL_DIR` 更换目录，也可以从
-[Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.8) 下载并解压。
+[Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.1) 下载并解压。
 请将 `rowtrail` 和 `rowtrail-runtime` 放在同一个目录。
 
-已验证的原生包大小（十进制 MB）：
+预算保持 **下载 30 MB / CLI 4.5 MB / 运行时 125 MB**。同一个 Linux 包在 Ubuntu
+22.04 和 24.04 上验证；包内附带 Agent 指南与可选演示。实际大小与哈希见
+[原生产物记录](docs/verification.md#native-distribution)。
 
-| 平台 | 压缩下载 `.tar.xz` | CLI | 运行时 |
-|---|---:|---:|---:|
-| macOS arm64 | **19.20 MB** | 3.73 MB | 100.08 MB |
-| Linux x86_64 | **22.60 MB** | 4.19 MB | 114.91 MB |
-
-CLI / 运行时列为解压大小，预算保持 **30 / 4.5 / 125 MB**。同一个 Linux 包在 Ubuntu
-22.04 和 24.04 上验证；包内附带 Agent 指南与可选演示。[原生产物记录](docs/verification.md#native-distribution)。
-
-**工作区升级：** alpha.8 将元数据升级到 schema 7，旧运行时不能打开升级后的工作区；
-如果需要回退，请停止协调器后保留完整的升级前副本。
+**工作区升级：** beta.1 将元数据升级到 schema 8。先关闭旧会话并让旧协调器退出；
+如果需要回退，请保留完整、已停止的升级前副本。旧运行时不能打开升级后的工作区，
+旧结果也不会被重新认证为数值安全。[数值合同](docs/numeric-contract.md)。
 
 ## 先问一个问题
 
@@ -121,38 +117,26 @@ python3 examples/quickstart.py
 
 ## 性能有数字，也有依据
 
-alpha.8 优化的是完整探索：打开陌生数据、保存子集、从结果分支，再回原始数据追问。
-测试明确记录并行度，对照引擎允许保留中间表。
-[验证报告](docs/verification.md) 保留重复原始计时、独立正确性检查、原生产物哈希与负面实验。
+beta.1 测量完整任务：保存大子集、连续追问十次、重连并找回同一个固定结果。
+初轮交替实验把每轮保存结果读取量从约 82 MB 降到 28 MB，原始数据读取仍为零。
+最终重复测量和原生产物还在验收；[验证报告](docs/verification.md) 保留状态与原始数据。
 
-同一台 Apple arm64 Mac 的测量：
+SQLite FULL 提交、文件与目录同步、SHA-256 和真实取消继续保留。缓存仍限制为每任务
+8 MiB，没有跨任务跳过校验。数值检查与更完整的元数据也有成本，报告会如实记录。
 
-| 完整流程，中位数 ms | alpha.7 | alpha.8 |
-|---|---:|---:|
-| 百万行默认探索（7 轮交替） | 236.41 | **144.23** |
-| 百万行排序，32 MiB 引擎池（5 轮交替） | 929.18 | **462.06** |
+本地通过 **112 项集成场景**和 **14 项 Rust 测试**，其中含 12 种子进程提交崩溃场景。
+alpha.8 工作区的固定结果与部分检查点继续保留；旧的无效 Decimal 会在读取/导出时报错。
 
-耗时分别降低约 **39% / 50%**。默认设置会为大扫描选择更多分区，对照也获得相应的最大
-分区目标。另一个全部固定为单分区的探索对照仍从 **240.34 降到 201.69 ms**。
-小数据探索和约 **1.10 ms** 的热会话小查询基本持平。
+**能力有明确边界。** 整数/Decimal SUM 已检查溢出，其他 SQL 运算继续采用引擎语义。
+`accuracy: exact` 表示抽样层面的精确性，不代表任意精度数学保证。
+[数值合同](docs/numeric-contract.md) 说明详细范围。Beta 不等于 1.0 元数据兼容承诺，
+也不代表已经支持 Windows 或远程来源。
 
-![alpha.8 完整探索与低内存排序，详细条件与负面结果见报告。](benchmarks/performance/alpha8/performance.svg)
-
-SQLite FULL 提交、文件与目录同步、内容校验和真实取消仍然保留。较大的压缩结果文件
-能减少持久化提交次数，但从大结果读取很小的分页可能变慢：百万行结果的 100 行分页从 **0.64 增到 2.01 ms**。
-内存池预算也不是 RSS 上限。
-安装包体积预算不变。
-
-**直接引擎仍然更快。** RowTrail 还承担持久任务、固定结果、校验、进程隔离和有界协议的
-成本。如果已有持久 DuckDB 环境，并能自行管理这些生命周期，它仍是很强的选择。
 最新真实 Agent 配对试验仍为 alpha.6：12 次全部答对，但 RowTrail 耗时更长、累计输入
-token 更多。本轮后端优化和接续演示不能证明模型整体耗时或 token 优势。
+token 更多。本轮后端优化不能证明模型整体耗时或 token 优势。
 
-两个原生构建平台均通过 **99 项集成场景**和 **9 项 Rust 测试**，其中含 12 种子进程
-提交崩溃场景。5,000 个带标签结果在重启后仍可找回，该本地探测的目录查询中位数为 **0.54 ms**。
-
-[当前证据](docs/verification.md) · [alpha.8 原始记录](benchmarks/performance/alpha8/) ·
-[alpha.7 历史报告](docs/releases/alpha7-verification.md)。
+[当前证据](docs/verification.md) · [beta.1 原始记录](benchmarks/performance/beta1/) ·
+[alpha.8 历史报告](docs/releases/alpha8-verification.md)。
 
 ## 接下来的方向
 

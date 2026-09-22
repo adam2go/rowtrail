@@ -73,7 +73,7 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-alpha7-') as td:
         rt = Logged(str(bins / 'rowtrail'), str(ws))
         pid = rt.call('doctor', {})['coordinator_pid']
         db = sqlite3.connect(ws / 'metadata.sqlite')
-        assert db.execute("SELECT value FROM meta WHERE key='schema_version'").fetchone()[0] == '7'
+        assert db.execute("SELECT value FROM meta WHERE key='schema_version'").fetchone()[0] == '8'
         opened = rt.open(base / 'data/many.parquet')
         assert opened['binding'] == rt.binding(opened)
         literal = base / 'quarter [1] #?.parquet'

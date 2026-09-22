@@ -5,7 +5,7 @@
   <p>A small native data tool, built for agents.<br>Ask a question, keep an exact result, and continue from there.</p>
   <p>
     <a href="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml"><img src="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml/badge.svg" alt="Build and verify"></a>
-    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.8"><img src="https://img.shields.io/badge/release-v0.1.0--alpha.8-147D70" alt="Release v0.1.0-alpha.8"></a>
+    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.1"><img src="https://img.shields.io/badge/release-v0.1.0--beta.1-147D70" alt="Release v0.1.0-beta.1"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-147D70" alt="Apache-2.0 license"></a>
   </p>
   <p><a href="README.zh-CN.md">简体中文</a> · <a href="#install">Install</a> · <a href="docs/agent-guide.md">Agent guide</a> · <a href="docs/verification.md">Test results</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
@@ -18,9 +18,11 @@ in its context. RowTrail opens local CSV/TSV/Parquet, runs read-only SQL, and ke
 versioned results on disk. The agent gets a bounded, typed observation and can
 branch from a saved result when the next question arrives.
 
-**New in alpha.8:** faster large-result persistence, resource-aware SQL
-parallelism, and labeled results that a fresh agent connection can identify and
-reuse. No new external dependency; the archive budget remains **30 MB**.
+**New in beta.1:** checked integer/Decimal SUM, stable reconnection across TMPDIR
+changes, a more complete stdlib client, and fewer repeated reads of saved results.
+No new external dependency; the archive budget remains **30 MB**.
+
+The beta candidate has passed local acceptance; native publication is pending.
 
 **Zero internal model calls. No API key. No spreadsheet UI.** Your agent chooses
 the questions and decides when the evidence is sufficient.
@@ -44,12 +46,13 @@ CSV / TSV / Parquet → exact query → saved result → next question
 
 ## Install
 
-**v0.1.0-alpha.8** is an early engineering preview, licensed under Apache-2.0.
+**v0.1.0-beta.1** is a beta preview, licensed under Apache-2.0.
+The commands below apply once its release assets are published.
 Native packages are available for **macOS arm64** and **Linux x86_64**
 (Ubuntu 22.04 / glibc 2.35 or newer).
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-alpha.8/install.sh -o /tmp/rowtrail-install.sh
+curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-beta.1/install.sh -o /tmp/rowtrail-install.sh
 sh /tmp/rowtrail-install.sh
 export PATH="$HOME/.local/bin:$PATH"
 rowtrail --version
@@ -57,23 +60,18 @@ rowtrail --version
 
 The installer verifies SHA-256 and installs a versioned pair in `~/.local/bin`.
 Set `ROWTRAIL_INSTALL_DIR` to choose another directory, or extract an archive
-from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.8).
+from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.1).
 Keep `rowtrail` and `rowtrail-runtime` together.
 
-Verified native sizes (decimal MB):
-
-| Platform | Download `.tar.xz` | CLI | Runtime |
-|---|---:|---:|---:|
-| macOS arm64 | **19.20 MB** | 3.73 MB | 100.08 MB |
-| Linux x86_64 | **22.60 MB** | 4.19 MB | 114.91 MB |
-
-CLI/runtime sizes are uncompressed. Budgets stay **30 MB / 4.5 MB / 125 MB**.
+Native budgets remain **30 MB download / 4.5 MB CLI / 125 MB runtime**.
 The same Linux archive is tested on Ubuntu 22.04 and 24.04. Archives include
-agent guides and the optional runnable demo. [Artifact verification](docs/verification.md#native-distribution).
+agent guides and the optional runnable demo. Actual sizes and hashes appear in
+[artifact verification](docs/verification.md#native-distribution).
 
-**Workspace upgrade:** alpha.8 upgrades metadata to schema 7. Old runtimes refuse
-an upgraded store; stop its coordinator and retain a full pre-upgrade copy if you
-need rollback.
+**Workspace upgrade:** beta.1 upgrades metadata to schema 8. Close old sessions
+and allow the old coordinator to exit before upgrading. Retain a stopped full
+pre-upgrade copy if you need rollback; older runtimes refuse upgraded stores.
+Old results keep their original numeric provenance. [Numeric contract](docs/numeric-contract.md).
 
 ## Give it a question
 
@@ -135,45 +133,31 @@ no extra model turn. [Small bootstrap](docs/agent-quickstart.md).
 
 ## Measured, with the receipts
 
-Alpha.8 targets the complete exploration: opening unfamiliar data, saving a
-subset, branching from it, and returning to the original dataset. Parallel targets
-are explicit in measurements; direct engines retain their intermediate tables.
-The [verification report](docs/verification.md) records repeated raw timings,
-independent answer checks, native artifact hashes and unsuccessful experiments.
+Beta.1 targets a complete task: save a large subset, ask ten follow-up questions,
+reconnect and find the same fixed result. The initial alternating experiment
+reduced duplicate saved-data reads from about 82 to 28 MB per follow-up, with
+zero original-source reads. Final repeated measurements and native artifacts are
+under verification; see the [report](docs/verification.md) for status and raw data.
 
-On one Apple arm64 Mac:
+SQLite FULL commits, file/directory sync, SHA-256 and actual cancellation remain.
+The cache is still bounded to 8 MiB per job; no cross-job verification shortcut is
+added. Numeric checks and richer metadata have costs, which stay in the report.
 
-| Complete workload, median ms | alpha.7 | alpha.8 |
-|---|---:|---:|
-| 1M-row exploration, defaults (7 alternating trials) | 236.41 | **144.23** |
-| 1M-row sort, 32 MiB engine pool (5 alternating trials) | 929.18 | **462.06** |
+Local acceptance passes **112 integration scenarios** and **14 Rust tests**,
+including 12 subprocess commit-crash cases. Published alpha.8 workspaces retain
+old fixed/partial revisions; invalid old Decimals fail explicitly on read/export.
 
-That is **39% / 50% less elapsed time**. Defaults use more partitions for large
-scans; direct controls receive matching maximum targets. A separate one-partition
-exploration comparison still improves **240.34 → 201.69 ms**. Small exploration
-and warm scalar queries (about **1.10 ms**) remain essentially unchanged.
+**Scope matters.** Integer/Decimal SUM is checked; other SQL arithmetic keeps
+engine semantics. `accuracy: exact` concerns sampling, not arbitrary precision.
+The [numeric contract](docs/numeric-contract.md) explains the guarantee. Beta is
+not a 1.0 metadata promise or support for Windows/remote sources.
 
-![Alpha.8 complete exploration and low-memory sort. Lower is better; exact values and all conditions are in the report.](benchmarks/performance/alpha8/performance.svg)
+The latest paired-agent pilot remains alpha.6: all 12 answers correct, but
+RowTrail used more time and cumulative input tokens than persistent DuckDB.
+Backend improvements do not establish a model-level latency/token advantage.
 
-The changes preserve SQLite FULL commits, file/directory sync, verified parts and
-real worker cancellation. Larger compressed parts reduce commit overhead but can
-make a small read from a large saved result slower: the 100-row page grows from
-**0.64 to 2.01 ms** in our million-row fixture. MemoryPool budgets are not
-RSS caps. Package-size budgets remain unchanged.
-
-**Direct engines remain faster.** RowTrail additionally pays for durable jobs,
-immutable results, verification, process isolation and bounded protocol. A
-persistent DuckDB environment is a strong choice if you already own those
-lifecycles. The latest paired-agent pilot is still alpha.6: all 12 answers correct,
-but RowTrail took more time and cumulative input tokens. Backend improvements and
-the new runnable handoff demo do not establish a model-level latency/token win.
-
-Both native build platforms pass **99 integration scenarios** and **nine Rust
-tests**, including 12 subprocess commit-crash cases. A 5,000-result labeled history
-survives restart; catalog lookup median is **0.54 ms** in that local probe.
-
-[Current evidence](docs/verification.md) · [Alpha.8 raw records](benchmarks/performance/alpha8/) ·
-[Archived alpha.7 report](docs/releases/alpha7-verification.md).
+[Current evidence](docs/verification.md) · [Beta.1 raw records](benchmarks/performance/beta1/) ·
+[Archived alpha.8 report](docs/releases/alpha8-verification.md).
 
 ## What comes next
 

@@ -7,7 +7,7 @@ use rowtrail_contracts::{FRAME_LIMIT, Request, now_ms};
 use serde_json::json;
 use std::{
     fs::OpenOptions,
-    os::unix::fs::PermissionsExt,
+    os::unix::fs::{MetadataExt, PermissionsExt},
     path::Path,
     sync::{
         Arc,
@@ -46,13 +46,24 @@ pub async fn serve(workspace: &Path) -> Result<()> {
     ensure!(
         metadata.is_dir()
             && !metadata.file_type().is_symlink()
-            && metadata.permissions().mode() & 0o077 == 0,
+            && metadata.permissions().mode() & 0o077 == 0
+            && metadata.uid() == unsafe { libc::geteuid() },
         "insecure socket directory"
     );
     if socket.exists() {
         std::fs::remove_file(&socket)?;
     }
     let listener = UnixListener::bind(&socket)?;
+    rowtrail_client::endpoint::publish(&rowtrail_client::endpoint::Endpoint {
+        descriptor_version: 1,
+        api_version: rowtrail_contracts::API_VERSION.into(),
+        runtime_version: env!("CARGO_PKG_VERSION").into(),
+        workspace: workspace.clone(),
+        socket: socket.clone(),
+        store_id: db.store_id.clone(),
+        pid: std::process::id(),
+        uid: unsafe { libc::geteuid() },
+    })?;
     let active = Arc::new(AtomicUsize::new(0));
     let busy = Arc::new(AtomicUsize::new(0));
     let touched = Arc::new(AtomicU64::new(now_ms()));
@@ -114,6 +125,7 @@ pub async fn serve(workspace: &Path) -> Result<()> {
     let _ = scheduler.await;
     drop(listener);
     let _ = std::fs::remove_file(socket);
+    let _ = std::fs::remove_file(rowtrail_client::endpoint::path(&workspace));
     drop(lock);
     Ok(())
 }
@@ -224,10 +236,10 @@ async fn run_job(db: &Db, spec: &JobSpec, pool: &mut Option<Worker>) -> Result<(
                         if let Err(e)=published&& db.stopping(&spec.job_id)?.is_none(){return Err(e)}
                     },
                     WorkerMessage::Completed{metrics}=>{terminal=Some(("completed".to_owned(),None,metrics));break},
-                    WorkerMessage::Failed{code,message,metrics}=>{
+                    WorkerMessage::Failed{code,message,details,metrics}=>{
                         if code=="SOURCE_CHANGED"{for source in &spec.sources{db.invalidate(&source.id)?;}}
                         let state=if code=="RESOURCE_EXHAUSTED"||code=="BUDGET_EXHAUSTED"{"budget_exhausted"}else if code=="CANCELLED"{"cancelled"}else{"failed"};
-                        terminal=Some((state.to_owned(),Some(json!({"code":code,"message":message})),metrics));break
+                        terminal=Some((state.to_owned(),Some(json!({"code":code,"message":message,"retryable":false,"details":details})),metrics));break
                     }
                 }
             },

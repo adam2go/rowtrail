@@ -188,6 +188,7 @@ impl StagedPart {
         })
     }
     fn write(&mut self, batch: &RecordBatch) -> Result<()> {
+        crate::numeric::validate_batch(batch)?;
         match &mut self.writer {
             PartWriter::Arrow(w) => w.write(batch)?,
             PartWriter::Parquet(w) => w.write(batch)?,
@@ -423,6 +424,7 @@ async fn execute_job(
             message(&WorkerMessage::Failed {
                 code: crate::errors::code(&e, counters.failure_code().unwrap_or("SQL_ERROR")).into(),
                 message: format!("{e:#}"),
+                details: crate::errors::details(&e),
                 metrics: json!({"elapsed_ms":started.elapsed().as_secs_f64()*1000.0,"io":counters.value()}),
             })
             .await?
@@ -504,6 +506,7 @@ async fn export(spec: &JobSpec, counters: &crate::store::Counters) -> Result<ser
             for part in &input.files {
                 for b in reader(part)? {
                     let b = b?;
+                    crate::numeric::validate_batch(&b)?;
                     rows += b.num_rows();
                     w.write(&b)?;
                 }
@@ -515,6 +518,7 @@ async fn export(spec: &JobSpec, counters: &crate::store::Counters) -> Result<ser
             for part in &input.files {
                 for b in reader(part)? {
                     let b = b?;
+                    crate::numeric::validate_batch(&b)?;
                     rows += b.num_rows();
                     w.write(&b)?;
                 }
@@ -530,6 +534,7 @@ async fn export(spec: &JobSpec, counters: &crate::store::Counters) -> Result<ser
             for part in &input.files {
                 for b in reader(part)? {
                     let b = b?;
+                    crate::numeric::validate_batch(&b)?;
                     rows += b.num_rows();
                     w.write(&b)?;
                 }
