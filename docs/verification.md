@@ -236,6 +236,13 @@ Its [fourteen new integration scenarios](../benchmarks/performance/beta1/native-
 and [installation / bundled demo](../benchmarks/performance/beta1/install-native-macos.json)
 all pass. These records carry the native artifact hashes, not the local timing hashes.
 
+After publication, the [public default installer](../benchmarks/performance/beta1/public-install.json)
+was fetched from the beta.1 tag and run in a private directory. The actual network
+download matches the verified macOS CI binary hashes. The printable client,
+unique-label handoff across TMPDIR changes, exact large integers, structured SUM
+overflow and bundled demo all pass. The probe is reproducible with
+`scripts/public_install_probe.py --report /tmp/rowtrail-public-install.json`.
+
 The beta name reflects acceptance of the bounded local CLI/session/MCP workflow.
 It does not promise stable 1.0 metadata, signed/notarized binaries, Windows,
 remote data sources or general arbitrary-precision SQL arithmetic.

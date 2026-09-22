@@ -1,0 +1,78 @@
+{
+  "status": "passed",
+  "installer_url": "https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-beta.1/install.sh",
+  "installer_sha256": "45f1fb3f3ca5393e543698b8a2916be964013b0881ca0c8b0e439eed842b79cd",
+  "version": "rowtrail-cli 0.1.0-beta.1",
+  "default_version_matches_release": true,
+  "public_network_download_and_checksum_install": true,
+  "installed_binary_sha256": {
+    "rowtrail": "2c484358e4f8dfe71723c276659187b01da6069b7aca47ba18d9eeb52d99649b",
+    "rowtrail-runtime": "2c021caefb823aa453575f2b6f958b12bf2ad92bbe5dff14262c4aa83c2ca58d"
+  },
+  "binaries_match_verified_ci_archive": "6dcdb07b5b505724669eb8b7a10dac0db2747e6f9a8fa2c708c1d6e55cad28b5",
+  "printed_client_matches_bundle": true,
+  "fresh_session_unique_label_handoff": true,
+  "changed_tmpdir_same_coordinator": true,
+  "lossless_large_integer": true,
+  "structured_sum_overflow": true,
+  "handoff_original_source_bytes": 0,
+  "bundled_demo": {
+    "status": "passed",
+    "input_rows": 20003,
+    "question": "Which region has the highest refunded value, and through which channels?",
+    "refunds_by_region_cents": [
+      [
+        "east",
+        "1930407"
+      ],
+      [
+        "north",
+        "1920667"
+      ],
+      [
+        "south",
+        "1925653"
+      ],
+      [
+        "west",
+        "1925537"
+      ]
+    ],
+    "chosen_region": "east",
+    "saved_label": "demo refunds: east",
+    "saved_rows": 385,
+    "channel_totals_cents": [
+      [
+        "app",
+        "630463"
+      ],
+      [
+        "store",
+        "643469"
+      ],
+      [
+        "web",
+        "656475"
+      ]
+    ],
+    "handoff_columns": [
+      "n",
+      "first_id",
+      "cents"
+    ],
+    "handoff_rows": [
+      [
+        "385",
+        "9007199254740993",
+        "1930407"
+      ]
+    ],
+    "handoff_calls": [
+      "workspace summary",
+      "query"
+    ],
+    "handoff_original_source_bytes": 0,
+    "checks": "Python integer oracle; exact/final/complete/untruncated guards; IDs above 2^53",
+    "continue": "Use this workspace and label to query the retained result. Labels are descriptive, not unique IDs."
+  }
+}

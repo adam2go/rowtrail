@@ -38,7 +38,10 @@ independent release artifact verification pass.
 
 [Release](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.1) ·
 [Native CI](https://github.com/adam2go/rowtrail/actions/runs/35757844420) ·
-[Artifact provenance](release-verification.json).
+[Artifact provenance](release-verification.json) ·
+[Public default install](../benchmarks/performance/beta1/public-install.json).
+The public beta.1 installer downloads the verified macOS pair; printed-client
+composition, cross-TMPDIR labeled handoff, overflow rejection and the demo pass.
 
 [Decision](decisions/009-numeric-reconnection-and-reuse.md) ·
 [Numeric contract](numeric-contract.md) · [Verification](verification.md).

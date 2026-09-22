@@ -24,6 +24,7 @@ calls; neither time nor response bytes establishes an agent-level advantage.
 | [native-macos-alpha9.json](native-macos-alpha9.json) | Fourteen new scenarios rerun against the actual macOS CI archive on the local Mac. |
 | [upgrade-native-macos.json](upgrade-native-macos.json) / [numeric-upgrade-native-macos.json](numeric-upgrade-native-macos.json) | Published alpha.8 to actual beta.1 native archive, fixed revisions and invalid legacy values. |
 | [install-native-macos.json](install-native-macos.json) | Actual native package install, checksum rejection, printable helper and bundled demo. |
+| [public-install.json](public-install.json) | Public tag installer, actual network download/hash, cross-TMPDIR label handoff, SUM overflow and bundled demo after publication. |
 | [experiments/](experiments/) | Earlier candidates, a failing legacy-provenance test, startup regression, first-invocation outlier and checked-SUM experiments. |
 
 Full methods, benefits, costs and native acceptance: [verification report](../../../docs/verification.md).
