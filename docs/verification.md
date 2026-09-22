@@ -3,7 +3,7 @@
 [Home](../README.md) · [Numeric contract](numeric-contract.md) · [Current limits](progress.md)
 
 Beta.1 is undergoing final native verification. Local acceptance already covers
-112 integration scenarios and 14 Rust tests, published-format schema-7 to schema-8
+113 integration scenarios and 14 Rust tests, published-format schema-7 to schema-8
 upgrades, invalid legacy Decimal rejection and a 32 MiB out-of-core sort whose
 exported rows all match an independent oracle. Native artifacts are not published
 until both build platforms, package limits, installation and checksums pass.

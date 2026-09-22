@@ -112,6 +112,22 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-alpha9-') as td:
         reject(lambda:list(rt.pages(saved,max_rows=4,max_bytes=1000,max_pages=4)),'PAGE_BUDGET_EXHAUSTED')
         check('total pagination row/page/wire-byte bounds distinguish EOF from exhaustion and resume the exact cursor')
 
+        # A saved result larger than the verified cache must still fit a
+        # one-pass scan budget. This failed under byte-range repartitioning.
+        n=1048576
+        subprocess.run([str(bins/'rowtrail-runtime'),'fixtures','--directory',str(base/'large'),'--rows',str(n)],check=True,stdout=subprocess.DEVNULL)
+        large=rt.open(base/'large/many.parquet')
+        large_saved=rt.query('SELECT id,region,amount,payload FROM t',{'t':large},execution={'output':{'max_rows':0}})
+        with sqlite3.connect(ws/'metadata.sqlite') as db:
+            sizes=[row[0] for row in db.execute('SELECT bytes FROM parts WHERE result_id=?',[rt.binding(large_saved)['result_ref']])]
+        size=sum(sizes);assert size>8*1024*1024 and max(sizes)<=8*1024*1024
+        for _ in range(2):
+            one_pass=rt.query('SELECT COUNT(*),SUM(CAST(id AS DECIMAL(38,0))) FROM t',{'t':large_saved},execution={'target_partitions':2,'scan_bytes':size})
+            assert rt.rows(one_pass)==[[str(n),str(n*9007199254740993+n*(n-1)//2)]]
+            io=one_pass['job']['metrics']['io']
+            assert io['result_read_bytes']==size and io['source_read_bytes']==0 and io['verified_cache_peak_bytes']<=8*1024*1024
+        check('large multi-part results scan once per job under an exact byte budget; new jobs reverify with the same 8 MiB cache')
+
         # Old metadata is unknown, not recertified during reading or downstream work.
         legacy=rt.query('SELECT 7 n');ref=rt.binding(legacy)
         with sqlite3.connect(ws/'metadata.sqlite') as db:

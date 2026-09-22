@@ -143,7 +143,7 @@ SQLite FULL commits, file/directory sync, SHA-256 and actual cancellation remain
 The cache is still bounded to 8 MiB per job; no cross-job verification shortcut is
 added. Numeric checks and richer metadata have costs, which stay in the report.
 
-Local acceptance passes **112 integration scenarios** and **14 Rust tests**,
+Local acceptance passes **113 integration scenarios** and **14 Rust tests**,
 including 12 subprocess commit-crash cases. Published alpha.8 workspaces retain
 old fixed/partial revisions; invalid old Decimals fail explicitly on read/export.
 

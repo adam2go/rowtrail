@@ -14,7 +14,7 @@ import tarfile
 import tomllib
 
 ROOT=Path(__file__).resolve().parents[1]
-SUITES={'integration':30,'alpha3':13,'alpha4':10,'alpha5':12,'alpha6':8,'alpha7':15,'alpha8':11,'alpha9':13}
+SUITES={'integration':30,'alpha3':13,'alpha4':10,'alpha5':12,'alpha6':8,'alpha7':15,'alpha8':11,'alpha9':14}
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--run',type=int,required=True)
 p.add_argument('--commit',required=True)

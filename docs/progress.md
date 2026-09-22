@@ -24,7 +24,7 @@ build verification and publication are in progress.
   partitioning while retaining the job-local 8 MiB cache and all durability rules.
 - Schema 8 upgrades 3/4/5/6/7 and excludes old runtimes. Local tests preserve old
   fixed and partial revisions and reject invalid old Decimal display/export.
-- 112 local integration scenarios and 14 Rust tests pass, including the original
+- 113 local integration scenarios and 14 Rust tests pass, including the original
   subprocess publication/cancellation tests. New native CI gates also fetch the
   checksum-pinned published alpha.8 package and test its real upgrade.
 
