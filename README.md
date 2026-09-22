@@ -61,10 +61,15 @@ Set `ROWTRAIL_INSTALL_DIR` to choose another directory, or extract an archive
 from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.7).
 Keep `rowtrail` and `rowtrail-runtime` together.
 
-Native artifact verification is pending for this source snapshot. Exact download
-and installed binary sizes will be recorded before release. Budgets remain
-**30 MB** per archive, 4.5 MB per CLI and 125 MB per runtime (decimal).
-[Native verification](docs/verification.md#native-distribution).
+Verified native release sizes (decimal MB):
+
+| Platform | Download `.tar.xz` | CLI | Runtime |
+|---|---:|---:|---:|
+| macOS arm64 | **19.14 MB** | 3.72 MB | 100.13 MB |
+| Linux x86_64 | **22.57 MB** | 4.16 MB | 114.89 MB |
+
+CLI/runtime are uncompressed sizes. Budgets remain **30 MB** per archive,
+4.5 MB per CLI and 125 MB per runtime. [Native artifact verification](docs/verification.md#native-distribution).
 
 **Workspace upgrade:** alpha.7 upgrades metadata to schema 6. Old runtimes refuse
 an upgraded store; retain a pre-upgrade copy if you need to keep using alpha.6.
@@ -116,12 +121,7 @@ Five-query exploration on one Apple arm64 Mac; seven alternating runs per versio
 median milliseconds. Includes opening, saving a subset, two saved-result branches,
 and returning to the original dataset.
 
-| Entry | 16,384 rows | 1,048,576 rows |
-|---|---:|---:|
-| RowTrail alpha.6 · rerun | 110.33 | 296.09 |
-| **RowTrail alpha.7 · persistent NDJSON** | **36.15** | **239.95** |
-| DuckDB 1.5.5 · persistent session | 8.61 | 95.46 |
-| Direct DataFusion 55.0.0 · persistent session | 4.39 | 63.67 |
+![Alternating exploration measurements: alpha.6, alpha.7, persistent DuckDB and DataFusion. Full values and conditions in the verification report.](benchmarks/performance/alpha7/exploration.svg)
 
 Direct engines remain faster. RowTrail also pays for durable results, verification,
 isolation and protocol; baselines retain in-memory tables and direct DataFusion
@@ -130,7 +130,7 @@ startup is excluded. These are local measurements, not universal guarantees.
 - **Cheap durable observations:** warm scalar median **18.12 → 1.19 ms**,
   P95 20.52 → 1.82 ms, 609 warm queries/version. SQLite FULL commit stays.
 - **Less repeated verification I/O:** three scans of a saved 1M-row result read
-  **19.61 → 4.66 MB**, under the same 8 MiB retained-cache budget, with zero source reads.
+  **19.61 → 4.66 MB**, under the same 8 MiB retained-cache budget, with zero source data bytes read.
 - **Read requested columns:** a 32-column Parquet fixture projecting two columns
   reads **17.33 → 1.57 MB** in the query. Benefit depends on file layout.
 - **Earlier useful prefixes:** one-file row-group aggregation reaches its first
@@ -146,7 +146,7 @@ make composition easier; they do not prove total model latency/token savings.
 The latest paired pilot remains alpha.6: all 12 answers correct, but slower and
 more cumulative input tokens than persistent DuckDB. [Evidence and limits](docs/verification.md#agent-workflow-evidence).
 
-The local build passes **88 integration scenarios**, eight Rust tests including
+The local build and both native CI platforms pass **88 integration scenarios**, eight Rust tests including
 12 subprocess commit-crash cases and a deterministic broken-ACK regression.
 Inline corruption, quotas, cancellation and one-way upgrades are checked.
 Native release verification is recorded in the report.

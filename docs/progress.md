@@ -32,8 +32,10 @@ It does not claim completion of all M2B–M6 roadmap work.
   work; no new fair paired-agent latency/token advantage is claimed.
 
 [Design](decisions/007-agent-workflow-performance.md) · [Measurements](verification.md).
-Native release verification is pending for this source snapshot; final archive
-sizes and provenance will be recorded before publication.
+Native [macOS/Linux CI](https://github.com/adam2go/rowtrail/actions/runs/35682125721) and independent archive verification passed.
+The installed macOS archive passes the new scenarios, printed-client composition,
+handoff and upgrade from published alpha.6. Downloads are 19.14 / 22.57 MB.
+[Release provenance](release-verification.json).
 
 ## Alpha.6
 

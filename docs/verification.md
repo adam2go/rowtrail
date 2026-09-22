@@ -9,12 +9,12 @@ native artifact verification. [Alpha.6 report](releases/alpha6-verification.md) 
 
 ## Correctness and migration
 
-The final local release build passes **88 integration scenarios**: 30 foundation,
+The final local build and both native CI platforms pass **88 integration scenarios**: 30 foundation,
 13 alpha.3, ten alpha.4, twelve alpha.5, eight alpha.6 and fifteen alpha.7.
 **Eight Rust tests** include twelve subprocess publication-crash cases and a
 deterministic real-pipe regression for worker death before acknowledgement.
 Formatting, Clippy, dependency boundaries, MCP/session, the benchmark-profile
-guard and the real alpha.6 → alpha.7 upgrade probe pass. Native CI status is below.
+guard and the real alpha.6 → alpha.7 upgrade probe pass. Native artifact verification is below.
 
 [Alpha.7 checks](../tests/integration/alpha7.py) cover inline and mixed storage,
 nullable exact values and large integers, SQLite corruption, quota/GC, restart,
@@ -27,8 +27,11 @@ interrupted and confirming its exit; cancellation and budget finish rules remain
 **Metadata upgrades once to schema 6; old runtimes refuse upgraded workspaces.**
 [The two-binary probe](../benchmarks/performance/alpha7/upgrade-local.json) preserves
 old fixed results and a partial checkpoint, then queries an old result with the
-new runtime. Copy a workspace before upgrading if you need to keep using alpha.6.
-No new external dependency was added. [Design](decisions/007-agent-workflow-performance.md).
+new runtime. For rollback, stop the coordinator and copy the full workspace before upgrading.
+[Direct schema-3 upgrade](../benchmarks/performance/alpha7/upgrade-alpha3-local.json)
+and [schema-4 upgrade](../benchmarks/performance/alpha7/upgrade-alpha4-local.json)
+also pass with actual old archives; alpha.4's partial checkpoint retains its original
+file-prefix semantics. No new external dependency was added. [Design](decisions/007-agent-workflow-performance.md).
 
 ## Complete exploration
 
@@ -40,8 +43,9 @@ outside timing; session/coordinator startup and open are included.
 
 Five queries: aggregate by region, save a non-null subset, group saved rows, count
 saved positives, return to the original product dimension. Persistent DuckDB
-1.5.5 and direct DataFusion 55.0.0 retain in-memory intermediate tables. Both use
-one thread/partition, as does RowTrail. Direct DataFusion excludes process startup;
+1.5.5 and direct DataFusion 55.0.0 retain in-memory intermediate tables. DuckDB uses
+one thread; both DataFusion paths target one query partition (runtime/I/O threads
+are not an OS one-core limit). Direct DataFusion excludes process startup;
 its separate process wall time is retained. All engines agree on answers.
 
 | Backend, median ms | 16,384 rows | 1,048,576 rows |
@@ -78,6 +82,14 @@ Arrow parts up to 128 KiB now commit their descriptor and checksum-verified BLOB
 in one SQLite FULL transaction, avoiding separate small-file durability operations.
 Acknowledgement still follows durable commit; large parts retain file sync and
 atomic publication. [All samples](../benchmarks/performance/alpha7/latency.json).
+
+A separate long-session check retains **5,000 exact scalar results** in one
+workspace, with no GC. The early warm 100-query window has median/P95
+0.850 / 1.237 ms; the last 100 have 0.838 / 1.058 ms. All values are independently
+checked and all 5,000 results remain catalogued. File lengths including SQLite/WAL
+total 43,306,992 bytes. This single session shows no obvious history slowdown for
+this workload; it is not a repeated version comparison or a general scaling bound.
+[Every sample](../benchmarks/performance/alpha7/history-alpha7.json).
 
 ## Read less, retain bounded verified bytes
 
@@ -191,9 +203,30 @@ final measurements with the fastest candidate sample.
 
 ## Native distribution
 
-Native alpha.7 CI and independent archive verification are pending for this source
-snapshot. Final release provenance and exact sizes will be recorded here before
-publishing. Budgets remain 30,000,000 archive bytes, 4,500,000 CLI bytes and
-125,000,000 runtime bytes. Supported builds are macOS arm64 and Ubuntu 24.04
-x86_64 (glibc 2.39+); Windows is not supported. Local timings above use local
-release builds; downloaded CI binaries have separately recorded hashes.
+[Linux x86_64 and macOS arm64 native CI](https://github.com/adam2go/rowtrail/actions/runs/35682125721) passed at source commit
+`1f8074446762270f8a432943bd4b646b2c32fd95`. Downloaded archives match their SHA-256/size manifests; extracted binary
+hashes match the tested binaries. Apache-2.0, dependency notices and every size
+budget were checked independently. The actual macOS package was installed and
+passed all fifteen alpha.7 scenarios, the locally printed Python client, exact
+large-integer composition and fresh-session catalog handoff.
+
+[Published alpha.6 → native alpha.7](../benchmarks/performance/alpha7/upgrade-native-macos.json)
+verifies the one-way schema-5 → schema-6 upgrade, old fixed and partial results,
+derived SQL, and the older runtime refusing the upgraded store.
+
+| Platform | Compressed bytes | CLI bytes | Runtime bytes |
+|---|---:|---:|---:|
+| macOS arm64 | 19,139,452 | 3,716,960 | 100,133,712 |
+| Linux x86_64 | 22,567,692 | 4,162,800 | 114,891,776 |
+
+Budgets remain 30,000,000 / 4,500,000 / 125,000,000 bytes respectively. No external
+package was added; Cargo.lock changes only the four workspace package versions.
+Linux requires glibc 2.39+. Packages are unsigned engineering previews.
+[Exact provenance and platform resource runs](release-verification.json) ·
+[Native check inventory](../benchmarks/performance/alpha7/verification.json).
+
+The release tag adds later documentation, charts and supplementary measurement
+records. Executable sources, installer and CI checks match the verified source
+commit. Bundled docs are the CI-time candidate snapshot; the repository contains
+the completed report. Local timing results use the local build and retain its
+separate hashes; no claim of identical CI-machine timings is made.

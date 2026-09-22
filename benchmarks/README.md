@@ -162,7 +162,7 @@ experiments. Keep old/new executable pairs in separate directories and run seria
 
 ```sh
 python3 benchmarks/latency.py --variant alpha6=/path/alpha6 --variant alpha7=target/release --repeats 21 --warm-queries 30
-/tmp/rowtrail-bench/bin/python benchmarks/compare_matrix.py --variant alpha6=/path/alpha6 --variant alpha7=target/release --rows 1048576 --repeats 7
+/tmp/rowtrail-bench/bin/python benchmarks/compare_matrix.py --variant alpha6=/path/alpha6 --variant alpha7=target/release --rows 1048576 --repeats 7 --output benchmarks/local/exploration-alpha7.json
 /tmp/rowtrail-bench/bin/python benchmarks/rescan.py --variant alpha6=/path/alpha6 --variant alpha7=target/release --repeats 7
 /tmp/rowtrail-bench/bin/python benchmarks/projection.py --variant alpha6=/path/alpha6 --variant alpha7=target/release --repeats 7
 /tmp/rowtrail-bench/bin/python benchmarks/reuse.py --variant alpha6=/path/alpha6 --variant alpha7=target/release --repeats 7
@@ -184,3 +184,10 @@ fragile absolute milliseconds; packaging enforces the existing size budgets.
 The manual agent walkthrough is not a new paired-agent comparison. Alpha.6's
 external-agent pilot remains the latest measured model-level evidence. Schema 6
 is a one-way upgrade, verified by `scripts/upgrade_probe.py OLD NEW --old-schema 5`.
+
+`python3 benchmarks/plot_alpha7.py` renders the final exploration SVG from the
+recorded JSON. Matplotlib is an optional documentation dependency only.
+
+`python3 benchmarks/history.py --queries 5000` retains every scalar result in one
+workspace and compares early/late warm windows. It is a single-session growth
+check, separate from alternating latency comparisons and from quota accounting.

@@ -57,8 +57,14 @@ rowtrail --version
 [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.7) 下载并解压。
 请将 `rowtrail` 和 `rowtrail-runtime` 放在同一个目录。
 
-此源码快照的原生产物验证尚在进行，发布前会补齐准确下载及解压大小。
-压缩包上限 **30 MB**，CLI / 运行时上限为 4.5 / 125 MB（十进制）。
+已验证的原生发布包大小（十进制 MB）：
+
+| 平台 | 压缩下载 `.tar.xz` | CLI | 运行时 |
+|---|---:|---:|---:|
+| macOS arm64 | **19.14 MB** | 3.72 MB | 100.13 MB |
+| Linux x86_64 | **22.57 MB** | 4.16 MB | 114.89 MB |
+
+CLI 与运行时为解压大小。压缩包上限 **30 MB**，CLI / 运行时上限为 4.5 / 125 MB。
 [原生产物验证](docs/verification.md#native-distribution)。
 
 **工作区升级：** alpha.7 将元数据升级到 schema 6，旧运行时不能再打开升级后的工作区；
@@ -104,12 +110,7 @@ rowtrail query --sql "SELECT region, SUM(amount) AS total
 同一台 Apple arm64 Mac，七轮交替运行新旧版本，取中位数，单位毫秒。
 完整五步探索包含打开输入、保存子集、两次结果分支，再回原始数据查询其他维度。
 
-| 调用方式 | 16,384 行 | 1,048,576 行 |
-|---|---:|---:|
-| RowTrail alpha.6 · 本次重跑 | 110.33 | 296.09 |
-| **RowTrail alpha.7 · 持久 NDJSON** | **36.15** | **239.95** |
-| DuckDB 1.5.5 · 持久会话 | 8.61 | 95.46 |
-| 直接 DataFusion 55.0.0 · 持久会话 | 4.39 | 63.67 |
+![完整探索交替测试：alpha.6 与 alpha.7，以及持久 DuckDB 和 DataFusion 对照；详细数值和条件见验证报告。](benchmarks/performance/alpha7/exploration.svg)
 
 直接引擎仍然更快；RowTrail 还承担结果持久化、校验、隔离和协议成本。对照保留内存
 中间表，DataFusion 计时不含启动。这些是本机测量，不代表普遍性能优势。
@@ -130,7 +131,7 @@ rowtrail query --sql "SELECT region, SUM(amount) AS total
 耗时或 token 已降低。最新真实配对试验仍是 alpha.6：12 次全部答对，但 RowTrail 比持久
 DuckDB 更慢、累计输入 token 更多。[证据与边界](docs/verification.md#agent-workflow-evidence)。
 
-本地通过 **88 项集成场景**、8 项 Rust 测试，包括 12 种提交边界子进程崩溃场景和
+本地和两个原生 CI 平台均通过 **88 项集成场景**、8 项 Rust 测试，包括 12 种提交边界子进程崩溃场景和
 确定性 ACK 断管回归；覆盖 inline 篡改、配额、取消和单向升级。原生发布验证另见报告。
 
 [完整验证报告](docs/verification.md) · [alpha.7 原始记录](benchmarks/performance/alpha7/) ·

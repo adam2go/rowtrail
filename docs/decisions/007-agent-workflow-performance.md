@@ -1,6 +1,6 @@
 # Alpha.7: cheap durable observations and bounded reuse
 
-Status: implemented; final native release verification pending.
+Status: implemented and verified on native macOS/Linux release artifacts.
 
 The product priorities remain agent-native contracts, a small native distribution,
 and fast complete exploration. This iteration targets three measured costs:
