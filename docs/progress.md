@@ -2,9 +2,34 @@
 
 [Home](../README.md) · [Verification and measurements](verification.md)
 
-Updated 2026-09-22 for **0.1.0-alpha.7**. This iteration makes durable
-small observations cheaper, avoids unnecessary reads and simplifies agent code.
-It does not claim completion of all M2B–M6 roadmap work.
+Updated 2026-09-22 for **0.1.0-alpha.8**. Release candidate: native CI, archive
+verification and final repeated performance records are required before release.
+
+## Alpha.8
+
+- Resource-aware SQL parallelism keeps small or tight-memory jobs serial, uses
+  bounded targets for larger inputs and reports the selected target. Explicit
+  targets fail before admission when the engine-pool allowance is insufficient.
+- Arrow publication uses actual encoded bytes and next-batch headroom, reducing
+  commits for compressible results. The 8 MiB encoded / 128-batch bounds, immediate
+  first preview, 50 ms flush, checksums and durability ordering remain unchanged.
+- Optional descriptive labels on open/query, an indexed exact catalog filter,
+  known row counts and bounded complete field hints simplify handoff. Duplicate
+  labels retain separate immutable bindings; expired data stays expired.
+- Schema 7 upgrades from 3/4/5/6. Old runtimes refuse upgraded job options; preserve
+  a stopped full workspace copy for rollback. Existing fixed revisions remain.
+- Eleven new integration scenarios cover reconnection, Unicode/budgets, labels,
+  idempotency, aggregates/joins/sort across partition targets and cancellation.
+- A zero-download example generates orders, saves a labeled branch, reconnects
+  with one catalog call plus one query and verifies exact answers independently.
+  It is bundled with the stdlib client and agent guides in native archives.
+- Linux build baseline moves to Ubuntu 22.04 / glibc 2.35; the same archive must
+  also pass installation and the demo on Ubuntu 24.04. Installer rejects older
+  glibc and musl before downloading. macOS arm64 remains supported.
+- No external dependency is added. Larger parts can slow small pages from large
+  saved results; final positive and negative measurements are reported together.
+
+[Design](decisions/008-bounded-parallelism-and-handoff.md) · [Measurements](verification.md).
 
 ## Alpha.7
 
@@ -31,11 +56,11 @@ It does not claim completion of all M2B–M6 roadmap work.
   and reconnects with zero original reads. It reveals remaining catalog discovery
   work; no new fair paired-agent latency/token advantage is claimed.
 
-[Design](decisions/007-agent-workflow-performance.md) · [Measurements](verification.md).
+[Design](decisions/007-agent-workflow-performance.md) · [Measurements](releases/alpha7-verification.md).
 Native [macOS/Linux CI](https://github.com/adam2go/rowtrail/actions/runs/35682125721) and independent archive verification passed.
 The installed macOS archive passes the new scenarios, printed-client composition,
 handoff and upgrade from published alpha.6. Downloads are 19.14 / 22.57 MB.
-[Release provenance](release-verification.json).
+[Release provenance](releases/alpha7-verification.json).
 
 ## Alpha.6
 

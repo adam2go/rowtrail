@@ -76,14 +76,22 @@ Sampling, a SQL prepared-plan cache, native MCP Tasks and automatic model resume
 are not implemented. These must not be simulated by the integration host and
 presented as capabilities of RowTrail.
 
-## Reconnect without guessing references (alpha.5)
+## Reconnect without guessing references
 
 Call `workspace` with `{"action":"summary","limit":20,"max_bytes":8192}`.
 It lists datasets, jobs and results with fixed bindings, stored validity, coverage
 and suggested next actions. Reuse an item's `binding` for SQL, or retain a job ID
 and explicitly wait/cancel. Filter with `kind: "dataset"`, `"job"` or `"result"`.
+Optional `open.label` and `query.label` describe a created object. Filter summary
+by exact `label` (up to 256 UTF-8 bytes, nonblank, no control characters). Labels
+are not unique; select the intended fixed binding. Dataset/result items include
+`row_count` (null if unknown) and `schema_hint`: at most four complete fields and
+512 encoded field bytes. `omitted_fields` indicates when full inspection is needed.
+Names are never silently shortened. Filtering uses an index, not a scan of every
+stored SQL specification.
+
 Counts describe stored state: known-invalid results are excluded from the readable
-count, while unobserved source changes remain unknown. Follow `next_cursor` unchanged with the same kind; it fixes page membership against
+count, while unobserved source changes remain unknown. Follow `next_cursor` unchanged with the same kind and label; it fixes page membership against
 new insertions, while each page reads current metadata. Counts cover the workspace.
 This is a bounded metadata catalog: it does not scan sources or generate prose.
 Stored validity is checked again when a binding is used. Expired tombstones are
@@ -167,8 +175,8 @@ set `fragment_unit:"manifest_file", checkpoint_interval_ms:0`.
 Details: [row-group design](decisions/005-row-groups-and-reconnection.md) and
 [arithmetic contract](decisions/004-progressive-file-aggregation.md).
 
-Alpha.7 upgrades metadata once from schema 3/4/5 to 6. Existing fixed revisions
-remain readable. Alpha.6 and earlier runtimes refuse an upgraded store: retain a
+Alpha.8 upgrades metadata once from schema 3/4/5/6 to 7. Existing fixed revisions
+remain readable. Alpha.7 and earlier runtimes refuse an upgraded store: retain a
 workspace backup if you need to keep using an older runtime.
 
 Arrow IPC parts up to 128 KiB of encoded data now live in SQLite, committed with
@@ -179,3 +187,20 @@ Database/WAL overhead remains outside the logical quota. Verification reads whol
 parts, so projection does not eliminate integrity I/O. The existing 8 MiB
 verified cache now holds multiple parts (up to 128) within one job. New jobs
 reverify bytes; there is no cross-job cache that bypasses corruption detection.
+
+## SQL parallelism and part sizing
+
+Automatic SQL planning keeps input sets below 16 MiB serial. Larger inputs target
+one partition per 64 MiB of engine pool, capped at four and available logical
+parallelism. The 128 MiB default allows two; a 32 MiB pool stays serial. Explicit
+`execution.target_partitions` accepts 1..8, with at least 64 MiB of pool per
+partition when greater than one. It fails validation before admission otherwise.
+`job.metrics.target_partitions` reports the planning target, not a thread/RSS
+limit or a guarantee every query fits. Pin one for a serial baseline. Progressive
+analysis and export remain sequential and reject explicit multi-partition targets.
+
+Large Arrow parts use encoded bytes plus conservative next-batch headroom to
+coalesce compressible output, within the same 8 MiB encoded/128-batch limits.
+First available previews and 50 ms flush remain. Fewer durable commits make large
+materialization cheaper; reading a small page from a larger part still verifies
+that whole part. See the measured tradeoffs in [verification](verification.md).

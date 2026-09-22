@@ -12,13 +12,14 @@ print(t['fields'])                        # discover the actual column names
 r = rt.query('SELECT COUNT(*) AS n FROM t', {'t': t})
 print(rt.observe(r))                      # full typed observation and quality
 saved = rt.query('SELECT * FROM t WHERE amount IS NOT NULL', {'t': t},
+                 label='non-null rows',
                  execution={'output': {'max_rows': 0, 'max_bytes': 8192}})
 next_result = rt.query('SELECT SUM(amount) FROM saved', {'saved': saved})
 print(rt.observe(next_result))
 ```
 
 Use SQL appropriate to the discovered fields. `query(sql, bindings={},
-parameters=[], execution={}, timeout=30, idempotency_key=None)` accepts an open,
+parameters=[], execution={}, timeout=30, idempotency_key=None, label=None)` accepts an open,
 query, read, or catalog item as a binding. It submits once, waits mechanically,
 and fetches one bounded page only if the reply has none. Defaults: final-only
 SQL, 1-second initial wait, then up to 30 seconds of waiting; 100 rows / 8 KiB
@@ -34,9 +35,11 @@ inputs to DECIMAL(38,0) (or the needed scale) before sums exceeding 64-bit range
 
 Compose dependent calculations and mechanical checks in one code call when the
 next step is already known. Print only observations needed for the next decision.
-On handoff, `rt.call('workspace', {'action':'summary','kind':'result','limit':10,
-'max_bytes':8192})` returns items usable as bindings. Follow `next_cursor` unchanged;
-stored catalog validity is not a fresh source scan.
+On handoff, `rt.call('workspace', {'action':'summary','kind':'result',
+'label':'non-null rows','max_bytes':8192})` returns matching fixed bindings,
+row counts and bounded field hints. Labels are descriptive, not unique; choose
+the intended item. Follow `next_cursor` with the same filter. Omitted fields need
+explicit inspection; stored validity is not a fresh source scan.
 
 Use `rt.call(method, params)` for asynchronous jobs, progressive analysis, paging,
 export, and cancellation; discover an unfamiliar contract with `rt.schema(method)`.

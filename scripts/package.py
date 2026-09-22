@@ -25,7 +25,9 @@ with tarfile.open(archive, "w:xz", preset=6) as output:
         source = root / "target/release" / binary
         sizes[binary] = source.stat().st_size
         output.add(source, arcname=f"{name}/{binary}", filter=archive_metadata)
-    for item in ("README.md", "README.zh-CN.md", "LICENSE", "NOTICE", "third-party", "docs/progress.md"):
+    for item in ("README.md", "README.zh-CN.md", "LICENSE", "NOTICE", "third-party", "docs/progress.md",
+                 "docs/agent-guide.md", "docs/agent-quickstart.md", "docs/usage.md",
+                 "examples/session_client.py", "examples/quickstart.py"):
         output.add(root / item, arcname=f"{name}/{item}", filter=archive_metadata)
 limits = json.loads((root / "benchmarks/budgets.json").read_text())["distribution"]
 for binary,size in sizes.items():

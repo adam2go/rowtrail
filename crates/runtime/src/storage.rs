@@ -89,8 +89,8 @@ pub fn workspace(db: &Db, p: WorkspaceParams) -> Result<Value> {
         return crate::catalog::summary(db, p);
     }
     ensure!(
-        p.cursor.is_none() && p.kind.is_none(),
-        "INVALID_ARGUMENT: cursor/kind are only for summary"
+        p.cursor.is_none() && p.kind.is_none() && p.label.is_none(),
+        "INVALID_ARGUMENT: cursor/kind/label are only for summary"
     );
     ensure!(
         matches!(p.action.as_str(), "usage" | "configure" | "gc"),

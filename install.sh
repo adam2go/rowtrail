@@ -1,12 +1,19 @@
 #!/bin/sh
 # Install a verified native release without a language runtime or package manager.
 set -eu
-version=${ROWTRAIL_VERSION:-0.1.0-alpha.7}
+version=${ROWTRAIL_VERSION:-0.1.0-alpha.8}
 install_dir=${ROWTRAIL_INSTALL_DIR:-"$HOME/.local/bin"}
 case "$version" in ''|*[!A-Za-z0-9.-]*) echo 'Invalid ROWTRAIL_VERSION' >&2; exit 1;; esac
 case "$(uname -s):$(uname -m)" in
     Darwin:arm64) target=aarch64-apple-darwin ;;
-    Linux:x86_64) target=x86_64-unknown-linux-gnu ;;
+    Linux:x86_64)
+        target=x86_64-unknown-linux-gnu
+        libc=$(getconf GNU_LIBC_VERSION 2>/dev/null || true)
+        if ! printf '%s\n' "$libc" | awk '$1 == "glibc" { split($2,v,"."); ok=(v[1]>2 || (v[1]==2 && v[2]>=35)) } END { exit !ok }'; then
+            echo 'The Linux package requires glibc 2.35 or newer (Ubuntu 22.04+). Build from source on older or musl-based systems.' >&2
+            exit 1
+        fi
+        ;;
     *) echo 'Available release targets: macOS arm64 and Linux x86_64.' >&2; exit 1 ;;
 esac
 name="rowtrail-$version-$target"

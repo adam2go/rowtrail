@@ -95,6 +95,8 @@ impl SourceFile {
 pub struct Manifest {
     pub id: String,
     pub dataset_ref: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
     pub source: PathBuf,
     pub format: String,
     pub schema: Schema,
@@ -333,6 +335,7 @@ pub fn open(p: &OpenParams) -> Result<Manifest> {
     Ok(Manifest {
         id: id("mf"),
         dataset_ref: id("ds"),
+        label: p.label.clone(),
         source,
         format: format.clone(),
         schema,

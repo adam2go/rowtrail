@@ -115,6 +115,15 @@ struct StagedPart {
     opened: tokio::time::Instant,
 }
 impl StagedPart {
+    fn occupied_bytes(&self) -> u64 {
+        match &self.writer {
+            // IPC writes each batch eagerly; use actual encoded bytes already
+            // accepted by HashWriter. The next batch's full memory size remains
+            // conservative headroom, with 2 MiB left for schema/footer overhead.
+            PartWriter::Arrow(w) => w.get_ref().bytes,
+            PartWriter::Parquet(_) => self.estimated_bytes,
+        }
+    }
     fn new(
         spec: &JobSpec,
         schema: &arrow::datatypes::Schema,
@@ -248,7 +257,7 @@ impl Output<'_> {
     ) -> Result<()> {
         if let Some(staged) = &self.staged
             && (staged
-                .estimated_bytes
+                .occupied_bytes()
                 .saturating_add(batch.get_array_memory_size() as u64)
                 > if self.spec.prepared.is_some() {
                     4 * 1024 * 1024
@@ -403,6 +412,7 @@ async fn execute_job(
         drop(stream);
         for source in &spec.sources{source.validate()?}
         Ok(json!({"io":counters.value(),"result_write_bytes":output.written,"rows":output.rows,
+            "target_partitions":crate::engine::target_partitions(spec),
             "planning_ms":planned_ms,"result_write_ms":output.write_ms,"commit_ack_ms":output.ack_ms,
             "elapsed_ms":started.elapsed().as_secs_f64()*1000.0,
             "plan":format!("{}",datafusion::physical_plan::display::DisplayableExecutionPlan::with_metrics(plan.as_ref()).indent(true))}))

@@ -10,6 +10,7 @@ p.add_argument('--bin-dir',default='target/release')
 p.add_argument('--entry', choices=['cli','session'], default='cli')
 p.add_argument('--repeats',type=int,default=3)
 p.add_argument('--rows',type=int,default=16384)
+p.add_argument('--partitions',type=int,choices=range(1,9),help='Pin all engines; otherwise direct controls match the largest RowTrail job target')
 p.add_argument('--output',default='benchmarks/local/latest.json')
 args=p.parse_args()
 root=pathlib.Path(__file__).resolve().parents[1]
@@ -45,7 +46,7 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-benchmark-') as td:
         stages=[];rowtrail_results=[]
         for index,sql in enumerate(queries):
             t=time.perf_counter()
-            q=call('query',{'bindings':{'saved':saved} if index in (2,3) else binding,'sql':sql,'execution':{'wait_ms':1000,'preview':'none'}})
+            q=call('query',{'bindings':{'saved':saved} if index in (2,3) else binding,'sql':sql,'execution':{'wait_ms':1000,'preview':'none',**({'target_partitions':args.partitions,'memory_bytes':max(128,args.partitions*64)*1024*1024} if args.partitions else {})}})
             while q['job']['state'] not in ('completed','failed','cancelled','interrupted','budget_exhausted'):
                 q=call('control',{'action':'wait','ref':q['job']['id'],'wait_ms':1000})
             assert q['job']['state']=='completed',q
@@ -58,7 +59,8 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-benchmark-') as td:
         if session is not None:
             session.stdin.close();session.wait(timeout=5)
         os.kill(doctor['coordinator_pid'],signal.SIGTERM)
-        started=time.perf_counter();con=duckdb.connect();con.execute('SET threads=1')
+        target=args.partitions or max(s['metrics'].get('target_partitions',1) for s in stages)
+        started=time.perf_counter();con=duckdb.connect();con.execute(f'SET threads={target}')
         con.from_parquet(str(source)).create_view('t')
         stages=[];duck_results=[]
         for index,sql in enumerate(queries):
@@ -68,11 +70,11 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-benchmark-') as td:
                 values=con.execute(sql).fetchall()
                 duck_results.append([[None if v is None else str(v) for v in row] for row in values])
             stages.append({'query':sql,'elapsed_ms':(time.perf_counter()-t)*1000})
-        duck={'backend':'duckdb','version':duckdb.__version__,'total_ms':(time.perf_counter()-started)*1000,'stages':stages,'intermediate_storage':'persistent in-process temp table'}
+        duck={'backend':'duckdb','version':duckdb.__version__,'threads':target,'total_ms':(time.perf_counter()-started)*1000,'stages':stages,'intermediate_storage':'persistent in-process temp table'}
         for a,b in zip(rowtrail_results,duck_results):assert sorted(a,key=str)==sorted(b,key=str),(a,b)
         con.close()
         t=time.perf_counter()
-        direct=json.loads(subprocess.check_output([str(bins/'rowtrail-runtime'),'benchmark','--source',str(source)]))
+        direct=json.loads(subprocess.check_output([str(bins/'rowtrail-runtime'),'benchmark','--source',str(source),*(['--target-partitions',str(target)] if target>1 else [])]))
         direct['process_wall_ms']=(time.perf_counter()-t)*1000
         records.append({'repeat':repeat,'rowtrail':rowtrail,'duckdb':duck,'datafusion':direct})
     def scrub(value):

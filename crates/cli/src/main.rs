@@ -49,6 +49,8 @@ enum Command {
     },
     Open {
         source: PathBuf,
+        #[arg(long)]
+        label: Option<String>,
         #[arg(long, default_value = "auto")]
         format: String,
         #[arg(long)]
@@ -91,6 +93,8 @@ enum Command {
     /// Inspect usage, configure a managed-data quota, or collect released data.
     Workspace {
         #[arg(long)]
+        label: Option<String>,
+        #[arg(long)]
         cursor: Option<String>,
         #[arg(long)]
         kind: Option<String>,
@@ -112,6 +116,10 @@ enum Command {
         reference: String,
     },
     Query {
+        #[arg(long)]
+        label: Option<String>,
+        #[arg(long)]
+        target_partitions: Option<usize>,
         #[arg(long)]
         request: Option<PathBuf>,
         #[arg(long, conflicts_with = "request")]
@@ -280,7 +288,7 @@ fn tool(name: &str) -> Option<Tool> {
     schema["properties"]["_request"] = json!({"type":"object","additionalProperties":false,"properties":{"request_id":{"type":"string"},"idempotency_key":{"type":"string"}}});
     let description = match method {
         "workspace" => {
-            "summary returns a bounded catalog of existing datasets, fixed result bindings and jobs; cursor pages membership without rescanning sources. Also usage, configure and explicit gc."
+            "summary returns labeled datasets, fixed results, row counts and bounded field hints; an exact label filter and cursor find saved work without rescanning sources. Also usage, configure and explicit gc."
         }
         "analyze" => {
             "Progressive Parquet count/sum/avg over complete row groups or files. Immutable partial checkpoints have explicit coverage; avg truncates to six decimal digits. Ordinary query is preferable for final-only answers."
@@ -289,7 +297,7 @@ fn tool(name: &str) -> Option<Tool> {
             "Read a fixed result revision or continue its cursor under row/byte budgets. Preserve numeric strings and distinguish partial coverage from final_for_request."
         }
         "query" => {
-            "Read-only SQL with explicit dataset/manifest or result/revision bindings. Reuse fixed intermediate results; consume included observations before making extra read calls."
+            "Read-only SQL with explicit dataset/manifest or result/revision bindings. Attach an optional descriptive label for later discovery. Reuse fixed intermediate results; consume included observations before making extra read calls."
         }
         "control" => {
             "Wait, inspect status, cancel actual execution, refresh a source, or pin/release managed results. Disconnecting does not cancel jobs."
@@ -469,13 +477,14 @@ async fn run(args: Args) -> Result<i32> {
         }
         Command::Open {
             source,
+            label,
             format,
             schema,
             delimiter,
             no_header,
         } => Request::new(
             "open",
-            json!({"source":absolute(&source)?,"format":format,"schema":schema.map(|p|load(&p)).transpose()?,"delimiter":delimiter,"header":!no_header}),
+            json!({"source":absolute(&source)?,"label":label,"format":format,"schema":schema.map(|p|load(&p)).transpose()?,"delimiter":delimiter,"header":!no_header}),
         ),
         Command::Inspect {
             reference,
@@ -500,6 +509,7 @@ async fn run(args: Args) -> Result<i32> {
             json!({"source":{"dataset_ref":dataset,"manifest_ref":manifest},"execution":{"wait_ms":wait_ms}}),
         ),
         Command::Workspace {
+            label,
             cursor,
             kind,
             limit,
@@ -509,7 +519,7 @@ async fn run(args: Args) -> Result<i32> {
             apply,
         } => Request::new(
             "workspace",
-            json!({"action":action,"quota_bytes":quota_bytes,"dry_run":!apply,"cursor":cursor,"kind":kind,"limit":limit,"max_bytes":max_bytes}),
+            json!({"action":action,"quota_bytes":quota_bytes,"dry_run":!apply,"cursor":cursor,"kind":kind,"label":label,"limit":limit,"max_bytes":max_bytes}),
         ),
         Command::Pin { reference } => {
             Request::new("control", json!({"action":"pin","ref":reference}))
@@ -518,6 +528,8 @@ async fn run(args: Args) -> Result<i32> {
             Request::new("control", json!({"action":"release","ref":reference}))
         }
         Command::Query {
+            label,
+            target_partitions,
             request,
             sql,
             bind,
@@ -528,6 +540,7 @@ async fn run(args: Args) -> Result<i32> {
                 request_from("query", load(&path)?)?
             } else {
                 let p = QueryParams {
+                    label: None,
                     bindings: parse_bindings(bind)?,
                     sql: sql.ok_or_else(|| anyhow::anyhow!("--sql or --request required"))?,
                     parameters: vec![],
@@ -536,6 +549,15 @@ async fn run(args: Args) -> Result<i32> {
                 };
                 Request::new("query", serde_json::to_value(p)?)
             };
+            if let Some(label) = label {
+                req.params["label"] = json!(label);
+            }
+            if let Some(n) = target_partitions {
+                if req.params.get("execution").is_none() {
+                    req.params["execution"] = json!({});
+                }
+                req.params["execution"]["target_partitions"] = json!(n);
+            }
             if r#async || wait_ms.is_some() {
                 if req.params.get("execution").is_none() {
                     req.params["execution"] = json!({})

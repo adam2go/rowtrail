@@ -1,6 +1,6 @@
 """Verify one-way metadata upgrades using actual old and new binaries."""
 import argparse,json,os,pathlib,signal,sqlite3,subprocess,tempfile,time
-p=argparse.ArgumentParser();p.add_argument('old_bin_dir');p.add_argument('new_bin_dir');p.add_argument('--old-schema',default='3');p.add_argument('--new-schema',default='6');p.add_argument('--report',default='benchmarks/local/upgrade.json');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('old_bin_dir');p.add_argument('new_bin_dir');p.add_argument('--old-schema',default='3');p.add_argument('--new-schema',default='7');p.add_argument('--report',default='benchmarks/local/upgrade.json');a=p.parse_args()
 old=pathlib.Path(a.old_bin_dir).resolve();new=pathlib.Path(a.new_bin_dir).resolve();pids=[]
 with tempfile.TemporaryDirectory(prefix='rowtrail-upgrade-') as td:
  ws=pathlib.Path(td)/'workspace'

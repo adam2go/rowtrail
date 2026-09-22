@@ -92,9 +92,15 @@ fn remember(c: &rusqlite::Connection, req: &Request, v: &Value) -> Result<()> {
     Ok(())
 }
 pub fn capabilities() -> Value {
-    json!({"api_version":"1","metadata_schema":"6; one-way upgrade from 3/4/5","progressive_aggregation":{"fragment_unit":"parquet_row_group","fragment_units":["parquet_row_group","manifest_file"],"checkpoint_interval_ms":50,"aggregate_limit":16,"numeric_inputs":"Int64, UInt64, Decimal128 scale 0..6","sum":"Decimal128(38,input_scale)","avg":"Decimal128(38,6), truncation toward zero","group_by":false,"sampling":false},"formats":["csv","tsv","parquet"],"source":"local","sql":"DataFusion 55.0.0 read-only SELECT; explicit bindings","analysis":["inspect:null_count","inspect:min_max","inspect:top_k","analyze:count","analyze:sum","analyze:avg"],"entries":["cli","ndjson_session","mcp_stdio","rust_sdk"],"workspace_summary":"bounded metadata catalog with fixed bindings and store-scoped cursor; no source scan","prepare":"explicit streaming CSV/TSV to managed Parquet; atomic dataset visibility","workspace_quota":"managed data plus conservative result/spill reservations; excludes SQLite/WAL overhead, logs and external exports","verified_part_cache_bytes":8388608,"result_part_target_bytes":6291456,"inline_result_part_max_bytes":131072,"result_part_max_bytes":8388608,"native_tasks":false,"automatic_resume":false,"source_consistency":"best_effort","result_storage":"immutable Arrow IPC; parts up to 128 KiB in SQLite, larger parts in files","max_frame_bytes":FRAME_LIMIT,"minimum_error_budget_bytes":512,"max_output_bytes":FRAME_LIMIT-512,"max_output_rows":10000,"max_manifest_files":128,"max_directory_entries":4096,"default_parallel_jobs":1,"cancellation":"cooperative signal with forced worker termination after 300ms","engine_memory_limit":"MemoryPool; not RSS hard limit","scan_limit":"byte reservation before local reads","result_retention":"retained by default; explicit pin/release and dependency-safe workspace gc","event_retention":"until workspace removal; no event pruning yet","unsupported":["Windows","remote","sampling","native_tasks","automatic_resume","union_by_name","binary_inline","RSS_hard_limit"]})
+    json!({"api_version":"1","metadata_schema":"7; one-way upgrade from 3/4/5/6","progressive_aggregation":{"fragment_unit":"parquet_row_group","fragment_units":["parquet_row_group","manifest_file"],"checkpoint_interval_ms":50,"aggregate_limit":16,"numeric_inputs":"Int64, UInt64, Decimal128 scale 0..6","sum":"Decimal128(38,input_scale)","avg":"Decimal128(38,6), truncation toward zero","group_by":false,"sampling":false},"formats":["csv","tsv","parquet"],"source":"local","sql":"DataFusion 55.0.0 read-only SELECT; explicit bindings","analysis":["inspect:null_count","inspect:min_max","inspect:top_k","analyze:count","analyze:sum","analyze:avg"],"entries":["cli","ndjson_session","mcp_stdio","rust_sdk"],"workspace_summary":"bounded metadata catalog with exact label filter, fixed bindings, row counts and bounded field hints; store-scoped cursor; no source scan","query_parallelism":{"auto_max":4,"serial_below_input_bytes":16777216,"pool_bytes_per_parallel_partition":67108864,"explicit_target_partitions":"1..8; requires 64 MiB per partition when greater than one","target_not_thread_limit":true},"prepare":"explicit streaming CSV/TSV to managed Parquet; atomic dataset visibility","workspace_quota":"managed data plus conservative result/spill reservations; excludes SQLite/WAL overhead, logs and external exports","verified_part_cache_bytes":8388608,"result_part_target_bytes":6291456,"result_part_target_basis":"encoded IPC plus next batch array memory; prepared Parquet keeps input-memory target","inline_result_part_max_bytes":131072,"result_part_max_bytes":8388608,"native_tasks":false,"automatic_resume":false,"source_consistency":"best_effort","result_storage":"immutable Arrow IPC; parts up to 128 KiB in SQLite, larger parts in files","max_frame_bytes":FRAME_LIMIT,"minimum_error_budget_bytes":512,"max_output_bytes":FRAME_LIMIT-512,"max_output_rows":10000,"max_manifest_files":128,"max_directory_entries":4096,"default_parallel_jobs":1,"cancellation":"cooperative signal with forced worker termination after 300ms","engine_memory_limit":"MemoryPool; not RSS hard limit","scan_limit":"byte reservation before local reads","result_retention":"retained by default; explicit pin/release and dependency-safe workspace gc","event_retention":"until workspace removal; no event pruning yet","unsupported":["Windows","remote","sampling","native_tasks","automatic_resume","union_by_name","binary_inline","RSS_hard_limit"]})
 }
 fn validate_execution(e: &Execution) -> Result<()> {
+    if let Some(n) = e.target_partitions {
+        ensure!(
+            (1..=8).contains(&n) && (n == 1 || e.memory_bytes / n >= 64 * 1024 * 1024),
+            "INVALID_ARGUMENT: target_partitions must be 1..8; multiple partitions require at least 64 MiB of engine pool per partition"
+        );
+    }
     ensure!(
         e.wait_ms <= 30000 && e.run_timeout_ms > 0 && e.run_timeout_ms <= 24 * 3600 * 1000,
         "INVALID_ARGUMENT: execution time bounds"
@@ -238,6 +244,7 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
         ),
         "open" => {
             let p: OpenParams = decode(&req.params)?;
+            crate::catalog::validate_label(p.label.as_deref())?;
             let prior = { existing(&db.conn.lock().unwrap(), req)? };
             if let Some(v) = prior {
                 return open_response(&db, v["manifest_ref"].as_str().unwrap(), &p.output);
@@ -253,7 +260,13 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
                     drop(c);
                     return open_response(&db, v["manifest_ref"].as_str().unwrap(), &output.output);
                 }
-                tx.execute("INSERT INTO objects(id,kind,data) VALUES(?,'dataset',?)",params![manifest.dataset_ref,json!({"dataset_ref":manifest.dataset_ref,"manifest_ref":manifest.id,"source":manifest.source}).to_string()])?;
+                tx.execute("INSERT INTO objects(id,kind,data) VALUES(?,'dataset',?)",params![manifest.dataset_ref,json!({"dataset_ref":manifest.dataset_ref,"manifest_ref":manifest.id,"source":manifest.source,"label":manifest.label}).to_string()])?;
+                if let Some(label) = &manifest.label {
+                    tx.execute(
+                        "INSERT INTO catalog_labels VALUES(?,?)",
+                        params![manifest.dataset_ref, label],
+                    )?;
+                }
                 tx.execute(
                     "INSERT INTO objects(id,kind,data) VALUES(?,'manifest',?)",
                     params![manifest.id, serde_json::to_string(&manifest)?],
@@ -269,6 +282,7 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
         }
         "query" => {
             let p: QueryParams = decode(&req.params)?;
+            crate::catalog::validate_label(p.label.as_deref())?;
             validate_execution(&p.execution)?;
             ensure!(
                 p.execution.goal == "exact"
@@ -287,6 +301,10 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
         "analyze" => {
             let p: AnalyzeParams = decode(&req.params)?;
             validate_execution(&p.execution)?;
+            ensure!(
+                p.execution.target_partitions.is_none_or(|n| n == 1),
+                "UNSUPPORTED_OPERATION: progressive analysis processes frozen fragments sequentially"
+            );
             ensure!(
                 p.execution.goal == "exact"
                     && matches!(p.execution.preview.as_str(), "available" | "none"),
@@ -307,6 +325,7 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
                 let projection = crate::aggregate::projection(input, &p)?;
                 quality["aggregation"] = json!({"aggregates":p.aggregates,"fragment_unit":p.fragment_unit,"average":"Decimal128(38,6); truncated toward zero at six fractional digits; exact sum and count retained in computation"});
                 let query = QueryParams {
+                    label: None,
                     bindings,
                     sql: format!("SELECT {projection} FROM source"),
                     parameters: vec![],
@@ -331,6 +350,7 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
                 let mut execution = p.execution.clone();
                 execution.preview = "none".into();
                 let query = QueryParams {
+                    label: None,
                     bindings: BTreeMap::from([("source".into(), Binding::Dataset(p.source))]),
                     sql: "SELECT * FROM source".into(),
                     parameters: vec![],
@@ -395,6 +415,7 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
                     })?;
                     let old: Manifest = serde_json::from_value(db.object(reference)?)?;
                     let options = OpenParams {
+                        label: old.label.clone(),
                         source: old.source.to_string_lossy().into_owned(),
                         format: old.format,
                         header: old.header,
@@ -428,7 +449,7 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
                             "INSERT INTO objects(id,kind,data) VALUES(?,'manifest',?)",
                             params![refreshed.id, serde_json::to_string(&refreshed)?],
                         )?;
-                        tx.execute("UPDATE objects SET data=? WHERE id=?",params![json!({"dataset_ref":p.object_ref,"manifest_ref":refreshed.id,"source":refreshed.source}).to_string(),p.object_ref])?;
+                        tx.execute("UPDATE objects SET data=? WHERE id=?",params![json!({"dataset_ref":p.object_ref,"manifest_ref":refreshed.id,"source":refreshed.source,"label":refreshed.label}).to_string(),p.object_ref])?;
                         tx.execute(
                             "INSERT INTO deps VALUES(?,?)",
                             params![refreshed.id, p.object_ref],
@@ -467,6 +488,10 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
         }
         "export" => {
             let p: ExportParams = decode(&req.params)?;
+            ensure!(
+                p.execution.target_partitions.is_none_or(|n| n == 1),
+                "UNSUPPORTED_OPERATION: export writes fixed parts sequentially"
+            );
             validate_execution(&p.execution)?;
             ensure!(
                 matches!(p.format.as_str(), "csv" | "parquet" | "arrow"),
@@ -520,7 +545,7 @@ fn open_response(db: &Db, manifest: &str, budget: &OutputBudget) -> Result<Value
     let raw = db.object(manifest)?;
     let m: Manifest = serde_json::from_value(raw.clone())?;
     let mut fields = vec![];
-    let mut response = json!({"binding":{"dataset_ref":m.dataset_ref,"manifest_ref":m.id},"dataset_ref":m.dataset_ref,"manifest_ref":m.id,"schema_ref":m.id,"format":m.format,"discovery":"complete","schema_origin":m.schema_origin,"schema_status":if m.schema_origin=="inferred"{"inferred_unvalidated_tail"}else{"declared"},"field_count":m.schema.fields().len(),"fields":[],"source_consistency":"best_effort","validity":raw["validity"],"metadata_read_bytes":m.metadata_bytes,"inferred_rows":m.inferred_rows,"file_count":m.files.len(),"rows":m.files.iter().map(|f|f.rows).collect::<Option<Vec<_>>>().map(|v|v.iter().sum::<u64>()),"next_field_offset":null});
+    let mut response = json!({"label":m.label,"binding":{"dataset_ref":m.dataset_ref,"manifest_ref":m.id},"dataset_ref":m.dataset_ref,"manifest_ref":m.id,"schema_ref":m.id,"format":m.format,"discovery":"complete","schema_origin":m.schema_origin,"schema_status":if m.schema_origin=="inferred"{"inferred_unvalidated_tail"}else{"declared"},"field_count":m.schema.fields().len(),"fields":[],"source_consistency":"best_effort","validity":raw["validity"],"metadata_read_bytes":m.metadata_bytes,"inferred_rows":m.inferred_rows,"file_count":m.files.len(),"rows":m.files.iter().map(|f|f.rows).collect::<Option<Vec<_>>>().map(|v|v.iter().sum::<u64>()),"next_field_offset":null});
     ensure!(
         budget.max_bytes <= FRAME_LIMIT - 512 && budget.max_rows <= 10000,
         "INVALID_ARGUMENT: output budget"
@@ -753,6 +778,12 @@ fn submit(
         "INSERT INTO results(id,job_id,quality) VALUES(?,?,?)",
         params![result, job, quality.to_string()],
     )?;
+    if let Some(label) = spec.query.as_ref().and_then(|q| q.label.as_ref()) {
+        tx.execute(
+            "INSERT INTO catalog_labels VALUES(?1,?3),(?2,?3)",
+            params![job, result, label],
+        )?;
+    }
     tx.execute(
         "INSERT INTO objects(id,kind,data) VALUES(?,'view',?)",
         params![
@@ -760,7 +791,7 @@ fn submit(
             json!({"view_ref":view,"request":req.params}).to_string()
         ],
     )?;
-    tx.execute("INSERT INTO objects(id,kind,data) VALUES(?,'scope',?)",params![scope,json!({"scope_ref":scope,"inputs":spec.query.as_ref().map(|q|&q.bindings),"sql":spec.query.as_ref().map(|q|&q.sql),"parameters":spec.query.as_ref().map(|q|&q.parameters),"coverage_semantics":if spec.analysis.is_some(){"one cumulative aggregate checkpoint over complete fragments in frozen manifest order"}else{"committed output prefix until final; input scan coverage unknown"},"quality":quality}).to_string()])?;
+    tx.execute("INSERT INTO objects(id,kind,data) VALUES(?,'scope',?)",params![scope,json!({"scope_ref":scope,"label":spec.query.as_ref().and_then(|q|q.label.as_ref()),"inputs":spec.query.as_ref().map(|q|&q.bindings),"sql":spec.query.as_ref().map(|q|&q.sql),"parameters":spec.query.as_ref().map(|q|&q.parameters),"coverage_semantics":if spec.analysis.is_some(){"one cumulative aggregate checkpoint over complete fragments in frozen manifest order"}else{"committed output prefix until final; input scan coverage unknown"},"quality":quality}).to_string()])?;
     for input in spec.inputs.values() {
         tx.execute(
             "INSERT OR IGNORE INTO deps VALUES(?,?)",

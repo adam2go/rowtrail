@@ -48,6 +48,8 @@ enum Command {
     Benchmark {
         #[arg(long)]
         source: std::path::PathBuf,
+        #[arg(long, default_value_t = 1)]
+        target_partitions: usize,
     },
 }
 #[tokio::main(worker_threads = 2)]
@@ -58,7 +60,10 @@ async fn main() -> anyhow::Result<()> {
     match Args::parse().command {
         Command::Probe { directory, rows } => probe::run(&directory, rows).await,
         Command::Fixtures { directory, rows } => probe::generate(&directory, rows),
-        Command::Benchmark { source } => probe::baseline(&source).await,
+        Command::Benchmark {
+            source,
+            target_partitions,
+        } => probe::baseline(&source, target_partitions).await,
         Command::Serve { workspace } => coordinator::serve(&workspace).await,
         Command::Worker { token } => {
             let previous = std::panic::take_hook();

@@ -140,6 +140,8 @@ pub struct Execution {
     pub wait_ms: u64,
     pub run_timeout_ms: u64,
     pub memory_bytes: usize,
+    /// None selects bounded parallelism from input size and the engine pool.
+    pub target_partitions: Option<usize>,
     pub scan_bytes: u64,
     pub result_bytes: u64,
     pub spill_bytes: u64,
@@ -153,6 +155,7 @@ impl Default for Execution {
             wait_ms: 200,
             run_timeout_ms: 60_000,
             memory_bytes: 128 * 1024 * 1024,
+            target_partitions: None,
             scan_bytes: 1024 * 1024 * 1024,
             result_bytes: 512 * 1024 * 1024,
             spill_bytes: 512 * 1024 * 1024,
@@ -164,6 +167,8 @@ impl Default for Execution {
 #[serde(deny_unknown_fields)]
 pub struct OpenParams {
     pub source: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
     #[serde(default = "auto")]
     pub format: String,
     #[serde(default)]
@@ -218,6 +223,8 @@ pub struct Notify {
 pub struct QueryParams {
     pub bindings: BTreeMap<String, Binding>,
     pub sql: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
     #[serde(default)]
     pub parameters: Vec<Parameter>,
     #[serde(default)]
@@ -284,6 +291,9 @@ fn checkpoint_interval() -> u64 {
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct WorkspaceParams {
+    /// Exact descriptive label filter for summary; labels are not unique IDs.
+    #[serde(default)]
+    pub label: Option<String>,
     #[serde(default)]
     pub cursor: Option<String>,
     #[serde(default)]

@@ -28,6 +28,14 @@ failed or cancelled jobs stop that worker before a replacement is started.
 
 ## Try the exact exploration loop
 
+For a complete demo requiring no input download, run
+`python3 examples/quickstart.py --rowtrail ./target/release/rowtrail` after building,
+or use the same script bundled inside an extracted release archive with
+`--rowtrail /absolute/path/to/rowtrail`. It generates 20,003 CSV rows, discovers
+fields, chooses a region from exact aggregates, saves a labeled branch, reconnects
+and verifies all answers with Python integers. It prints the retained workspace
+path; the coordinator exits after 60 idle seconds and its results stay on disk.
+
 ```sh
 ./target/release/rowtrail-runtime fixtures --directory /tmp/rowtrail-data --rows 16384
 ./target/release/rowtrail open /tmp/rowtrail-data/small.parquet
@@ -38,6 +46,7 @@ the input (replace the example IDs with the returned IDs):
 
 ```sh
 rowtrail query --bind orders=ds_ID@mf_ID \
+  --label 'totals by region' \
   --sql 'SELECT region, SUM(amount) AS total FROM orders GROUP BY region'
 ```
 
@@ -69,6 +78,22 @@ python3 examples/explore.py /tmp/rowtrail-data/many.parquet --rowtrail ./target/
 ```
 
 Python is only needed for this optional example.
+
+Find saved work without inspecting each opaque ID:
+
+```sh
+rowtrail workspace summary --kind result --label 'totals by region'
+```
+
+Labels are optional descriptions (up to 256 UTF-8 bytes), not unique names or
+mutable aliases. Use the returned fixed binding. Counts and bounded schema hints
+help selection; omitted fields and stored validity are explicit.
+
+SQL automatically keeps small/tight-memory work serial and permits more target
+partitions for larger inputs. Use `query --target-partitions 1` to pin serial
+planning. Other explicit targets (2..8) require at least 64 MiB of engine pool
+per partition; set `execution.memory_bytes` through JSON for larger pools.
+`job.metrics.target_partitions` reports the choice. It is not a thread or RSS cap.
 
 ## CLI, MCP, and Rust client
 

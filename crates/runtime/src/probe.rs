@@ -203,13 +203,19 @@ pub async fn run(directory: &Path, rows: usize) -> Result<()> {
 
 /// Development-only reference execution. Bounded fixture results are kept in a
 /// persistent MemTable, a deliberately strong baseline for within-run reuse.
-pub async fn baseline(source: &Path) -> Result<()> {
+pub async fn baseline(source: &Path, target_partitions: usize) -> Result<()> {
+    ensure!(
+        (1..=8).contains(&target_partitions),
+        "target_partitions must be 1..8"
+    );
     ensure!(
         source.metadata()?.len() <= 256 * 1024 * 1024,
         "benchmark fixture exceeds 256 MiB bound"
     );
     let started = Instant::now();
-    let ctx = SessionContext::new_with_config(SessionConfig::new().with_target_partitions(1));
+    let ctx = SessionContext::new_with_config(
+        SessionConfig::new().with_target_partitions(target_partitions),
+    );
     ctx.register_parquet("t", source.to_str().unwrap(), ParquetReadOptions::default())
         .await?;
     let mut stages = vec![];
@@ -249,7 +255,7 @@ pub async fn baseline(source: &Path) -> Result<()> {
     println!(
         "{}",
         serde_json::to_string(
-            &json!({"backend":"direct_datafusion_55.0.0","total_ms":started.elapsed().as_secs_f64()*1000.0,"stages":stages,"intermediate_storage":"persistent in-process MemTable"})
+            &json!({"backend":"direct_datafusion_55.0.0","target_partitions":target_partitions,"total_ms":started.elapsed().as_secs_f64()*1000.0,"stages":stages,"intermediate_storage":"persistent in-process MemTable"})
         )?
     );
     Ok(())

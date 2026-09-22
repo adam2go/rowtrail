@@ -15,6 +15,27 @@ use datafusion::{
 };
 use std::sync::Arc;
 
+/// Keep small scans and tight pools serial. This is a planning target, not a
+/// thread/RSS limit: Arrow buffers, codecs and object-store caches are separate.
+pub fn target_partitions(spec: &JobSpec) -> usize {
+    let e = &spec.query.as_ref().unwrap().execution;
+    if let Some(n) = e.target_partitions {
+        return n;
+    }
+    let bytes = spec
+        .inputs
+        .values()
+        .flat_map(|i| &i.files)
+        .fold(0u64, |total, f| total.saturating_add(f.size));
+    if bytes < 16 * 1024 * 1024 {
+        return 1;
+    }
+    let cpus = std::thread::available_parallelism()
+        .map(usize::from)
+        .unwrap_or(1);
+    (e.memory_bytes / (64 * 1024 * 1024)).clamp(1, 4).min(cpus)
+}
+
 pub async fn plan(
     spec: &JobSpec,
     counters: Arc<Counters>,
@@ -44,7 +65,7 @@ pub async fn plan(
     );
     let ctx = SessionContext::new_with_config_rt(
         SessionConfig::new()
-            .with_target_partitions(1)
+            .with_target_partitions(target_partitions(spec))
             .with_batch_size(8192),
         runtime,
     );

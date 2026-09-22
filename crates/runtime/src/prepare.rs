@@ -47,6 +47,7 @@ pub fn commit(c: &Connection, spec: &JobSpec) -> Result<()> {
     );
     let source = spec.workspace.join("store").join(&spec.result_ref);
     let m = Manifest {
+        label: None,
         id: prepared.manifest_ref.clone(),
         dataset_ref: prepared.dataset_ref.clone(),
         source,

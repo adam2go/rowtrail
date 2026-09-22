@@ -17,6 +17,8 @@ from session_client import RowTrail
 p = argparse.ArgumentParser(description=__doc__)
 p.add_argument('--variant', action='append', required=True)
 p.add_argument('--repeats', type=int, default=21)
+p.add_argument('--source-rows', type=int, default=16384)
+p.add_argument('--wide-result', action='store_true', help='Save id/region/amount; pages still project only id')
 p.add_argument('--output', default='benchmarks/local/paging-matrix.json')
 a = p.parse_args()
 variants = {n: (ROOT / d).resolve() for n, d in (v.split('=', 1) for v in a.variant)}
@@ -24,11 +26,13 @@ records, clients, refs, pids = [], {}, {}, {}
 with tempfile.TemporaryDirectory(prefix='rowtrail-pages-') as td:
     base = pathlib.Path(td)
     try:
-        subprocess.run([str(next(iter(variants.values())) / 'rowtrail-runtime'), 'fixtures', '--directory', str(base / 'data'), '--rows', '16384'], check=True, stdout=subprocess.DEVNULL)
+        assert a.source_rows >= 10000
+        subprocess.run([str(next(iter(variants.values())) / 'rowtrail-runtime'), 'fixtures', '--directory', str(base / 'data'), '--rows', str(a.source_rows)], check=True, stdout=subprocess.DEVNULL)
         for name, bins in variants.items():
             rt = clients[name] = RowTrail(str(bins / 'rowtrail'), str(base / name))
             pids[name] = rt.call('doctor', {})['coordinator_pid']
-            refs[name] = rt.binding(rt.query('SELECT id FROM t ORDER BY id', {'t': rt.open(base / 'data/many.parquet')}))
+            columns = 'id,region,amount' if a.wide_result else 'id'
+            refs[name] = rt.binding(rt.query(f'SELECT {columns} FROM t ORDER BY id', {'t': rt.open(base / 'data/many.parquet')}))
         for repeat in range(a.repeats):
             names = list(variants)
             if repeat % 2:
@@ -36,7 +40,7 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-pages-') as td:
             for rows in (100, 1000, 10000):
                 for name in names:
                     start = time.perf_counter()
-                    result = clients[name].call('read', {**refs[name], 'max_rows': rows, 'max_bytes': 1000000})
+                    result = clients[name].call('read', {**refs[name], 'columns':['id'], 'max_rows': rows, 'max_bytes': 1000000})
                     elapsed = (time.perf_counter() - start) * 1000
                     assert result['rows'] == [[str(9007199254740993 + i)] for i in range(rows)]
                     records.append({'variant': name, 'repeat': repeat, 'rows': rows, 'ms': elapsed, 'read_metrics': result['read_metrics']})
@@ -44,7 +48,7 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-pages-') as td:
             values = sorted(values)
             return {'median_ms': statistics.median(values), 'p95_ms': values[(95 * len(values) + 99) // 100 - 1]}
         report = {'status': 'passed', 'kind': 'alternating bounded page reads; persistent sessions; no model calls',
-                  'platform': platform.platform(), 'repeats': a.repeats,
+                  'platform': platform.platform(), 'repeats': a.repeats, 'source_rows':a.source_rows, 'materialized_columns':columns,
                   'binary_sha256': {name: {n: hashlib.sha256((bins / n).read_bytes()).hexdigest() for n in ('rowtrail', 'rowtrail-runtime')} for name, bins in variants.items()},
                   'records': records, 'summary': {name: {str(rows): summary([r['ms'] for r in records if r['variant'] == name and r['rows'] == rows]) for rows in (100, 1000, 10000)} for name in variants},
                   'limitations': ['Same fixed sorted IDs; separate persistent workspaces. Each timing includes response transfer and JSON parsing, not startup/materialization.', 'OS cache not flushed. All repeats retained, including first reads. Native CLI startup is measured separately.']}

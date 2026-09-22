@@ -49,6 +49,8 @@ impl Db {
         c.busy_timeout(std::time::Duration::from_secs(5))?;
         c.execute_batch("PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA synchronous=FULL;
             CREATE TABLE IF NOT EXISTS meta(key TEXT PRIMARY KEY,value TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS catalog_labels(ref TEXT PRIMARY KEY,label TEXT NOT NULL);
+            CREATE INDEX IF NOT EXISTS catalog_labels_value ON catalog_labels(label,ref);
             CREATE TABLE IF NOT EXISTS objects(id TEXT PRIMARY KEY,kind TEXT NOT NULL,data TEXT NOT NULL,validity TEXT NOT NULL DEFAULT 'valid');
             CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY,state TEXT NOT NULL,phase TEXT NOT NULL,spec TEXT NOT NULL,attempt TEXT NOT NULL,result_ref TEXT NOT NULL,scope_ref TEXT NOT NULL,error TEXT,metrics TEXT,created INTEGER NOT NULL,started INTEGER,finished INTEGER,stop_requested TEXT,worker_pid INTEGER,worker_token TEXT);
             CREATE TABLE IF NOT EXISTS results(id TEXT PRIMARY KEY,job_id TEXT NOT NULL REFERENCES jobs(id),schema TEXT,quality TEXT NOT NULL,head INTEGER NOT NULL DEFAULT 0,validity TEXT NOT NULL DEFAULT 'valid');
@@ -71,7 +73,7 @@ impl Db {
             [id("store")],
         )?;
         c.execute(
-            "INSERT OR IGNORE INTO meta VALUES('schema_version','6')",
+            "INSERT OR IGNORE INTO meta VALUES('schema_version','7')",
             [],
         )?;
         let version: String = c.query_row(
@@ -80,15 +82,15 @@ impl Db {
             |r| r.get(0),
         )?;
         ensure!(
-            matches!(version.as_str(), "3" | "4" | "5" | "6"),
+            matches!(version.as_str(), "3" | "4" | "5" | "6" | "7"),
             "PROTOCOL_VERSION_MISMATCH: metadata schema"
         );
-        // Upgrade atomically; older runtimes cannot interpret inline result parts.
-        if version != "6" {
+        // Upgrade atomically; older runtimes cannot interpret new persisted query options.
+        if version != "7" {
             c.execute_batch("BEGIN IMMEDIATE;
                 UPDATE jobs SET spec=json_set(spec,'$.analysis.fragment_unit','manifest_file','$.analysis.checkpoint_interval_ms',0)
                   WHERE json_type(spec,'$.analysis')='object' AND json_type(spec,'$.analysis.fragment_unit') IS NULL;
-                UPDATE meta SET value='6' WHERE key='schema_version'; COMMIT;")?;
+                UPDATE meta SET value='7' WHERE key='schema_version'; COMMIT;")?;
         }
         let store_id = c.query_row("SELECT value FROM meta WHERE key='store_id'", [], |r| {
             r.get(0)

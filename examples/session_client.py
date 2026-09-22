@@ -72,7 +72,7 @@ class RowTrail:
         raise ValueError('A dataset manifest or a readable fixed result revision is required')
 
     def query(self, sql, bindings=None, *, parameters=(), execution=None,
-              timeout=30, idempotency_key=None):
+              timeout=30, idempotency_key=None, label=None):
         """Submit once and wait mechanically, returning the complete job response.
 
         Defaults suit final-answer SQL. Use call('query', ...) for immediate
@@ -83,6 +83,7 @@ class RowTrail:
             'sql': sql,
             'bindings': {name: self.binding(value) for name, value in (bindings or {}).items()},
             'parameters': list(parameters),
+            **({'label': label} if label is not None else {}),
             'execution': {'wait_ms': 1000, 'preview': 'none', **(execution or {})},
         }, idempotency_key=idempotency_key)
         response = self.finish(response, timeout=timeout)
