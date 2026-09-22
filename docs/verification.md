@@ -242,6 +242,12 @@ previews; Windows, Linux arm64 and macOS x86_64 are not published targets.
 Artifacts and bundled documents come from the verified build source; final report
 and README updates on the release tag do not change those executable bytes.
 
+After publication, a fresh macOS installation downloads the tag's public installer
+and release archive without `--from` or a version override. Installed executable
+hashes match CI. The printed client, exact large-integer query, fresh-session label
+handoff and bundled demo all pass. GitHub's six published asset digests also match
+the verified local CI files. [Public installation record](../benchmarks/performance/alpha8/public-install.json).
+
 ## Reproduce
 
 Build with Rust 1.94.0 and Cargo.lock; use `scripts/cargo-local.sh` for the local

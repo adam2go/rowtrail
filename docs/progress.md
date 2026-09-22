@@ -44,6 +44,12 @@ measurements are verified; this remains an engineering preview.
 
 [Design](decisions/008-bounded-parallelism-and-handoff.md) · [Measurements](verification.md).
 
+Published [v0.1.0-alpha.8](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.8).
+The public macOS installer selects alpha.8 by default; its actual downloaded
+binaries, printed-client composition, labeled handoff and bundled demo pass.
+[Public install](../benchmarks/performance/alpha8/public-install.json) ·
+[Release provenance](release-verification.json).
+
 ## Alpha.7
 
 - Arrow parts up to 128 KiB store their checked bytes and descriptor atomically

@@ -1,0 +1,80 @@
+{
+  "status": "passed",
+  "installer_url": "https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-alpha.8/install.sh",
+  "installer_sha256": "67a004e2b75e8d2b444a902cac43da307cb0cc6418c42da341b0e90b77abf9f4",
+  "version": "rowtrail-cli 0.1.0-alpha.8",
+  "default_version_selects_alpha8": true,
+  "public_network_download_and_checksum_install": true,
+  "installed_binary_sha256": {
+    "rowtrail": "95271dbbf48b078eea2974cbb82742e9206c707cda6ffc59a9087c9f6e4c5d9c",
+    "rowtrail-runtime": "79ff822a1bd4ed52aedfe4ccc4ad03f85022f01d2bcf1b9056a0080de37650d3"
+  },
+  "binaries_match_verified_ci_archive": "2c45b04b91922d3b1a81db20218190fdce780425224c3dc04fb0e3b7a2135d81",
+  "printed_client_matches_bundle": true,
+  "fresh_session_labeled_handoff": true,
+  "exact_large_integer_rows": [
+    [
+      "9007199254740994"
+    ]
+  ],
+  "handoff_original_source_bytes": 0,
+  "bundled_demo": {
+    "status": "passed",
+    "input_rows": 20003,
+    "question": "Which region has the highest refunded value, and through which channels?",
+    "refunds_by_region_cents": [
+      [
+        "east",
+        "1930407"
+      ],
+      [
+        "north",
+        "1920667"
+      ],
+      [
+        "south",
+        "1925653"
+      ],
+      [
+        "west",
+        "1925537"
+      ]
+    ],
+    "chosen_region": "east",
+    "saved_label": "demo refunds: east",
+    "saved_rows": 385,
+    "channel_totals_cents": [
+      [
+        "app",
+        "630463"
+      ],
+      [
+        "store",
+        "643469"
+      ],
+      [
+        "web",
+        "656475"
+      ]
+    ],
+    "handoff_columns": [
+      "n",
+      "first_id",
+      "cents"
+    ],
+    "handoff_rows": [
+      [
+        "385",
+        "9007199254740993",
+        "1930407"
+      ]
+    ],
+    "handoff_calls": [
+      "workspace summary",
+      "query"
+    ],
+    "handoff_original_source_bytes": 0,
+    "checks": "Python integer oracle; exact/final/complete/untruncated guards; IDs above 2^53",
+    "continue": "Use this workspace and label to query the retained result. Labels are descriptive, not unique IDs."
+  }
+}
