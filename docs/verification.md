@@ -15,8 +15,8 @@ alpha.7 and eleven alpha.8. **Nine Rust tests** include twelve subprocess
 publication-crash cases and a deterministic broken-ACK regression. Formatting,
 Clippy, dependency boundaries, MCP/session, Rust SDK and benchmark-profile checks
 pass. [Local final-binary check inventory](../benchmarks/performance/alpha8/verification.json).
-[Native CI](https://github.com/adam2go/rowtrail/actions/runs/35691929567)
-uses source `0eab3d8a42f89ba9d650225cf64794e1503680c8`.
+[Native CI](https://github.com/adam2go/rowtrail/actions/runs/35696150110)
+uses source `4d8e37b202c9bc294c9a0a5ac05d580f04fed38c`.
 
 The [new checks](../tests/integration/alpha8.py) cover exact labels, duplicate-label
 pagination, refresh, Unicode/byte bounds, tombstones, idempotency, 1/2/4-partition
@@ -53,12 +53,12 @@ to the original product dimension. Seven trials per version in each series:
 
 | Complete workflow, median ms | alpha.7 | alpha.8 |
 |---|---:|---:|
-| 16,384 rows, defaults | 37.35 | 37.23 |
-| 1,048,576 rows, defaults | 234.26 | **144.22** |
-| 1,048,576 rows, both pinned to one partition | 234.39 | **193.83** |
+| 16,384 rows, defaults | 37.71 | 37.38 |
+| 1,048,576 rows, defaults | 236.41 | **144.23** |
+| 1,048,576 rows, both pinned to one partition | 240.34 | **201.69** |
 
-Default million-row time is **38.4% lower**. In a separate alternating series
-with one target partition throughout, it is **17.3% lower**. Small data is
+Default million-row time is **39.0% lower**. In a separate alternating series
+with one target partition throughout, it is **16.1% lower**. Small data is
 essentially unchanged in this sample. Auto planning targets two
 partitions for large original scans under the 128 MiB pool, one for small saved
 inputs. The 32 MiB pool remains serial. Explicit multi-partition requests require
@@ -73,8 +73,8 @@ are not identical hard CPU caps. Direct controls use their default memory limits
 not RowTrail's pool, and direct DataFusion excludes process startup (also recorded
 separately). These are strong direct-engine controls, not equal durability systems.
 
-In the alpha.8 million-row default arm, persistent DuckDB takes **70.56 ms** and
-direct DataFusion **38.00 ms**: both remain faster. RowTrail additionally pays for
+In the alpha.8 million-row default arm, persistent DuckDB takes **72.54 ms** and
+direct DataFusion **37.35 ms**: both remain faster. RowTrail additionally pays for
 durable admission/results, verification, isolation and protocol. RowTrail's
 returned values are checked against DuckDB; the direct DataFusion timing harness
 records stage row counts rather than separately serializing answer values.
@@ -101,22 +101,22 @@ and an independent check of every exported ID:
 
 | Measurement | alpha.7 | alpha.8 |
 |---|---:|---:|
-| Sort median, ms | 912.20 | **462.41** |
-| Export median, ms | 258.83 | 250.68 |
+| Sort median, ms | 929.18 | **462.06** |
+| Export median, ms | 265.85 | 254.89 |
 | Result parts, median | 43 | **3** |
 | Spill count, median | 26 | 26 |
 | Largest result part, bytes | 305,114 | 4,655,714 |
-| Sampled worker RSS, median bytes | 141,279,232 | 138,149,888 |
+| Sampled worker RSS, median bytes | 146,702,336 | 142,049,280 |
 
-Sort time is **49.3% lower**. Timing includes bounded polling, protocol and `ps`
+Sort time is **50.3% lower**. Timing includes bounded polling, protocol and `ps`
 sampling, not just engine CPU. MemoryPool is not an RSS cap; samples can miss true
 peaks. The 228,139,988-byte Parquet fixture and each binary are hashed. Python's
 independent integer key specifies every sorted row; DuckDB only reads the exported
 Parquet for comparison. [All ten runs](../benchmarks/performance/alpha8/resources.json).
 
 A separate **2,097,152-row** materialization followed by three logical saved scans
-runs seven alternating trials. Full workflow median **386.52 → 210.68 ms**;
-rescan median **56.98 → 53.59 ms**. Parts fall from 17 to four. Alpha.8 stores and
+runs seven alternating trials. Full workflow median **386.62 → 210.89 ms**;
+rescan median **56.72 → 53.58 ms**. Parts fall from 17 to four. Alpha.8 stores and
 reads 9,282,856 result bytes, with **zero original-source bytes during reuse** and
 6,964,366 retained cache bytes at peak, within the existing 8 MiB budget. This
 access pattern reads each part once; other patterns can evict and reread. The SQL
@@ -125,8 +125,8 @@ reuse rather than optimal SQL. [All samples and exact oracle](../benchmarks/perf
 
 Wide Parquet projection also retains alpha.7's range-I/O gain: both read
 **1,574,716 source bytes** when projecting two distant columns from a 32-column,
-65,536-row high-entropy fixture. Query median **9.55 → 8.75 ms**, open plus query
-29.91 → 29.22 ms in seven alternating trials. This small local gain depends on
+65,536-row high-entropy fixture. Query median **9.50 → 8.66 ms**, open plus query
+29.77 → 28.92 ms in seven alternating trials. This small local gain depends on
 layout. [Projection records](../benchmarks/performance/alpha8/projection.json).
 
 ## Small calls, handoff and retained history
@@ -137,23 +137,33 @@ share their session/worker. Every sample is retained.
 
 | Median ms (P95 where noted) | alpha.7 | alpha.8 |
 |---|---:|---:|
-| CLI/coordinator startup | 18.31 | 18.36 |
-| First query | 5.92 | 5.90 |
-| Warm query | 1.08 | 1.06 |
-| Warm query P95 | 3.11 | 1.62 |
+| CLI/coordinator startup | 18.34 | 18.35 |
+| First query | 5.99 | 5.98 |
+| Warm query | 1.11 | 1.10 |
+| Warm query P95 | 1.62 | 1.49 |
 
 The fast small-call behavior is retained; no new cold-start or median scalar gain
-is established. The warm P95 improves in this series, with an alpha.7 tail
-outlier; this is not an independent tail-latency guarantee. P95 is nearest-rank over observed warm samples, not an SLA or
+is established. The alpha.8 first-query series includes a **246.69 ms**
+outlier, and startup P95 is **22.60 → 31.42 ms**. These samples are retained;
+there is no established startup/tail-latency gain. P95 is nearest-rank over observed warm samples, not an SLA or
 609 independent cold runs. [Latency records](../benchmarks/performance/alpha8/latency.json).
 
 One retained workspace creates **5,000 labeled exact scalar results**, checking
 every answer. After coordinator restart, 31 exact-label catalog lookups have
-median **0.54 ms**, P95 **0.66 ms**, including protocol and JSON but excluding
+median **0.54 ms**, P95 **0.68 ms**, including protocol and JSON but excluding
 startup. The label index is verified in the SQLite query plan. Early/late labeled
-query windows have medians 0.878 / 0.880 ms. There is no GC; file lengths including
-SQLite/WAL total 40,928,464 bytes. This is a single history-growth probe, not a
+query windows have medians 0.867 / 0.930 ms. There is no GC; file lengths including
+SQLite/WAL total 40,957,136 bytes. This is a single history-growth probe, not a
 repeated version comparison or general scaling bound. [All samples](../benchmarks/performance/alpha8/catalog.json).
+
+A separate final-binary **50,000-result** probe checks every created scalar answer
+and then restarts the coordinator. Exact-label lookup median is **4.36 ms**, P95
+**5.26 ms**; each lookup's result JSON is at most **841 bytes** before the protocol
+envelope. Early/late query medians are **0.840 / 0.902 ms**. Retaining everything
+uses 407,110,888 bytes of file lengths, including metadata/WAL. The catalog still
+computes whole-workspace counts, so the label index does not make the whole call
+constant-time. This exposes a future metadata-count optimization; it does not
+change the package or add a cache. [50K records](../benchmarks/performance/alpha8/catalog-50000.json).
 
 ## Regressions and limits
 
@@ -163,9 +173,9 @@ million-row id/region/amount result, projecting only ID:
 
 | Page size, median ms | alpha.7 | alpha.8 |
 |---|---:|---:|
-| 100 rows | 0.64 | **2.00** |
-| 1,000 rows | 0.99 | **2.32** |
-| 10,000 rows | 5.48 | **6.80** |
+| 100 rows | 0.64 | **2.01** |
+| 1,000 rows | 0.98 | **2.30** |
+| 10,000 rows | 5.64 | **7.01** |
 
 The first 100-row page verifies **736,490 → 4,272,602 bytes**. These are logical
 read/checksum bytes, not physical device I/O through the OS page cache. This is a
@@ -173,10 +183,10 @@ real regression, accepted for the larger complete-workflow/persistence gains;
 projected integrity reads remain a performance priority. [Large-result pages](../benchmarks/performance/alpha8/paging-1048576.json).
 
 Small 16K ID-only result paging is essentially unchanged: 100 / 1K / 10K medians
-are 0.34 / 0.68 / 5.16 ms before and 0.28 / 0.67 / 5.25 ms after.
+are 0.35 / 0.72 / 5.47 ms before and 0.36 / 0.71 / 5.38 ms after.
 [Small-result pages](../benchmarks/performance/alpha8/paging-16384.json).
 A 131,072-row high-entropy integer materialization with three exact saved aggregates
-is **98.95 → 97.39 ms** (seven alternating trials), about 1.6% faster in this sample.
+is **97.02 → 97.93 ms** (seven alternating trials), about 0.9% slower in this sample.
 Compression and part sizing are not universal wins. [Entropy records](../benchmarks/performance/alpha8/entropy.json).
 
 [Exploratory trials](../benchmarks/performance/alpha8/experiments/) retain the
@@ -209,8 +219,8 @@ preflight checks on **Ubuntu 24.04**. No local archive replaces a CI artifact.
 
 | Native release | Download, bytes (MB) | CLI, bytes | Runtime, bytes |
 |---|---:|---:|---:|
-| macOS arm64 | 19,229,952 (19.23) | 3,733,632 | 100,100,304 |
-| Linux x86_64 | 22,556,188 (22.56) | 4,185,696 | 114,908,680 |
+| macOS arm64 | 19,203,588 (19.20) | 3,733,632 | 100,083,712 |
+| Linux x86_64 | 22,600,156 (22.60) | 4,185,696 | 114,905,864 |
 
 All MB are decimal. Unchanged budgets: **30,000,000** per archive, **4,500,000**
 per CLI and **125,000,000** per runtime. Cargo.lock changes only the four workspace
@@ -241,7 +251,7 @@ macOS Command Line Tools selection only. [Build and integration commands](../doc
 Final local benchmark binaries:
 
 - CLI: `342b33d232b5d30dd242c0659967e5828ff00d0e034db2054a080b64d7ea1267`
-- Runtime: `8122e915fbae80b02f236adb9c95c8c9d88774447a65447ce20d64656da59edb`
+- Runtime: `299389250dcad9b056fdedda51c4147fed970e6df50bc44301231684f8619d4e`
 
 Native archive hashes differ and are recorded separately. Keep binary provenance,
 source/result I/O, returned-value checks and cache/process conditions together

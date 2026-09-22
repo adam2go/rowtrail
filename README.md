@@ -64,8 +64,8 @@ Verified native sizes (decimal MB):
 
 | Platform | Download `.tar.xz` | CLI | Runtime |
 |---|---:|---:|---:|
-| macOS arm64 | **19.23 MB** | 3.73 MB | 100.10 MB |
-| Linux x86_64 | **22.56 MB** | 4.19 MB | 114.91 MB |
+| macOS arm64 | **19.20 MB** | 3.73 MB | 100.08 MB |
+| Linux x86_64 | **22.60 MB** | 4.19 MB | 114.91 MB |
 
 CLI/runtime sizes are uncompressed. Budgets stay **30 MB / 4.5 MB / 125 MB**.
 The same Linux archive is tested on Ubuntu 22.04 and 24.04. Archives include
@@ -145,20 +145,20 @@ On one Apple arm64 Mac:
 
 | Complete workload, median ms | alpha.7 | alpha.8 |
 |---|---:|---:|
-| 1M-row exploration, defaults (7 alternating trials) | 234.26 | **144.22** |
-| 1M-row sort, 32 MiB engine pool (5 alternating trials) | 912.20 | **462.41** |
+| 1M-row exploration, defaults (7 alternating trials) | 236.41 | **144.23** |
+| 1M-row sort, 32 MiB engine pool (5 alternating trials) | 929.18 | **462.06** |
 
-That is **38% / 49% less elapsed time**. Defaults use more partitions for large
+That is **39% / 50% less elapsed time**. Defaults use more partitions for large
 scans; direct controls receive matching maximum targets. A separate one-partition
-exploration comparison still improves **234.39 → 193.83 ms**. Small exploration
-and warm scalar queries (about **1.06 ms**) remain essentially unchanged.
+exploration comparison still improves **240.34 → 201.69 ms**. Small exploration
+and warm scalar queries (about **1.10 ms**) remain essentially unchanged.
 
 ![Alpha.8 complete exploration and low-memory sort. Lower is better; exact values and all conditions are in the report.](benchmarks/performance/alpha8/performance.svg)
 
 The changes preserve SQLite FULL commits, file/directory sync, verified parts and
 real worker cancellation. Larger compressed parts reduce commit overhead but can
 make a small read from a large saved result slower: the 100-row page grows from
-**0.64 to 2.00 ms** in our million-row fixture. MemoryPool budgets are not
+**0.64 to 2.01 ms** in our million-row fixture. MemoryPool budgets are not
 RSS caps. Package-size budgets remain unchanged.
 
 **Direct engines remain faster.** RowTrail additionally pays for durable jobs,

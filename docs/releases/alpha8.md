@@ -31,17 +31,17 @@ that workflow faster and easier to compose, with no new external dependency.
 
 | Complete workflow, median ms | alpha.7 | alpha.8 |
 |---|---:|---:|
-| Million-row exploration, defaults; seven alternating trials | 234.26 | 144.22 |
-| Million-row exploration, both one partition; seven trials | 234.39 | 193.83 |
-| Million-row sort, 32 MiB engine pool; five alternating trials | 912.20 | 462.41 |
+| Million-row exploration, defaults; seven alternating trials | 236.41 | 144.23 |
+| Million-row exploration, both one partition; seven trials | 240.34 | 201.69 |
+| Million-row sort, 32 MiB engine pool; five alternating trials | 929.18 | 462.06 |
 
-Default exploration takes about **38% less time**; the spill sort takes about
-**49% less time**. Sort output drops from 43 parts to three, and every exported
+Default exploration takes about **39% less time**; the spill sort takes about
+**50% less time**. Sort output drops from 43 parts to three, and every exported
 ID is checked independently. Direct engine controls receive matching maximum
 query targets and may retain intermediates; they remain faster than RowTrail.
 
 There is a real tradeoff: the first 100-row page of a large saved result takes
-**0.64 → 2.00 ms**, because larger parts still undergo whole-part verification.
+**0.64 → 2.01 ms**, because larger parts still undergo whole-part verification.
 Small calls and high-entropy workloads remain broadly unchanged. The engine pool
 is not an RSS cap. These are local backend measurements, not a proven real-agent
 latency/token advantage.
@@ -50,7 +50,7 @@ latency/token advantage.
 
 ## Install and verify
 
-Native downloads: **macOS arm64 19.23 MB**, **Linux x86_64 22.56 MB** (decimal,
+Native downloads: **macOS arm64 19.20 MB**, **Linux x86_64 22.60 MB** (decimal,
 compressed). Archive budget remains 30 MB. Runtime use requires no Rust, Python,
 Node, Docker, model API key or external database.
 

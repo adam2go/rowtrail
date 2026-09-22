@@ -28,8 +28,8 @@ https://github.com/adam2go/rowtrail
    Labels and bounded catalog hints let a fresh connection find the right saved
    result. A runnable example demonstrates handoff in one catalog call + one query.
 
-4. On one Mac, 1M-row exploration: 234 → 144 ms (7 alternating trials).
-   A 32 MiB sort: 912 → 462 ms (5 trials). Controls match maximum query targets.
+4. On one Mac, 1M-row exploration: 236 → 144 ms (7 alternating trials).
+   A 32 MiB sort: 929 → 462 ms (5 trials). Controls match maximum query targets.
    Direct engines remain faster; tiny pages from big results regress.
 
 5. It is an Apache-2.0 engineering preview: small native CLI + runtime, MCP and

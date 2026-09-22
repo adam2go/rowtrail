@@ -1,0 +1,29 @@
+{
+  "status": "fixed_and_locally_regression_tested",
+  "candidate_ci": "https://github.com/adam2go/rowtrail/actions/runs/35694862811",
+  "candidate_source": "b39409b583b25d168eea7aa0c40d043ad7ded9d1",
+  "fix_source": "4d8e37b202c9bc294c9a0a5ac05d580f04fed38c",
+  "observed": {
+    "state": "cancelled",
+    "error": "WORKER_LOST",
+    "readable_revision": 1,
+    "worker_exit_confirmed": true
+  },
+  "deterministic_regression": "coordinator::tests::stopped_worker_eof_uses_the_durable_stop_reason",
+  "before": {
+    "status": "failed",
+    "actual": "WORKER_LOST",
+    "expected": "CANCELLED"
+  },
+  "after": {
+    "status": "passed",
+    "cases": [
+      "unexpected EOF remains interrupted/WORKER_LOST",
+      "cancellation becomes cancelled/CANCELLED",
+      "execution timeout becomes budget_exhausted/BUDGET_EXHAUSTED",
+      "late completion cannot overwrite any terminal row"
+    ],
+    "worker_exit_confirmed": true
+  },
+  "fix": "Select terminal state and error from the same durable stop reason inside Db::finish transaction. No replay, relaxed checksum or durability change."
+}

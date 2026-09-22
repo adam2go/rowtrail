@@ -29,11 +29,14 @@ measurements are verified; this remains an engineering preview.
 - Linux build baseline moves to Ubuntu 22.04 / glibc 2.35; the same archive also
   passes installation and the demo on Ubuntu 24.04. Installer rejects older
   glibc and musl before downloading. macOS arm64 remains supported.
-- No external dependency is added. Native download sizes are 19.23 / 22.56 MB.
-  Default million-row exploration is 234.26 → 144.22 ms (7 alternating trials);
-  the 32 MiB sort is 912.20 → 462.41 ms (5 trials). One-partition exploration also
-  improves. Larger saved-result pages regress by about 1.3 ms; entropy and small
+- No external dependency is added. Native download sizes are 19.20 / 22.60 MB.
+  Default million-row exploration is 236.41 → 144.23 ms (7 alternating trials);
+  the 32 MiB sort is 929.18 → 462.06 ms (5 trials). One-partition exploration also
+  improves. Larger saved-result pages regress by about 1.4 ms; entropy and small
   queries are essentially unchanged. All samples and tradeoffs are retained.
+- A separate 50,000-result retained-history probe keeps late scalar queries near
+  0.90 ms; fresh-coordinator catalog lookup takes 4.36 ms median with bounded
+  output. Whole-workspace counts remain a scaling cost to optimize next.
 - Native builds pass 99 integration scenarios and nine Rust tests each. The
   installed macOS archive passes the new scenarios, demo and published alpha.7
   upgrade again. Installer checks actual executables before switching links,

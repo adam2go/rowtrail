@@ -210,6 +210,7 @@ python3 -m venv /tmp/rowtrail-bench
 python3 benchmarks/latency.py --variant alpha7=/path/to/alpha7 --variant alpha8=target/release --repeats 21 --warm-queries 30
 python3 benchmarks/paging_matrix.py --variant alpha7=/path/to/alpha7 --variant alpha8=target/release --source-rows 1048576 --wide-result --repeats 21
 python3 benchmarks/catalog.py --bin-dir target/release --queries 5000 --lookups 31
+python3 benchmarks/catalog.py --bin-dir target/release --queries 50000 --lookups 31 --output benchmarks/local/catalog-50000.json
 ```
 
 Run the 16K exploration and ordinary 16K paging variants as well. Keep timing
