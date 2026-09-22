@@ -36,6 +36,8 @@ for axis,(title,labels,values,colors) in zip(axes,panels):
 fig.suptitle('Keep results. Spend less time saving them.',fontsize=21,fontweight='bold',color='#163d37',ha='left',x=.02)
 fig.supxlabel(f'One Apple arm64 Mac · 7 alternating exploration trials / 5 sort trials\nSeparate one-partition exploration: {serial["alpha7"]["rowtrail"]:.1f} → {serial["alpha8"]["rowtrail"]:.1f} ms.\nDirect engines remain faster; small pages from large results regress. Full conditions in the report.',fontsize=9,color='#526b63')
 fig.savefig(data/'performance.svg',metadata={'Date':None,'Description':'RowTrail alpha.8 local repeated measurements; all timings start at zero. See verification.md for controls and tradeoffs.'})
+svg=data/'performance.svg'
+svg.write_text('\n'.join(line.rstrip() for line in svg.read_text().splitlines())+'\n')
 preview=ROOT/'benchmarks/local/alpha8/performance.png';preview.parent.mkdir(parents=True,exist_ok=True)
 fig.savefig(preview,dpi=150)
 print(preview)

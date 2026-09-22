@@ -145,20 +145,20 @@ On one Apple arm64 Mac:
 
 | Complete workload, median ms | alpha.7 | alpha.8 |
 |---|---:|---:|
-| 1M-row exploration, defaults (7 alternating trials) | 231.07 | **142.46** |
-| 1M-row sort, 32 MiB engine pool (5 alternating trials) | 865.94 | **436.50** |
+| 1M-row exploration, defaults (7 alternating trials) | 234.26 | **144.22** |
+| 1M-row sort, 32 MiB engine pool (5 alternating trials) | 912.20 | **462.41** |
 
-That is **38% / 50% less elapsed time**. Defaults use more partitions for large
+That is **38% / 49% less elapsed time**. Defaults use more partitions for large
 scans; direct controls receive matching maximum targets. A separate one-partition
-exploration comparison still improves **234.33 → 197.58 ms**. Small exploration
-and warm scalar queries (about **1.14 ms**) remain essentially unchanged.
+exploration comparison still improves **234.39 → 193.83 ms**. Small exploration
+and warm scalar queries (about **1.06 ms**) remain essentially unchanged.
 
 ![Alpha.8 complete exploration and low-memory sort. Lower is better; exact values and all conditions are in the report.](benchmarks/performance/alpha8/performance.svg)
 
 The changes preserve SQLite FULL commits, file/directory sync, verified parts and
 real worker cancellation. Larger compressed parts reduce commit overhead but can
 make a small read from a large saved result slower: the 100-row page grows from
-**0.63 to 1.94 ms** in our million-row fixture. MemoryPool budgets are not
+**0.64 to 2.00 ms** in our million-row fixture. MemoryPool budgets are not
 RSS caps. Package-size budgets remain unchanged.
 
 **Direct engines remain faster.** RowTrail additionally pays for durable jobs,
@@ -170,7 +170,7 @@ the new runnable handoff demo do not establish a model-level latency/token win.
 
 Both native build platforms pass **99 integration scenarios** and **eight Rust
 tests**, including 12 subprocess commit-crash cases. A 5,000-result labeled history
-survives restart; catalog lookup median is **0.56 ms** in that local probe.
+survives restart; catalog lookup median is **0.54 ms** in that local probe.
 
 [Current evidence](docs/verification.md) · [Alpha.8 raw records](benchmarks/performance/alpha8/) ·
 [Archived alpha.7 report](docs/releases/alpha7-verification.md).
