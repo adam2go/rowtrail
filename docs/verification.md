@@ -11,7 +11,7 @@ and [provenance](releases/alpha7-verification.json) are archived.
 
 The local build and both native build platforms pass **99 integration scenarios**:
 30 foundation, 13 alpha.3, ten alpha.4, twelve alpha.5, eight alpha.6, fifteen
-alpha.7 and eleven alpha.8. **Eight Rust tests** include twelve subprocess
+alpha.7 and eleven alpha.8. **Nine Rust tests** include twelve subprocess
 publication-crash cases and a deterministic broken-ACK regression. Formatting,
 Clippy, dependency boundaries, MCP/session, Rust SDK and benchmark-profile checks
 pass. [Local final-binary check inventory](../benchmarks/performance/alpha8/verification.json).
@@ -23,6 +23,13 @@ pagination, refresh, Unicode/byte bounds, tombstones, idempotency, 1/2/4-partiti
 aggregates and joins, independently checked full-row sorting, shared scan limits
 and actual cancellation. The installed macOS CI archive passes the eleven new
 scenarios again on the local Mac, plus its bundled demo and a real upgrade.
+
+A later candidate failed the Linux cancellation race check: the worker was
+confirmed stopped, but the final `cancelled` state retained `WORKER_LOST` from
+EOF. The added real-child regression fails before the fix and covers unexpected
+exit, cancellation and timeout afterward. The final metadata transaction now
+chooses state and error from the same durable stop reason. The candidate failure
+and earlier timing series are retained in the [experiment record](../benchmarks/performance/alpha8/experiments/).
 
 **Schema 7 is a one-way upgrade from 3/4/5/6.** The new indexed labels and persisted
 query options preserve existing fixed revisions and prefix quality. A probe using
@@ -196,7 +203,7 @@ level win. We invite independently reproduced real-agent tasks.
 ## Native distribution
 
 The verified CI run builds on **Ubuntu 22.04 x86_64** and **macOS 14 arm64**. It
-runs all 99 integration scenarios and eight Rust tests on each. The **same Linux
+runs all 99 integration scenarios and nine Rust tests on each. The **same Linux
 archive** then passes checksum installation, its bundled demo and platform
 preflight checks on **Ubuntu 24.04**. No local archive replaces a CI artifact.
 

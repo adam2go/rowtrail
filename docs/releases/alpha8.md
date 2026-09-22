@@ -17,6 +17,9 @@ that workflow faster and easier to compose, with no new external dependency.
   catalog filtering, row counts and bounded field hints support handoff in one
   catalog call plus one query. Labels are descriptive and nonunique; immutable
   revisions remain the authority.
+- **Consistent cancellation errors.** A Linux CI race exposed a stopped job
+  incorrectly retaining `WORKER_LOST`. Final state and error now follow the same
+  durable stop reason, with a deterministic child-exit regression.
 - **A runnable introduction.** Native archives bundle agent guides, the optional
   stdlib client and a complete demo: generate 20,003 orders, save 385 refunds,
   reconnect and verify exact answers, including an ID above 2^53.
@@ -58,7 +61,7 @@ export PATH="$HOME/.local/bin:$PATH"
 rowtrail --version
 ```
 
-Both native build platforms pass **99 integration scenarios and eight Rust
+Both native build platforms pass **99 integration scenarios and nine Rust
 tests**, including twelve subprocess publication-crash cases. The same Linux
 archive passes installation and its demo on Ubuntu 24.04. Checksums, binary
 architecture, test hashes, size budgets and 557 dependency notice files per

@@ -168,7 +168,7 @@ lifecycles. The latest paired-agent pilot is still alpha.6: all 12 answers corre
 but RowTrail took more time and cumulative input tokens. Backend improvements and
 the new runnable handoff demo do not establish a model-level latency/token win.
 
-Both native build platforms pass **99 integration scenarios** and **eight Rust
+Both native build platforms pass **99 integration scenarios** and **nine Rust
 tests**, including 12 subprocess commit-crash cases. A 5,000-result labeled history
 survives restart; catalog lookup median is **0.54 ms** in that local probe.
 

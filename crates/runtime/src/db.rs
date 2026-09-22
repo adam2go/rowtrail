@@ -563,6 +563,16 @@ impl Db {
             return Ok(());
         }
         let state = stop.as_deref().unwrap_or(state);
+        // Cancellation/timeout is authoritative in this same transaction for
+        // both state and error. A forced exit, broken ACK, or late terminal
+        // frame must not leave a synthetic WORKER_LOST on a stopped job.
+        let error = match stop.as_deref() {
+            Some("cancelled") => Some(json!({"code":"CANCELLED","message":"execution cancelled"})),
+            Some("budget_exhausted") => {
+                Some(json!({"code":"BUDGET_EXHAUSTED","message":"execution time budget exhausted"}))
+            }
+            _ => error,
+        };
         if state == "completed"
             && let Some(export) = &spec.export
         {

@@ -92,7 +92,7 @@ assert compatibility['status']=='passed' and compatibility['archive_sha256']==ar
 assert compatibility['installed_quickstart']['status']=='passed' and compatibility['version']==version
 report={'version':version,'status':'verified','verified_source_commit':a.commit,'ci_run':run['html_url'],
         'platforms':['Ubuntu 22.04 x86_64','macOS 14 arm64'],'same_linux_archive_on_ubuntu24_verified':True,
-        'per_platform':{'integration_scenarios':sum(SUITES.values()),'rust_tests_including_subprocess_harness':8,'subprocess_crash_scenarios':12,
+        'per_platform':{'integration_scenarios':sum(SUITES.values()),'rust_tests_including_subprocess_harness':9,'subprocess_crash_scenarios':12,
                         'deterministic_broken_ack_regression':True,'format_clippy_dependency_boundaries':True,'mcp_session_sdk':True,
                         'benchmark_profile_guard':True,'archive_install_and_checksum_rejection':True},
         'artifact_sha256_verified_locally':True,'artifact_binaries_match_test_hashes':True,'bundled_guides_client_demo_and_notices_match':True,

@@ -24,3 +24,13 @@ Final reporting reads the actual selected session target rather than recomputing
 CPU availability after a job. Earlier completed series remain in Git history;
 final release measurements are rerun with final executable hashes. None of these
 backend trials establishes an overall model latency or token advantage.
+
+A later Linux candidate CI run exposed a cancellation race:
+[run 35694862811](https://github.com/adam2go/rowtrail/actions/runs/35694862811),
+source `b39409b583b25d168eea7aa0c40d043ad7ded9d1`. A committed cancellation won
+the final state (`cancelled`, worker exit confirmed, revision 1 still readable),
+but EOF after a forced stop left the synthetic `WORKER_LOST` error attached.
+That candidate is not released. A deterministic real-child EOF regression covers
+unexpected exit, explicit cancellation and execution timeout; stop state and
+error must be selected together in the final metadata transaction. Earlier raw
+timing series remain in Git history; the release matrix uses the corrected binary.

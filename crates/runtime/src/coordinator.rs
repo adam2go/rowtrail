@@ -287,6 +287,66 @@ mod tests {
     use sha2::{Digest, Sha256};
 
     #[tokio::test]
+    async fn stopped_worker_eof_uses_the_durable_stop_reason() {
+        for (reason, state, code) in [
+            (None, "interrupted", "WORKER_LOST"),
+            (Some("cancelled"), "cancelled", "CANCELLED"),
+            (
+                Some("budget_exhausted"),
+                "budget_exhausted",
+                "BUDGET_EXHAUSTED",
+            ),
+        ] {
+            let temp = tempfile::tempdir().unwrap();
+            for dir in ["store", "staging", "spill", "logs"] {
+                std::fs::create_dir(temp.path().join(dir)).unwrap();
+            }
+            let db = Arc::new(Db::open(temp.path()).unwrap());
+            let accepted = crate::api::dispatch(
+                db.clone(),
+                Request::new(
+                    "query",
+                    json!({"bindings":{},"sql":"SELECT 7","execution":{"wait_ms":0}}),
+                ),
+            )
+            .await;
+            assert!(accepted.ok);
+            let spec = db.queued().unwrap().unwrap();
+            if let Some(reason) = reason {
+                db.cancel(&spec.job_id, reason).unwrap();
+            }
+            // A real child exits without a terminal frame. The committed stop
+            // request must govern both state and error, regardless of whether
+            // EOF or the stop-monitor tick is observed first.
+            let mut child = Command::new("sh")
+                .args(["-c", "IFS= read -r job; exit 0"])
+                .stdin(std::process::Stdio::piped())
+                .stdout(std::process::Stdio::piped())
+                .kill_on_drop(true)
+                .spawn()
+                .unwrap();
+            let input = child.stdin.take().unwrap();
+            let lines = BufReader::new(child.stdout.take().unwrap()).lines();
+            let mut worker = Some(Worker {
+                child,
+                input,
+                lines,
+                token: "worker_test".into(),
+                uses: 0,
+            });
+            run_job_with_recovery(&db, &spec, &mut worker).await;
+            assert!(worker.is_none());
+            let job = db.job(&spec.job_id).unwrap();
+            assert_eq!(job["state"], state);
+            assert_eq!(job["error"]["code"], code);
+            assert_eq!(job["metrics"]["worker_exit_confirmed"], true);
+            // A late competing completion cannot overwrite the terminal row.
+            db.finish(&spec, "completed", None, json!({})).unwrap();
+            assert_eq!(db.job(&spec.job_id).unwrap(), job);
+        }
+    }
+
+    #[tokio::test]
     async fn broken_ack_pipe_preserves_committed_revision_as_interrupted() {
         let temp = tempfile::tempdir().unwrap();
         for dir in ["store", "staging", "spill", "logs"] {

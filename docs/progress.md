@@ -20,6 +20,9 @@ measurements are verified; this remains an engineering preview.
   a stopped full workspace copy for rollback. Existing fixed revisions remain.
 - Eleven new integration scenarios cover reconnection, Unicode/budgets, labels,
   idempotency, aggregates/joins/sort across partition targets and cancellation.
+- A Linux CI cancellation race is fixed: the durable stop reason governs both
+  final state and error in one transaction. Deterministic child-exit tests cover
+  unexpected exit, cancellation and timeout, without weakening exit confirmation.
 - A zero-download example generates orders, saves a labeled branch, reconnects
   with one catalog call plus one query and verifies exact answers independently.
   It is bundled with the stdlib client and agent guides in native archives.
@@ -31,7 +34,7 @@ measurements are verified; this remains an engineering preview.
   the 32 MiB sort is 912.20 → 462.41 ms (5 trials). One-partition exploration also
   improves. Larger saved-result pages regress by about 1.3 ms; entropy and small
   queries are essentially unchanged. All samples and tradeoffs are retained.
-- Native builds pass 99 integration scenarios and eight Rust tests each. The
+- Native builds pass 99 integration scenarios and nine Rust tests each. The
   installed macOS archive passes the new scenarios, demo and published alpha.7
   upgrade again. Installer checks actual executables before switching links,
   including when an explicitly selected older package needs a newer libc.
