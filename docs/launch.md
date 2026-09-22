@@ -1,17 +1,17 @@
-# Introducing RowTrail alpha.8
+# Introducing RowTrail beta.1
 
-Copy is for the verified alpha.8 engineering preview. Link the release and
-[measurement report](verification.md); the user publishes social posts themselves.
+Copy for the beta.1 release. The user publishes social posts themselves. Link
+[the release](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.1) and
+[measurement report](verification.md); retain the conditions with timing claims.
 
 ## Short announcement
 
-RowTrail alpha.8: a small native data workspace for agents.
+RowTrail enters beta: a small native data workspace built for agents.
 
-Explore CSV/Parquet, save exact results, and pick up where you left off without
-putting whole tables in the prompt.
+Explore CSV/Parquet, save a result, keep asking. Bounded observations, checked
+integer/Decimal SUM, stable reconnection. CLI + MCP. Zero internal model calls.
 
-CLI + MCP. Zero internal model calls. Apache-2.0.
-
+Apache-2.0. Help us test real workflows:
 https://github.com/adam2go/rowtrail
 
 ## English thread
@@ -24,21 +24,28 @@ https://github.com/adam2go/rowtrail
    result revisions. The agent receives bounded, typed observations. It can query
    a saved subset directly, without sending all its rows through the model.
 
-3. Alpha.8 improves large-result persistence and uses resource-aware parallelism.
-   Labels and bounded catalog hints let a fresh connection find the right saved
-   result. A runnable example demonstrates handoff in one catalog call + one query.
+3. Beta.1 follows independent feedback: checked integer/Decimal SUM, invalid
+   Decimal rejection, stable workspace reconnection and a stdlib client with
+   strict labels, prepare/inspect/export and explicitly budgeted pagination.
 
-4. On one Mac, 1M-row exploration: 236 → 144 ms (7 alternating trials).
-   A 32 MiB sort: 929 → 462 ms (5 trials). Controls match maximum query targets.
-   Direct engines remain faster; tiny pages from big results regress.
+4. On one Mac, seven alternating trials: save a large subset from 2M rows,
+   ask ten more questions, reconnect and recover it. Complete time: 934 → 720 ms.
+   Follow-up saved-data reads: 82 → 28 MB each, zero original-data bytes.
+   Independent integer/Decimal answers; no model calls in this benchmark.
 
-5. It is an Apache-2.0 engineering preview: small native CLI + runtime, MCP and
-   persistent sessions, zero internal model calls. Native packages support macOS
-   arm64 and Linux x86_64. No Python, Node, Docker or model API key is required.
+5. Costs stay visible: save time +4%, separate 1M-row exploration +4%, response
+   bytes +9%. Warm-query p95 rises. Direct engines remain faster. We have not
+   established a real-agent time or token advantage over persistent DuckDB.
+   Raw samples, rejected candidates and correctness tests are all in the repo.
 
-6. Help us test it on real agent tasks: a reproducible slow workflow, a confusing
-   contract, a smaller binary, or an integration that takes less setup.
-   Independent comparisons and negative results are welcome.
+6. Agent-native. Small native CLI + runtime. Apache-2.0. No internal model calls,
+   provider account, Python/Node/Docker runtime dependency or spreadsheet UI.
+   macOS arm64 and Linux x86_64. Beta means a tested local workflow, not 1.0
+   metadata stability or arbitrary-precision SQL.
+
+7. Help us make it useful: real agent tasks, confusing contracts, slow workflows,
+   smaller binaries, or integrations that take less setup. Independent comparisons
+   and negative results are welcome.
    https://github.com/adam2go/rowtrail
 
 ## 中文介绍
@@ -47,43 +54,51 @@ Agent 拿到一张陌生表时，通常并不知道完整的分析路径。它�
 根据结果改变方向，再继续追问。我们希望探索过程中的结果能留在工具里，而不是不断
 复制到模型上下文中。这是 RowTrail 的出发点：**探索数据，留下路径。**
 
-RowTrail 是一个专门给 Agent 使用的本地数据工具。它打开 CSV、TSV、Parquet，执行只读
+RowTrail 是专门给 Agent 使用的本地数据工具。它打开 CSV、TSV、Parquet，执行只读
 SQL，将结果保存为不可变版本，按行数和字节预算返回带类型的观察。下一步可以直接绑定
-已存结果；任务受理、等待、取消、结果质量和截断状态都有明确的协议。
+保存结果；任务受理、等待、取消、结果质量和截断状态都有明确协议。
 
-alpha.8 继续围绕 **Agent 原生、小而美、性能强** 打磨：根据资源预算选择查询并行度，
-减少保存可压缩结果时的持久化提交，增加结果标签、行数和字段提示，让重连后的 Agent
-更容易找回之前的工作。原生包还带了一份无需下载数据的完整演示，答案会用独立整数
-运算校验。具体性能数字、机器条件、原生检查和负面结果全部放在验证报告中。
+beta.1 根据独立测试反馈补齐四个方向：整数/Decimal SUM 溢出检查，阻止无效 Decimal
+被错误显示；跨 TMPDIR 的稳定重连；轻量客户端的整理、画像、导出、严格标签查找和有界
+分页；保存大结果后的连续复用。数值保证明确限定范围，旧结果不会被悄悄重新认证。
 
-它还不是成熟数据库的替代品。直接使用持久 DuckDB 仍然很强；RowTrail 额外承担持久任务、
-固定结果、校验与隔离的成本。较大的结果文件会拖慢很小的分页，渐进聚合目前不支持
-GROUP BY 或过滤，也没有中断续算、远程数据源或 Windows 包。我们还没有证明真实 Agent
-整体耗时和 token 用量优于持久 DuckDB。
+性能方面，在一台 Mac 上做了 7 轮交替测试：从 2M 行来源保存子集，连续追问十次，再
+重连找回结果。完整任务从 934 ms 降到 720 ms；十次追问从 567 ms 降到 375 ms，每次
+保存数据读取从 82 MB 减少到 28 MB，原始数据读取为零。独立整数/Decimal 运算校验答案。
+没有新增产品依赖，校验、持久化和真实取消也继续保留。
+
+我们同样公开代价：首次保存约慢 4%，另一组百万行探索约慢 4%，返回字节增加约 9%，
+热查询尾部延迟也上升了。直接使用持久 DuckDB 仍然很强；RowTrail 额外承担持久任务、
+固定结果、校验与隔离的成本。目前还没有证明真实 Agent 的总耗时或 token 优势。完整
+样本、失败候选、性能图和原生验收证据都留在项目中。
+
+**Agent 原生、小而美、性能强** 是我们继续做取舍的依据。Beta 表示本地核心流程已经
+可以让更多开发者试用，不等于 1.0 兼容承诺。渐进聚合仍不支持 GROUP BY 或过滤，没有
+计算中断续算、远程来源和 Windows 包。浮点、AVG、其他 SQL 运算也不属于本轮 SUM
+检查的保证范围。
 
 前期我们更关心项目是否有用、是否容易理解和传播。Apache-2.0 开源，无内部模型调用，
-不绑定模型厂商。欢迎一起贡献真实任务、可复现的性能问题、接入示例、体积优化和更清晰
-的协议。尤其欢迎独立测量，以及指出我们没有做好的地方。
+不绑定模型厂商。欢迎贡献真实任务、可复现的性能问题、接入示例、体积优化和更清晰的
+协议。尤其欢迎独立测量，以及指出我们没有做好的地方。
 
 项目：https://github.com/adam2go/rowtrail
 
 ## A short recording
 
-1. Open the README at “Explore data. Keep the trail.” State the problem: an
-   agent's analysis changes direction; whole tables should not occupy its prompt.
+1. Open the README at “Explore data. Keep the trail.” Explain why an agent's
+   changing analysis should retain useful results outside the prompt.
 2. Show `rowtrail --version`. From the repository or extracted archive, run:
 
    ```sh
    python3 examples/quickstart.py
    ```
 
-3. Point to 20,003 input rows, the four region totals and the selected region.
-   The saved subset has 385 rows; only its three channel totals are shown.
-4. Show the handoff: one catalog call, one query, zero original-source bytes.
-   The retained ID `9007199254740993` remains an exact string, not a rounded float.
-5. Open the verification report. Explain one performance gain and the small-page
-   tradeoff, then finish on CONTRIBUTING.md. Do not present demo timing as an
-   independent model-efficiency benchmark.
+3. Point to 20,003 input rows, the region totals and the selected region. The
+   saved subset has 385 rows; only its three channel totals are shown.
+4. Show handoff: one catalog call, one query, zero original-source bytes. The
+   retained ID `9007199254740993` remains an exact string, not a rounded float.
+5. Open the verification report. Show the complete-task benefit and a regression.
+   Finish on CONTRIBUTING.md. Do not turn demo timing into a model-efficiency claim.
 
 ## Questions to expect
 
@@ -92,12 +107,12 @@ lifecycle, fixed result bindings, explicit quality and bounded observation behin
 CLI/session/MCP interfaces. DuckDB remains faster in our direct-engine controls.
 Use the simplest tool that serves the task.
 
-**Is “exact” arbitrary precision?** No. Wire Int64/UInt64/Decimal values retain
-their types and digits, but SQL operates on finite-width types. The pinned engine
-can wrap an overflowing Int64 SUM. Cast wide integer sums to `DECIMAL(38,0)` (or
-the needed scale) and stay within its precision. Use an explicit Decimal schema
-for money. “Exact” also does not turn a partial source prefix into a population
-answer; quality, completion and truncation remain separate.
+**Is “exact” arbitrary precision?** No. It describes sampling. Wire integer and
+Decimal values retain their digits; beta.1 checks integer/Decimal SUM against the
+result's declared range and rejects precision-invalid Decimal output. Float SUM,
+AVG, other arithmetic and casts retain engine semantics. An explicit wider
+Decimal helps only within its finite range. Old wrapped integers cannot be
+recovered; unknown input ancestry remains unknown. See the numeric contract.
 
 **Can the original file change after saving?** External file identities are
 checked when bindings are used. Changed or missing sources can invalidate derived
@@ -110,10 +125,10 @@ with explicit partial coverage. Interrupted computation is not automatically
 continued or replayed. Labels do not change this contract.
 
 **What does the memory limit cover?** The query engine's MemoryPool, not total
-RSS. Codec buffers, metadata, verified-part caches and other process allocations
-are separate. Reports include sampled RSS and real spilling; it is not a hard cap.
+RSS. Codec buffers, metadata, verified-part caches and other allocations are
+separate. Reports include sampled RSS and real spilling; it is not a hard cap.
 
 **What is ready to contribute?** Real agent workflows with independent correctness
-oracles; bounded client examples; projected reads with less integrity-I/O overhead;
-smaller native artifacts; more native targets. Discuss a substantial new engine
-or workflow first so the project stays small and agent-focused.
+oracles; warm-query tail latency; better observation size; projected reads with
+less integrity-I/O overhead; smaller artifacts and more native targets. Discuss
+a substantial new engine or workflow first so the project stays small and focused.

@@ -2,7 +2,7 @@
   <img src="docs/brand/trail.png" width="720" alt="Trail, the RowTrail mascot: three mint data rows walking along a trail of orange stepping stones.">
   <h1>RowTrail</h1>
   <p><strong>Explore data. Keep the trail.</strong></p>
-  <p>A small native data tool, built for agents.<br>Ask a question, keep an exact result, and continue from there.</p>
+  <p>A small native data tool, built for agents.<br>Ask a question, keep a result, and continue from there.</p>
   <p>
     <a href="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml"><img src="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml/badge.svg" alt="Build and verify"></a>
     <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.1"><img src="https://img.shields.io/badge/release-v0.1.0--beta.1-147D70" alt="Release v0.1.0-beta.1"></a>
@@ -22,7 +22,7 @@ branch from a saved result when the next question arrives.
 changes, a more complete stdlib client, and fewer repeated reads of saved results.
 No new external dependency; the archive budget remains **30 MB**.
 
-The beta candidate has passed local acceptance; native publication is pending.
+Native macOS/Linux builds pass **113 integration scenarios and 14 Rust tests**.
 
 **Zero internal model calls. No API key. No spreadsheet UI.** Your agent chooses
 the questions and decides when the evidence is sufficient.
@@ -39,7 +39,7 @@ the questions and decides when the evidence is sufficient.
 | **Stay native and small** | Two executables; no Python, Node, Docker or external database required. |
 
 ```text
-CSV / TSV / Parquet → exact query → saved result → next question
+CSV / TSV / Parquet → SQL query → saved result → next question
                           ↓              ↓
                     bounded observations for your agent
 ```
@@ -47,7 +47,6 @@ CSV / TSV / Parquet → exact query → saved result → next question
 ## Install
 
 **v0.1.0-beta.1** is a beta preview, licensed under Apache-2.0.
-The commands below apply once its release assets are published.
 Native packages are available for **macOS arm64** and **Linux x86_64**
 (Ubuntu 22.04 / glibc 2.35 or newer).
 
@@ -63,7 +62,8 @@ Set `ROWTRAIL_INSTALL_DIR` to choose another directory, or extract an archive
 from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.1).
 Keep `rowtrail` and `rowtrail-runtime` together.
 
-Native budgets remain **30 MB download / 4.5 MB CLI / 125 MB runtime**.
+Downloads are **19.37 MB (macOS) / 22.71 MB (Linux)**.
+Budgets remain **30 MB download / 4.5 MB CLI / 125 MB runtime**.
 The same Linux archive is tested on Ubuntu 22.04 and 24.04. Archives include
 agent guides and the optional runnable demo. Actual sizes and hashes appear in
 [artifact verification](docs/verification.md#native-distribution).
@@ -134,16 +134,26 @@ no extra model turn. [Small bootstrap](docs/agent-quickstart.md).
 ## Measured, with the receipts
 
 Beta.1 targets a complete task: save a large subset, ask ten follow-up questions,
-reconnect and find the same fixed result. The initial alternating experiment
-reduced duplicate saved-data reads from about 82 to 28 MB per follow-up, with
-zero original-source reads. Final repeated measurements and native artifacts are
-under verification; see the [report](docs/verification.md) for status and raw data.
+reconnect and find the same fixed result. Seven alternating trials on one Apple
+arm64 Mac, with independent integer/Decimal answers:
+
+| Median, alpha.8 → beta.1 | Result |
+|---|---:|
+| Complete task on a 2M-row source | **934 → 720 ms** (23% less time) |
+| Ten queries on the saved subset | **567 → 375 ms** (34% less time) |
+| Saved-data read per follow-up | **82.03 → 28.16 MB**; zero original-data bytes |
+
+First-save cost rises 4.3%; separate million-row exploration takes 4.0% longer.
+Warm query median is 0.89 ms, but p95 rises from 1.39 to 3.38 ms. Response bytes
+increase 9.2%. [Full report, controls and raw samples](docs/verification.md).
+
+![Beta.1 local comparisons, including the separate exploration regression.](benchmarks/performance/beta1/performance.svg)
 
 SQLite FULL commits, file/directory sync, SHA-256 and actual cancellation remain.
-The cache is still bounded to 8 MiB per job; no cross-job verification shortcut is
-added. Numeric checks and richer metadata have costs, which stay in the report.
+The cache is still bounded to 8 MiB per job; every new job revalidates saved data.
+No external dependency was added.
 
-Local acceptance passes **113 integration scenarios** and **14 Rust tests**,
+Both native build platforms pass **113 integration scenarios** and **14 Rust tests**,
 including 12 subprocess commit-crash cases. Published alpha.8 workspaces retain
 old fixed/partial revisions; invalid old Decimals fail explicitly on read/export.
 

@@ -94,7 +94,7 @@ next-batch memory headroom. Compressible output needs fewer parts/commits; writt
 batches are released. The **8 MiB encoded hard limit**, 128-batch bound, 50 ms flush,
 immediate first available preview, file/directory sync, checksums and SQLite FULL
 commit-before-ACK ordering remain. Prepared Parquet keeps its previous target.
-[Design](decisions/008-bounded-parallelism-and-handoff.md).
+[Design](../decisions/008-bounded-parallelism-and-handoff.md).
 
 Five alternating real million-row sorts, each with a **32 MiB engine pool**, spill
 and an independent check of every exported ID:
@@ -196,7 +196,7 @@ in the [alpha.7 report](alpha7-verification.md).
 
 ## Agent workflow evidence
 
-The bundled [zero-download demo](../examples/quickstart.py) generates 20,003 CSV
+The bundled [zero-download demo](../../examples/quickstart.py) generates 20,003 CSV
 orders. Four exact region totals select east; its **385** saved refund rows return
 three channel totals. A fresh connection finds the labeled result in one catalog
 call and queries it in one more call, with zero original-source data bytes and no
@@ -238,7 +238,7 @@ valid but incompatible or wrong-version packages leave existing links unchanged.
 previews; Windows, Linux arm64 and macOS x86_64 are not published targets.
 
 [Exact provenance, hashes and platform reports](alpha8-verification.json) ·
-[Reusable archive verifier](../scripts/verify_release.py).
+[Reusable archive verifier](../../scripts/verify_release.py).
 Artifacts and bundled documents come from the verified build source; final report
 and README updates on the release tag do not change those executable bytes.
 
@@ -251,7 +251,7 @@ the verified local CI files. [Public installation record](../../benchmarks/perfo
 ## Reproduce
 
 Build with Rust 1.94.0 and Cargo.lock; use `scripts/cargo-local.sh` for the local
-macOS Command Line Tools selection only. [Build and integration commands](../docs/usage.md#build)
+macOS Command Line Tools selection only. [Build and integration commands](../usage.md#build)
 · [Benchmark recipes](../../benchmarks/README.md#alpha8-release-matrix).
 
 Final local benchmark binaries:

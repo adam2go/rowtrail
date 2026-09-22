@@ -1,0 +1,5548 @@
+{
+  "status": "passed",
+  "checks": [
+    "signed, unsigned and Decimal SUM overflow fails durably with structured details and no readable bad revision",
+    "wider Decimal, cancellation within a wide sum, nulls, explicit policy and lossless Python values",
+    "grouped, DISTINCT and sliding-window overflow with successful retraction answers",
+    "a scalar Decimal exceeding declared precision is rejected before Arrow publication or display",
+    "prepare, fixed-manifest inspect and streaming export compose; Parquet reopening preserves numeric provenance",
+    "strict label lookup returns a unique fixed binding and rejects missing, ambiguous and expired matches",
+    "total pagination row/page/wire-byte bounds distinguish EOF from exhaustion and resume the exact cursor",
+    "large multi-part results scan once per job under an exact byte budget; new jobs reverify with the same 8 MiB cache",
+    "legacy quality remains unknown in client policy checks and derived numeric lineage",
+    "TMPDIR changes reconnect to the same live coordinator and saved fixed revision",
+    "descriptor ownership/privacy and live workspace/PID checks reject mismatches with actionable structured errors",
+    "stale descriptor/socket after coordinator death is replaced under the workspace lock without losing fixed results",
+    "simultaneous cold clients and long workspace paths converge on one coordinator",
+    "failed runtime startup retains code, retryability and log path through the Python NDJSON client"
+  ],
+  "binary_sha256": {
+    "rowtrail": "2c484358e4f8dfe71723c276659187b01da6069b7aca47ba18d9eeb52d99649b",
+    "rowtrail-runtime": "2c021caefb823aa453575f2b6f958b12bf2ad92bbe5dff14262c4aa83c2ca58d"
+  },
+  "traces": [
+    {
+      "method": "doctor",
+      "params": {},
+      "result": {
+        "store_id": "store_5a33938b514d4c36bc9b2aadc2507784",
+        "coordinator_pid": 94187,
+        "capabilities": {
+          "api_version": "1",
+          "metadata_schema": "8; one-way upgrade from 3/4/5/6/7",
+          "numeric": {
+            "policy": "rowtrail-numeric-v1",
+            "checked_sum": "Int64, UInt64, Decimal32/64/128/256; grouped, distinct, window and partial merge; checked i256 state, declared output range",
+            "decimal_output": "declared precision checked before persistence and presentation",
+            "other_sql_arithmetic": "engine semantics; finite-width and floating-point arithmetic are not certified",
+            "accuracy_meaning": "exact describes sampling, not an arbitrary-precision arithmetic guarantee"
+          },
+          "progressive_aggregation": {
+            "fragment_unit": "parquet_row_group",
+            "fragment_units": [
+              "parquet_row_group",
+              "manifest_file"
+            ],
+            "checkpoint_interval_ms": 50,
+            "aggregate_limit": 16,
+            "numeric_inputs": "Int64, UInt64, Decimal128 scale 0..6",
+            "sum": "Decimal128(38,input_scale)",
+            "avg": "Decimal128(38,6), truncation toward zero",
+            "group_by": false,
+            "sampling": false
+          },
+          "formats": [
+            "csv",
+            "tsv",
+            "parquet"
+          ],
+          "source": "local",
+          "sql": "DataFusion 55.0.0 read-only SELECT; explicit bindings",
+          "analysis": [
+            "inspect:null_count",
+            "inspect:min_max",
+            "inspect:top_k",
+            "analyze:count",
+            "analyze:sum",
+            "analyze:avg"
+          ],
+          "entries": [
+            "cli",
+            "ndjson_session",
+            "mcp_stdio",
+            "rust_sdk"
+          ],
+          "workspace_summary": "bounded metadata catalog with exact label filter, fixed bindings, row counts and bounded field hints; store-scoped cursor; no source scan",
+          "query_parallelism": {
+            "auto_max": 4,
+            "serial_below_input_bytes": 16777216,
+            "pool_bytes_per_parallel_partition": 67108864,
+            "explicit_target_partitions": "1..8; requires 64 MiB per partition when greater than one",
+            "target_not_thread_limit": true
+          },
+          "prepare": "explicit streaming CSV/TSV to managed Parquet; atomic dataset visibility",
+          "workspace_quota": "managed data plus conservative result/spill reservations; excludes SQLite/WAL overhead, logs and external exports",
+          "saved_result_scan": "whole IPC parts; separate files remain parallel; each new job verifies again",
+          "verified_part_cache_bytes": 8388608,
+          "result_part_target_bytes": 6291456,
+          "result_part_target_basis": "encoded IPC plus next batch array memory; prepared Parquet keeps input-memory target",
+          "inline_result_part_max_bytes": 131072,
+          "result_part_max_bytes": 8388608,
+          "native_tasks": false,
+          "automatic_resume": false,
+          "source_consistency": "best_effort",
+          "result_storage": "immutable Arrow IPC; parts up to 128 KiB in SQLite, larger parts in files",
+          "max_frame_bytes": 1048576,
+          "minimum_error_budget_bytes": 512,
+          "max_output_bytes": 1048064,
+          "max_output_rows": 10000,
+          "max_manifest_files": 128,
+          "max_directory_entries": 4096,
+          "default_parallel_jobs": 1,
+          "cancellation": "cooperative signal with forced worker termination after 300ms",
+          "engine_memory_limit": "MemoryPool; not RSS hard limit",
+          "scan_limit": "byte reservation before local reads",
+          "result_retention": "retained by default; explicit pin/release and dependency-safe workspace gc",
+          "event_retention": "until workspace removal; no event pruning yet",
+          "unsupported": [
+            "Windows",
+            "remote",
+            "sampling",
+            "native_tasks",
+            "automatic_resume",
+            "union_by_name",
+            "binary_inline",
+            "RSS_hard_limit"
+          ]
+        },
+        "workspace": "/private<fixture>/workspace",
+        "runtime_version": "0.1.0-beta.1"
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT SUM(n) FROM (VALUES (CAST('9223372036854775807' AS BIGINT)),(CAST('1' AS BIGINT))) t(n)",
+        "bindings": {},
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none",
+          "target_partitions": 1
+        }
+      },
+      "result": {
+        "job_id": "job_a2d55c22529345fc9ed36416d8d53b3b",
+        "result_ref": "res_f2e3811bf5c74ff6b3c529f0ff555fd5",
+        "view_ref": "vw_7613b87f88d6413b9cc8917382639860",
+        "scope_ref": "scope_8550a2b36e494d2f8d9fe93c8aacd508",
+        "job": {
+          "prepared": null,
+          "id": "job_a2d55c22529345fc9ed36416d8d53b3b",
+          "state": "failed",
+          "phase": "failed",
+          "result_ref": "res_f2e3811bf5c74ff6b3c529f0ff555fd5",
+          "scope_ref": "scope_8550a2b36e494d2f8d9fe93c8aacd508",
+          "readable_revision": null,
+          "error": {
+            "code": "ARITHMETIC_OVERFLOW",
+            "message": "External error: ARITHMETIC_OVERFLOW: SUM sum(t.n) (Int64): final sum exceeds declared output range: ARITHMETIC_OVERFLOW: SUM sum(t.n) (Int64): final sum exceeds declared output range",
+            "retryable": false,
+            "details": {
+              "operation": "SUM",
+              "data_type": "Int64",
+              "expression": "sum(t.n)",
+              "reason": "final sum exceeds declared output range",
+              "recovery": "Use a wider declared Decimal type where possible; otherwise reduce the range or use an external arbitrary-precision engine. No wrapped result was published for this batch."
+            }
+          },
+          "metrics": {
+            "elapsed_ms": 15.930166,
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "publication_ms": 0.0,
+            "result_parts": 0,
+            "worker_elapsed_ms": 22.676917,
+            "execution_stopped": true,
+            "worker_exit_confirmed": true,
+            "worker_reused": false,
+            "worker_pid": 94193
+          },
+          "created_ms": 1790097898503,
+          "started_ms": 1790097898504,
+          "finished_ms": 1790097898527,
+          "stop_requested": null
+        },
+        "readable_revision": null,
+        "observation": null,
+        "binding": null,
+        "next_actions": []
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT SUM(n) FROM (VALUES (CAST('-9223372036854775808' AS BIGINT)),(CAST('-1' AS BIGINT))) t(n)",
+        "bindings": {},
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none",
+          "target_partitions": 1
+        }
+      },
+      "result": {
+        "job_id": "job_85dcc7c5b1054b21a091a20d05deb089",
+        "result_ref": "res_d870eaaee764454b832a3f1b3f8da9de",
+        "view_ref": "vw_fc21a5573ec54325a2ba90f7ae8563cb",
+        "scope_ref": "scope_085b2809b46345e3b04909bcb990f6e1",
+        "job": {
+          "prepared": null,
+          "id": "job_85dcc7c5b1054b21a091a20d05deb089",
+          "state": "failed",
+          "phase": "failed",
+          "result_ref": "res_d870eaaee764454b832a3f1b3f8da9de",
+          "scope_ref": "scope_085b2809b46345e3b04909bcb990f6e1",
+          "readable_revision": null,
+          "error": {
+            "code": "ARITHMETIC_OVERFLOW",
+            "message": "External error: ARITHMETIC_OVERFLOW: SUM sum(t.n) (Int64): final sum exceeds declared output range: ARITHMETIC_OVERFLOW: SUM sum(t.n) (Int64): final sum exceeds declared output range",
+            "retryable": false,
+            "details": {
+              "operation": "SUM",
+              "data_type": "Int64",
+              "expression": "sum(t.n)",
+              "reason": "final sum exceeds declared output range",
+              "recovery": "Use a wider declared Decimal type where possible; otherwise reduce the range or use an external arbitrary-precision engine. No wrapped result was published for this batch."
+            }
+          },
+          "metrics": {
+            "elapsed_ms": 1.911208,
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "publication_ms": 0.0,
+            "result_parts": 0,
+            "worker_elapsed_ms": 7.209125,
+            "execution_stopped": true,
+            "worker_exit_confirmed": true,
+            "worker_reused": false,
+            "worker_pid": 94194
+          },
+          "created_ms": 1790097898528,
+          "started_ms": 1790097898528,
+          "finished_ms": 1790097898536,
+          "stop_requested": null
+        },
+        "readable_revision": null,
+        "observation": null,
+        "binding": null,
+        "next_actions": []
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT SUM(n) FROM (VALUES (CAST('18446744073709551615' AS BIGINT UNSIGNED)),(CAST('1' AS BIGINT UNSIGNED))) t(n)",
+        "bindings": {},
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none",
+          "target_partitions": 1
+        }
+      },
+      "result": {
+        "job_id": "job_5396e81cfdfe42d3af7fd1d3c08288ce",
+        "result_ref": "res_a0c50df9937a40a8b9902e433b3d777b",
+        "view_ref": "vw_45f5b056520a4f75802e4e6c2d314cef",
+        "scope_ref": "scope_1b2ba48d911d41368bc4c5d274bdea22",
+        "job": {
+          "prepared": null,
+          "id": "job_5396e81cfdfe42d3af7fd1d3c08288ce",
+          "state": "failed",
+          "phase": "failed",
+          "result_ref": "res_a0c50df9937a40a8b9902e433b3d777b",
+          "scope_ref": "scope_1b2ba48d911d41368bc4c5d274bdea22",
+          "readable_revision": null,
+          "error": {
+            "code": "ARITHMETIC_OVERFLOW",
+            "message": "External error: ARITHMETIC_OVERFLOW: SUM sum(t.n) (UInt64): final sum exceeds declared output range: ARITHMETIC_OVERFLOW: SUM sum(t.n) (UInt64): final sum exceeds declared output range",
+            "retryable": false,
+            "details": {
+              "operation": "SUM",
+              "data_type": "UInt64",
+              "expression": "sum(t.n)",
+              "reason": "final sum exceeds declared output range",
+              "recovery": "Use a wider declared Decimal type where possible; otherwise reduce the range or use an external arbitrary-precision engine. No wrapped result was published for this batch."
+            }
+          },
+          "metrics": {
+            "elapsed_ms": 1.778167,
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "publication_ms": 0.0,
+            "result_parts": 0,
+            "worker_elapsed_ms": 6.525,
+            "execution_stopped": true,
+            "worker_exit_confirmed": true,
+            "worker_reused": false,
+            "worker_pid": 94195
+          },
+          "created_ms": 1790097898537,
+          "started_ms": 1790097898537,
+          "finished_ms": 1790097898545,
+          "stop_requested": null
+        },
+        "readable_revision": null,
+        "observation": null,
+        "binding": null,
+        "next_actions": []
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT SUM(n) FROM (VALUES (CAST('99999999999999999999999999999999999999' AS DECIMAL(38,0))),(CAST('1' AS DECIMAL(38,0)))) t(n)",
+        "bindings": {},
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none",
+          "target_partitions": 1
+        }
+      },
+      "result": {
+        "job_id": "job_6db329acbfe14f529cb2f0c519faf22e",
+        "result_ref": "res_7d823a661f8d4c53a5757de5fde2c534",
+        "view_ref": "vw_96ac6021fac14ab58613e746c78d2e24",
+        "scope_ref": "scope_5357a57d27ed41bbbe00f94dabb889bd",
+        "job": {
+          "prepared": null,
+          "id": "job_6db329acbfe14f529cb2f0c519faf22e",
+          "state": "failed",
+          "phase": "failed",
+          "result_ref": "res_7d823a661f8d4c53a5757de5fde2c534",
+          "scope_ref": "scope_5357a57d27ed41bbbe00f94dabb889bd",
+          "readable_revision": null,
+          "error": {
+            "code": "ARITHMETIC_OVERFLOW",
+            "message": "External error: ARITHMETIC_OVERFLOW: SUM sum(t.n) (Decimal128(38, 0)): final sum exceeds declared output range: ARITHMETIC_OVERFLOW: SUM sum(t.n) (Decimal128(38, 0)): final sum exceeds declared output range",
+            "retryable": false,
+            "details": {
+              "operation": "SUM",
+              "data_type": "Decimal128(38, 0)",
+              "expression": "sum(t.n)",
+              "reason": "final sum exceeds declared output range",
+              "recovery": "Use a wider declared Decimal type where possible; otherwise reduce the range or use an external arbitrary-precision engine. No wrapped result was published for this batch."
+            }
+          },
+          "metrics": {
+            "elapsed_ms": 1.7615,
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "publication_ms": 0.0,
+            "result_parts": 0,
+            "worker_elapsed_ms": 6.2744159999999995,
+            "execution_stopped": true,
+            "worker_exit_confirmed": true,
+            "worker_reused": false,
+            "worker_pid": 94196
+          },
+          "created_ms": 1790097898545,
+          "started_ms": 1790097898545,
+          "finished_ms": 1790097898552,
+          "stop_requested": null
+        },
+        "readable_revision": null,
+        "observation": null,
+        "binding": null,
+        "next_actions": []
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT SUM(n) FROM (VALUES (CAST('9223372036854775807' AS BIGINT)),(CAST('1' AS BIGINT))) t(n)",
+        "bindings": {},
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none",
+          "target_partitions": 2
+        }
+      },
+      "result": {
+        "job_id": "job_411180f77d6e45d8b6dd0a86d3f5b882",
+        "result_ref": "res_8a8bd6f20e4b4c748dd68b767ae077a5",
+        "view_ref": "vw_becb61ff2c5a4937b7f7273933002611",
+        "scope_ref": "scope_bbf5b2b6bcc54179a37d30dc3bd2eeaf",
+        "job": {
+          "prepared": null,
+          "id": "job_411180f77d6e45d8b6dd0a86d3f5b882",
+          "state": "failed",
+          "phase": "failed",
+          "result_ref": "res_8a8bd6f20e4b4c748dd68b767ae077a5",
+          "scope_ref": "scope_bbf5b2b6bcc54179a37d30dc3bd2eeaf",
+          "readable_revision": null,
+          "error": {
+            "code": "ARITHMETIC_OVERFLOW",
+            "message": "External error: ARITHMETIC_OVERFLOW: SUM sum(t.n) (Int64): final sum exceeds declared output range: ARITHMETIC_OVERFLOW: SUM sum(t.n) (Int64): final sum exceeds declared output range",
+            "retryable": false,
+            "details": {
+              "operation": "SUM",
+              "data_type": "Int64",
+              "expression": "sum(t.n)",
+              "reason": "final sum exceeds declared output range",
+              "recovery": "Use a wider declared Decimal type where possible; otherwise reduce the range or use an external arbitrary-precision engine. No wrapped result was published for this batch."
+            }
+          },
+          "metrics": {
+            "elapsed_ms": 1.476125,
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "publication_ms": 0.0,
+            "result_parts": 0,
+            "worker_elapsed_ms": 5.64175,
+            "execution_stopped": true,
+            "worker_exit_confirmed": true,
+            "worker_reused": false,
+            "worker_pid": 94197
+          },
+          "created_ms": 1790097898553,
+          "started_ms": 1790097898553,
+          "finished_ms": 1790097898562,
+          "stop_requested": null
+        },
+        "readable_revision": null,
+        "observation": null,
+        "binding": null,
+        "next_actions": []
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT SUM(n) FROM (VALUES (CAST('-9223372036854775808' AS BIGINT)),(CAST('-1' AS BIGINT))) t(n)",
+        "bindings": {},
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none",
+          "target_partitions": 2
+        }
+      },
+      "result": {
+        "job_id": "job_f3c2a0757e7a47388ceb9ac1b55d3fa0",
+        "result_ref": "res_ba313aa903c142d3a7cf3c6202ba361a",
+        "view_ref": "vw_fa7b6542e6d342bfa51d82592584e0f9",
+        "scope_ref": "scope_d62730a74e9a4cc9a6b96c60aefd7bce",
+        "job": {
+          "prepared": null,
+          "id": "job_f3c2a0757e7a47388ceb9ac1b55d3fa0",
+          "state": "failed",
+          "phase": "failed",
+          "result_ref": "res_ba313aa903c142d3a7cf3c6202ba361a",
+          "scope_ref": "scope_d62730a74e9a4cc9a6b96c60aefd7bce",
+          "readable_revision": null,
+          "error": {
+            "code": "ARITHMETIC_OVERFLOW",
+            "message": "External error: ARITHMETIC_OVERFLOW: SUM sum(t.n) (Int64): final sum exceeds declared output range: ARITHMETIC_OVERFLOW: SUM sum(t.n) (Int64): final sum exceeds declared output range",
+            "retryable": false,
+            "details": {
+              "operation": "SUM",
+              "data_type": "Int64",
+              "expression": "sum(t.n)",
+              "reason": "final sum exceeds declared output range",
+              "recovery": "Use a wider declared Decimal type where possible; otherwise reduce the range or use an external arbitrary-precision engine. No wrapped result was published for this batch."
+            }
+          },
+          "metrics": {
+            "elapsed_ms": 1.424291,
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "publication_ms": 0.0,
+            "result_parts": 0,
+            "worker_elapsed_ms": 5.507208,
+            "execution_stopped": true,
+            "worker_exit_confirmed": true,
+            "worker_reused": false,
+            "worker_pid": 94198
+          },
+          "created_ms": 1790097898563,
+          "started_ms": 1790097898563,
+          "finished_ms": 1790097898569,
+          "stop_requested": null
+        },
+        "readable_revision": null,
+        "observation": null,
+        "binding": null,
+        "next_actions": []
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT SUM(n) FROM (VALUES (CAST('18446744073709551615' AS BIGINT UNSIGNED)),(CAST('1' AS BIGINT UNSIGNED))) t(n)",
+        "bindings": {},
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none",
+          "target_partitions": 2
+        }
+      },
+      "result": {
+        "job_id": "job_9076fc2fe43845bda481a96cd0d3215c",
+        "result_ref": "res_e2a835e7a3d34710914e168f90a714d9",
+        "view_ref": "vw_91e05384c9b243b79ac28833e8a423de",
+        "scope_ref": "scope_46d53ad8308e47909dc2ea4545e5a1d3",
+        "job": {
+          "prepared": null,
+          "id": "job_9076fc2fe43845bda481a96cd0d3215c",
+          "state": "failed",
+          "phase": "failed",
+          "result_ref": "res_e2a835e7a3d34710914e168f90a714d9",
+          "scope_ref": "scope_46d53ad8308e47909dc2ea4545e5a1d3",
+          "readable_revision": null,
+          "error": {
+            "code": "ARITHMETIC_OVERFLOW",
+            "message": "External error: ARITHMETIC_OVERFLOW: SUM sum(t.n) (UInt64): final sum exceeds declared output range: ARITHMETIC_OVERFLOW: SUM sum(t.n) (UInt64): final sum exceeds declared output range",
+            "retryable": false,
+            "details": {
+              "operation": "SUM",
+              "data_type": "UInt64",
+              "expression": "sum(t.n)",
+              "reason": "final sum exceeds declared output range",
+              "recovery": "Use a wider declared Decimal type where possible; otherwise reduce the range or use an external arbitrary-precision engine. No wrapped result was published for this batch."
+            }
+          },
+          "metrics": {
+            "elapsed_ms": 1.462792,
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "publication_ms": 0.0,
+            "result_parts": 0,
+            "worker_elapsed_ms": 5.490084,
+            "execution_stopped": true,
+            "worker_exit_confirmed": true,
+            "worker_reused": false,
+            "worker_pid": 94199
+          },
+          "created_ms": 1790097898569,
+          "started_ms": 1790097898569,
+          "finished_ms": 1790097898576,
+          "stop_requested": null
+        },
+        "readable_revision": null,
+        "observation": null,
+        "binding": null,
+        "next_actions": []
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT SUM(n) FROM (VALUES (CAST('99999999999999999999999999999999999999' AS DECIMAL(38,0))),(CAST('1' AS DECIMAL(38,0)))) t(n)",
+        "bindings": {},
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none",
+          "target_partitions": 2
+        }
+      },
+      "result": {
+        "job_id": "job_77841025049e47c690c376ba87345efc",
+        "result_ref": "res_2fe6d78ea5ed4ddea30a8e3da8856067",
+        "view_ref": "vw_dcbed794620f480fa61cc7ef5fe3c061",
+        "scope_ref": "scope_194d98c2604d48678129ff3aea42bf1d",
+        "job": {
+          "prepared": null,
+          "id": "job_77841025049e47c690c376ba87345efc",
+          "state": "failed",
+          "phase": "failed",
+          "result_ref": "res_2fe6d78ea5ed4ddea30a8e3da8856067",
+          "scope_ref": "scope_194d98c2604d48678129ff3aea42bf1d",
+          "readable_revision": null,
+          "error": {
+            "code": "ARITHMETIC_OVERFLOW",
+            "message": "External error: ARITHMETIC_OVERFLOW: SUM sum(t.n) (Decimal128(38, 0)): final sum exceeds declared output range: ARITHMETIC_OVERFLOW: SUM sum(t.n) (Decimal128(38, 0)): final sum exceeds declared output range",
+            "retryable": false,
+            "details": {
+              "operation": "SUM",
+              "data_type": "Decimal128(38, 0)",
+              "expression": "sum(t.n)",
+              "reason": "final sum exceeds declared output range",
+              "recovery": "Use a wider declared Decimal type where possible; otherwise reduce the range or use an external arbitrary-precision engine. No wrapped result was published for this batch."
+            }
+          },
+          "metrics": {
+            "elapsed_ms": 1.3953749999999998,
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "publication_ms": 0.0,
+            "result_parts": 0,
+            "worker_elapsed_ms": 5.453917,
+            "execution_stopped": true,
+            "worker_exit_confirmed": true,
+            "worker_reused": false,
+            "worker_pid": 94200
+          },
+          "created_ms": 1790097898576,
+          "started_ms": 1790097898576,
+          "finished_ms": 1790097898582,
+          "stop_requested": null
+        },
+        "readable_revision": null,
+        "observation": null,
+        "binding": null,
+        "next_actions": []
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT SUM(n) s FROM (VALUES ('9223372036854775807'::DECIMAL(38,0)),(1::DECIMAL(38,0))) t(n)",
+        "bindings": {},
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none"
+        }
+      },
+      "result": {
+        "job_id": "job_5b4df614441848cd9fb02c159c799473",
+        "result_ref": "res_b8f98313e05542499be6a7ab6122b9ca",
+        "view_ref": "vw_dc53468e690643d0bc1257cd40166b2b",
+        "scope_ref": "scope_5434e298476a49a6bffa9b2ab4bf54ab",
+        "job": {
+          "prepared": null,
+          "id": "job_5b4df614441848cd9fb02c159c799473",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_b8f98313e05542499be6a7ab6122b9ca",
+          "scope_ref": "scope_5434e298476a49a6bffa9b2ab4bf54ab",
+          "readable_revision": 1,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "result_write_bytes": 690,
+            "rows": 1,
+            "target_partitions": 1,
+            "planning_ms": 1.4686670000000002,
+            "result_write_ms": 0.14133400000000002,
+            "commit_ack_ms": 0.195458,
+            "elapsed_ms": 1.888542,
+            "worker_pid": 94201,
+            "publication_ms": 0.176042,
+            "result_parts": 1,
+            "worker_elapsed_ms": 5.7070419999999995,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": false,
+            "plan_available": true
+          },
+          "created_ms": 1790097898583,
+          "started_ms": 1790097898583,
+          "finished_ms": 1790097898591,
+          "stop_requested": null
+        },
+        "readable_revision": 1,
+        "observation": {
+          "result_ref": "res_b8f98313e05542499be6a7ab6122b9ca",
+          "revision": 1,
+          "schema": [
+            {
+              "name": "s",
+              "type": "Decimal128(38, 0)",
+              "nullable": true
+            }
+          ],
+          "rows": [
+            [
+              "9223372036854775808"
+            ]
+          ],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_5434e298476a49a6bffa9b2ab4bf54ab"
+            },
+            "final_for_request": true,
+            "source_consistency": "immutable_materialized",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "declared"
+            },
+            "lineage": []
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 1,
+            "has_more": false
+          },
+          "next_cursor": null,
+          "read_metrics": {
+            "checksum_bytes": 690,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 690
+          }
+        },
+        "binding": {
+          "result_ref": "res_b8f98313e05542499be6a7ab6122b9ca",
+          "revision": 1
+        },
+        "next_actions": [
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT SUM(n) FROM (VALUES ('9223372036854775807'::BIGINT),(1::BIGINT),(-1::BIGINT)) t(n)",
+        "bindings": {},
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none"
+        }
+      },
+      "result": {
+        "job_id": "job_9ab259a9042f4e4899c34480919ee5bc",
+        "result_ref": "res_be672ed150f640649e8d0b4366fd35b0",
+        "view_ref": "vw_623c9fa86a2d49efad7b0304d7511c9e",
+        "scope_ref": "scope_2a682f8c37c34d2eb20812ce58ec9b7c",
+        "job": {
+          "prepared": null,
+          "id": "job_9ab259a9042f4e4899c34480919ee5bc",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_be672ed150f640649e8d0b4366fd35b0",
+          "scope_ref": "scope_2a682f8c37c34d2eb20812ce58ec9b7c",
+          "readable_revision": 1,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "result_write_bytes": 770,
+            "rows": 1,
+            "target_partitions": 1,
+            "planning_ms": 0.4449999999999999,
+            "result_write_ms": 0.009333,
+            "commit_ack_ms": 0.22175,
+            "elapsed_ms": 0.687875,
+            "worker_pid": 94201,
+            "publication_ms": 0.133542,
+            "result_parts": 1,
+            "worker_elapsed_ms": 0.781875,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          },
+          "created_ms": 1790097898591,
+          "started_ms": 1790097898592,
+          "finished_ms": 1790097898593,
+          "stop_requested": null
+        },
+        "readable_revision": 1,
+        "observation": {
+          "result_ref": "res_be672ed150f640649e8d0b4366fd35b0",
+          "revision": 1,
+          "schema": [
+            {
+              "name": "sum(t.n)",
+              "type": "Int64",
+              "nullable": true
+            }
+          ],
+          "rows": [
+            [
+              "9223372036854775807"
+            ]
+          ],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_2a682f8c37c34d2eb20812ce58ec9b7c"
+            },
+            "final_for_request": true,
+            "source_consistency": "immutable_materialized",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "declared"
+            },
+            "lineage": []
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 1,
+            "has_more": false
+          },
+          "next_cursor": null,
+          "read_metrics": {
+            "checksum_bytes": 770,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 770
+          }
+        },
+        "binding": {
+          "result_ref": "res_be672ed150f640649e8d0b4366fd35b0",
+          "revision": 1
+        },
+        "next_actions": [
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT SUM(n) FROM (VALUES (NULL::BIGINT)) t(n)",
+        "bindings": {},
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none"
+        }
+      },
+      "result": {
+        "job_id": "job_87b49443b7564e6681ee987685979d9b",
+        "result_ref": "res_201cb79f867f4b969ce940f974069856",
+        "view_ref": "vw_805875bef6684390a3756475830707c2",
+        "scope_ref": "scope_61e981c4707a4c65b0f2595afd0d4355",
+        "job": {
+          "prepared": null,
+          "id": "job_87b49443b7564e6681ee987685979d9b",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_201cb79f867f4b969ce940f974069856",
+          "scope_ref": "scope_61e981c4707a4c65b0f2595afd0d4355",
+          "readable_revision": 1,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "result_write_bytes": 770,
+            "rows": 1,
+            "target_partitions": 1,
+            "planning_ms": 0.317333,
+            "result_write_ms": 0.006791,
+            "commit_ack_ms": 0.151125,
+            "elapsed_ms": 0.501292,
+            "worker_pid": 94201,
+            "publication_ms": 0.100166,
+            "result_parts": 1,
+            "worker_elapsed_ms": 0.584792,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          },
+          "created_ms": 1790097898593,
+          "started_ms": 1790097898593,
+          "finished_ms": 1790097898595,
+          "stop_requested": null
+        },
+        "readable_revision": 1,
+        "observation": {
+          "result_ref": "res_201cb79f867f4b969ce940f974069856",
+          "revision": 1,
+          "schema": [
+            {
+              "name": "sum(t.n)",
+              "type": "Int64",
+              "nullable": true
+            }
+          ],
+          "rows": [
+            [
+              null
+            ]
+          ],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_61e981c4707a4c65b0f2595afd0d4355"
+            },
+            "final_for_request": true,
+            "source_consistency": "immutable_materialized",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "declared"
+            },
+            "lineage": []
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 1,
+            "has_more": false
+          },
+          "next_cursor": null,
+          "read_metrics": {
+            "checksum_bytes": 770,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 770
+          }
+        },
+        "binding": {
+          "result_ref": "res_201cb79f867f4b969ce940f974069856",
+          "revision": 1
+        },
+        "next_actions": [
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT INTERVAL '1 day' elapsed",
+        "bindings": {},
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none"
+        }
+      },
+      "result": {
+        "job_id": "job_8b203d99eb124ecf8af135da7b252bdb",
+        "result_ref": "res_4f746bf1d00143389843bfba7b65aa0a",
+        "view_ref": "vw_b58970d6585f42cfa9de7c2642c42869",
+        "scope_ref": "scope_c065eabb746349d4aafbf020cb7626c4",
+        "job": {
+          "prepared": null,
+          "id": "job_8b203d99eb124ecf8af135da7b252bdb",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_4f746bf1d00143389843bfba7b65aa0a",
+          "scope_ref": "scope_c065eabb746349d4aafbf020cb7626c4",
+          "readable_revision": 1,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "result_write_bytes": 698,
+            "rows": 1,
+            "target_partitions": 1,
+            "planning_ms": 0.357333,
+            "result_write_ms": 0.006834,
+            "commit_ack_ms": 0.174708,
+            "elapsed_ms": 0.55525,
+            "worker_pid": 94201,
+            "publication_ms": 0.100541,
+            "result_parts": 1,
+            "worker_elapsed_ms": 0.642417,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          },
+          "created_ms": 1790097898595,
+          "started_ms": 1790097898595,
+          "finished_ms": 1790097898596,
+          "stop_requested": null
+        },
+        "readable_revision": 1,
+        "observation": {
+          "result_ref": "res_4f746bf1d00143389843bfba7b65aa0a",
+          "revision": 1,
+          "schema": [
+            {
+              "name": "elapsed",
+              "type": "Interval(MonthDayNano)",
+              "nullable": false
+            }
+          ],
+          "rows": [
+            [
+              "1 days"
+            ]
+          ],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_c065eabb746349d4aafbf020cb7626c4"
+            },
+            "final_for_request": true,
+            "source_consistency": "immutable_materialized",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "declared"
+            },
+            "lineage": []
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 1,
+            "has_more": false
+          },
+          "next_cursor": null,
+          "read_metrics": {
+            "checksum_bytes": 698,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 698
+          }
+        },
+        "binding": {
+          "result_ref": "res_4f746bf1d00143389843bfba7b65aa0a",
+          "revision": 1
+        },
+        "next_actions": [
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT g,SUM(n) FROM (VALUES (1,'9223372036854775807'::BIGINT),(1,1::BIGINT)) t(g,n) GROUP BY g",
+        "bindings": {},
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none"
+        }
+      },
+      "result": {
+        "job_id": "job_ef6f20c32eca4c2c9effbed722941568",
+        "result_ref": "res_2575c1a63d464312a0baf86eb4ec66ca",
+        "view_ref": "vw_c62877b8c8e3487a8e9672a764be727c",
+        "scope_ref": "scope_43cbe9db272f4b2e9e9279aba02452a6",
+        "job": {
+          "prepared": null,
+          "id": "job_ef6f20c32eca4c2c9effbed722941568",
+          "state": "failed",
+          "phase": "failed",
+          "result_ref": "res_2575c1a63d464312a0baf86eb4ec66ca",
+          "scope_ref": "scope_43cbe9db272f4b2e9e9279aba02452a6",
+          "readable_revision": null,
+          "error": {
+            "code": "ARITHMETIC_OVERFLOW",
+            "message": "External error: ARITHMETIC_OVERFLOW: SUM sum(t.n) (Int64): final sum exceeds declared output range: ARITHMETIC_OVERFLOW: SUM sum(t.n) (Int64): final sum exceeds declared output range",
+            "retryable": false,
+            "details": {
+              "operation": "SUM",
+              "data_type": "Int64",
+              "expression": "sum(t.n)",
+              "reason": "final sum exceeds declared output range",
+              "recovery": "Use a wider declared Decimal type where possible; otherwise reduce the range or use an external arbitrary-precision engine. No wrapped result was published for this batch."
+            }
+          },
+          "metrics": {
+            "elapsed_ms": 0.92975,
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "publication_ms": 0.0,
+            "result_parts": 0,
+            "worker_elapsed_ms": 1.597292,
+            "execution_stopped": true,
+            "worker_exit_confirmed": true,
+            "worker_reused": true,
+            "worker_pid": 94201
+          },
+          "created_ms": 1790097898596,
+          "started_ms": 1790097898597,
+          "finished_ms": 1790097898599,
+          "stop_requested": null
+        },
+        "readable_revision": null,
+        "observation": null,
+        "binding": null,
+        "next_actions": []
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT SUM(DISTINCT n) FROM (VALUES ('9223372036854775807'::BIGINT),(1::BIGINT),(1::BIGINT)) t(n)",
+        "bindings": {},
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none"
+        }
+      },
+      "result": {
+        "job_id": "job_bae8ec06415c4cb5b7257b7b3013d0af",
+        "result_ref": "res_3df60802f1d44c11a29d3db23dc28738",
+        "view_ref": "vw_48487df396244d4197752ba9600b31a7",
+        "scope_ref": "scope_92d9610975ee4c9e81736dc2e3661885",
+        "job": {
+          "prepared": null,
+          "id": "job_bae8ec06415c4cb5b7257b7b3013d0af",
+          "state": "failed",
+          "phase": "failed",
+          "result_ref": "res_3df60802f1d44c11a29d3db23dc28738",
+          "scope_ref": "scope_92d9610975ee4c9e81736dc2e3661885",
+          "readable_revision": null,
+          "error": {
+            "code": "ARITHMETIC_OVERFLOW",
+            "message": "External error: ARITHMETIC_OVERFLOW: SUM sum(alias1) (Int64): final sum exceeds declared output range: ARITHMETIC_OVERFLOW: SUM sum(alias1) (Int64): final sum exceeds declared output range",
+            "retryable": false,
+            "details": {
+              "operation": "SUM",
+              "data_type": "Int64",
+              "expression": "sum(alias1)",
+              "reason": "final sum exceeds declared output range",
+              "recovery": "Use a wider declared Decimal type where possible; otherwise reduce the range or use an external arbitrary-precision engine. No wrapped result was published for this batch."
+            }
+          },
+          "metrics": {
+            "elapsed_ms": 1.659375,
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "publication_ms": 0.0,
+            "result_parts": 0,
+            "worker_elapsed_ms": 6.0109580000000005,
+            "execution_stopped": true,
+            "worker_exit_confirmed": true,
+            "worker_reused": false,
+            "worker_pid": 94202
+          },
+          "created_ms": 1790097898599,
+          "started_ms": 1790097898600,
+          "finished_ms": 1790097898606,
+          "stop_requested": null
+        },
+        "readable_revision": null,
+        "observation": null,
+        "binding": null,
+        "next_actions": []
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT SUM(n) OVER (ORDER BY i ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) FROM (VALUES (1,'9223372036854775807'::BIGINT),(2,1::BIGINT)) t(i,n)",
+        "bindings": {},
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none"
+        }
+      },
+      "result": {
+        "job_id": "job_6e91889ff89f43faae25addafacfa5e6",
+        "result_ref": "res_26bf582409a8430aa79edf98e3afad63",
+        "view_ref": "vw_9856d89468b349dba03623b2a73343ed",
+        "scope_ref": "scope_8fc1414d048041dcb083da228ead3ceb",
+        "job": {
+          "prepared": null,
+          "id": "job_6e91889ff89f43faae25addafacfa5e6",
+          "state": "failed",
+          "phase": "failed",
+          "result_ref": "res_26bf582409a8430aa79edf98e3afad63",
+          "scope_ref": "scope_8fc1414d048041dcb083da228ead3ceb",
+          "readable_revision": null,
+          "error": {
+            "code": "ARITHMETIC_OVERFLOW",
+            "message": "External error: ARITHMETIC_OVERFLOW: SUM sum(t.n) ORDER BY [t.i ASC NULLS LAST] ROWS BETWEEN 1 PRECEDING AND CURRENT ROW (Int64): final sum exceeds declared output range: ARITHMETIC_OVERFLOW: SUM sum(t.n) ORDER BY [t.i ASC NULLS LAST] ROWS BETWEEN 1 PRECEDING AND CURRENT ROW (Int64): final sum exceeds declared output range",
+            "retryable": false,
+            "details": {
+              "operation": "SUM",
+              "data_type": "Int64",
+              "expression": "sum(t.n) ORDER BY [t.i ASC NULLS LAST] ROWS BETWEEN 1 PRECEDING AND CURRENT ROW",
+              "reason": "final sum exceeds declared output range",
+              "recovery": "Use a wider declared Decimal type where possible; otherwise reduce the range or use an external arbitrary-precision engine. No wrapped result was published for this batch."
+            }
+          },
+          "metrics": {
+            "elapsed_ms": 2.334167,
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "publication_ms": 0.0,
+            "result_parts": 0,
+            "worker_elapsed_ms": 6.272708,
+            "execution_stopped": true,
+            "worker_exit_confirmed": true,
+            "worker_reused": false,
+            "worker_pid": 94203
+          },
+          "created_ms": 1790097898606,
+          "started_ms": 1790097898607,
+          "finished_ms": 1790097898614,
+          "stop_requested": null
+        },
+        "readable_revision": null,
+        "observation": null,
+        "binding": null,
+        "next_actions": []
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT i,SUM(n) OVER (ORDER BY i ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) FROM (VALUES (1,2::BIGINT),(2,3::BIGINT),(3,4::BIGINT)) t(i,n) ORDER BY i",
+        "bindings": {},
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none"
+        }
+      },
+      "result": {
+        "job_id": "job_5d514955fa4048fb91630e1aa3c96db8",
+        "result_ref": "res_16271b9e975648a5bcd23ed8012351f7",
+        "view_ref": "vw_d471e591be194d4887d93a0231f58b06",
+        "scope_ref": "scope_358d802398b141349327f779bcb0da10",
+        "job": {
+          "prepared": null,
+          "id": "job_5d514955fa4048fb91630e1aa3c96db8",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_16271b9e975648a5bcd23ed8012351f7",
+          "scope_ref": "scope_358d802398b141349327f779bcb0da10",
+          "readable_revision": 1,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "result_write_bytes": 1154,
+            "rows": 3,
+            "target_partitions": 1,
+            "planning_ms": 1.46775,
+            "result_write_ms": 0.032208,
+            "commit_ack_ms": 0.16325,
+            "elapsed_ms": 1.883167,
+            "worker_pid": 94204,
+            "publication_ms": 0.141292,
+            "result_parts": 1,
+            "worker_elapsed_ms": 5.398041999999999,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": false,
+            "plan_available": true
+          },
+          "created_ms": 1790097898614,
+          "started_ms": 1790097898614,
+          "finished_ms": 1790097898620,
+          "stop_requested": null
+        },
+        "readable_revision": 1,
+        "observation": {
+          "result_ref": "res_16271b9e975648a5bcd23ed8012351f7",
+          "revision": 1,
+          "schema": [
+            {
+              "name": "i",
+              "type": "Int64",
+              "nullable": false
+            },
+            {
+              "name": "sum(t.n) ORDER BY [t.i ASC NULLS LAST] ROWS BETWEEN 1 PRECEDING AND CURRENT ROW",
+              "type": "Int64",
+              "nullable": true
+            }
+          ],
+          "rows": [
+            [
+              "1",
+              "2"
+            ],
+            [
+              "2",
+              "5"
+            ],
+            [
+              "3",
+              "7"
+            ]
+          ],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_358d802398b141349327f779bcb0da10"
+            },
+            "final_for_request": true,
+            "source_consistency": "immutable_materialized",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "declared"
+            },
+            "lineage": []
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 3,
+            "has_more": false
+          },
+          "next_cursor": null,
+          "read_metrics": {
+            "checksum_bytes": 1154,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 1154
+          }
+        },
+        "binding": {
+          "result_ref": "res_16271b9e975648a5bcd23ed8012351f7",
+          "revision": 1
+        },
+        "next_actions": [
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT i,SUM(DISTINCT n) OVER (ORDER BY i ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) FROM (VALUES (1,2::BIGINT),(2,2::BIGINT),(3,3::BIGINT),(4,3::BIGINT)) t(i,n) ORDER BY i",
+        "bindings": {},
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none"
+        }
+      },
+      "result": {
+        "job_id": "job_f107323ebff4459a9b7ffeacb665d979",
+        "result_ref": "res_1983a129204e43c3953dec3ce1d58deb",
+        "view_ref": "vw_4d9b65f917dc48e4b49e57fd6d5dcfe1",
+        "scope_ref": "scope_7ca65c905323480caeeb002d4b1e4af7",
+        "job": {
+          "prepared": null,
+          "id": "job_f107323ebff4459a9b7ffeacb665d979",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_1983a129204e43c3953dec3ce1d58deb",
+          "scope_ref": "scope_7ca65c905323480caeeb002d4b1e4af7",
+          "readable_revision": 1,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "result_write_bytes": 1170,
+            "rows": 4,
+            "target_partitions": 1,
+            "planning_ms": 0.517083,
+            "result_write_ms": 0.010417,
+            "commit_ack_ms": 0.185958,
+            "elapsed_ms": 0.738333,
+            "worker_pid": 94204,
+            "publication_ms": 0.135125,
+            "result_parts": 1,
+            "worker_elapsed_ms": 0.8590409999999999,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          },
+          "created_ms": 1790097898621,
+          "started_ms": 1790097898622,
+          "finished_ms": 1790097898623,
+          "stop_requested": null
+        },
+        "readable_revision": 1,
+        "observation": {
+          "result_ref": "res_1983a129204e43c3953dec3ce1d58deb",
+          "revision": 1,
+          "schema": [
+            {
+              "name": "i",
+              "type": "Int64",
+              "nullable": false
+            },
+            {
+              "name": "sum(DISTINCT t.n) ORDER BY [t.i ASC NULLS LAST] ROWS BETWEEN 1 PRECEDING AND CURRENT ROW",
+              "type": "Int64",
+              "nullable": true
+            }
+          ],
+          "rows": [
+            [
+              "1",
+              "2"
+            ],
+            [
+              "2",
+              "2"
+            ],
+            [
+              "3",
+              "5"
+            ],
+            [
+              "4",
+              "3"
+            ]
+          ],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_7ca65c905323480caeeb002d4b1e4af7"
+            },
+            "final_for_request": true,
+            "source_consistency": "immutable_materialized",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "declared"
+            },
+            "lineage": []
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 4,
+            "has_more": false
+          },
+          "next_cursor": null,
+          "read_metrics": {
+            "checksum_bytes": 1170,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 1170
+          }
+        },
+        "binding": {
+          "result_ref": "res_1983a129204e43c3953dec3ce1d58deb",
+          "revision": 1
+        },
+        "next_actions": [
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT CAST('99999999999999999999999999999999999999' AS DECIMAL(38,0))+CAST(1 AS DECIMAL(38,0)) AS bad",
+        "bindings": {},
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none"
+        }
+      },
+      "result": {
+        "job_id": "job_7d425519a8294d68b3c4097942414e4b",
+        "result_ref": "res_bb2a4021019649feb8a3ef117eef5dd3",
+        "view_ref": "vw_101f3e041f2048c3ac564cb5f9e34760",
+        "scope_ref": "scope_498938d6bf9b453da8774eda84dee27b",
+        "job": {
+          "prepared": null,
+          "id": "job_7d425519a8294d68b3c4097942414e4b",
+          "state": "failed",
+          "phase": "failed",
+          "result_ref": "res_bb2a4021019649feb8a3ef117eef5dd3",
+          "scope_ref": "scope_498938d6bf9b453da8774eda84dee27b",
+          "readable_revision": null,
+          "error": {
+            "code": "ARITHMETIC_OVERFLOW",
+            "message": "External error: ARITHMETIC_OVERFLOW: decimal_output bad (Decimal128(38, 0)): value exceeds declared Decimal precision: ARITHMETIC_OVERFLOW: decimal_output bad (Decimal128(38, 0)): value exceeds declared Decimal precision",
+            "retryable": false,
+            "details": {
+              "operation": "decimal_output",
+              "data_type": "Decimal128(38, 0)",
+              "expression": "bad",
+              "reason": "value exceeds declared Decimal precision",
+              "recovery": "Use a wider declared Decimal type where possible; otherwise reduce the range or use an external arbitrary-precision engine. No wrapped result was published for this batch."
+            }
+          },
+          "metrics": {
+            "elapsed_ms": 0.69975,
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "publication_ms": 0.0,
+            "result_parts": 0,
+            "worker_elapsed_ms": 1.356792,
+            "execution_stopped": true,
+            "worker_exit_confirmed": true,
+            "worker_reused": true,
+            "worker_pid": 94204
+          },
+          "created_ms": 1790097898623,
+          "started_ms": 1790097898624,
+          "finished_ms": 1790097898625,
+          "stop_requested": null
+        },
+        "readable_revision": null,
+        "observation": null,
+        "binding": null,
+        "next_actions": []
+      }
+    },
+    {
+      "method": "open",
+      "params": {
+        "source": "<fixture>/orders.csv",
+        "label": "orders"
+      },
+      "result": {
+        "label": "orders",
+        "binding": {
+          "dataset_ref": "ds_3f7a4dee479c46ab9e9fae3f26756fd8",
+          "manifest_ref": "mf_e06960424548400d84b878ef35cafe3b"
+        },
+        "dataset_ref": "ds_3f7a4dee479c46ab9e9fae3f26756fd8",
+        "manifest_ref": "mf_e06960424548400d84b878ef35cafe3b",
+        "schema_ref": "mf_e06960424548400d84b878ef35cafe3b",
+        "format": "csv",
+        "discovery": "complete",
+        "schema_origin": "inferred",
+        "schema_status": "inferred_unvalidated_tail",
+        "field_count": 3,
+        "fields": [
+          {
+            "name": "id",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "amount",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "region",
+            "type": "Utf8",
+            "nullable": true
+          }
+        ],
+        "source_consistency": "best_effort",
+        "validity": "valid",
+        "metadata_read_bytes": 55,
+        "inferred_rows": 4,
+        "file_count": 1,
+        "rows": null,
+        "next_field_offset": null
+      }
+    },
+    {
+      "method": "inspect",
+      "params": {
+        "ref": "mf_e06960424548400d84b878ef35cafe3b",
+        "checks": [
+          "schema"
+        ],
+        "columns": [],
+        "budget": {
+          "max_rows": 100,
+          "max_bytes": 8192
+        }
+      },
+      "result": {
+        "ref": "mf_e06960424548400d84b878ef35cafe3b",
+        "manifest_ref": "mf_e06960424548400d84b878ef35cafe3b",
+        "schema_origin": "inferred",
+        "field_count": 3,
+        "fields": [
+          {
+            "name": "id",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "amount",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "region",
+            "type": "Utf8",
+            "nullable": true
+          }
+        ],
+        "next_field_offset": null
+      }
+    },
+    {
+      "method": "prepare",
+      "params": {
+        "source": {
+          "dataset_ref": "ds_3f7a4dee479c46ab9e9fae3f26756fd8",
+          "manifest_ref": "mf_e06960424548400d84b878ef35cafe3b"
+        },
+        "execution": {
+          "wait_ms": 1000
+        }
+      },
+      "result": {
+        "job_id": "job_0eec7da2425c450aae520b2f4e30a54b",
+        "dataset_ref": "ds_8fdcc04e383444b3af5e5d77db9ad2aa",
+        "manifest_ref": "mf_8d0667a399ad4d3e88a12cd19bf27c44",
+        "scope_ref": "scope_11cbab42c7d4494198905eceddd416ac",
+        "job": {
+          "prepared": {
+            "dataset_ref": "ds_8fdcc04e383444b3af5e5d77db9ad2aa",
+            "manifest_ref": "mf_8d0667a399ad4d3e88a12cd19bf27c44"
+          },
+          "id": "job_0eec7da2425c450aae520b2f4e30a54b",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_ac3d28e9e1214766b55a4452e189329f",
+          "scope_ref": "scope_11cbab42c7d4494198905eceddd416ac",
+          "readable_revision": null,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 55,
+              "source_read_bytes": 55,
+              "result_read_bytes": 0,
+              "read_requests": 1,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "result_write_bytes": 1597,
+            "rows": 4,
+            "target_partitions": 1,
+            "planning_ms": 1.702209,
+            "result_write_ms": 23.070541,
+            "commit_ack_ms": 12.256208,
+            "elapsed_ms": 37.365375,
+            "worker_pid": 94205,
+            "publication_ms": 12.219584,
+            "result_parts": 1,
+            "worker_elapsed_ms": 46.124917,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": false,
+            "plan_available": true
+          },
+          "created_ms": 1790097898628,
+          "started_ms": 1790097898628,
+          "finished_ms": 1790097898675,
+          "stop_requested": null
+        },
+        "readable_revision": null,
+        "observation": null,
+        "binding": null,
+        "next_actions": []
+      }
+    },
+    {
+      "method": "inspect",
+      "params": {
+        "ref": "mf_8d0667a399ad4d3e88a12cd19bf27c44",
+        "checks": [
+          "null_count",
+          "min_max"
+        ],
+        "columns": [
+          "amount"
+        ],
+        "budget": {
+          "max_rows": 100,
+          "max_bytes": 8192
+        }
+      },
+      "result": {
+        "job_id": "job_9fab99aa5df543a4b28096c795ed26e4",
+        "result_ref": "res_617b1b452c044012973c2a5c6ca6a2e9",
+        "view_ref": "vw_dfdde10aee284aad80824a9a07484bcf",
+        "scope_ref": "scope_2f02db9bc1804c2a99ed0239a6652e76",
+        "job": {
+          "prepared": null,
+          "id": "job_9fab99aa5df543a4b28096c795ed26e4",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_617b1b452c044012973c2a5c6ca6a2e9",
+          "scope_ref": "scope_2f02db9bc1804c2a99ed0239a6652e76",
+          "readable_revision": 2,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 1597,
+              "source_read_bytes": 0,
+              "result_read_bytes": 1597,
+              "read_requests": 1,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 1,
+              "verified_cache_peak_bytes": 1597,
+              "verified_part_load_ms": 0.026166
+            },
+            "result_write_bytes": 2714,
+            "rows": 1,
+            "target_partitions": 1,
+            "planning_ms": 2.378125,
+            "result_write_ms": 0.027751,
+            "commit_ack_ms": 0.32170899999999997,
+            "elapsed_ms": 2.781917,
+            "worker_pid": 94205,
+            "publication_ms": 0.248792,
+            "result_parts": 1,
+            "worker_elapsed_ms": 2.941958,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          },
+          "created_ms": 1790097898676,
+          "started_ms": 1790097898676,
+          "finished_ms": 1790097898679,
+          "stop_requested": null
+        },
+        "readable_revision": 2,
+        "observation": {
+          "result_ref": "res_617b1b452c044012973c2a5c6ca6a2e9",
+          "revision": 2,
+          "schema": [
+            {
+              "name": "rows",
+              "type": "Int64",
+              "nullable": false
+            },
+            {
+              "name": "c0_null_count",
+              "type": "Int64",
+              "nullable": false
+            },
+            {
+              "name": "c0_min",
+              "type": "Int64",
+              "nullable": true
+            },
+            {
+              "name": "c0_max",
+              "type": "Int64",
+              "nullable": true
+            }
+          ],
+          "rows": [
+            [
+              "4",
+              "1",
+              "10",
+              "40"
+            ]
+          ],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_2f02db9bc1804c2a99ed0239a6652e76"
+            },
+            "final_for_request": true,
+            "source_consistency": "best_effort",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "unknown"
+            },
+            "lineage": [
+              {
+                "binding": {
+                  "dataset_ref": "ds_8fdcc04e383444b3af5e5d77db9ad2aa",
+                  "manifest_ref": "mf_8d0667a399ad4d3e88a12cd19bf27c44"
+                },
+                "accuracy": "exact",
+                "coverage": {
+                  "kind": "complete",
+                  "scope_ref": "scope_11cbab42c7d4494198905eceddd416ac"
+                },
+                "numeric": {
+                  "policy": "rowtrail-numeric-v1",
+                  "other_sql": "engine_semantics",
+                  "input_provenance": "unknown"
+                }
+              }
+            ],
+            "inspection": {
+              "columns": [
+                "amount"
+              ],
+              "checks": [
+                "null_count",
+                "min_max"
+              ],
+              "outputs": [
+                {
+                  "output": "rows",
+                  "check": "row_count"
+                },
+                {
+                  "output": "c0_null_count",
+                  "column": "amount",
+                  "check": "null_count"
+                },
+                {
+                  "output": "c0_min",
+                  "column": "amount",
+                  "check": "min"
+                },
+                {
+                  "output": "c0_max",
+                  "column": "amount",
+                  "check": "max"
+                }
+              ],
+              "top_k": null
+            }
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 1,
+            "has_more": false
+          },
+          "next_cursor": null,
+          "read_metrics": {
+            "checksum_bytes": 2714,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 2714
+          }
+        },
+        "binding": {
+          "result_ref": "res_617b1b452c044012973c2a5c6ca6a2e9",
+          "revision": 2
+        },
+        "next_actions": [
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT * FROM t ORDER BY id",
+        "bindings": {
+          "t": {
+            "dataset_ref": "ds_8fdcc04e383444b3af5e5d77db9ad2aa",
+            "manifest_ref": "mf_8d0667a399ad4d3e88a12cd19bf27c44"
+          }
+        },
+        "parameters": [],
+        "label": "handoff",
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none",
+          "output": {
+            "max_rows": 0
+          }
+        }
+      },
+      "result": {
+        "job_id": "job_029542f8d1dd472dbff4581a714cb73b",
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "view_ref": "vw_c6ed8db1ccb9484eaa2b689240a24842",
+        "scope_ref": "scope_47855a0593854538b013fdb72430bb67",
+        "job": {
+          "prepared": null,
+          "id": "job_029542f8d1dd472dbff4581a714cb73b",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+          "scope_ref": "scope_47855a0593854538b013fdb72430bb67",
+          "readable_revision": 1,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 1597,
+              "source_read_bytes": 0,
+              "result_read_bytes": 1597,
+              "read_requests": 2,
+              "verified_cache_hits": 1,
+              "verified_cache_misses": 1,
+              "verified_cache_peak_bytes": 1597,
+              "verified_part_load_ms": 0.022875
+            },
+            "result_write_bytes": 2434,
+            "rows": 4,
+            "target_partitions": 1,
+            "planning_ms": 0.648416,
+            "result_write_ms": 0.027251,
+            "commit_ack_ms": 0.18483400000000005,
+            "elapsed_ms": 1.54025,
+            "worker_pid": 94205,
+            "publication_ms": 0.15204199999999998,
+            "result_parts": 1,
+            "worker_elapsed_ms": 1.74325,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          },
+          "created_ms": 1790097898680,
+          "started_ms": 1790097898680,
+          "finished_ms": 1790097898682,
+          "stop_requested": null
+        },
+        "readable_revision": 1,
+        "observation": {
+          "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+          "revision": 1,
+          "schema": [
+            {
+              "name": "id",
+              "type": "Int64",
+              "nullable": true
+            },
+            {
+              "name": "amount",
+              "type": "Int64",
+              "nullable": true
+            },
+            {
+              "name": "region",
+              "type": "Utf8",
+              "nullable": true
+            }
+          ],
+          "rows": [],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_47855a0593854538b013fdb72430bb67"
+            },
+            "final_for_request": true,
+            "source_consistency": "best_effort",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "unknown"
+            },
+            "lineage": [
+              {
+                "binding": {
+                  "dataset_ref": "ds_8fdcc04e383444b3af5e5d77db9ad2aa",
+                  "manifest_ref": "mf_8d0667a399ad4d3e88a12cd19bf27c44"
+                },
+                "accuracy": "exact",
+                "coverage": {
+                  "kind": "complete",
+                  "scope_ref": "scope_11cbab42c7d4494198905eceddd416ac"
+                },
+                "numeric": {
+                  "policy": "rowtrail-numeric-v1",
+                  "other_sql": "engine_semantics",
+                  "input_provenance": "unknown"
+                }
+              }
+            ]
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 0,
+            "has_more": true
+          },
+          "next_cursor": "7b2273746f72655f6964223a2273746f72655f3561333339333862353134643463333662633962326161646332353037373834222c22726573756c745f726566223a227265735f3237643236306339306236373466633339663336643632643134383361303863222c227265766973696f6e223a312c226f6666736574223a302c22636f6c756d6e73223a5b5d7d",
+          "read_metrics": {
+            "checksum_bytes": 0,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 0
+          }
+        },
+        "binding": {
+          "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+          "revision": 1
+        },
+        "next_actions": [
+          "read",
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "export",
+      "params": {
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "revision": 1,
+        "destination": "<fixture>/saved.parquet",
+        "format": "parquet",
+        "allow_nonfinal": false,
+        "allow_estimate": false,
+        "execution": {
+          "wait_ms": 1000
+        }
+      },
+      "result": {
+        "job_id": "job_ffb27fd46fa34366b4e2e20fe56064b8",
+        "result_ref": "res_a733803ba2ad4a5682e93a154d5434ff",
+        "view_ref": "vw_892245dcb54e44fa866e20f67c2cee05",
+        "scope_ref": "scope_9a063902a4764f4994a4aa1401c0b9b3",
+        "job": {
+          "prepared": null,
+          "id": "job_ffb27fd46fa34366b4e2e20fe56064b8",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_a733803ba2ad4a5682e93a154d5434ff",
+          "scope_ref": "scope_9a063902a4764f4994a4aa1401c0b9b3",
+          "readable_revision": null,
+          "error": null,
+          "metrics": {
+            "destination": "<fixture>/saved.parquet",
+            "manifest": "<fixture>/saved.parquet.rowtrail.json",
+            "rows": 4,
+            "bytes": 2727,
+            "io": {
+              "reserved_read_bytes": 2434,
+              "source_read_bytes": 0,
+              "result_read_bytes": 2434,
+              "read_requests": 1,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "worker_pid": 94205,
+            "worker_reused": true,
+            "publication_ms": 0.0,
+            "result_parts": 0,
+            "worker_elapsed_ms": 10.3075,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false
+          },
+          "created_ms": 1790097898683,
+          "started_ms": 1790097898684,
+          "finished_ms": 1790097898700,
+          "stop_requested": null
+        },
+        "readable_revision": null,
+        "observation": null,
+        "binding": null,
+        "next_actions": []
+      }
+    },
+    {
+      "method": "open",
+      "params": {
+        "source": "<fixture>/saved.parquet"
+      },
+      "result": {
+        "label": null,
+        "binding": {
+          "dataset_ref": "ds_6b56c18717e2488585bf8fc06389985d",
+          "manifest_ref": "mf_c2a2ffc6b3094f6dbdd055e045e30288"
+        },
+        "dataset_ref": "ds_6b56c18717e2488585bf8fc06389985d",
+        "manifest_ref": "mf_c2a2ffc6b3094f6dbdd055e045e30288",
+        "schema_ref": "mf_c2a2ffc6b3094f6dbdd055e045e30288",
+        "format": "parquet",
+        "discovery": "complete",
+        "schema_origin": "metadata",
+        "schema_status": "declared",
+        "field_count": 3,
+        "fields": [
+          {
+            "name": "id",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "amount",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "region",
+            "type": "Utf8",
+            "nullable": true
+          }
+        ],
+        "source_consistency": "best_effort",
+        "validity": "valid",
+        "metadata_read_bytes": 2397,
+        "inferred_rows": 0,
+        "file_count": 1,
+        "rows": 4,
+        "next_field_offset": null
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT SUM(amount) FROM t",
+        "bindings": {
+          "t": {
+            "dataset_ref": "ds_6b56c18717e2488585bf8fc06389985d",
+            "manifest_ref": "mf_c2a2ffc6b3094f6dbdd055e045e30288"
+          }
+        },
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none"
+        }
+      },
+      "result": {
+        "job_id": "job_4406262b8c53449b8030b6568ed549d3",
+        "result_ref": "res_ed4b4a653c62438d8b05a3281f6a139e",
+        "view_ref": "vw_20c7ad998cf94a13a9eea3dc9159ee15",
+        "scope_ref": "scope_abb2adef9b0e495baa0ff0bc960cafc5",
+        "job": {
+          "prepared": null,
+          "id": "job_4406262b8c53449b8030b6568ed549d3",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_ed4b4a653c62438d8b05a3281f6a139e",
+          "scope_ref": "scope_abb2adef9b0e495baa0ff0bc960cafc5",
+          "readable_revision": 1,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 2792,
+              "source_read_bytes": 2792,
+              "result_read_bytes": 0,
+              "read_requests": 2,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "result_write_bytes": 2226,
+            "rows": 1,
+            "target_partitions": 1,
+            "planning_ms": 0.61225,
+            "result_write_ms": 0.018584000000000003,
+            "commit_ack_ms": 0.15575,
+            "elapsed_ms": 0.911875,
+            "worker_pid": 94205,
+            "publication_ms": 0.130875,
+            "result_parts": 1,
+            "worker_elapsed_ms": 1.081959,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          },
+          "created_ms": 1790097898702,
+          "started_ms": 1790097898703,
+          "finished_ms": 1790097898704,
+          "stop_requested": null
+        },
+        "readable_revision": 1,
+        "observation": {
+          "result_ref": "res_ed4b4a653c62438d8b05a3281f6a139e",
+          "revision": 1,
+          "schema": [
+            {
+              "name": "sum(t.amount)",
+              "type": "Int64",
+              "nullable": true
+            }
+          ],
+          "rows": [
+            [
+              "70"
+            ]
+          ],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_abb2adef9b0e495baa0ff0bc960cafc5"
+            },
+            "final_for_request": true,
+            "source_consistency": "best_effort",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "unknown"
+            },
+            "lineage": [
+              {
+                "binding": {
+                  "dataset_ref": "ds_6b56c18717e2488585bf8fc06389985d",
+                  "manifest_ref": "mf_c2a2ffc6b3094f6dbdd055e045e30288"
+                },
+                "accuracy": "exact",
+                "coverage": {
+                  "kind": "complete",
+                  "scope_ref": "scope_47855a0593854538b013fdb72430bb67"
+                },
+                "numeric": {
+                  "policy": "rowtrail-numeric-v1",
+                  "other_sql": "engine_semantics",
+                  "input_provenance": "unknown"
+                }
+              }
+            ]
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 1,
+            "has_more": false
+          },
+          "next_cursor": null,
+          "read_metrics": {
+            "checksum_bytes": 2226,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 2226
+          }
+        },
+        "binding": {
+          "result_ref": "res_ed4b4a653c62438d8b05a3281f6a139e",
+          "revision": 1
+        },
+        "next_actions": [
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "workspace",
+      "params": {
+        "action": "summary",
+        "kind": "result",
+        "label": "handoff",
+        "limit": 2,
+        "max_bytes": 8192
+      },
+      "result": {
+        "store_id": "store_5a33938b514d4c36bc9b2aadc2507784",
+        "counts": {
+          "datasets": 3,
+          "active_jobs": 0,
+          "readable_results": 9
+        },
+        "items": [
+          {
+            "kind": "result",
+            "ref": "res_27d260c90b674fc39f36d62d1483a08c",
+            "label": "handoff",
+            "schema_hint": {
+              "field_count": 3,
+              "omitted_fields": 0,
+              "fields": [
+                {
+                  "name": "id",
+                  "type": "Int64",
+                  "nullable": true
+                },
+                {
+                  "name": "amount",
+                  "type": "Int64",
+                  "nullable": true
+                },
+                {
+                  "name": "region",
+                  "type": "Utf8",
+                  "nullable": true
+                }
+              ]
+            },
+            "row_count": 4,
+            "binding": {
+              "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+              "revision": 1
+            },
+            "stored_validity": "valid",
+            "scope_ref": "scope_47855a0593854538b013fdb72430bb67",
+            "quality": {
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_47855a0593854538b013fdb72430bb67"
+              },
+              "final_for_request": true,
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "unknown"
+              }
+            },
+            "next_actions": [
+              "read",
+              "query",
+              "export",
+              "release"
+            ]
+          }
+        ],
+        "next_cursor": null,
+        "membership": "fixed at first page; values observed per page",
+        "validity_check": "stored only; source identities checked when bindings are used"
+      }
+    },
+    {
+      "method": "workspace",
+      "params": {
+        "action": "summary",
+        "kind": "result",
+        "label": "missing",
+        "limit": 2,
+        "max_bytes": 8192
+      },
+      "result": {
+        "store_id": "store_5a33938b514d4c36bc9b2aadc2507784",
+        "counts": {
+          "datasets": 3,
+          "active_jobs": 0,
+          "readable_results": 9
+        },
+        "items": [],
+        "next_cursor": null,
+        "membership": "fixed at first page; values observed per page",
+        "validity_check": "stored only; source identities checked when bindings are used"
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT 1",
+        "bindings": {},
+        "parameters": [],
+        "label": "duplicate",
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none"
+        }
+      },
+      "result": {
+        "job_id": "job_4da3bd4692b34294852df8772747e5e5",
+        "result_ref": "res_9f950597b19248ba86a806eb06050af5",
+        "view_ref": "vw_dcaebc09dfbc426e927e8af23997a15d",
+        "scope_ref": "scope_7b542f6c00a14cfcb3aefa01c7095af2",
+        "job": {
+          "prepared": null,
+          "id": "job_4da3bd4692b34294852df8772747e5e5",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_9f950597b19248ba86a806eb06050af5",
+          "scope_ref": "scope_7b542f6c00a14cfcb3aefa01c7095af2",
+          "readable_revision": 1,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "result_write_bytes": 770,
+            "rows": 1,
+            "target_partitions": 1,
+            "planning_ms": 0.265292,
+            "result_write_ms": 0.010208,
+            "commit_ack_ms": 0.189291,
+            "elapsed_ms": 0.472125,
+            "worker_pid": 94205,
+            "publication_ms": 0.112083,
+            "result_parts": 1,
+            "worker_elapsed_ms": 0.574292,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          },
+          "created_ms": 1790097898705,
+          "started_ms": 1790097898706,
+          "finished_ms": 1790097898706,
+          "stop_requested": null
+        },
+        "readable_revision": 1,
+        "observation": {
+          "result_ref": "res_9f950597b19248ba86a806eb06050af5",
+          "revision": 1,
+          "schema": [
+            {
+              "name": "Int64(1)",
+              "type": "Int64",
+              "nullable": false
+            }
+          ],
+          "rows": [
+            [
+              "1"
+            ]
+          ],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_7b542f6c00a14cfcb3aefa01c7095af2"
+            },
+            "final_for_request": true,
+            "source_consistency": "immutable_materialized",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "declared"
+            },
+            "lineage": []
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 1,
+            "has_more": false
+          },
+          "next_cursor": null,
+          "read_metrics": {
+            "checksum_bytes": 770,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 770
+          }
+        },
+        "binding": {
+          "result_ref": "res_9f950597b19248ba86a806eb06050af5",
+          "revision": 1
+        },
+        "next_actions": [
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT 2",
+        "bindings": {},
+        "parameters": [],
+        "label": "duplicate",
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none"
+        }
+      },
+      "result": {
+        "job_id": "job_47977ed463974458982d04ce28fbd55a",
+        "result_ref": "res_37b92adfdc0a438b901d34073d7176e0",
+        "view_ref": "vw_67161f3b7fc84dc9a2ba9330765ef033",
+        "scope_ref": "scope_2f3bf2f5a6c143f1bc4e779db618c193",
+        "job": {
+          "prepared": null,
+          "id": "job_47977ed463974458982d04ce28fbd55a",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_37b92adfdc0a438b901d34073d7176e0",
+          "scope_ref": "scope_2f3bf2f5a6c143f1bc4e779db618c193",
+          "readable_revision": 1,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "result_write_bytes": 770,
+            "rows": 1,
+            "target_partitions": 1,
+            "planning_ms": 0.202917,
+            "result_write_ms": 0.006583,
+            "commit_ack_ms": 0.105125,
+            "elapsed_ms": 0.32,
+            "worker_pid": 94205,
+            "publication_ms": 0.06387499999999999,
+            "result_parts": 1,
+            "worker_elapsed_ms": 0.407959,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          },
+          "created_ms": 1790097898707,
+          "started_ms": 1790097898707,
+          "finished_ms": 1790097898708,
+          "stop_requested": null
+        },
+        "readable_revision": 1,
+        "observation": {
+          "result_ref": "res_37b92adfdc0a438b901d34073d7176e0",
+          "revision": 1,
+          "schema": [
+            {
+              "name": "Int64(2)",
+              "type": "Int64",
+              "nullable": false
+            }
+          ],
+          "rows": [
+            [
+              "2"
+            ]
+          ],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_2f3bf2f5a6c143f1bc4e779db618c193"
+            },
+            "final_for_request": true,
+            "source_consistency": "immutable_materialized",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "declared"
+            },
+            "lineage": []
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 1,
+            "has_more": false
+          },
+          "next_cursor": null,
+          "read_metrics": {
+            "checksum_bytes": 770,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 770
+          }
+        },
+        "binding": {
+          "result_ref": "res_37b92adfdc0a438b901d34073d7176e0",
+          "revision": 1
+        },
+        "next_actions": [
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "workspace",
+      "params": {
+        "action": "summary",
+        "kind": "result",
+        "label": "duplicate",
+        "limit": 2,
+        "max_bytes": 8192
+      },
+      "result": {
+        "store_id": "store_5a33938b514d4c36bc9b2aadc2507784",
+        "counts": {
+          "datasets": 3,
+          "active_jobs": 0,
+          "readable_results": 11
+        },
+        "items": [
+          {
+            "kind": "result",
+            "ref": "res_9f950597b19248ba86a806eb06050af5",
+            "label": "duplicate",
+            "schema_hint": {
+              "field_count": 1,
+              "omitted_fields": 0,
+              "fields": [
+                {
+                  "name": "Int64(1)",
+                  "type": "Int64",
+                  "nullable": false
+                }
+              ]
+            },
+            "row_count": 1,
+            "binding": {
+              "result_ref": "res_9f950597b19248ba86a806eb06050af5",
+              "revision": 1
+            },
+            "stored_validity": "valid",
+            "scope_ref": "scope_7b542f6c00a14cfcb3aefa01c7095af2",
+            "quality": {
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_7b542f6c00a14cfcb3aefa01c7095af2"
+              },
+              "final_for_request": true,
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "declared"
+              }
+            },
+            "next_actions": [
+              "read",
+              "query",
+              "export",
+              "release"
+            ]
+          },
+          {
+            "kind": "result",
+            "ref": "res_37b92adfdc0a438b901d34073d7176e0",
+            "label": "duplicate",
+            "schema_hint": {
+              "field_count": 1,
+              "omitted_fields": 0,
+              "fields": [
+                {
+                  "name": "Int64(2)",
+                  "type": "Int64",
+                  "nullable": false
+                }
+              ]
+            },
+            "row_count": 1,
+            "binding": {
+              "result_ref": "res_37b92adfdc0a438b901d34073d7176e0",
+              "revision": 1
+            },
+            "stored_validity": "valid",
+            "scope_ref": "scope_2f3bf2f5a6c143f1bc4e779db618c193",
+            "quality": {
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_2f3bf2f5a6c143f1bc4e779db618c193"
+              },
+              "final_for_request": true,
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "declared"
+              }
+            },
+            "next_actions": [
+              "read",
+              "query",
+              "export",
+              "release"
+            ]
+          }
+        ],
+        "next_cursor": null,
+        "membership": "fixed at first page; values observed per page",
+        "validity_check": "stored only; source identities checked when bindings are used"
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT 1",
+        "bindings": {},
+        "parameters": [],
+        "label": "expired",
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none"
+        }
+      },
+      "result": {
+        "job_id": "job_7c53bb3c11664a788a7b25ff40472d56",
+        "result_ref": "res_b2c524bd104143069dbae1d5ad9186b6",
+        "view_ref": "vw_12a746dca1454662bfef9e6e85582734",
+        "scope_ref": "scope_5c25a7cb8ca34e29847e07697851d44c",
+        "job": {
+          "prepared": null,
+          "id": "job_7c53bb3c11664a788a7b25ff40472d56",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_b2c524bd104143069dbae1d5ad9186b6",
+          "scope_ref": "scope_5c25a7cb8ca34e29847e07697851d44c",
+          "readable_revision": 1,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "result_write_bytes": 770,
+            "rows": 1,
+            "target_partitions": 1,
+            "planning_ms": 0.230583,
+            "result_write_ms": 0.008625,
+            "commit_ack_ms": 0.106167,
+            "elapsed_ms": 0.35258300000000004,
+            "worker_pid": 94205,
+            "publication_ms": 0.07008400000000001,
+            "result_parts": 1,
+            "worker_elapsed_ms": 0.45025,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          },
+          "created_ms": 1790097898709,
+          "started_ms": 1790097898709,
+          "finished_ms": 1790097898709,
+          "stop_requested": null
+        },
+        "readable_revision": 1,
+        "observation": {
+          "result_ref": "res_b2c524bd104143069dbae1d5ad9186b6",
+          "revision": 1,
+          "schema": [
+            {
+              "name": "Int64(1)",
+              "type": "Int64",
+              "nullable": false
+            }
+          ],
+          "rows": [
+            [
+              "1"
+            ]
+          ],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_5c25a7cb8ca34e29847e07697851d44c"
+            },
+            "final_for_request": true,
+            "source_consistency": "immutable_materialized",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "declared"
+            },
+            "lineage": []
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 1,
+            "has_more": false
+          },
+          "next_cursor": null,
+          "read_metrics": {
+            "checksum_bytes": 770,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 770
+          }
+        },
+        "binding": {
+          "result_ref": "res_b2c524bd104143069dbae1d5ad9186b6",
+          "revision": 1
+        },
+        "next_actions": [
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "control",
+      "params": {
+        "action": "release",
+        "ref": "res_b2c524bd104143069dbae1d5ad9186b6"
+      },
+      "result": {
+        "ref": "res_b2c524bd104143069dbae1d5ad9186b6",
+        "storage_ref": "res_b2c524bd104143069dbae1d5ad9186b6",
+        "pinned": false,
+        "released": true,
+        "reclamation": "explicit workspace gc; active and retained dependencies remain protected"
+      }
+    },
+    {
+      "method": "workspace",
+      "params": {
+        "action": "gc",
+        "dry_run": false
+      },
+      "result": {
+        "stored_bytes": 15763,
+        "reserved_bytes": 0,
+        "quota_bytes": 0,
+        "quota_scope": "managed result/prepare data plus conservative result/spill reservations; excludes metadata, logs, and external files",
+        "gc": {
+          "dry_run": false,
+          "candidate_count": 1,
+          "candidate_bytes": 770,
+          "reclaimed_bytes": 770,
+          "batch_limit": 1000
+        }
+      }
+    },
+    {
+      "method": "workspace",
+      "params": {
+        "action": "summary",
+        "kind": "result",
+        "label": "expired",
+        "limit": 2,
+        "max_bytes": 8192
+      },
+      "result": {
+        "store_id": "store_5a33938b514d4c36bc9b2aadc2507784",
+        "counts": {
+          "datasets": 3,
+          "active_jobs": 0,
+          "readable_results": 11
+        },
+        "items": [
+          {
+            "kind": "result",
+            "ref": "res_b2c524bd104143069dbae1d5ad9186b6",
+            "label": "expired",
+            "schema_hint": {
+              "field_count": 1,
+              "omitted_fields": 0,
+              "fields": [
+                {
+                  "name": "Int64(1)",
+                  "type": "Int64",
+                  "nullable": false
+                }
+              ]
+            },
+            "row_count": 1,
+            "binding": {
+              "result_ref": "res_b2c524bd104143069dbae1d5ad9186b6",
+              "revision": 1
+            },
+            "stored_validity": "expired",
+            "scope_ref": "scope_5c25a7cb8ca34e29847e07697851d44c",
+            "quality": {
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_5c25a7cb8ca34e29847e07697851d44c"
+              },
+              "final_for_request": true,
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "declared"
+              }
+            },
+            "next_actions": []
+          }
+        ],
+        "next_cursor": null,
+        "membership": "fixed at first page; values observed per page",
+        "validity_check": "stored only; source identities checked when bindings are used"
+      }
+    },
+    {
+      "method": "read",
+      "params": {
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "revision": 1,
+        "columns": [],
+        "max_rows": 1,
+        "max_bytes": 8192
+      },
+      "result": {
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "revision": 1,
+        "schema": [
+          {
+            "name": "id",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "amount",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "region",
+            "type": "Utf8",
+            "nullable": true
+          }
+        ],
+        "rows": [
+          [
+            "1",
+            "10",
+            "east"
+          ]
+        ],
+        "quality": {
+          "accuracy": "exact",
+          "coverage": {
+            "kind": "complete",
+            "scope_ref": "scope_47855a0593854538b013fdb72430bb67"
+          },
+          "final_for_request": true,
+          "source_consistency": "best_effort",
+          "numeric": {
+            "policy": "rowtrail-numeric-v1",
+            "other_sql": "engine_semantics",
+            "input_provenance": "unknown"
+          },
+          "lineage": [
+            {
+              "binding": {
+                "dataset_ref": "ds_8fdcc04e383444b3af5e5d77db9ad2aa",
+                "manifest_ref": "mf_8d0667a399ad4d3e88a12cd19bf27c44"
+              },
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_11cbab42c7d4494198905eceddd416ac"
+              },
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "unknown"
+              }
+            }
+          ]
+        },
+        "validity": "valid",
+        "job_state": "completed",
+        "presentation": {
+          "returned_rows": 1,
+          "has_more": true
+        },
+        "next_cursor": "7b2273746f72655f6964223a2273746f72655f3561333339333862353134643463333662633962326161646332353037373834222c22726573756c745f726566223a227265735f3237643236306339306236373466633339663336643632643134383361303863222c227265766973696f6e223a312c226f6666736574223a312c22636f6c756d6e73223a5b5d7d",
+        "read_metrics": {
+          "checksum_bytes": 2434,
+          "part_file_bytes_opened": 0,
+          "inline_bytes_loaded": 2434
+        }
+      }
+    },
+    {
+      "method": "read",
+      "params": {
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "revision": 1,
+        "columns": [],
+        "max_rows": 1,
+        "max_bytes": 8192,
+        "cursor": "7b2273746f72655f6964223a2273746f72655f3561333339333862353134643463333662633962326161646332353037373834222c22726573756c745f726566223a227265735f3237643236306339306236373466633339663336643632643134383361303863222c227265766973696f6e223a312c226f6666736574223a312c22636f6c756d6e73223a5b5d7d"
+      },
+      "result": {
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "revision": 1,
+        "schema": [
+          {
+            "name": "id",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "amount",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "region",
+            "type": "Utf8",
+            "nullable": true
+          }
+        ],
+        "rows": [
+          [
+            "2",
+            "20",
+            "west"
+          ]
+        ],
+        "quality": {
+          "accuracy": "exact",
+          "coverage": {
+            "kind": "complete",
+            "scope_ref": "scope_47855a0593854538b013fdb72430bb67"
+          },
+          "final_for_request": true,
+          "source_consistency": "best_effort",
+          "numeric": {
+            "policy": "rowtrail-numeric-v1",
+            "other_sql": "engine_semantics",
+            "input_provenance": "unknown"
+          },
+          "lineage": [
+            {
+              "binding": {
+                "dataset_ref": "ds_8fdcc04e383444b3af5e5d77db9ad2aa",
+                "manifest_ref": "mf_8d0667a399ad4d3e88a12cd19bf27c44"
+              },
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_11cbab42c7d4494198905eceddd416ac"
+              },
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "unknown"
+              }
+            }
+          ]
+        },
+        "validity": "valid",
+        "job_state": "completed",
+        "presentation": {
+          "returned_rows": 1,
+          "has_more": true
+        },
+        "next_cursor": "7b2273746f72655f6964223a2273746f72655f3561333339333862353134643463333662633962326161646332353037373834222c22726573756c745f726566223a227265735f3237643236306339306236373466633339663336643632643134383361303863222c227265766973696f6e223a312c226f6666736574223a322c22636f6c756d6e73223a5b5d7d",
+        "read_metrics": {
+          "checksum_bytes": 2434,
+          "part_file_bytes_opened": 0,
+          "inline_bytes_loaded": 2434
+        }
+      }
+    },
+    {
+      "method": "read",
+      "params": {
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "revision": 1,
+        "columns": [],
+        "max_rows": 1,
+        "max_bytes": 8192,
+        "cursor": "7b2273746f72655f6964223a2273746f72655f3561333339333862353134643463333662633962326161646332353037373834222c22726573756c745f726566223a227265735f3237643236306339306236373466633339663336643632643134383361303863222c227265766973696f6e223a312c226f6666736574223a322c22636f6c756d6e73223a5b5d7d"
+      },
+      "result": {
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "revision": 1,
+        "schema": [
+          {
+            "name": "id",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "amount",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "region",
+            "type": "Utf8",
+            "nullable": true
+          }
+        ],
+        "rows": [
+          [
+            "3",
+            null,
+            "east"
+          ]
+        ],
+        "quality": {
+          "accuracy": "exact",
+          "coverage": {
+            "kind": "complete",
+            "scope_ref": "scope_47855a0593854538b013fdb72430bb67"
+          },
+          "final_for_request": true,
+          "source_consistency": "best_effort",
+          "numeric": {
+            "policy": "rowtrail-numeric-v1",
+            "other_sql": "engine_semantics",
+            "input_provenance": "unknown"
+          },
+          "lineage": [
+            {
+              "binding": {
+                "dataset_ref": "ds_8fdcc04e383444b3af5e5d77db9ad2aa",
+                "manifest_ref": "mf_8d0667a399ad4d3e88a12cd19bf27c44"
+              },
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_11cbab42c7d4494198905eceddd416ac"
+              },
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "unknown"
+              }
+            }
+          ]
+        },
+        "validity": "valid",
+        "job_state": "completed",
+        "presentation": {
+          "returned_rows": 1,
+          "has_more": true
+        },
+        "next_cursor": "7b2273746f72655f6964223a2273746f72655f3561333339333862353134643463333662633962326161646332353037373834222c22726573756c745f726566223a227265735f3237643236306339306236373466633339663336643632643134383361303863222c227265766973696f6e223a312c226f6666736574223a332c22636f6c756d6e73223a5b5d7d",
+        "read_metrics": {
+          "checksum_bytes": 2434,
+          "part_file_bytes_opened": 0,
+          "inline_bytes_loaded": 2434
+        }
+      }
+    },
+    {
+      "method": "read",
+      "params": {
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "revision": 1,
+        "columns": [],
+        "max_rows": 1,
+        "max_bytes": 8192,
+        "cursor": "7b2273746f72655f6964223a2273746f72655f3561333339333862353134643463333662633962326161646332353037373834222c22726573756c745f726566223a227265735f3237643236306339306236373466633339663336643632643134383361303863222c227265766973696f6e223a312c226f6666736574223a332c22636f6c756d6e73223a5b5d7d"
+      },
+      "result": {
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "revision": 1,
+        "schema": [
+          {
+            "name": "id",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "amount",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "region",
+            "type": "Utf8",
+            "nullable": true
+          }
+        ],
+        "rows": [
+          [
+            "4",
+            "40",
+            "east"
+          ]
+        ],
+        "quality": {
+          "accuracy": "exact",
+          "coverage": {
+            "kind": "complete",
+            "scope_ref": "scope_47855a0593854538b013fdb72430bb67"
+          },
+          "final_for_request": true,
+          "source_consistency": "best_effort",
+          "numeric": {
+            "policy": "rowtrail-numeric-v1",
+            "other_sql": "engine_semantics",
+            "input_provenance": "unknown"
+          },
+          "lineage": [
+            {
+              "binding": {
+                "dataset_ref": "ds_8fdcc04e383444b3af5e5d77db9ad2aa",
+                "manifest_ref": "mf_8d0667a399ad4d3e88a12cd19bf27c44"
+              },
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_11cbab42c7d4494198905eceddd416ac"
+              },
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "unknown"
+              }
+            }
+          ]
+        },
+        "validity": "valid",
+        "job_state": "completed",
+        "presentation": {
+          "returned_rows": 1,
+          "has_more": false
+        },
+        "next_cursor": null,
+        "read_metrics": {
+          "checksum_bytes": 2434,
+          "part_file_bytes_opened": 0,
+          "inline_bytes_loaded": 2434
+        }
+      }
+    },
+    {
+      "method": "read",
+      "params": {
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "revision": 1,
+        "columns": [],
+        "max_rows": 1,
+        "max_bytes": 8192
+      },
+      "result": {
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "revision": 1,
+        "schema": [
+          {
+            "name": "id",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "amount",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "region",
+            "type": "Utf8",
+            "nullable": true
+          }
+        ],
+        "rows": [
+          [
+            "1",
+            "10",
+            "east"
+          ]
+        ],
+        "quality": {
+          "accuracy": "exact",
+          "coverage": {
+            "kind": "complete",
+            "scope_ref": "scope_47855a0593854538b013fdb72430bb67"
+          },
+          "final_for_request": true,
+          "source_consistency": "best_effort",
+          "numeric": {
+            "policy": "rowtrail-numeric-v1",
+            "other_sql": "engine_semantics",
+            "input_provenance": "unknown"
+          },
+          "lineage": [
+            {
+              "binding": {
+                "dataset_ref": "ds_8fdcc04e383444b3af5e5d77db9ad2aa",
+                "manifest_ref": "mf_8d0667a399ad4d3e88a12cd19bf27c44"
+              },
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_11cbab42c7d4494198905eceddd416ac"
+              },
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "unknown"
+              }
+            }
+          ]
+        },
+        "validity": "valid",
+        "job_state": "completed",
+        "presentation": {
+          "returned_rows": 1,
+          "has_more": true
+        },
+        "next_cursor": "7b2273746f72655f6964223a2273746f72655f3561333339333862353134643463333662633962326161646332353037373834222c22726573756c745f726566223a227265735f3237643236306339306236373466633339663336643632643134383361303863222c227265766973696f6e223a312c226f6666736574223a312c22636f6c756d6e73223a5b5d7d",
+        "read_metrics": {
+          "checksum_bytes": 2434,
+          "part_file_bytes_opened": 0,
+          "inline_bytes_loaded": 2434
+        }
+      }
+    },
+    {
+      "method": "read",
+      "params": {
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "revision": 1,
+        "columns": [],
+        "max_rows": 1,
+        "max_bytes": 8192,
+        "cursor": "7b2273746f72655f6964223a2273746f72655f3561333339333862353134643463333662633962326161646332353037373834222c22726573756c745f726566223a227265735f3237643236306339306236373466633339663336643632643134383361303863222c227265766973696f6e223a312c226f6666736574223a312c22636f6c756d6e73223a5b5d7d"
+      },
+      "result": {
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "revision": 1,
+        "schema": [
+          {
+            "name": "id",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "amount",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "region",
+            "type": "Utf8",
+            "nullable": true
+          }
+        ],
+        "rows": [
+          [
+            "2",
+            "20",
+            "west"
+          ]
+        ],
+        "quality": {
+          "accuracy": "exact",
+          "coverage": {
+            "kind": "complete",
+            "scope_ref": "scope_47855a0593854538b013fdb72430bb67"
+          },
+          "final_for_request": true,
+          "source_consistency": "best_effort",
+          "numeric": {
+            "policy": "rowtrail-numeric-v1",
+            "other_sql": "engine_semantics",
+            "input_provenance": "unknown"
+          },
+          "lineage": [
+            {
+              "binding": {
+                "dataset_ref": "ds_8fdcc04e383444b3af5e5d77db9ad2aa",
+                "manifest_ref": "mf_8d0667a399ad4d3e88a12cd19bf27c44"
+              },
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_11cbab42c7d4494198905eceddd416ac"
+              },
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "unknown"
+              }
+            }
+          ]
+        },
+        "validity": "valid",
+        "job_state": "completed",
+        "presentation": {
+          "returned_rows": 1,
+          "has_more": true
+        },
+        "next_cursor": "7b2273746f72655f6964223a2273746f72655f3561333339333862353134643463333662633962326161646332353037373834222c22726573756c745f726566223a227265735f3237643236306339306236373466633339663336643632643134383361303863222c227265766973696f6e223a312c226f6666736574223a322c22636f6c756d6e73223a5b5d7d",
+        "read_metrics": {
+          "checksum_bytes": 2434,
+          "part_file_bytes_opened": 0,
+          "inline_bytes_loaded": 2434
+        }
+      }
+    },
+    {
+      "method": "read",
+      "params": {
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "revision": 1,
+        "columns": [],
+        "max_rows": 1,
+        "max_bytes": 8192,
+        "cursor": "7b2273746f72655f6964223a2273746f72655f3561333339333862353134643463333662633962326161646332353037373834222c22726573756c745f726566223a227265735f3237643236306339306236373466633339663336643632643134383361303863222c227265766973696f6e223a312c226f6666736574223a322c22636f6c756d6e73223a5b5d7d"
+      },
+      "result": {
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "revision": 1,
+        "schema": [
+          {
+            "name": "id",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "amount",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "region",
+            "type": "Utf8",
+            "nullable": true
+          }
+        ],
+        "rows": [
+          [
+            "3",
+            null,
+            "east"
+          ]
+        ],
+        "quality": {
+          "accuracy": "exact",
+          "coverage": {
+            "kind": "complete",
+            "scope_ref": "scope_47855a0593854538b013fdb72430bb67"
+          },
+          "final_for_request": true,
+          "source_consistency": "best_effort",
+          "numeric": {
+            "policy": "rowtrail-numeric-v1",
+            "other_sql": "engine_semantics",
+            "input_provenance": "unknown"
+          },
+          "lineage": [
+            {
+              "binding": {
+                "dataset_ref": "ds_8fdcc04e383444b3af5e5d77db9ad2aa",
+                "manifest_ref": "mf_8d0667a399ad4d3e88a12cd19bf27c44"
+              },
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_11cbab42c7d4494198905eceddd416ac"
+              },
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "unknown"
+              }
+            }
+          ]
+        },
+        "validity": "valid",
+        "job_state": "completed",
+        "presentation": {
+          "returned_rows": 1,
+          "has_more": true
+        },
+        "next_cursor": "7b2273746f72655f6964223a2273746f72655f3561333339333862353134643463333662633962326161646332353037373834222c22726573756c745f726566223a227265735f3237643236306339306236373466633339663336643632643134383361303863222c227265766973696f6e223a312c226f6666736574223a332c22636f6c756d6e73223a5b5d7d",
+        "read_metrics": {
+          "checksum_bytes": 2434,
+          "part_file_bytes_opened": 0,
+          "inline_bytes_loaded": 2434
+        }
+      }
+    },
+    {
+      "method": "read",
+      "params": {
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "revision": 1,
+        "columns": [],
+        "max_rows": 1,
+        "max_bytes": 8192,
+        "cursor": "7b2273746f72655f6964223a2273746f72655f3561333339333862353134643463333662633962326161646332353037373834222c22726573756c745f726566223a227265735f3237643236306339306236373466633339663336643632643134383361303863222c227265766973696f6e223a312c226f6666736574223a332c22636f6c756d6e73223a5b5d7d"
+      },
+      "result": {
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "revision": 1,
+        "schema": [
+          {
+            "name": "id",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "amount",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "region",
+            "type": "Utf8",
+            "nullable": true
+          }
+        ],
+        "rows": [
+          [
+            "4",
+            "40",
+            "east"
+          ]
+        ],
+        "quality": {
+          "accuracy": "exact",
+          "coverage": {
+            "kind": "complete",
+            "scope_ref": "scope_47855a0593854538b013fdb72430bb67"
+          },
+          "final_for_request": true,
+          "source_consistency": "best_effort",
+          "numeric": {
+            "policy": "rowtrail-numeric-v1",
+            "other_sql": "engine_semantics",
+            "input_provenance": "unknown"
+          },
+          "lineage": [
+            {
+              "binding": {
+                "dataset_ref": "ds_8fdcc04e383444b3af5e5d77db9ad2aa",
+                "manifest_ref": "mf_8d0667a399ad4d3e88a12cd19bf27c44"
+              },
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_11cbab42c7d4494198905eceddd416ac"
+              },
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "unknown"
+              }
+            }
+          ]
+        },
+        "validity": "valid",
+        "job_state": "completed",
+        "presentation": {
+          "returned_rows": 1,
+          "has_more": false
+        },
+        "next_cursor": null,
+        "read_metrics": {
+          "checksum_bytes": 2434,
+          "part_file_bytes_opened": 0,
+          "inline_bytes_loaded": 2434
+        }
+      }
+    },
+    {
+      "method": "read",
+      "params": {
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "revision": 1,
+        "columns": [],
+        "max_rows": 1,
+        "max_bytes": 32768
+      },
+      "result": {
+        "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+        "revision": 1,
+        "schema": [
+          {
+            "name": "id",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "amount",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "region",
+            "type": "Utf8",
+            "nullable": true
+          }
+        ],
+        "rows": [
+          [
+            "1",
+            "10",
+            "east"
+          ]
+        ],
+        "quality": {
+          "accuracy": "exact",
+          "coverage": {
+            "kind": "complete",
+            "scope_ref": "scope_47855a0593854538b013fdb72430bb67"
+          },
+          "final_for_request": true,
+          "source_consistency": "best_effort",
+          "numeric": {
+            "policy": "rowtrail-numeric-v1",
+            "other_sql": "engine_semantics",
+            "input_provenance": "unknown"
+          },
+          "lineage": [
+            {
+              "binding": {
+                "dataset_ref": "ds_8fdcc04e383444b3af5e5d77db9ad2aa",
+                "manifest_ref": "mf_8d0667a399ad4d3e88a12cd19bf27c44"
+              },
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_11cbab42c7d4494198905eceddd416ac"
+              },
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "unknown"
+              }
+            }
+          ]
+        },
+        "validity": "valid",
+        "job_state": "completed",
+        "presentation": {
+          "returned_rows": 1,
+          "has_more": true
+        },
+        "next_cursor": "7b2273746f72655f6964223a2273746f72655f3561333339333862353134643463333662633962326161646332353037373834222c22726573756c745f726566223a227265735f3237643236306339306236373466633339663336643632643134383361303863222c227265766973696f6e223a312c226f6666736574223a312c22636f6c756d6e73223a5b5d7d",
+        "read_metrics": {
+          "checksum_bytes": 2434,
+          "part_file_bytes_opened": 0,
+          "inline_bytes_loaded": 2434
+        }
+      }
+    },
+    {
+      "method": "open",
+      "params": {
+        "source": "<fixture>/large/many.parquet"
+      },
+      "result": {
+        "label": null,
+        "binding": {
+          "dataset_ref": "ds_14898823e82b44b999f357a0c67aaddb",
+          "manifest_ref": "mf_7d23140d63804a5494ba605805d51694"
+        },
+        "dataset_ref": "ds_14898823e82b44b999f357a0c67aaddb",
+        "manifest_ref": "mf_7d23140d63804a5494ba605805d51694",
+        "schema_ref": "mf_7d23140d63804a5494ba605805d51694",
+        "format": "parquet",
+        "discovery": "complete",
+        "schema_origin": "metadata",
+        "schema_status": "declared",
+        "field_count": 5,
+        "fields": [
+          {
+            "name": "id",
+            "type": "Int64",
+            "nullable": false
+          },
+          {
+            "name": "region",
+            "type": "Utf8",
+            "nullable": true
+          },
+          {
+            "name": "product",
+            "type": "Utf8",
+            "nullable": false
+          },
+          {
+            "name": "amount",
+            "type": "Decimal128(20, 2)",
+            "nullable": true
+          },
+          {
+            "name": "payload",
+            "type": "Utf8",
+            "nullable": false
+          }
+        ],
+        "source_consistency": "best_effort",
+        "validity": "valid",
+        "metadata_read_bytes": 176980,
+        "inferred_rows": 0,
+        "file_count": 1,
+        "rows": 1048576,
+        "next_field_offset": null
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT id,region,amount,payload FROM t",
+        "bindings": {
+          "t": {
+            "dataset_ref": "ds_14898823e82b44b999f357a0c67aaddb",
+            "manifest_ref": "mf_7d23140d63804a5494ba605805d51694"
+          }
+        },
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none",
+          "output": {
+            "max_rows": 0
+          }
+        }
+      },
+      "result": {
+        "job_id": "job_f5f2d00bea194edaaf687176b047ce1e",
+        "result_ref": "res_9fa85b9c4e554f75a48fba525618e8eb",
+        "view_ref": "vw_78b610988a6946db908b57143062c595",
+        "scope_ref": "scope_901b63e86c124cc0b2314052ff613213",
+        "job": {
+          "prepared": null,
+          "id": "job_f5f2d00bea194edaaf687176b047ce1e",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_9fa85b9c4e554f75a48fba525618e8eb",
+          "scope_ref": "scope_901b63e86c124cc0b2314052ff613213",
+          "readable_revision": 1,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 228252279,
+              "source_read_bytes": 228252279,
+              "result_read_bytes": 0,
+              "read_requests": 1025,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "result_write_bytes": 17250088,
+            "rows": 1048576,
+            "target_partitions": 2,
+            "planning_ms": 1.511167,
+            "result_write_ms": 145.29120599999993,
+            "commit_ack_ms": 21.125625,
+            "elapsed_ms": 169.308,
+            "worker_pid": 94205,
+            "publication_ms": 20.885834000000003,
+            "result_parts": 4,
+            "worker_elapsed_ms": 169.65,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          },
+          "created_ms": 1790097899003,
+          "started_ms": 1790097899003,
+          "finished_ms": 1790097899173,
+          "stop_requested": null
+        },
+        "readable_revision": 1,
+        "observation": {
+          "result_ref": "res_9fa85b9c4e554f75a48fba525618e8eb",
+          "revision": 1,
+          "schema": [
+            {
+              "name": "id",
+              "type": "Int64",
+              "nullable": false
+            },
+            {
+              "name": "region",
+              "type": "Utf8",
+              "nullable": true
+            },
+            {
+              "name": "amount",
+              "type": "Decimal128(20, 2)",
+              "nullable": true
+            },
+            {
+              "name": "payload",
+              "type": "Utf8",
+              "nullable": false
+            }
+          ],
+          "rows": [],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_901b63e86c124cc0b2314052ff613213"
+            },
+            "final_for_request": true,
+            "source_consistency": "best_effort",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "unknown"
+            },
+            "lineage": [
+              {
+                "binding": {
+                  "dataset_ref": "ds_14898823e82b44b999f357a0c67aaddb",
+                  "manifest_ref": "mf_7d23140d63804a5494ba605805d51694"
+                },
+                "accuracy": "exact",
+                "coverage": {
+                  "kind": "complete"
+                },
+                "numeric": {
+                  "policy": "unknown"
+                }
+              }
+            ]
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 0,
+            "has_more": true
+          },
+          "next_cursor": "7b2273746f72655f6964223a2273746f72655f3561333339333862353134643463333662633962326161646332353037373834222c22726573756c745f726566223a227265735f3966613835623963346535353466373561343866626135323536313865386562222c227265766973696f6e223a312c226f6666736574223a302c22636f6c756d6e73223a5b5d7d",
+          "read_metrics": {
+            "checksum_bytes": 0,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 0
+          }
+        },
+        "binding": {
+          "result_ref": "res_9fa85b9c4e554f75a48fba525618e8eb",
+          "revision": 1
+        },
+        "next_actions": [
+          "read",
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT COUNT(*),SUM(CAST(id AS DECIMAL(38,0))) FROM t",
+        "bindings": {
+          "t": {
+            "result_ref": "res_9fa85b9c4e554f75a48fba525618e8eb",
+            "revision": 1
+          }
+        },
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none",
+          "target_partitions": 2,
+          "scan_bytes": 17250088
+        }
+      },
+      "result": {
+        "job_id": "job_73e146fcc95c43bd929f3d0b36c795ab",
+        "result_ref": "res_2476a4b0ddd94440aa2c62bc433b19c0",
+        "view_ref": "vw_e8a760b32fab4e44a167117d7e96caaf",
+        "scope_ref": "scope_01b2d635beb547d1840dfe53295016fc",
+        "job": {
+          "prepared": null,
+          "id": "job_73e146fcc95c43bd929f3d0b36c795ab",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_2476a4b0ddd94440aa2c62bc433b19c0",
+          "scope_ref": "scope_01b2d635beb547d1840dfe53295016fc",
+          "readable_revision": 1,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 17250088,
+              "source_read_bytes": 0,
+              "result_read_bytes": 17250088,
+              "read_requests": 4,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 4,
+              "verified_cache_peak_bytes": 6610628,
+              "verified_part_load_ms": 7.781125
+            },
+            "result_write_bytes": 1034,
+            "rows": 1,
+            "target_partitions": 2,
+            "planning_ms": 1.013291,
+            "result_write_ms": 0.019082,
+            "commit_ack_ms": 0.168958,
+            "elapsed_ms": 19.095833,
+            "worker_pid": 94205,
+            "publication_ms": 0.13224999999999998,
+            "result_parts": 1,
+            "worker_elapsed_ms": 19.283666,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          },
+          "created_ms": 1790097899174,
+          "started_ms": 1790097899174,
+          "finished_ms": 1790097899194,
+          "stop_requested": null
+        },
+        "readable_revision": 1,
+        "observation": {
+          "result_ref": "res_2476a4b0ddd94440aa2c62bc433b19c0",
+          "revision": 1,
+          "schema": [
+            {
+              "name": "count(*)",
+              "type": "Int64",
+              "nullable": false
+            },
+            {
+              "name": "sum(t.id)",
+              "type": "Decimal128(38, 0)",
+              "nullable": true
+            }
+          ],
+          "rows": [
+            [
+              "1048576",
+              "9444732966289046765568"
+            ]
+          ],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_01b2d635beb547d1840dfe53295016fc"
+            },
+            "final_for_request": true,
+            "source_consistency": "immutable_materialized",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "unknown"
+            },
+            "lineage": [
+              {
+                "binding": {
+                  "result_ref": "res_9fa85b9c4e554f75a48fba525618e8eb",
+                  "revision": 1
+                },
+                "accuracy": "exact",
+                "coverage": {
+                  "kind": "complete",
+                  "scope_ref": "scope_901b63e86c124cc0b2314052ff613213"
+                },
+                "numeric": {
+                  "policy": "rowtrail-numeric-v1",
+                  "other_sql": "engine_semantics",
+                  "input_provenance": "unknown"
+                }
+              }
+            ]
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 1,
+            "has_more": false
+          },
+          "next_cursor": null,
+          "read_metrics": {
+            "checksum_bytes": 1034,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 1034
+          }
+        },
+        "binding": {
+          "result_ref": "res_2476a4b0ddd94440aa2c62bc433b19c0",
+          "revision": 1
+        },
+        "next_actions": [
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT COUNT(*),SUM(CAST(id AS DECIMAL(38,0))) FROM t",
+        "bindings": {
+          "t": {
+            "result_ref": "res_9fa85b9c4e554f75a48fba525618e8eb",
+            "revision": 1
+          }
+        },
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none",
+          "target_partitions": 2,
+          "scan_bytes": 17250088
+        }
+      },
+      "result": {
+        "job_id": "job_4224891d0f5243219c06aaafb7250bea",
+        "result_ref": "res_bca67d671ea7411aa0a50832f79c0147",
+        "view_ref": "vw_0231c9b179ae4a5d905066d0b6d9b531",
+        "scope_ref": "scope_26a9c088b16c4365bb8c0d4efe1d1dc9",
+        "job": {
+          "prepared": null,
+          "id": "job_4224891d0f5243219c06aaafb7250bea",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_bca67d671ea7411aa0a50832f79c0147",
+          "scope_ref": "scope_26a9c088b16c4365bb8c0d4efe1d1dc9",
+          "readable_revision": 1,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 17250088,
+              "source_read_bytes": 0,
+              "result_read_bytes": 17250088,
+              "read_requests": 4,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 4,
+              "verified_cache_peak_bytes": 6610628,
+              "verified_part_load_ms": 6.810041
+            },
+            "result_write_bytes": 1034,
+            "rows": 1,
+            "target_partitions": 2,
+            "planning_ms": 0.7905409999999999,
+            "result_write_ms": 0.015333,
+            "commit_ack_ms": 0.14400000000000002,
+            "elapsed_ms": 17.390416,
+            "worker_pid": 94205,
+            "publication_ms": 0.112417,
+            "result_parts": 1,
+            "worker_elapsed_ms": 17.566208,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          },
+          "created_ms": 1790097899194,
+          "started_ms": 1790097899194,
+          "finished_ms": 1790097899212,
+          "stop_requested": null
+        },
+        "readable_revision": 1,
+        "observation": {
+          "result_ref": "res_bca67d671ea7411aa0a50832f79c0147",
+          "revision": 1,
+          "schema": [
+            {
+              "name": "count(*)",
+              "type": "Int64",
+              "nullable": false
+            },
+            {
+              "name": "sum(t.id)",
+              "type": "Decimal128(38, 0)",
+              "nullable": true
+            }
+          ],
+          "rows": [
+            [
+              "1048576",
+              "9444732966289046765568"
+            ]
+          ],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_26a9c088b16c4365bb8c0d4efe1d1dc9"
+            },
+            "final_for_request": true,
+            "source_consistency": "immutable_materialized",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "unknown"
+            },
+            "lineage": [
+              {
+                "binding": {
+                  "result_ref": "res_9fa85b9c4e554f75a48fba525618e8eb",
+                  "revision": 1
+                },
+                "accuracy": "exact",
+                "coverage": {
+                  "kind": "complete",
+                  "scope_ref": "scope_901b63e86c124cc0b2314052ff613213"
+                },
+                "numeric": {
+                  "policy": "rowtrail-numeric-v1",
+                  "other_sql": "engine_semantics",
+                  "input_provenance": "unknown"
+                }
+              }
+            ]
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 1,
+            "has_more": false
+          },
+          "next_cursor": null,
+          "read_metrics": {
+            "checksum_bytes": 1034,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 1034
+          }
+        },
+        "binding": {
+          "result_ref": "res_bca67d671ea7411aa0a50832f79c0147",
+          "revision": 1
+        },
+        "next_actions": [
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT 7 n",
+        "bindings": {},
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none"
+        }
+      },
+      "result": {
+        "job_id": "job_139a111c781741bebdc24cf5f1c83bbe",
+        "result_ref": "res_07a3d3fa900644f8a2a8528d924396d2",
+        "view_ref": "vw_8f3e1d1c5eb442ce899430307234bf43",
+        "scope_ref": "scope_1eaec6f2e67c44cbba01f6ac22aa0f5c",
+        "job": {
+          "prepared": null,
+          "id": "job_139a111c781741bebdc24cf5f1c83bbe",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_07a3d3fa900644f8a2a8528d924396d2",
+          "scope_ref": "scope_1eaec6f2e67c44cbba01f6ac22aa0f5c",
+          "readable_revision": 1,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 0,
+              "source_read_bytes": 0,
+              "result_read_bytes": 0,
+              "read_requests": 0,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 0,
+              "verified_cache_peak_bytes": 0,
+              "verified_part_load_ms": 0.0
+            },
+            "result_write_bytes": 698,
+            "rows": 1,
+            "target_partitions": 1,
+            "planning_ms": 0.35991700000000004,
+            "result_write_ms": 0.00875,
+            "commit_ack_ms": 0.134417,
+            "elapsed_ms": 0.5095,
+            "worker_pid": 94205,
+            "publication_ms": 0.077666,
+            "result_parts": 1,
+            "worker_elapsed_ms": 0.618541,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          },
+          "created_ms": 1790097899213,
+          "started_ms": 1790097899213,
+          "finished_ms": 1790097899214,
+          "stop_requested": null
+        },
+        "readable_revision": 1,
+        "observation": {
+          "result_ref": "res_07a3d3fa900644f8a2a8528d924396d2",
+          "revision": 1,
+          "schema": [
+            {
+              "name": "n",
+              "type": "Int64",
+              "nullable": false
+            }
+          ],
+          "rows": [
+            [
+              "7"
+            ]
+          ],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_1eaec6f2e67c44cbba01f6ac22aa0f5c"
+            },
+            "final_for_request": true,
+            "source_consistency": "immutable_materialized",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "declared"
+            },
+            "lineage": []
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 1,
+            "has_more": false
+          },
+          "next_cursor": null,
+          "read_metrics": {
+            "checksum_bytes": 698,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 698
+          }
+        },
+        "binding": {
+          "result_ref": "res_07a3d3fa900644f8a2a8528d924396d2",
+          "revision": 1
+        },
+        "next_actions": [
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "read",
+      "params": {
+        "result_ref": "res_07a3d3fa900644f8a2a8528d924396d2",
+        "revision": 1
+      },
+      "result": {
+        "result_ref": "res_07a3d3fa900644f8a2a8528d924396d2",
+        "revision": 1,
+        "schema": [
+          {
+            "name": "n",
+            "type": "Int64",
+            "nullable": false
+          }
+        ],
+        "rows": [
+          [
+            "7"
+          ]
+        ],
+        "quality": {
+          "accuracy": "exact",
+          "coverage": {
+            "kind": "complete",
+            "scope_ref": "scope_1eaec6f2e67c44cbba01f6ac22aa0f5c"
+          },
+          "final_for_request": true,
+          "source_consistency": "immutable_materialized",
+          "lineage": []
+        },
+        "validity": "valid",
+        "job_state": "completed",
+        "presentation": {
+          "returned_rows": 1,
+          "has_more": false
+        },
+        "next_cursor": null,
+        "read_metrics": {
+          "checksum_bytes": 698,
+          "part_file_bytes_opened": 0,
+          "inline_bytes_loaded": 698
+        }
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT SUM(n) FROM t",
+        "bindings": {
+          "t": {
+            "result_ref": "res_07a3d3fa900644f8a2a8528d924396d2",
+            "revision": 1
+          }
+        },
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none"
+        }
+      },
+      "result": {
+        "job_id": "job_5a68d995af8541c2b4eea8e5a34ce389",
+        "result_ref": "res_eebb6cd93515433fa1ae2de830a10218",
+        "view_ref": "vw_ae8f96613f4c42959355c8435208e029",
+        "scope_ref": "scope_e98443e3e7f2475790fdbdf5d5010307",
+        "job": {
+          "prepared": null,
+          "id": "job_5a68d995af8541c2b4eea8e5a34ce389",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_eebb6cd93515433fa1ae2de830a10218",
+          "scope_ref": "scope_e98443e3e7f2475790fdbdf5d5010307",
+          "readable_revision": 1,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 698,
+              "source_read_bytes": 0,
+              "result_read_bytes": 698,
+              "read_requests": 1,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 1,
+              "verified_cache_peak_bytes": 698,
+              "verified_part_load_ms": 0.243958
+            },
+            "result_write_bytes": 770,
+            "rows": 1,
+            "target_partitions": 1,
+            "planning_ms": 0.380958,
+            "result_write_ms": 0.008793,
+            "commit_ack_ms": 0.08541599999999999,
+            "elapsed_ms": 0.739833,
+            "worker_pid": 94205,
+            "publication_ms": 0.06933299999999999,
+            "result_parts": 1,
+            "worker_elapsed_ms": 0.8534579999999999,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          },
+          "created_ms": 1790097899215,
+          "started_ms": 1790097899215,
+          "finished_ms": 1790097899216,
+          "stop_requested": null
+        },
+        "readable_revision": 1,
+        "observation": {
+          "result_ref": "res_eebb6cd93515433fa1ae2de830a10218",
+          "revision": 1,
+          "schema": [
+            {
+              "name": "sum(t.n)",
+              "type": "Int64",
+              "nullable": true
+            }
+          ],
+          "rows": [
+            [
+              "7"
+            ]
+          ],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_e98443e3e7f2475790fdbdf5d5010307"
+            },
+            "final_for_request": true,
+            "source_consistency": "immutable_materialized",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "unknown"
+            },
+            "lineage": [
+              {
+                "binding": {
+                  "result_ref": "res_07a3d3fa900644f8a2a8528d924396d2",
+                  "revision": 1
+                },
+                "accuracy": "exact",
+                "coverage": {
+                  "kind": "complete",
+                  "scope_ref": "scope_1eaec6f2e67c44cbba01f6ac22aa0f5c"
+                },
+                "numeric": {
+                  "policy": "unknown"
+                }
+              }
+            ]
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 1,
+            "has_more": false
+          },
+          "next_cursor": null,
+          "read_metrics": {
+            "checksum_bytes": 770,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 770
+          }
+        },
+        "binding": {
+          "result_ref": "res_eebb6cd93515433fa1ae2de830a10218",
+          "revision": 1
+        },
+        "next_actions": [
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT * FROM t",
+        "bindings": {
+          "t": {
+            "result_ref": "res_eebb6cd93515433fa1ae2de830a10218",
+            "revision": 1
+          }
+        },
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none"
+        }
+      },
+      "result": {
+        "job_id": "job_d5820703eaa94c9f8c2ad7a159159eb6",
+        "result_ref": "res_32f527409fa249e29db96770e353b53d",
+        "view_ref": "vw_9647500276e34390bce00a1b5070a94b",
+        "scope_ref": "scope_47a4d4ca7ddc4c689712d2eacd96662b",
+        "job": {
+          "prepared": null,
+          "id": "job_d5820703eaa94c9f8c2ad7a159159eb6",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_32f527409fa249e29db96770e353b53d",
+          "scope_ref": "scope_47a4d4ca7ddc4c689712d2eacd96662b",
+          "readable_revision": 1,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 770,
+              "source_read_bytes": 0,
+              "result_read_bytes": 770,
+              "read_requests": 1,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 1,
+              "verified_cache_peak_bytes": 770,
+              "verified_part_load_ms": 0.230583
+            },
+            "result_write_bytes": 770,
+            "rows": 1,
+            "target_partitions": 1,
+            "planning_ms": 0.238334,
+            "result_write_ms": 0.007333,
+            "commit_ack_ms": 0.088333,
+            "elapsed_ms": 0.58025,
+            "worker_pid": 94205,
+            "publication_ms": 0.073667,
+            "result_parts": 1,
+            "worker_elapsed_ms": 0.685083,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          },
+          "created_ms": 1790097899216,
+          "started_ms": 1790097899216,
+          "finished_ms": 1790097899217,
+          "stop_requested": null
+        },
+        "readable_revision": 1,
+        "observation": {
+          "result_ref": "res_32f527409fa249e29db96770e353b53d",
+          "revision": 1,
+          "schema": [
+            {
+              "name": "sum(t.n)",
+              "type": "Int64",
+              "nullable": true
+            }
+          ],
+          "rows": [
+            [
+              "7"
+            ]
+          ],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_47a4d4ca7ddc4c689712d2eacd96662b"
+            },
+            "final_for_request": true,
+            "source_consistency": "immutable_materialized",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "unknown"
+            },
+            "lineage": [
+              {
+                "binding": {
+                  "result_ref": "res_eebb6cd93515433fa1ae2de830a10218",
+                  "revision": 1
+                },
+                "accuracy": "exact",
+                "coverage": {
+                  "kind": "complete",
+                  "scope_ref": "scope_e98443e3e7f2475790fdbdf5d5010307"
+                },
+                "numeric": {
+                  "policy": "rowtrail-numeric-v1",
+                  "other_sql": "engine_semantics",
+                  "input_provenance": "unknown"
+                }
+              }
+            ]
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 1,
+            "has_more": false
+          },
+          "next_cursor": null,
+          "read_metrics": {
+            "checksum_bytes": 770,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 770
+          }
+        },
+        "binding": {
+          "result_ref": "res_32f527409fa249e29db96770e353b53d",
+          "revision": 1
+        },
+        "next_actions": [
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT * FROM t",
+        "bindings": {
+          "t": {
+            "result_ref": "res_32f527409fa249e29db96770e353b53d",
+            "revision": 1
+          }
+        },
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none"
+        }
+      },
+      "result": {
+        "job_id": "job_cc5f214ebc9d47b49cedb20523d44c82",
+        "result_ref": "res_10a1400edf6c473e9d0817b2ca9f6b34",
+        "view_ref": "vw_d254a82ae25f481fa17114ef9ed6bdc4",
+        "scope_ref": "scope_909240fb316a470681b0cf72fe2dca66",
+        "job": {
+          "prepared": null,
+          "id": "job_cc5f214ebc9d47b49cedb20523d44c82",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_10a1400edf6c473e9d0817b2ca9f6b34",
+          "scope_ref": "scope_909240fb316a470681b0cf72fe2dca66",
+          "readable_revision": 1,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 770,
+              "source_read_bytes": 0,
+              "result_read_bytes": 770,
+              "read_requests": 1,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 1,
+              "verified_cache_peak_bytes": 770,
+              "verified_part_load_ms": 0.268084
+            },
+            "result_write_bytes": 770,
+            "rows": 1,
+            "target_partitions": 1,
+            "planning_ms": 0.236875,
+            "result_write_ms": 0.007043000000000001,
+            "commit_ack_ms": 0.125708,
+            "elapsed_ms": 0.6535,
+            "worker_pid": 94205,
+            "publication_ms": 0.094792,
+            "result_parts": 1,
+            "worker_elapsed_ms": 0.7896249999999999,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          },
+          "created_ms": 1790097899218,
+          "started_ms": 1790097899218,
+          "finished_ms": 1790097899219,
+          "stop_requested": null
+        },
+        "readable_revision": 1,
+        "observation": {
+          "result_ref": "res_10a1400edf6c473e9d0817b2ca9f6b34",
+          "revision": 1,
+          "schema": [
+            {
+              "name": "sum(t.n)",
+              "type": "Int64",
+              "nullable": true
+            }
+          ],
+          "rows": [
+            [
+              "7"
+            ]
+          ],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_909240fb316a470681b0cf72fe2dca66"
+            },
+            "final_for_request": true,
+            "source_consistency": "immutable_materialized",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "unknown"
+            },
+            "lineage": [
+              {
+                "binding": {
+                  "result_ref": "res_32f527409fa249e29db96770e353b53d",
+                  "revision": 1
+                },
+                "accuracy": "exact",
+                "coverage": {
+                  "kind": "complete",
+                  "scope_ref": "scope_47a4d4ca7ddc4c689712d2eacd96662b"
+                },
+                "numeric": {
+                  "policy": "rowtrail-numeric-v1",
+                  "other_sql": "engine_semantics",
+                  "input_provenance": "unknown"
+                }
+              }
+            ]
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 1,
+            "has_more": false
+          },
+          "next_cursor": null,
+          "read_metrics": {
+            "checksum_bytes": 770,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 770
+          }
+        },
+        "binding": {
+          "result_ref": "res_10a1400edf6c473e9d0817b2ca9f6b34",
+          "revision": 1
+        },
+        "next_actions": [
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "query",
+      "params": {
+        "sql": "SELECT * FROM t",
+        "bindings": {
+          "t": {
+            "result_ref": "res_10a1400edf6c473e9d0817b2ca9f6b34",
+            "revision": 1
+          }
+        },
+        "parameters": [],
+        "execution": {
+          "wait_ms": 1000,
+          "preview": "none"
+        }
+      },
+      "result": {
+        "job_id": "job_42547fb82d8240eb97d3dd7b02ef5889",
+        "result_ref": "res_c8317427d3664b1b9cb504aebab806bd",
+        "view_ref": "vw_9271f318d41a44799f661b86a21329aa",
+        "scope_ref": "scope_740e592fddaf49a2ae374ad4e3923405",
+        "job": {
+          "prepared": null,
+          "id": "job_42547fb82d8240eb97d3dd7b02ef5889",
+          "state": "completed",
+          "phase": "completed",
+          "result_ref": "res_c8317427d3664b1b9cb504aebab806bd",
+          "scope_ref": "scope_740e592fddaf49a2ae374ad4e3923405",
+          "readable_revision": 1,
+          "error": null,
+          "metrics": {
+            "io": {
+              "reserved_read_bytes": 770,
+              "source_read_bytes": 0,
+              "result_read_bytes": 770,
+              "read_requests": 1,
+              "verified_cache_hits": 0,
+              "verified_cache_misses": 1,
+              "verified_cache_peak_bytes": 770,
+              "verified_part_load_ms": 0.231792
+            },
+            "result_write_bytes": 770,
+            "rows": 1,
+            "target_partitions": 1,
+            "planning_ms": 0.219083,
+            "result_write_ms": 0.0069169999999999995,
+            "commit_ack_ms": 0.086833,
+            "elapsed_ms": 0.556416,
+            "worker_pid": 94205,
+            "publication_ms": 0.07179200000000001,
+            "result_parts": 1,
+            "worker_elapsed_ms": 0.6786249999999999,
+            "execution_stopped": true,
+            "worker_exit_confirmed": false,
+            "worker_reused": true,
+            "plan_available": true
+          },
+          "created_ms": 1790097899219,
+          "started_ms": 1790097899219,
+          "finished_ms": 1790097899220,
+          "stop_requested": null
+        },
+        "readable_revision": 1,
+        "observation": {
+          "result_ref": "res_c8317427d3664b1b9cb504aebab806bd",
+          "revision": 1,
+          "schema": [
+            {
+              "name": "sum(t.n)",
+              "type": "Int64",
+              "nullable": true
+            }
+          ],
+          "rows": [
+            [
+              "7"
+            ]
+          ],
+          "quality": {
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_740e592fddaf49a2ae374ad4e3923405"
+            },
+            "final_for_request": true,
+            "source_consistency": "immutable_materialized",
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "unknown"
+            },
+            "lineage": [
+              {
+                "binding": {
+                  "result_ref": "res_10a1400edf6c473e9d0817b2ca9f6b34",
+                  "revision": 1
+                },
+                "accuracy": "exact",
+                "coverage": {
+                  "kind": "complete",
+                  "scope_ref": "scope_909240fb316a470681b0cf72fe2dca66"
+                },
+                "numeric": {
+                  "policy": "rowtrail-numeric-v1",
+                  "other_sql": "engine_semantics",
+                  "input_provenance": "unknown"
+                }
+              }
+            ]
+          },
+          "validity": "valid",
+          "job_state": "completed",
+          "presentation": {
+            "returned_rows": 1,
+            "has_more": false
+          },
+          "next_cursor": null,
+          "read_metrics": {
+            "checksum_bytes": 770,
+            "part_file_bytes_opened": 0,
+            "inline_bytes_loaded": 770
+          }
+        },
+        "binding": {
+          "result_ref": "res_c8317427d3664b1b9cb504aebab806bd",
+          "revision": 1
+        },
+        "next_actions": [
+          "query"
+        ]
+      }
+    },
+    {
+      "method": "doctor",
+      "params": {},
+      "result": {
+        "store_id": "store_5a33938b514d4c36bc9b2aadc2507784",
+        "coordinator_pid": 94187,
+        "capabilities": {
+          "api_version": "1",
+          "metadata_schema": "8; one-way upgrade from 3/4/5/6/7",
+          "numeric": {
+            "policy": "rowtrail-numeric-v1",
+            "checked_sum": "Int64, UInt64, Decimal32/64/128/256; grouped, distinct, window and partial merge; checked i256 state, declared output range",
+            "decimal_output": "declared precision checked before persistence and presentation",
+            "other_sql_arithmetic": "engine semantics; finite-width and floating-point arithmetic are not certified",
+            "accuracy_meaning": "exact describes sampling, not an arbitrary-precision arithmetic guarantee"
+          },
+          "progressive_aggregation": {
+            "fragment_unit": "parquet_row_group",
+            "fragment_units": [
+              "parquet_row_group",
+              "manifest_file"
+            ],
+            "checkpoint_interval_ms": 50,
+            "aggregate_limit": 16,
+            "numeric_inputs": "Int64, UInt64, Decimal128 scale 0..6",
+            "sum": "Decimal128(38,input_scale)",
+            "avg": "Decimal128(38,6), truncation toward zero",
+            "group_by": false,
+            "sampling": false
+          },
+          "formats": [
+            "csv",
+            "tsv",
+            "parquet"
+          ],
+          "source": "local",
+          "sql": "DataFusion 55.0.0 read-only SELECT; explicit bindings",
+          "analysis": [
+            "inspect:null_count",
+            "inspect:min_max",
+            "inspect:top_k",
+            "analyze:count",
+            "analyze:sum",
+            "analyze:avg"
+          ],
+          "entries": [
+            "cli",
+            "ndjson_session",
+            "mcp_stdio",
+            "rust_sdk"
+          ],
+          "workspace_summary": "bounded metadata catalog with exact label filter, fixed bindings, row counts and bounded field hints; store-scoped cursor; no source scan",
+          "query_parallelism": {
+            "auto_max": 4,
+            "serial_below_input_bytes": 16777216,
+            "pool_bytes_per_parallel_partition": 67108864,
+            "explicit_target_partitions": "1..8; requires 64 MiB per partition when greater than one",
+            "target_not_thread_limit": true
+          },
+          "prepare": "explicit streaming CSV/TSV to managed Parquet; atomic dataset visibility",
+          "workspace_quota": "managed data plus conservative result/spill reservations; excludes SQLite/WAL overhead, logs and external exports",
+          "saved_result_scan": "whole IPC parts; separate files remain parallel; each new job verifies again",
+          "verified_part_cache_bytes": 8388608,
+          "result_part_target_bytes": 6291456,
+          "result_part_target_basis": "encoded IPC plus next batch array memory; prepared Parquet keeps input-memory target",
+          "inline_result_part_max_bytes": 131072,
+          "result_part_max_bytes": 8388608,
+          "native_tasks": false,
+          "automatic_resume": false,
+          "source_consistency": "best_effort",
+          "result_storage": "immutable Arrow IPC; parts up to 128 KiB in SQLite, larger parts in files",
+          "max_frame_bytes": 1048576,
+          "minimum_error_budget_bytes": 512,
+          "max_output_bytes": 1048064,
+          "max_output_rows": 10000,
+          "max_manifest_files": 128,
+          "max_directory_entries": 4096,
+          "default_parallel_jobs": 1,
+          "cancellation": "cooperative signal with forced worker termination after 300ms",
+          "engine_memory_limit": "MemoryPool; not RSS hard limit",
+          "scan_limit": "byte reservation before local reads",
+          "result_retention": "retained by default; explicit pin/release and dependency-safe workspace gc",
+          "event_retention": "until workspace removal; no event pruning yet",
+          "unsupported": [
+            "Windows",
+            "remote",
+            "sampling",
+            "native_tasks",
+            "automatic_resume",
+            "union_by_name",
+            "binary_inline",
+            "RSS_hard_limit"
+          ]
+        },
+        "workspace": "/private<fixture>/workspace",
+        "runtime_version": "0.1.0-beta.1"
+      }
+    },
+    {
+      "method": "workspace",
+      "params": {
+        "action": "summary",
+        "kind": "result",
+        "label": "handoff",
+        "limit": 2,
+        "max_bytes": 8192
+      },
+      "result": {
+        "store_id": "store_5a33938b514d4c36bc9b2aadc2507784",
+        "counts": {
+          "datasets": 4,
+          "active_jobs": 0,
+          "readable_results": 19
+        },
+        "items": [
+          {
+            "kind": "result",
+            "ref": "res_27d260c90b674fc39f36d62d1483a08c",
+            "label": "handoff",
+            "schema_hint": {
+              "field_count": 3,
+              "omitted_fields": 0,
+              "fields": [
+                {
+                  "name": "id",
+                  "type": "Int64",
+                  "nullable": true
+                },
+                {
+                  "name": "amount",
+                  "type": "Int64",
+                  "nullable": true
+                },
+                {
+                  "name": "region",
+                  "type": "Utf8",
+                  "nullable": true
+                }
+              ]
+            },
+            "row_count": 4,
+            "binding": {
+              "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+              "revision": 1
+            },
+            "stored_validity": "valid",
+            "scope_ref": "scope_47855a0593854538b013fdb72430bb67",
+            "quality": {
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_47855a0593854538b013fdb72430bb67"
+              },
+              "final_for_request": true,
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "unknown"
+              }
+            },
+            "next_actions": [
+              "read",
+              "query",
+              "export",
+              "release"
+            ]
+          }
+        ],
+        "next_cursor": null,
+        "membership": "fixed at first page; values observed per page",
+        "validity_check": "stored only; source identities checked when bindings are used"
+      }
+    },
+    {
+      "method": "doctor",
+      "params": {},
+      "result": {
+        "store_id": "store_5a33938b514d4c36bc9b2aadc2507784",
+        "coordinator_pid": 94187,
+        "capabilities": {
+          "api_version": "1",
+          "metadata_schema": "8; one-way upgrade from 3/4/5/6/7",
+          "numeric": {
+            "policy": "rowtrail-numeric-v1",
+            "checked_sum": "Int64, UInt64, Decimal32/64/128/256; grouped, distinct, window and partial merge; checked i256 state, declared output range",
+            "decimal_output": "declared precision checked before persistence and presentation",
+            "other_sql_arithmetic": "engine semantics; finite-width and floating-point arithmetic are not certified",
+            "accuracy_meaning": "exact describes sampling, not an arbitrary-precision arithmetic guarantee"
+          },
+          "progressive_aggregation": {
+            "fragment_unit": "parquet_row_group",
+            "fragment_units": [
+              "parquet_row_group",
+              "manifest_file"
+            ],
+            "checkpoint_interval_ms": 50,
+            "aggregate_limit": 16,
+            "numeric_inputs": "Int64, UInt64, Decimal128 scale 0..6",
+            "sum": "Decimal128(38,input_scale)",
+            "avg": "Decimal128(38,6), truncation toward zero",
+            "group_by": false,
+            "sampling": false
+          },
+          "formats": [
+            "csv",
+            "tsv",
+            "parquet"
+          ],
+          "source": "local",
+          "sql": "DataFusion 55.0.0 read-only SELECT; explicit bindings",
+          "analysis": [
+            "inspect:null_count",
+            "inspect:min_max",
+            "inspect:top_k",
+            "analyze:count",
+            "analyze:sum",
+            "analyze:avg"
+          ],
+          "entries": [
+            "cli",
+            "ndjson_session",
+            "mcp_stdio",
+            "rust_sdk"
+          ],
+          "workspace_summary": "bounded metadata catalog with exact label filter, fixed bindings, row counts and bounded field hints; store-scoped cursor; no source scan",
+          "query_parallelism": {
+            "auto_max": 4,
+            "serial_below_input_bytes": 16777216,
+            "pool_bytes_per_parallel_partition": 67108864,
+            "explicit_target_partitions": "1..8; requires 64 MiB per partition when greater than one",
+            "target_not_thread_limit": true
+          },
+          "prepare": "explicit streaming CSV/TSV to managed Parquet; atomic dataset visibility",
+          "workspace_quota": "managed data plus conservative result/spill reservations; excludes SQLite/WAL overhead, logs and external exports",
+          "saved_result_scan": "whole IPC parts; separate files remain parallel; each new job verifies again",
+          "verified_part_cache_bytes": 8388608,
+          "result_part_target_bytes": 6291456,
+          "result_part_target_basis": "encoded IPC plus next batch array memory; prepared Parquet keeps input-memory target",
+          "inline_result_part_max_bytes": 131072,
+          "result_part_max_bytes": 8388608,
+          "native_tasks": false,
+          "automatic_resume": false,
+          "source_consistency": "best_effort",
+          "result_storage": "immutable Arrow IPC; parts up to 128 KiB in SQLite, larger parts in files",
+          "max_frame_bytes": 1048576,
+          "minimum_error_budget_bytes": 512,
+          "max_output_bytes": 1048064,
+          "max_output_rows": 10000,
+          "max_manifest_files": 128,
+          "max_directory_entries": 4096,
+          "default_parallel_jobs": 1,
+          "cancellation": "cooperative signal with forced worker termination after 300ms",
+          "engine_memory_limit": "MemoryPool; not RSS hard limit",
+          "scan_limit": "byte reservation before local reads",
+          "result_retention": "retained by default; explicit pin/release and dependency-safe workspace gc",
+          "event_retention": "until workspace removal; no event pruning yet",
+          "unsupported": [
+            "Windows",
+            "remote",
+            "sampling",
+            "native_tasks",
+            "automatic_resume",
+            "union_by_name",
+            "binary_inline",
+            "RSS_hard_limit"
+          ]
+        },
+        "workspace": "/private<fixture>/workspace",
+        "runtime_version": "0.1.0-beta.1"
+      }
+    },
+    {
+      "method": "workspace",
+      "params": {
+        "action": "summary",
+        "kind": "result",
+        "label": "handoff",
+        "limit": 2,
+        "max_bytes": 8192
+      },
+      "result": {
+        "store_id": "store_5a33938b514d4c36bc9b2aadc2507784",
+        "counts": {
+          "datasets": 4,
+          "active_jobs": 0,
+          "readable_results": 19
+        },
+        "items": [
+          {
+            "kind": "result",
+            "ref": "res_27d260c90b674fc39f36d62d1483a08c",
+            "label": "handoff",
+            "schema_hint": {
+              "field_count": 3,
+              "omitted_fields": 0,
+              "fields": [
+                {
+                  "name": "id",
+                  "type": "Int64",
+                  "nullable": true
+                },
+                {
+                  "name": "amount",
+                  "type": "Int64",
+                  "nullable": true
+                },
+                {
+                  "name": "region",
+                  "type": "Utf8",
+                  "nullable": true
+                }
+              ]
+            },
+            "row_count": 4,
+            "binding": {
+              "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+              "revision": 1
+            },
+            "stored_validity": "valid",
+            "scope_ref": "scope_47855a0593854538b013fdb72430bb67",
+            "quality": {
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_47855a0593854538b013fdb72430bb67"
+              },
+              "final_for_request": true,
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "unknown"
+              }
+            },
+            "next_actions": [
+              "read",
+              "query",
+              "export",
+              "release"
+            ]
+          }
+        ],
+        "next_cursor": null,
+        "membership": "fixed at first page; values observed per page",
+        "validity_check": "stored only; source identities checked when bindings are used"
+      }
+    },
+    {
+      "method": "doctor",
+      "params": {},
+      "error": {
+        "code": "ENDPOINT_INVALID",
+        "details": {
+          "workspace": "/private<fixture>/workspace",
+          "endpoint": "/private<fixture>/workspace/runtime-endpoint.json",
+          "runtime_log": "/private<fixture>/workspace/logs/runtime.log",
+          "recovery": "Reconnect to inspect durable state. If an older coordinator owns this workspace, close its sessions and let it exit before upgrading. Never automatically replay a possibly accepted request.",
+          "session_unusable": true
+        }
+      },
+      "response": {
+        "api_version": "1",
+        "request_id": "4ec13f93b66f4d4baa410b8f213c37b4",
+        "ok": false,
+        "error": {
+          "code": "ENDPOINT_INVALID",
+          "message": "descriptor and live runtime identities differ",
+          "retryable": true,
+          "details": {
+            "workspace": "/private<fixture>/workspace",
+            "endpoint": "/private<fixture>/workspace/runtime-endpoint.json",
+            "runtime_log": "/private<fixture>/workspace/logs/runtime.log",
+            "recovery": "Reconnect to inspect durable state. If an older coordinator owns this workspace, close its sessions and let it exit before upgrading. Never automatically replay a possibly accepted request.",
+            "session_unusable": true
+          }
+        }
+      }
+    },
+    {
+      "method": "doctor",
+      "params": {},
+      "error": {
+        "code": "ENDPOINT_INVALID",
+        "details": {
+          "workspace": "/private<fixture>/workspace",
+          "endpoint": "/private<fixture>/workspace/runtime-endpoint.json",
+          "runtime_log": "/private<fixture>/workspace/logs/runtime.log",
+          "recovery": "Reconnect to inspect durable state. If an older coordinator owns this workspace, close its sessions and let it exit before upgrading. Never automatically replay a possibly accepted request.",
+          "session_unusable": true
+        }
+      },
+      "response": {
+        "api_version": "1",
+        "request_id": "6145c61411b2432eaa6fab4c08ea54a4",
+        "ok": false,
+        "error": {
+          "code": "ENDPOINT_INVALID",
+          "message": "endpoint identity mismatch",
+          "retryable": false,
+          "details": {
+            "workspace": "/private<fixture>/workspace",
+            "endpoint": "/private<fixture>/workspace/runtime-endpoint.json",
+            "runtime_log": "/private<fixture>/workspace/logs/runtime.log",
+            "recovery": "Reconnect to inspect durable state. If an older coordinator owns this workspace, close its sessions and let it exit before upgrading. Never automatically replay a possibly accepted request.",
+            "session_unusable": true
+          }
+        }
+      }
+    },
+    {
+      "method": "doctor",
+      "params": {},
+      "error": {
+        "code": "ENDPOINT_INVALID",
+        "details": {
+          "workspace": "/private<fixture>/workspace",
+          "endpoint": "/private<fixture>/workspace/runtime-endpoint.json",
+          "runtime_log": "/private<fixture>/workspace/logs/runtime.log",
+          "recovery": "Reconnect to inspect durable state. If an older coordinator owns this workspace, close its sessions and let it exit before upgrading. Never automatically replay a possibly accepted request.",
+          "session_unusable": true
+        }
+      },
+      "response": {
+        "api_version": "1",
+        "request_id": "eddd8964d03e422684322949c5c54815",
+        "ok": false,
+        "error": {
+          "code": "ENDPOINT_INVALID",
+          "message": "descriptor and live runtime identities differ",
+          "retryable": true,
+          "details": {
+            "workspace": "/private<fixture>/workspace",
+            "endpoint": "/private<fixture>/workspace/runtime-endpoint.json",
+            "runtime_log": "/private<fixture>/workspace/logs/runtime.log",
+            "recovery": "Reconnect to inspect durable state. If an older coordinator owns this workspace, close its sessions and let it exit before upgrading. Never automatically replay a possibly accepted request.",
+            "session_unusable": true
+          }
+        }
+      }
+    },
+    {
+      "method": "doctor",
+      "params": {},
+      "error": {
+        "code": "ENDPOINT_INVALID",
+        "details": {
+          "workspace": "/private<fixture>/workspace",
+          "endpoint": "/private<fixture>/workspace/runtime-endpoint.json",
+          "runtime_log": "/private<fixture>/workspace/logs/runtime.log",
+          "recovery": "Reconnect to inspect durable state. If an older coordinator owns this workspace, close its sessions and let it exit before upgrading. Never automatically replay a possibly accepted request.",
+          "session_unusable": true
+        }
+      },
+      "response": {
+        "api_version": "1",
+        "request_id": "afd368c52ebd48d6b5057f60a55c7558",
+        "ok": false,
+        "error": {
+          "code": "ENDPOINT_INVALID",
+          "message": "insecure or oversized endpoint descriptor",
+          "retryable": false,
+          "details": {
+            "workspace": "/private<fixture>/workspace",
+            "endpoint": "/private<fixture>/workspace/runtime-endpoint.json",
+            "runtime_log": "/private<fixture>/workspace/logs/runtime.log",
+            "recovery": "Reconnect to inspect durable state. If an older coordinator owns this workspace, close its sessions and let it exit before upgrading. Never automatically replay a possibly accepted request.",
+            "session_unusable": true
+          }
+        }
+      }
+    },
+    {
+      "method": "doctor",
+      "params": {},
+      "result": {
+        "store_id": "store_5a33938b514d4c36bc9b2aadc2507784",
+        "coordinator_pid": 94218,
+        "capabilities": {
+          "api_version": "1",
+          "metadata_schema": "8; one-way upgrade from 3/4/5/6/7",
+          "numeric": {
+            "policy": "rowtrail-numeric-v1",
+            "checked_sum": "Int64, UInt64, Decimal32/64/128/256; grouped, distinct, window and partial merge; checked i256 state, declared output range",
+            "decimal_output": "declared precision checked before persistence and presentation",
+            "other_sql_arithmetic": "engine semantics; finite-width and floating-point arithmetic are not certified",
+            "accuracy_meaning": "exact describes sampling, not an arbitrary-precision arithmetic guarantee"
+          },
+          "progressive_aggregation": {
+            "fragment_unit": "parquet_row_group",
+            "fragment_units": [
+              "parquet_row_group",
+              "manifest_file"
+            ],
+            "checkpoint_interval_ms": 50,
+            "aggregate_limit": 16,
+            "numeric_inputs": "Int64, UInt64, Decimal128 scale 0..6",
+            "sum": "Decimal128(38,input_scale)",
+            "avg": "Decimal128(38,6), truncation toward zero",
+            "group_by": false,
+            "sampling": false
+          },
+          "formats": [
+            "csv",
+            "tsv",
+            "parquet"
+          ],
+          "source": "local",
+          "sql": "DataFusion 55.0.0 read-only SELECT; explicit bindings",
+          "analysis": [
+            "inspect:null_count",
+            "inspect:min_max",
+            "inspect:top_k",
+            "analyze:count",
+            "analyze:sum",
+            "analyze:avg"
+          ],
+          "entries": [
+            "cli",
+            "ndjson_session",
+            "mcp_stdio",
+            "rust_sdk"
+          ],
+          "workspace_summary": "bounded metadata catalog with exact label filter, fixed bindings, row counts and bounded field hints; store-scoped cursor; no source scan",
+          "query_parallelism": {
+            "auto_max": 4,
+            "serial_below_input_bytes": 16777216,
+            "pool_bytes_per_parallel_partition": 67108864,
+            "explicit_target_partitions": "1..8; requires 64 MiB per partition when greater than one",
+            "target_not_thread_limit": true
+          },
+          "prepare": "explicit streaming CSV/TSV to managed Parquet; atomic dataset visibility",
+          "workspace_quota": "managed data plus conservative result/spill reservations; excludes SQLite/WAL overhead, logs and external exports",
+          "saved_result_scan": "whole IPC parts; separate files remain parallel; each new job verifies again",
+          "verified_part_cache_bytes": 8388608,
+          "result_part_target_bytes": 6291456,
+          "result_part_target_basis": "encoded IPC plus next batch array memory; prepared Parquet keeps input-memory target",
+          "inline_result_part_max_bytes": 131072,
+          "result_part_max_bytes": 8388608,
+          "native_tasks": false,
+          "automatic_resume": false,
+          "source_consistency": "best_effort",
+          "result_storage": "immutable Arrow IPC; parts up to 128 KiB in SQLite, larger parts in files",
+          "max_frame_bytes": 1048576,
+          "minimum_error_budget_bytes": 512,
+          "max_output_bytes": 1048064,
+          "max_output_rows": 10000,
+          "max_manifest_files": 128,
+          "max_directory_entries": 4096,
+          "default_parallel_jobs": 1,
+          "cancellation": "cooperative signal with forced worker termination after 300ms",
+          "engine_memory_limit": "MemoryPool; not RSS hard limit",
+          "scan_limit": "byte reservation before local reads",
+          "result_retention": "retained by default; explicit pin/release and dependency-safe workspace gc",
+          "event_retention": "until workspace removal; no event pruning yet",
+          "unsupported": [
+            "Windows",
+            "remote",
+            "sampling",
+            "native_tasks",
+            "automatic_resume",
+            "union_by_name",
+            "binary_inline",
+            "RSS_hard_limit"
+          ]
+        },
+        "workspace": "/private<fixture>/workspace",
+        "runtime_version": "0.1.0-beta.1"
+      }
+    },
+    {
+      "method": "workspace",
+      "params": {
+        "action": "summary",
+        "kind": "result",
+        "label": "handoff",
+        "limit": 2,
+        "max_bytes": 8192
+      },
+      "result": {
+        "store_id": "store_5a33938b514d4c36bc9b2aadc2507784",
+        "counts": {
+          "datasets": 4,
+          "active_jobs": 0,
+          "readable_results": 19
+        },
+        "items": [
+          {
+            "kind": "result",
+            "ref": "res_27d260c90b674fc39f36d62d1483a08c",
+            "label": "handoff",
+            "schema_hint": {
+              "field_count": 3,
+              "omitted_fields": 0,
+              "fields": [
+                {
+                  "name": "id",
+                  "type": "Int64",
+                  "nullable": true
+                },
+                {
+                  "name": "amount",
+                  "type": "Int64",
+                  "nullable": true
+                },
+                {
+                  "name": "region",
+                  "type": "Utf8",
+                  "nullable": true
+                }
+              ]
+            },
+            "row_count": 4,
+            "binding": {
+              "result_ref": "res_27d260c90b674fc39f36d62d1483a08c",
+              "revision": 1
+            },
+            "stored_validity": "valid",
+            "scope_ref": "scope_47855a0593854538b013fdb72430bb67",
+            "quality": {
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_47855a0593854538b013fdb72430bb67"
+              },
+              "final_for_request": true,
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "unknown"
+              }
+            },
+            "next_actions": [
+              "read",
+              "query",
+              "export",
+              "release"
+            ]
+          }
+        ],
+        "next_cursor": null,
+        "membership": "fixed at first page; values observed per page",
+        "validity_check": "stored only; source identities checked when bindings are used"
+      }
+    },
+    {
+      "method": "doctor",
+      "params": {},
+      "error": {
+        "code": "RUNTIME_START_FAILED",
+        "details": {
+          "workspace": "/private<fixture>/missing",
+          "endpoint": "/private<fixture>/missing/runtime-endpoint.json",
+          "runtime_log": "/private<fixture>/missing/logs/runtime.log",
+          "recovery": "Reconnect to inspect durable state. If an older coordinator owns this workspace, close its sessions and let it exit before upgrading. Never automatically replay a possibly accepted request.",
+          "session_unusable": true
+        }
+      },
+      "response": {
+        "api_version": "1",
+        "request_id": "f2171f950e0443a3bb230179cf94f325",
+        "ok": false,
+        "error": {
+          "code": "RUNTIME_START_FAILED",
+          "message": "cannot start <fixture>/missing-runtime: No such file or directory (os error 2)",
+          "retryable": false,
+          "details": {
+            "workspace": "/private<fixture>/missing",
+            "endpoint": "/private<fixture>/missing/runtime-endpoint.json",
+            "runtime_log": "/private<fixture>/missing/logs/runtime.log",
+            "recovery": "Reconnect to inspect durable state. If an older coordinator owns this workspace, close its sessions and let it exit before upgrading. Never automatically replay a possibly accepted request.",
+            "session_unusable": true
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 # Checked sums, stable connections and bounded follow-up work
 
-Status: implemented for beta.1; final native acceptance and publication pending.
+Status: implemented and accepted for beta.1; native macOS/Linux tests and
+independent artifact checks pass. [Evidence](../verification.md).
 The work started as alpha.9. The beta label follows local numeric, connection,
 legacy-upgrade and full-regression acceptance, with native release gates retained.
 
@@ -69,12 +70,13 @@ strings and schema remain the default; optional Python int/Decimal conversion
 never uses float for those values.
 
 Saved Arrow results are already known IPC files with parts bounded to 8 MiB.
-An experimental source skips format sniffing and keeps each part whole while
+A dedicated source skips format sniffing and keeps each part whole while
 allowing separate files to run in parallel. This targets duplicate whole-part
 verification caused by byte-range repartitioning. The existing job-local 8 MiB
 verified-byte cache, SHA-256, scan reservation, publication fsync/SQLite FULL,
 commit-before-ACK and cancellation ordering stay intact. Each new job revalidates.
-Retain the experiment only if complete workflow and resource tests support it.
+Complete workflow, resource and one-pass scan-budget tests retain this change;
+measurements also record the separate exploration and warm-tail costs.
 
 ## Acceptance and beta decision
 

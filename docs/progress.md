@@ -2,8 +2,8 @@
 
 [Home](../README.md) · [Verification and measurements](verification.md)
 
-Updated 2026-09-23 for **0.1.0-beta.1**. Local acceptance passed; final native
-build verification and publication are in progress.
+Updated 2026-09-23 for **0.1.0-beta.1**. Native macOS/Linux acceptance and
+independent release artifact verification pass.
 
 ## Beta.1
 
@@ -24,9 +24,21 @@ build verification and publication are in progress.
   partitioning while retaining the job-local 8 MiB cache and all durability rules.
 - Schema 8 upgrades 3/4/5/6/7 and excludes old runtimes. Local tests preserve old
   fixed and partial revisions and reject invalid old Decimal display/export.
-- 113 local integration scenarios and 14 Rust tests pass, including the original
-  subprocess publication/cancellation tests. New native CI gates also fetch the
+- 113 integration scenarios and 14 Rust tests pass locally and on both native
+  build platforms, including the original subprocess publication/cancellation tests. Native CI gates also fetch the
   checksum-pinned published alpha.8 package and test its real upgrade.
+- Seven alternating local trials: save large subset, ten follow-ups and reconnect
+  takes 934.02 → 719.63 ms; ten-query time 567.27 → 375.18 ms. Each follow-up reads
+  82.03 → 28.16 MB of saved data, zero original bytes. Save time +4.3%, separate
+  million-row exploration +4.0%, response bytes +9.2%; warm p95 also regresses.
+- Native downloads are 19.37 / 22.71 MB, with no added external dependency. SHA-256,
+  executable test hashes and all 557 notices match. The same Linux archive also
+  passes Ubuntu 24.04 installation and its bundled demo. The actual macOS archive
+  passes the new suite, real old-version upgrade and installed demo again locally.
+
+[Release](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.1) ·
+[Native CI](https://github.com/adam2go/rowtrail/actions/runs/35757844420) ·
+[Artifact provenance](release-verification.json).
 
 [Decision](decisions/009-numeric-reconnection-and-reuse.md) ·
 [Numeric contract](numeric-contract.md) · [Verification](verification.md).
@@ -68,13 +80,13 @@ build verification and publication are in progress.
   upgrade again. Installer checks actual executables before switching links,
   including when an explicitly selected older package needs a newer libc.
 
-[Design](decisions/008-bounded-parallelism-and-handoff.md) · [Measurements](verification.md).
+[Design](decisions/008-bounded-parallelism-and-handoff.md) · [Measurements](releases/alpha8-verification.md).
 
 Published [v0.1.0-alpha.8](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-alpha.8).
-The public macOS installer selects alpha.8 by default; its actual downloaded
+At publication, the public macOS installer selected alpha.8 by default; its downloaded
 binaries, printed-client composition, labeled handoff and bundled demo pass.
 [Public install](../benchmarks/performance/alpha8/public-install.json) ·
-[Release provenance](release-verification.json).
+[Release provenance](releases/alpha8-verification.json).
 
 ## Alpha.7
 
@@ -267,8 +279,8 @@ size budgets remain mandatory. [Alpha.2 history](releases/alpha2-progress.md).
 - Windows, remote sources, union-by-name, native MCP Tasks, automatic host resume,
   inline binary cells remain unimplemented. A small synthetic agent pilot is not
   evidence of adoption or broadly improved agent efficiency.
-- Preview metadata is versioned with no migration promise. Packages are unsigned
-  engineering previews. CSV sidecars are not automatically reimported as schema
+- Pre-1.0 metadata may still change; documented one-way migrations are tested.
+  Packages are unsigned beta previews. CSV sidecars are not automatically reimported as schema
   or quality; use Parquet when carrying those properties through reopening.
 
 ## Verify from source
