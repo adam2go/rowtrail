@@ -230,3 +230,9 @@ records. Executable sources, installer and CI checks match the verified source
 commit. Bundled docs are the CI-time candidate snapshot; the repository contains
 the completed report. Local timing results use the local build and retain its
 separate hashes; no claim of identical CI-machine timings is made.
+
+After publication, the [public installer probe](../benchmarks/performance/alpha7/public-install.json)
+downloaded the tagged installer and release asset without a version override.
+Checksum-verified installation, exact large integers, workspace catalog and the
+locally printed client's saved-result composition all passed. Installed binary
+hashes match the independently verified macOS CI artifact.
