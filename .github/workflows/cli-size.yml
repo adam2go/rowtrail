@@ -1,0 +1,36 @@
+name: Compare CLI build sizes
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/cli-size.yml
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87
+        with:
+          toolchain: 1.94.0
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: Compare only the CLI; leave engine optimization unchanged
+        shell: python
+        run: |
+          import hashlib, json, pathlib, subprocess
+          results = []
+          for units, opt in [(8, 3), (1, 2), (8, 2)]:
+              subprocess.run(['cargo', 'build', '--release', '--locked', '-p', 'rowtrail-cli',
+                  '--config', f'profile.release.package.rowtrail-cli.codegen-units={units}',
+                  '--config', f'profile.release.package.rowtrail-cli.opt-level={opt}'], check=True)
+              binary = pathlib.Path('target/release/rowtrail')
+              results.append({'codegen_units': units, 'opt_level': opt,
+                  'bytes': binary.stat().st_size,
+                  'sha256': hashlib.sha256(binary.read_bytes()).hexdigest()})
+              print(json.dumps(results[-1]), flush=True)
+          pathlib.Path('cli-size.json').write_text(json.dumps(results, indent=2) + '\n')
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: linux-cli-size-comparison
+          path: cli-size.json
