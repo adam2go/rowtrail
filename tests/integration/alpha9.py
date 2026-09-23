@@ -195,7 +195,7 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-alpha9-') as td:
         finally:
             if previous is None:os.environ.pop('ROWTRAIL_RUNTIME',None)
             else:os.environ['ROWTRAIL_RUNTIME']=previous
-        fake=RowTrail.__new__(RowTrail);fake.usable=True
+        fake=RowTrail.__new__(RowTrail);fake.usable=True;fake.response_mode="full"
         fake.process=subprocess.Popen([sys.executable,'-u','-c',
             "import sys,json,time; r=json.loads(sys.stdin.readline()); print(json.dumps({'api_version':'1','request_id':r['request_id'],'ok':False,'error':'malformed'}),flush=True); time.sleep(30)"],
             stdin=subprocess.PIPE,stdout=subprocess.PIPE,text=True)

@@ -155,6 +155,7 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-alpha7-') as td:
 
         bad = RowTrail.__new__(RowTrail)
         bad.usable = True
+        bad.response_mode = "full"
         bad.process = subprocess.Popen([sys.executable, '-u', '-c', "import sys,json,time; sys.stdin.readline(); print(json.dumps({'api_version':'1','request_id':'wrong','ok':True,'result':{}}),flush=True); time.sleep(30)"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
         try:
             try:

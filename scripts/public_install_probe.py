@@ -89,7 +89,11 @@ try:
             analysis_pid=json.loads(subprocess.check_output([
                 str(binary),'--workspace',analysis[field],'doctor'],text=True))['result']['coordinator_pid']
             pids.add(analysis_pid)
-        report = {'status': 'passed', 'installer_url': url,
+        agent=json.loads(subprocess.check_output([str(binary),'demo','--directory',str(base/'agent-demo'),'--rows','128'],text=True))
+        assert agent['status']=='passed' and agent['checks']['separate_recipient_process'] and agent['checks']['original_csv_removed']
+        for name in ('full','compact','receiver'):
+            pids.add(json.loads(subprocess.check_output([str(binary),'--workspace',str(base/'agent-demo'/name),'doctor'],text=True))['result']['coordinator_pid'])
+        report = {'agent_demo':{'status':agent['status'],**agent['checks']},'status': 'passed', 'installer_url': url,
                   'installer_sha256': hashlib.file_digest(installer.open('rb'), 'sha256').hexdigest(),
                   'version': installed_version, 'default_version_matches_release': True,
                   'public_network_download_and_checksum_install': True,
