@@ -1,5 +1,5 @@
 """Compact answers, bounded schema/context discovery and offline agent demo."""
-import argparse, hashlib, json, os, pathlib, signal, sqlite3, subprocess, sys, tempfile
+import argparse, hashlib, json, os, pathlib, shutil, signal, sqlite3, subprocess, sys, tempfile
 ROOT=pathlib.Path(__file__).resolve().parents[2];sys.path.insert(0,str(ROOT/'examples'))
 from session_client import RowTrail,RowTrailError,JobNotCompleted
 from part_fixture import corrupt_part
@@ -123,6 +123,14 @@ try:
             assert '--compact' in config['mcpServers']['rowtrail']['args']
             request_schema=rt.schema('request');assert 'response_mode' in request_schema['properties']
             check('CLI, printed MCP configuration and request schemas expose the same compact preference')
+        # A distinguishable sibling script prevents a developer-tree fallback
+        # from hiding an incorrect install-symlink resource path on CI hosts.
+        packaged=base/'versioned-package';(packaged/'examples').mkdir(parents=True)
+        shutil.copy2(bins/'rowtrail',packaged/'rowtrail')
+        (packaged/'examples/agent_demo.py').write_text('import json,sys\nprint(json.dumps({"bundled_marker":True,"executable":sys.argv[sys.argv.index("--rowtrail")+1]}))\n')
+        link=base/'installed-rowtrail';link.symlink_to(packaged/'rowtrail')
+        dispatched=json.loads(subprocess.check_output([str(link),'demo']))
+        assert dispatched=={'bundled_marker':True,'executable':str((packaged/'rowtrail').resolve())},dispatched
         demo=json.loads(subprocess.check_output([str(bins/'rowtrail'),'demo','--directory',str(base/'demo'),'--rows','128']))
         assert demo['status']=='passed' and demo['checks']['separate_recipient_process'] and demo['checks']['original_csv_removed']
         assert demo['checks']['included_aggregate_explicitly_recomputed'] and demo['checks']['recipient_unique_ids']
@@ -134,7 +142,7 @@ try:
         assert attempt.returncode!=0 and marker.read_text()=='retained'
         for name in ('full','compact','receiver'):
             with Client(str(bins/'rowtrail'),str(base/'demo'/name)) as client:client.call('doctor',{})
-        check('bundled offline demo verifies a separate-process result handoff and refuses an existing destination')
+        check('installed symlink uses bundled demo; offline handoff is verified and existing destinations are refused')
     report={'status':'passed','checks':checks,'binary_sha256':{n:hashlib.sha256((bins/n).read_bytes()).hexdigest() for n in ('rowtrail','rowtrail-runtime')},'native_calls':len(trace)}
     path=ROOT/a.report;path.parent.mkdir(parents=True,exist_ok=True);path.write_text(json.dumps(report,indent=2)+'\n')
 finally:

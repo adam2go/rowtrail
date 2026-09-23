@@ -484,7 +484,9 @@ async fn run(args: Args) -> Result<i32> {
         .or_else(|| std::env::var_os("ROWTRAIL_WORKSPACE").map(PathBuf::from))
         .unwrap_or_else(|| PathBuf::from(".rowtrail"));
     if let Command::Demo { directory, rows } = &args.command {
-        let executable = std::env::current_exe()?;
+        // macOS may retain the install symlink in current_exe(). Resolve the
+        // versioned package before looking for its sibling demo resources.
+        let executable = std::env::current_exe()?.canonicalize()?;
         let bundled = executable.parent().unwrap().join("examples/agent_demo.py");
         let source_tree =
             Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/agent_demo.py");
