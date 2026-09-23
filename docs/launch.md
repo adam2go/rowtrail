@@ -9,7 +9,7 @@ RowTrail beta.3: spend context on evidence.
 One command generates a 100K-row demo, saves the analysis, runs checks and hands
 it to another process to continue—even after the original CSV is gone.
 
-Compact responses keep full quality. In our scripted test: 26.5% fewer response
+Compact responses keep full quality. In our scripted test: 27.7% fewer response
 tokens. Raw transcripts, faster DuckDB controls and limitations are public.
 
 Agent-native. Small native install. Apache-2.0. Zero internal model calls.
@@ -31,8 +31,8 @@ CSV is deleted. It explicitly runs a recipe to recheck IDs and reproduce the
 aggregate from the included intermediate. Missing raw inputs remain a declared
 limit. Imported SQL never executes automatically.
 
-4. Seven scripted trials: native response tokens 4,706 → 3,461 with o200k_base.
-Including request tokens, the sum of medians falls 20.9%. These are tokenizer
+4. Seven scripted trials: native response tokens 4,753 → 3,438 with o200k_base.
+Including request tokens, the sum of medians falls 22.2%. These are tokenizer
 counts—not a model bill or evidence that every agent task improves.
 
 5. Direct DuckDB is still faster and sends less metadata. It can persist tables
@@ -52,7 +52,7 @@ RowTrail 的目标是让 Agent 低成本地探索陌生数据，并留下可以�
 beta.3 用精简响应、按列名发现、一次调用恢复上下文、有界等待结果和可执行 demo 来解决。
 质量、数值语义、错误与截断不会被简化成一个“成功”标签。原始表留在工具里，模型只看必要证据。
 
-七轮固定任务中，响应 token 减少 26.5%；包含请求的中位数之和减少 20.9%。这是明确
+七轮固定任务中，响应 token 减少 27.7%；包含请求的中位数之和减少 22.2%。这是明确
 编码下的脚本分词结果，不是真实模型账单。已有大工作流小幅变慢，直接 DuckDB 仍然更快，
 这些都在原始记录里。我们希望凭借完整工作流增加价值，而不是声称数据库无法做这些事。
 

@@ -7,9 +7,9 @@ compact responses, schema-name search, contextual inspection, bounded wait
 observations and an installed end-to-end demo. Metadata stays at schema 9; no
 engine/client dependency is added. Local verification passes. Native macOS/Linux
 CI and independent artifact verification are in progress for source
-`5fa8df29e4ccaad5b6bde7e0e6382022a4df7941`.
+`d512eea14004cbcead005fa32b4a9021c981dbde`.
 
-[Native CI](https://github.com/adam2go/rowtrail/actions/runs/35892255644) ·
+[Native CI](https://github.com/adam2go/rowtrail/actions/runs/35895228633) ·
 [Archived beta.2 evidence](releases/beta2-verification.md).
 
 ## Correctness gates
@@ -42,23 +42,23 @@ All 100,000-row, 64-column answers pass an independent integer oracle.
 
 | Shared workflow | Response tokens | Request tokens | Median ms |
 |---|---:|---:|---:|
-| RowTrail full | 4,706 | 986 | 72.69 |
-| RowTrail compact | 3,461 | 1,043 | 72.14 |
-| DuckDB live memory connection/tables | 223 | 325 | 18.12 |
-| DuckDB durable file, reopened connection | 223 | 325 | 34.60 |
+| RowTrail full | 4,753 | 998 | 73.28 |
+| RowTrail compact | 3,438 | 1,038 | 71.88 |
+| DuckDB live memory connection/tables | 223 | 324 | 17.44 |
+| DuckDB durable file, reopened connection | 223 | 324 | 34.38 |
 
 Tokens use `o200k_base`, tiktoken 0.12.0, each actual JSON message separately.
-Compact saves **26.5% of response tokens**; the sum of request/response medians
-saves **20.9%**. The preference itself adds request tokens. `cl100k_base` response
-medians are 4,652 → 3,401 (26.9% fewer); UTF-8 bytes 14,587 → 10,521 (27.9% fewer).
-A separate metadata probe returns 1,067 → 138 tokens by searching the one relevant
+Compact saves **27.7% of response tokens**; the sum of request/response medians
+saves **22.2%**. The preference itself adds request tokens. `cl100k_base` response
+medians are 4,703 → 3,386 (28.0% fewer); UTF-8 bytes 14,615 → 10,521 (28.0% fewer).
+A separate metadata probe returns 1,060 → 127 tokens by searching the one relevant
 field instead of listing 64. Neither baseline is forced to list all fields.
 
 These counts exclude system prompts, tool definitions, chat framing, reasoning,
 caching and repeated context input. They are **not billed model usage** or a new
 same-agent trial. All raw messages, encodings, versions and binary hashes are in
 [the published records](../benchmarks/performance/beta3/). The code-composed compact
-answer/check/follow-up card is 984 tokens; known mechanical work stays in code.
+answer/check/follow-up card is 986 tokens; known mechanical work stays in code.
 A database application can use code composition too.
 
 Both engines save/reuse intermediates and aggregate before returning rows.
@@ -75,19 +75,21 @@ external-model turns.
 
 | Median unless stated | beta.2 | beta.3 |
 |---|---:|---:|
-| Save + ten follow-ups + reconnect, 2M rows | 683.78 ms | 689.54 ms |
-| Save component | 271.97 ms | 275.51 ms |
-| Ten follow-ups component | 347.80 ms | 347.66 ms |
-| Five-query exploration, 1M rows | 144.62 ms | 146.23 ms |
-| Cold startup | 18.46 ms | 18.55 ms |
-| Warm scalar | 0.890 ms | 0.890 ms |
-| Warm p95 | 1.354 ms | 1.329 ms |
+| Save + ten follow-ups + reconnect, 2M rows | 698.81 ms | 700.08 ms |
+| Save component | 278.85 ms | 285.96 ms |
+| Ten follow-ups component | 350.53 ms | 349.30 ms |
+| Five-query exploration, 1M rows | 146.32 ms | 144.91 ms |
+| Cold startup | 18.40 ms | 18.60 ms |
+| Warm scalar | 0.887 ms | 0.891 ms |
+| Warm p95 | 1.304 ms | 1.310 ms |
 
 There are seven alternating large-workload trials and eleven startup sessions
-with 1,089 warm scalar samples per version. The larger tasks regress **0.8% /
-1.1%**; no general engine speedup is claimed. A **2,276 ms beta.2 startup outlier**
-is retained. These eleven samples cannot establish a tail-latency advantage.
-Separate 1M-row controls remain faster: DuckDB 69.26 ms, direct DataFusion 36.83 ms
+with 1,089 warm scalar samples per version. Follow-ups are **0.2% slower** and
+exploration **1.0% faster** in this series; no general engine speedup is claimed.
+The [earlier complete series](../benchmarks/performance/beta3/earlier/)
+retains a **2,276 ms beta.2 startup outlier**; the final repeat has no comparable
+outlier. These eleven samples cannot establish a tail-latency advantage.
+Separate 1M-row controls remain faster: DuckDB 69.70 ms, direct DataFusion 37.13 ms
 in the beta.3 series. Both retain in-memory intermediates.
 
 ## Installed agent demo
@@ -113,14 +115,17 @@ the tokenizer benchmark keeps its exact measured message strings.
 ## Native distribution
 
 Budgets stay **30,000,000 archive / 4,500,000 CLI / 125,000,000 runtime bytes**.
-The local archive is 19,484,908 bytes, CLI 3,942,144 bytes, runtime 101,061,328 bytes.
+The local archive is 19,456,692 bytes, CLI 3,761,136 bytes, runtime 101,061,328 bytes.
 These are local measurements, not substitutes for native macOS/Linux release
 artifacts. Final CI sizes/hashes and the Ubuntu 24.04 compatibility install will
 be recorded before publication. All 557 dependency notices must match.
 
-The CLI alone uses one codegen unit. A trial with `opt-level=s` increased macOS
-CLI size to 4,445,456 bytes and was rejected; the selected CLI is smaller than the
-local beta.2 baseline's 3,948,688 bytes. Runtime optimization is unchanged. The
+The CLI alone uses one codegen unit and `opt-level=2`. A trial with
+`opt-level=s` increased macOS CLI size to 4,445,456 bytes and was rejected.
+At `opt-level=3`, Linux exceeded the unchanged 4,500,000-byte CLI ceiling
+(4,616,672 bytes), despite passing the functionality suites. The final configuration
+is remeasured above and keeps the engine at its previous optimization level.
+The local CLI is smaller than beta.2's 3,948,688 bytes. The
 optional demo is bundled as a script instead of duplicating it inside the CLI.
 The benchmark-only tokenizer/database dependencies are never shipped.
 

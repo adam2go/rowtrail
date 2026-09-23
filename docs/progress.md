@@ -18,7 +18,7 @@ The latest published release evidence remains beta.2 until the new CI gates pass
   bundled `rowtrail demo` generates its own wide data, retains full transcripts,
   verifies answers and hands a portable branch to a separate recipient process.
 - Same schema 9 as beta.2. No model calls; no new engine or CLI dependency. CLI
-  alone uses one codegen unit; engine optimization stays unchanged.
+  alone uses one codegen unit and opt-level=2; engine optimization stays unchanged.
 - Fourteen new integration scenarios cover budgets, search, context, numeric
   evidence, errors, partial coverage, waiting, checks and the offline handoff.
   Release status and measured effects will be recorded after native verification.

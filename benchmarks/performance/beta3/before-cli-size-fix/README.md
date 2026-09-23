@@ -1,0 +1,1 @@
+These complete repeated reports use the final error-handling code with CLI codegen-units=1, opt-level=3. Linux later exceeded the unchanged CLI size ceiling, so opt-level=2 was selected for the CLI only. The engine configuration is unchanged. Final reports are in the parent directory. No trials are discarded.

@@ -32,8 +32,8 @@ recomputation. Optional Python 3 standard library only; no network or model call
 ## Measured effects
 
 Seven trials on one Mac, 100K-row workflow, `o200k_base`: response tokens
-**4,706 → 3,461 (26.5% fewer)**. Including requests, the sum of reported medians
-falls **20.9%**. A separate schema probe goes **1,067 → 138 tokens** when returning
+**4,753 → 3,438 (27.7% fewer)**. Including requests, the sum of reported medians
+falls **22.2%**. A separate schema probe goes **1,060 → 127 tokens** when returning
 the one relevant field instead of 64. These are measured JSON tokenizer counts,
 not real-model billing or a new paired-agent experiment.
 
@@ -41,10 +41,11 @@ Direct DuckDB remains faster and returns less metadata. It is allowed both a
 retained in-memory connection and a reopened durable database. RowTrail supplies
 standard quality/version/context/handoff contracts that database applications can
 also implement. Existing 2M-row follow-ups and 1M-row exploration remain broadly
-stable, with approximately 0.8% and 1.1% regressions retained in the report.
+stable, with a 0.2% slower follow-up median and 1.0% faster exploration median in the final series;
+earlier series and regressions remain in the report.
 
-[Full measurements, raw transcripts and limits](../verification.md) ·
-[Demo guide](../agent-demo.md) · [Analysis composition](../analysis.md).
+[Full measurements, raw transcripts and limits](https://github.com/adam2go/rowtrail/blob/v0.1.0-beta.3/docs/verification.md) ·
+[Demo guide](https://github.com/adam2go/rowtrail/blob/v0.1.0-beta.3/docs/agent-demo.md) · [Analysis composition](https://github.com/adam2go/rowtrail/blob/v0.1.0-beta.3/docs/analysis.md).
 
 ## Compatibility and release checks
 

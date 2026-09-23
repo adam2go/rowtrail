@@ -24,4 +24,5 @@ fig.text(.06,.075,'100K rows · one Mac · seven rotated trials · medians. Sche
 fig.text(.06,.035,'No model calls or billed-token claims. DuckDB returns less metadata; both controls retain intermediate tables. Full raw transcripts are published.',fontsize=10,color='#4e6558')
 fig.subplots_adjust(left=.06,right=.99,top=.73,bottom=.23,wspace=.4)
 fig.savefig(data/'performance.svg',facecolor=fig.get_facecolor())
+svg=data/'performance.svg';svg.write_text('\n'.join(line.rstrip() for line in svg.read_text().splitlines())+'\n')
 png=ROOT/'benchmarks/local/beta3/performance.png';fig.savefig(png,dpi=160,facecolor=fig.get_facecolor());print(png)

@@ -29,5 +29,57 @@
       "bytes": 101061328,
       "sha256": "83526c1da06fbea07ca1b3ae9afb4769d91e1e08d0591d74b2f60bb3652422c0"
     }
+  },
+  "final_error_handling_fixes_same_configuration": {
+    "rowtrail": {
+      "bytes": 3942144,
+      "sha256": "a8159b64dca72421163d9a9829231790670c6d149bfb09048a78b59d2f335628"
+    },
+    "rowtrail-runtime": {
+      "bytes": 101061328,
+      "sha256": "83526c1da06fbea07ca1b3ae9afb4769d91e1e08d0591d74b2f60bb3652422c0"
+    }
+  },
+  "selected_codegen_units_1_opt_level_2": {
+    "rowtrail": {
+      "bytes": 3761136,
+      "sha256": "b78a8cc52af247bc64398e3c790db53f2ae9b5e67cd24ceb870cc197fd0cf88f"
+    },
+    "rowtrail-runtime": {
+      "bytes": 101061328,
+      "sha256": "83526c1da06fbea07ca1b3ae9afb4769d91e1e08d0591d74b2f60bb3652422c0"
+    }
+  },
+  "linux_ci_rejected_opt_level_3": {
+    "codegen_units": 1,
+    "opt_level": 3,
+    "cli_bytes": 4616672,
+    "budget_bytes": 4500000,
+    "ci_run": "https://github.com/adam2go/rowtrail/actions/runs/35892255644",
+    "result": "All integration scenarios passed; package rejected for CLI size."
+  },
+  "linux_isolated_cli_experiment": {
+    "ci_run": "https://github.com/adam2go/rowtrail/actions/runs/35895015932",
+    "note": "Built only rowtrail-cli, so dependency features differ from workspace releases. Informational only; not a substitute for native release size/latency gates.",
+    "results": [
+      {
+        "codegen_units": 8,
+        "opt_level": 3,
+        "bytes": 5524800,
+        "sha256": "6f39d479d54ec92a0238b0a6fdd80aea44b30356aaab44f3e41d8a37a91df8b7"
+      },
+      {
+        "codegen_units": 1,
+        "opt_level": 2,
+        "bytes": 4400128,
+        "sha256": "17a294add9817abcfbf7872503f75fabf725c6d62ec9d4933776e224d3e93d12"
+      },
+      {
+        "codegen_units": 8,
+        "opt_level": 2,
+        "bytes": 5487208,
+        "sha256": "9ff87d17cae00c1ece4a08168deb4b1b6b3533430f4c08f3e85f62ded304ff67"
+      }
+    ]
   }
 }

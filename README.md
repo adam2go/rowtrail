@@ -147,11 +147,11 @@ On one Mac, seven 100K-row trials of the same workflow:
 
 | Change | Measured effect |
 |---|---:|
-| Full → compact native responses | **4,706 → 3,461 response tokens (−26.5%)** |
-| Requests + responses, sum of medians | **−20.9%** |
-| Relevant field search instead of 64-field schema | **1,067 → 138 tokens** |
-| Save 2M-row subset + ten queries + reconnect | **683.78 → 689.54 ms** (beta.2 → beta.3) |
-| Five-query 1M-row exploration | **144.62 → 146.23 ms** |
+| Full → compact native responses | **4,753 → 3,438 response tokens (−27.7%)** |
+| Requests + responses, sum of medians | **−22.2%** |
+| Relevant field search instead of 64-field schema | **1,060 → 127 tokens** |
+| Save 2M-row subset + ten queries + reconnect | **698.81 → 700.08 ms** (beta.2 → beta.3) |
+| Five-query 1M-row exploration | **146.32 → 144.91 ms** |
 
 Token counts use `o200k_base` on actual JSON messages. They exclude model prompts,
 reasoning, tool schemas, caching and chat framing; they are not model bills.
@@ -160,9 +160,9 @@ workloads remain broadly stable, including the small regressions above.
 
 ![Beta.3 context savings with faster direct SQL controls shown.](benchmarks/performance/beta3/performance.svg)
 
-Direct DuckDB remains faster and returns less metadata: **18.12 ms** with a live
-memory connection, **34.60 ms** with a reopened durable database, versus
-**72.14 ms** for compact RowTrail in the shared task. Both controls retain tables
+Direct DuckDB remains faster and returns less metadata: **17.44 ms** with a live
+memory connection, **34.38 ms** with a reopened durable database, versus
+**71.88 ms** for compact RowTrail in the shared task. Both controls retain tables
 and return bounded answers. RowTrail adds quality, fixed references, purpose and
 handoff contracts; those guarantees cost time and context.
 
