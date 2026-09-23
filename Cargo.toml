@@ -28,7 +28,7 @@ strip = true
 lto = "thin"
 codegen-units = 8
 
-# One codegen unit gives the small CLI more cross-function optimization.
-# The engine keeps its existing release settings.
+# Keep CLI code generation small; the engine retains its existing optimization.
 [profile.release.package.rowtrail-cli]
 codegen-units = 1
+opt-level = 2
