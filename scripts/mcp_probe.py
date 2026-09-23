@@ -58,6 +58,10 @@ try:
         "bindings":{},"sql":"SELECT 42 answer","execution":{"wait_ms":1000},"_request":{"response_mode":"full"}}}})
     detailed=receive(81)['result']['structuredContent']['result']
     assert 'metrics' in detailed['job'] and not detailed.get('details_omitted')
+    send({"jsonrpc":"2.0","id":82,"method":"tools/call","params":{"name":"data_query","arguments":{
+        "bindings":{},"sql":"SELECT 99 answer","_request":{"response_mode":"tiny"}}}})
+    invalid=receive(82)['result']
+    assert invalid['isError'] and invalid['structuredContent']['error']['code']=='INVALID_ARGUMENT'
     print(json.dumps({"mcp_compact_context_and_explicit_full":True,"protocol":initialized["result"]["protocolVersion"],"tools":[t["name"] for t in tools],"query_schema_valid":True,"mcp_query_cli_read":True,"mcp_snapshot_cli_query":True}))
 finally:
     p.stdin.close()

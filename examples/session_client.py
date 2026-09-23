@@ -385,13 +385,16 @@ class RowTrail:
         """
         job = response['job']
         revision = response.get('readable_revision')
-        return {
+        projected = {
             'job_id': job['id'], 'state': job['state'],
             'binding': response.get('binding') or ({'result_ref': job['result_ref'], 'revision': revision} if revision else None),
             'observation': response.get('observation'),
             'observation_omitted': response.get('observation_omitted'),
             'error': job.get('error'), 'next_actions': response.get('next_actions', []),
         }
+        if response.get('observation_error') is not None:
+            projected['observation_error'] = response['observation_error']
+        return projected
 
     def __enter__(self):return self
     def __exit__(self, *_):

@@ -2,6 +2,7 @@
 import argparse, hashlib, json, os, pathlib, signal, sqlite3, subprocess, sys, tempfile
 ROOT=pathlib.Path(__file__).resolve().parents[2];sys.path.insert(0,str(ROOT/'examples'))
 from session_client import RowTrail,RowTrailError,JobNotCompleted
+from part_fixture import corrupt_part
 p=argparse.ArgumentParser();p.add_argument('--bin-dir',default='target/release');p.add_argument('--report',default='benchmarks/local/beta3.json')
 a=p.parse_args();bins=(ROOT/a.bin_dir).resolve();checks=[];pids=set();trace=[]
 def check(name):checks.append(name);print('PASS',name,flush=True)
@@ -38,6 +39,13 @@ try:
             check('full diagnostics and durable acceptance remain available in compact sessions')
             failed=reject(lambda:rt.query('SELECT missing'),'SQL_ERROR')
             assert failed.response['job']['state']=='failed' and failed.response['job']['error']['code']=='SQL_ERROR'
+            damaged=rt.query('SELECT 123 damaged_value')
+            with sqlite3.connect(workspace/'metadata.sqlite') as db:
+                corrupt_part(db,rt.binding(damaged)['result_ref'])
+            unreadable=rt.call('control',{'action':'wait','ref':damaged['job']['id'],'output':{'max_rows':1,'max_bytes':2048}})
+            assert unreadable['job']['state']=='completed' and unreadable['observation'] is None
+            assert unreadable['observation_error']['code']=='RESULT_CORRUPT'
+            assert rt.observe(unreadable)['observation_error']==unreadable['observation_error']
             reject(lambda:rt.call('control',{'action':'status','ref':compact['job']['id'],'output':{'max_rows':1}}),'INVALID_ARGUMENT')
             check('terminal execution failures and invalid output requests remain explicit')
             wide=rt.query('SELECT '+','.join(f'{i} AS "Revenue_{i:03}"' for i in range(60))+',1 AS "金额\"\"来源"',fetch=False)

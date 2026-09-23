@@ -390,7 +390,8 @@ impl ServerHandler for Mcp {
             }
             req.idempotency_key = options["idempotency_key"].as_str().map(str::to_owned);
             if let Some(mode) = options.get("response_mode") {
-                req.response_mode = serde_json::from_value(mode.clone())?;
+                req.response_mode = serde_json::from_value(mode.clone())
+                    .map_err(|error| ApiError::new("INVALID_ARGUMENT", error))?;
             } else if self.compact {
                 req.response_mode = rowtrail_contracts::ResponseMode::Compact;
             }
