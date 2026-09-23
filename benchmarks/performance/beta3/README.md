@@ -136,3 +136,8 @@ The downloaded final macOS CI archive also passes `native-macos-beta3.json` and
 using those binaries; only its local directory prefix is replaced with
 `<native-demo>`. Both platforms' hashes, sizes, all suites and Ubuntu 24.04
 installation are in [the release proof](../../../docs/release-verification.json).
+
+`upload-verification.json` checks all six GitHub assets against the verified CI
+files before publication. `public-install.json` then tests the published tag's
+default installer via anonymous network download, exact executable hashes, the
+installed demo and existing handoff/numeric checks. Both passed.

@@ -64,3 +64,6 @@ the same Linux archive must install on Ubuntu 24.04. Distribution ceilings remai
 **Verified downloads:** macOS arm64 **19.43 MB**, Linux x86_64 **22.88 MB**.
 Both platforms passed all gates above; archive and binary hashes, bundled files
 and 557 notices were independently checked. [Native CI](https://github.com/adam2go/rowtrail/actions/runs/35898544833).
+
+The published default installer also passed a fresh network installation and all
+three bundled demos on macOS. [Public installation receipt](https://github.com/adam2go/rowtrail/blob/main/benchmarks/performance/beta3/public-install.json).

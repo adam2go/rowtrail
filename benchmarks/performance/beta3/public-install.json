@@ -1,0 +1,98 @@
+{
+  "agent_demo": {
+    "status": "passed",
+    "independent_integer_oracle": true,
+    "intermediate_rows_shown": 0,
+    "schema_search": true,
+    "reconnect_context": true,
+    "unique_ids": true,
+    "separate_recipient_process": true,
+    "original_csv_removed": true,
+    "recipient_unique_ids": true,
+    "included_aggregate_explicitly_recomputed": true,
+    "raw_filter_recomputed": false,
+    "package_verified": "bytes only; not authorship or SQL reproduction",
+    "sql_recomputed_on_import": false
+  },
+  "status": "passed",
+  "installer_url": "https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-beta.3/install.sh",
+  "installer_sha256": "8f64e6782806811fac85473b9fecfc95c66a972e1a3dbf7c244a5bd78a7a9790",
+  "version": "rowtrail-cli 0.1.0-beta.3",
+  "default_version_matches_release": true,
+  "public_network_download_and_checksum_install": true,
+  "installed_binary_sha256": {
+    "rowtrail": "d34f2ceebdefcf8fac0208f6333a3203e797196f1b00e7f023b5e496a43c8174",
+    "rowtrail-runtime": "c0f55c2b0732d1f478b80ee0a26604122faa24c8458025379a10ec0fbe42db8e"
+  },
+  "binaries_match_verified_ci_archive": "02d66141c853f4f4882c4ecc224db99c17be9ccf90a08af3cced4511645a0396",
+  "printed_client_matches_bundle": true,
+  "analysis_snapshot_check_diff_package_import_recipe": {
+    "status": "passed",
+    "total": 60,
+    "modified_rows": 1
+  },
+  "fresh_session_unique_label_handoff": true,
+  "changed_tmpdir_same_coordinator": true,
+  "lossless_large_integer": true,
+  "structured_sum_overflow": true,
+  "handoff_original_source_bytes": 0,
+  "bundled_demo": {
+    "status": "passed",
+    "input_rows": 20003,
+    "question": "Which region has the highest refunded value, and through which channels?",
+    "refunds_by_region_cents": [
+      [
+        "east",
+        "1930407"
+      ],
+      [
+        "north",
+        "1920667"
+      ],
+      [
+        "south",
+        "1925653"
+      ],
+      [
+        "west",
+        "1925537"
+      ]
+    ],
+    "chosen_region": "east",
+    "saved_label": "demo refunds: east",
+    "saved_rows": 385,
+    "channel_totals_cents": [
+      [
+        "app",
+        "630463"
+      ],
+      [
+        "store",
+        "643469"
+      ],
+      [
+        "web",
+        "656475"
+      ]
+    ],
+    "handoff_columns": [
+      "n",
+      "first_id",
+      "cents"
+    ],
+    "handoff_rows": [
+      [
+        "385",
+        "9007199254740993",
+        "1930407"
+      ]
+    ],
+    "handoff_calls": [
+      "workspace summary",
+      "query"
+    ],
+    "handoff_original_source_bytes": 0,
+    "checks": "Python integer oracle; exact/final/complete/untruncated guards; IDs above 2^53",
+    "continue": "Use this workspace and label to query the retained result. Labels are descriptive, not unique IDs."
+  }
+}

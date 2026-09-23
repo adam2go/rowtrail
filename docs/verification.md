@@ -12,6 +12,12 @@ verification pass for source `3c7c6e2b8e6f9471f6addbc25fe8892889376878`.
 [Native CI](https://github.com/adam2go/rowtrail/actions/runs/35898544833) ·
 [Archived beta.2 evidence](releases/beta2-verification.md).
 
+The published tag's default installer also passes a fresh anonymous network
+download, checksum and install check on macOS, including the installed demo,
+cross-TMPDIR handoff, large integers and overflow handling.
+[Public installation receipt](../benchmarks/performance/beta3/public-install.json) ·
+[Uploaded asset verification](../benchmarks/performance/beta3/upload-verification.json).
+
 ## Correctness gates
 
 **143 integration scenarios** (129 existing + 14 beta.3) and **14 Rust tests**,

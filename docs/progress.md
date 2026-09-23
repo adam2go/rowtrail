@@ -33,6 +33,8 @@ independent artifact checks pass. [Release evidence](release-verification.json).
 
 [Native CI](https://github.com/adam2go/rowtrail/actions/runs/35898544833) ·
 [Published beta.3](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.3).
+The public default installer, exact native hashes, installed demo and handoff
+also pass [post-publication acceptance](../benchmarks/performance/beta3/public-install.json).
 
 [Agent demo](agent-demo.md) · [Decision](decisions/011-agent-context-and-demo.md).
 
