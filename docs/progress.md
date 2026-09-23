@@ -2,8 +2,8 @@
 
 [Home](../README.md) · [Verification and measurements](verification.md)
 
-Updated 2026-09-24 for **0.1.0-beta.3**. Native release verification is pending.
-The latest published release evidence remains beta.2 until the new CI gates pass.
+Updated 2026-09-24 for **0.1.0-beta.3**. Native macOS/Linux verification and
+independent artifact checks pass. [Release evidence](release-verification.json).
 
 ## Beta.3
 
@@ -21,7 +21,18 @@ The latest published release evidence remains beta.2 until the new CI gates pass
   alone uses one codegen unit and opt-level=2; engine optimization stays unchanged.
 - Fourteen new integration scenarios cover budgets, search, context, numeric
   evidence, errors, partial coverage, waiting, checks and the offline handoff.
-  Release status and measured effects will be recorded after native verification.
+  Both native platforms pass all 143 integration scenarios and 14 Rust tests,
+  public-release upgrades, installation and demo checks. The same Linux archive
+  also installs on Ubuntu 24.04.
+- Seven final local trials: compact response tokens fall 27.7%; the sum of request
+  and response medians falls 22.2%. This is JSON tokenization, not model billing.
+  Direct DuckDB remains faster; all earlier series and small regressions are kept.
+- Native downloads are 19.43 MB macOS / 22.88 MB Linux, under unchanged ceilings.
+  CLI opt-level=3 exceeded Linux's size budget; only the CLI moved to opt-level=2.
+  Engine optimization, fsync, checked numerics and full quality remain unchanged.
+
+[Native CI](https://github.com/adam2go/rowtrail/actions/runs/35898544833) ·
+[Published beta.3](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.3).
 
 [Agent demo](agent-demo.md) · [Decision](decisions/011-agent-context-and-demo.md).
 

@@ -23,8 +23,8 @@ Agent 探索一张大表，不应该先把整张表塞进上下文。RowTrail �
 [运行 demo](docs/agent-demo.md) · [保存、比较、复用分析](docs/analysis.md)。
 
 不新增外部依赖。压缩包 / CLI / runtime 上限仍为 **30 MB / 4.5 MB / 125 MB**。
-beta.3 原生发布验证进行中；验收覆盖 **143 项集成场景、14 项 Rust 测试**、安装检查、
-公开 alpha.8/beta.1 升级及 beta.2 工作区兼容性。
+两端原生产物均通过 **143 项集成场景、14 项 Rust 测试**、安装检查、
+公开 alpha.8/beta.1 升级及 beta.2 工作区兼容性。[发布验证](docs/release-verification.json)。
 
 **内部零模型调用，无需 API Key，没有表格界面。** 问什么、证据够不够，由你的 Agent 判断。
 
@@ -63,7 +63,7 @@ rowtrail --version
 [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.3) 下载并解压。
 请将 `rowtrail` 和 `rowtrail-runtime` 放在同一个目录。
 
-上一版 beta.2 下载为 **macOS 19.42 MB / Linux 22.82 MB**；beta.3 产物体积待原生验证。
+下载体积为 **macOS 19.43 MB / Linux 22.88 MB**，包含两个可执行文件、许可证、指南和演示。
 预算保持 **下载 30 MB / CLI 4.5 MB / 运行时 125 MB**。同一个 Linux 包在 Ubuntu
 22.04 和 24.04 上验证；包内附带 Agent 指南与可选演示。实际大小与哈希见
 [原生产物记录](docs/verification.md#native-distribution)。

@@ -1,6 +1,6 @@
 # 011 — Spend context on evidence, keep execution outside the model
 
-Status: implementing for 0.1.0-beta.3.
+Status: accepted and verified in 0.1.0-beta.3.
 
 An agent using a large table needs to discover relevant columns, keep intermediates
 outside its context, distinguish a complete answer from a preview, and recover the

@@ -129,3 +129,10 @@ final native suite includes a distinguishable bundled-script regression.
 
 The post-link-fix repeat has 11 cold starts and 1,089 warm scalar samples per
 version; it is separate from the primary series above and retains all samples.
+
+The downloaded final macOS CI archive also passes `native-macos-beta3.json` and
+`native-macos-install.json` on macOS 26.6.2, including the real install symlink.
+`native-demo-result.json` and `native-demo-report.md` retain a default 100K-row run
+using those binaries; only its local directory prefix is replaced with
+`<native-demo>`. Both platforms' hashes, sizes, all suites and Ubuntu 24.04
+installation are in [the release proof](../../../docs/release-verification.json).

@@ -60,3 +60,7 @@ MCP/session/SDK, bounded out-of-core execution, installation and the bundled dem
 Only independently verified native macOS/Linux CI artifacts may be published;
 the same Linux archive must install on Ubuntu 24.04. Distribution ceilings remain
 **30 MB archive / 4.5 MB CLI / 125 MB runtime**.
+
+**Verified downloads:** macOS arm64 **19.43 MB**, Linux x86_64 **22.88 MB**.
+Both platforms passed all gates above; archive and binary hashes, bundled files
+and 557 notices were independently checked. [Native CI](https://github.com/adam2go/rowtrail/actions/runs/35898544833).

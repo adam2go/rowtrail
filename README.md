@@ -25,9 +25,9 @@ checks → handoff to a separate process, with no data download or model API.
 [Run the demo](docs/agent-demo.md) · [Save, compare and reuse analysis](docs/analysis.md).
 
 No new external dependency. Native archive/CLI/runtime budgets remain
-**30 MB / 4.5 MB / 125 MB**. Beta.3 native release verification is pending; the
-new gates cover **143 integration scenarios and 14 Rust tests**, installation and
-published alpha.8/beta.1 upgrades plus beta.2 schema compatibility.
+**30 MB / 4.5 MB / 125 MB**. Both native platforms pass **143 integration scenarios
+and 14 Rust tests**, installation and published alpha.8/beta.1 upgrades plus
+beta.2 schema compatibility. [Verified release](docs/release-verification.json).
 
 **Zero internal model calls. No API key. No spreadsheet UI.** Your agent chooses
 the questions and decides when the evidence is sufficient.
@@ -68,8 +68,8 @@ Set `ROWTRAIL_INSTALL_DIR` to choose another directory, or extract an archive
 from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.3).
 Keep `rowtrail` and `rowtrail-runtime` together.
 
-The previous beta.2 downloads were **19.42 MB (macOS) / 22.82 MB (Linux)**;
-beta.3 artifact measurements are pending native verification.
+Downloads are **19.43 MB (macOS) / 22.88 MB (Linux)**, including both executables,
+licenses, guides and the runnable demo.
 Budgets remain **30 MB download / 4.5 MB CLI / 125 MB runtime**.
 The same Linux archive is tested on Ubuntu 22.04 and 24.04. Archives include
 agent guides and the optional runnable demo. Actual sizes and hashes appear in

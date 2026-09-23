@@ -5,9 +5,9 @@
 Beta.3 reduces operational context without changing stored evidence: optional
 compact responses, schema-name search, contextual inspection, bounded wait
 observations and an installed end-to-end demo. Metadata stays at schema 9; no
-engine/client dependency is added. Local verification passes. Native macOS/Linux
-CI and independent artifact verification are in progress for source
-`3c7c6e2b8e6f9471f6addbc25fe8892889376878`.
+engine/client dependency is added. Both native platforms and independent artifact
+verification pass for source `3c7c6e2b8e6f9471f6addbc25fe8892889376878`.
+[Machine-readable artifact provenance](release-verification.json).
 
 [Native CI](https://github.com/adam2go/rowtrail/actions/runs/35898544833) ·
 [Archived beta.2 evidence](releases/beta2-verification.md).
@@ -119,10 +119,22 @@ the tokenizer benchmark keeps its exact measured message strings.
 ## Native distribution
 
 Budgets stay **30,000,000 archive / 4,500,000 CLI / 125,000,000 runtime bytes**.
-The local archive is 19,456,692 bytes, CLI 3,761,136 bytes, runtime 101,061,328 bytes.
-These are local measurements, not substitutes for native macOS/Linux release
-artifacts. Final CI sizes/hashes and the Ubuntu 24.04 compatibility install will
-be recorded before publication. All 557 dependency notices must match.
+Published archives come from the passing native CI run above. Downloaded archive
+hashes and embedded binaries match the native test reports, all 557 dependency
+notices and bundled client/guides match source, and the same Linux archive installs
+on Ubuntu 24.04. The downloaded macOS archive also passes the beta.3 suite and
+installed demos again locally.
+
+| Native CI artifact | Compressed bytes | CLI bytes | Runtime bytes |
+|---|---:|---:|---:|
+| macOS arm64 | 19,430,384 | 3,777,792 | 101,028,320 |
+| Linux x86_64 | 22,876,268 | 4,452,544 | 116,030,120 |
+
+Exact SHA-256 values and complete per-platform reports are in
+[release-verification.json](release-verification.json). The separate local benchmark
+build is 3,761,136 CLI / 101,061,328 runtime bytes; its package was 19,456,692 bytes.
+Archive documents reflect the verified source; later report/README updates on the
+release tag do not change these executable bytes.
 
 The CLI alone uses one codegen unit and `opt-level=2`. A trial with
 `opt-level=s` increased macOS CLI size to 4,445,456 bytes and was rejected.

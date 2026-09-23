@@ -1,0 +1,77 @@
+{
+  "status": "passed",
+  "format": "rowtrail.agent-demo.v1",
+  "directory": "<native-demo>",
+  "input_rows": 100000,
+  "input_columns": 64,
+  "qualifying_rows": 77922,
+  "answer": {
+    "columns": [
+      "channel",
+      "orders",
+      "revenue_cents"
+    ],
+    "rows": [
+      [
+        "direct",
+        "15585",
+        "79495325"
+      ],
+      [
+        "organic",
+        "31168",
+        "158900110"
+      ],
+      [
+        "paid",
+        "15585",
+        "79494900"
+      ],
+      [
+        "referral",
+        "15584",
+        "79445514"
+      ]
+    ]
+  },
+  "transcripts": {
+    "full": {
+      "calls": 8,
+      "request_bytes": 2667,
+      "response_bytes": 12286,
+      "shared_workflow_ms": 100.091
+    },
+    "compact": {
+      "calls": 8,
+      "request_bytes": 2875,
+      "response_bytes": 9219,
+      "shared_workflow_ms": 85.248
+    }
+  },
+  "producer_enhancement_calls": 10,
+  "checks": {
+    "independent_integer_oracle": true,
+    "intermediate_rows_shown": 0,
+    "schema_search": true,
+    "reconnect_context": true,
+    "unique_ids": true,
+    "separate_recipient_process": true,
+    "original_csv_removed": true,
+    "recipient_unique_ids": true,
+    "included_aggregate_explicitly_recomputed": true,
+    "raw_filter_recomputed": false,
+    "package_verified": "bytes only; not authorship or SQL reproduction",
+    "sql_recomputed_on_import": false
+  },
+  "report": "<native-demo>/report.md",
+  "package_report": "<native-demo>/handoff/report.md",
+  "workspace": "<native-demo>/compact",
+  "receiver": "<native-demo>/receiver",
+  "limitations": [
+    "Scripted workflow; zero model calls. Transcript bytes are not billed model tokens.",
+    "Both modes run identical SQL and keep large intermediates out of observations.",
+    "Single demo timings include native startup, durability and handoff; not a speed benchmark.",
+    "DuckDB can persist tables and return bounded answers too. RowTrail supplies explicit quality, fixed references, lineage and portable packages as shared contracts.",
+    "Result-only package cannot recompute absent original inputs; import never runs saved SQL."
+  ]
+}
