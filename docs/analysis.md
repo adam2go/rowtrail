@@ -180,7 +180,10 @@ Verification has deliberate limits:
 - Import copies verified payloads through a private bounded streaming file into
   native managed snapshots, then checks schemas and row counts. It returns a
   mapping and the original manifest. Completed imports remain if a later node
-  fails; the exception retains `imported_bindings`.
+  fails; the exception retains `imported_bindings`. A snapshot failure/deadline also
+  retains `import_staging_path`: keep this private source while a job is active,
+  inspect/wait for terminal state, then explicitly remove that directory. A helper
+  timeout must not delete input underneath an accepted native job.
 - The returned `recipe` is inert. With explicit input mappings (or included input
   snapshots), call `run_recipe` to recompute. Only then has SQL been rerun.
 

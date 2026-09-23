@@ -133,6 +133,13 @@ try:
                 followup=receiver.query('SELECT SUM(total) FROM t',{'t':imported});assert receiver.scalar(followup)==75
                 assert imported['verification']['missing_inputs']
                 check('offline byte verification and fresh-workspace import support follow-ups without original files or SQL execution')
+            e=reject(lambda:rt.import_package(base/'package',execution={'wait_ms':0},timeout=0),'JOB_NOT_COMPLETED')
+            staging=pathlib.Path(e.import_staging_path)
+            assert (staging/'payload.parquet').is_file()
+            completed=rt._completed(e.response,30)
+            assert rt.scalar(rt.query('SELECT SUM(total) FROM t',{'t':completed}))==75
+            import shutil
+            shutil.rmtree(staging)
             full=rt.pack(branch,base/'full',include_inputs=True)
             assert rt.verify_package(base/'full')['missing_inputs']==[]
             with Client(str(bins/'rowtrail'),str(base/'receiver2')) as receiver:

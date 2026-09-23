@@ -866,7 +866,7 @@ def _import_package(rt, directory, *, max_bytes=1024*1024*1024, execution=None, 
     Returned recipe is inert JSON; run it explicitly with required inputs.
     """
     from pathlib import Path
-    import tempfile
+    import tempfile,shutil
     verified=_verify_package(directory,max_bytes=max_bytes)
     manifest=verified['manifest'];mapping={}
     try:
@@ -876,13 +876,25 @@ def _import_package(rt, directory, *, max_bytes=1024*1024*1024, execution=None, 
             path=Path(directory).absolute()/payload['file']
             # Recheck immediately before native open. Native execution separately
             # validates the frozen file identity before and after its read.
-            with tempfile.TemporaryDirectory(prefix='rowtrail-import-') as td:
-                private=Path(td)/'payload.parquet'
+            staging=Path(tempfile.mkdtemp(prefix='rowtrail-import-'))
+            private=staging/'payload.parquet'
+            try:
                 _copy_verified(path,private,payload)
+            except Exception:
+                shutil.rmtree(staging)
+                raise
+            try:
                 snap=rt.from_parquet(private,label='import:'+node['id'],
                     provenance={'origin':'rowtrail.package:'+str(manifest['package_id']),
                                 'description':'Imported '+node['id']+'; source SQL is recorded, not recomputed.'},
                     execution=execution,timeout=timeout)
+            except Exception as error:
+                # A helper deadline or lost response does not stop an accepted
+                # worker. Preserve its source until the caller confirms terminal
+                # state; deleting a temporary input would sabotage durable work.
+                error.import_staging_path=str(staging)
+                raise
+            shutil.rmtree(staging)
             binding=rt.binding(snap);mapping[node['id']]=binding
             actual=_metadata(rt,binding)
             if actual['fields']!=node['metadata']['fields']:
