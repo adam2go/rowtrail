@@ -938,7 +938,14 @@ async fn wait_response(
     refs["job"] = state.clone();
     refs["readable_revision"] = state["readable_revision"].clone();
     refs["observation"] = Value::Null;
-    refs["binding"] = if let Some(revision) = state["readable_revision"].as_u64() {
+    let prepared = state["prepared"].is_object();
+    refs["binding"] = if prepared {
+        if state["state"] == "completed" {
+            state["prepared"].clone()
+        } else {
+            Value::Null
+        }
+    } else if let Some(revision) = state["readable_revision"].as_u64() {
         json!({"result_ref":state["result_ref"],"revision":revision})
     } else {
         Value::Null
@@ -972,7 +979,9 @@ async fn wait_response(
         }
     }
     let mut actions = vec![];
-    if state["readable_revision"].is_number() {
+    if prepared && state["state"] == "completed" {
+        actions.extend(["inspect", "query"]);
+    } else if !prepared && state["readable_revision"].is_number() {
         if refs["observation"].is_null() || refs["observation"]["presentation"]["has_more"] == true
         {
             actions.push("read");

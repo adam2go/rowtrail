@@ -37,7 +37,19 @@ try:
     # CLI consumes the exact result version produced by MCP.
     read = json.loads(subprocess.check_output([sys.argv[1],'--workspace',str(workspace),'read',result['job']['result_ref'],'--revision',str(result['readable_revision'])]))
     assert read['result']['rows']==[['9007199254740993']],read
-    print(json.dumps({"protocol":initialized["result"]["protocolVersion"],"tools":[t["name"] for t in tools],"query_schema_valid":True,"mcp_query_cli_read":True}))
+    send({"jsonrpc":"2.0","id":40,"method":"tools/call","params":{"name":"data_snapshot","arguments":{
+        "source":{"result_ref":result['job']['result_ref'],"revision":result['readable_revision']},
+        "label":"mcp snapshot","provenance":{"description":"Cross-entry independent snapshot"},"execution":{"wait_ms":1000}}}})
+    snap=receive(40)['result']['structuredContent']['result']
+    for i in range(20):
+        if snap['job']['state']=='completed':break
+        send({"jsonrpc":"2.0","id":50+i,"method":"tools/call","params":{"name":"data_control","arguments":{"action":"wait","ref":snap['job']['id'],"wait_ms":1000}}})
+        snap=receive(50+i)['result']['structuredContent']['result']
+    assert snap['job']['state']=='completed' and 'dataset_ref' in snap['binding'] and 'read' not in snap['next_actions'],snap
+    answer=json.loads(subprocess.check_output([sys.argv[1],'--workspace',str(workspace),'call','query'],
+        input=json.dumps({'sql':'SELECT id FROM t','bindings':{'t':snap['binding']},'execution':{'wait_ms':1000}}),text=True))
+    assert answer['result']['observation']['rows']==[['9007199254740993']],answer
+    print(json.dumps({"protocol":initialized["result"]["protocolVersion"],"tools":[t["name"] for t in tools],"query_schema_valid":True,"mcp_query_cli_read":True,"mcp_snapshot_cli_query":True}))
 finally:
     p.stdin.close()
     try: p.wait(timeout=5)

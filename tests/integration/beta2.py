@@ -29,6 +29,7 @@ try:
             snapshot=rt.snapshot(opened,label='sessions',provenance=provenance,idempotency_key='snapshot-once')
             again=rt.snapshot(opened,label='sessions',provenance=provenance,idempotency_key='snapshot-once')
             assert rt.binding(snapshot)==rt.binding(again)
+            assert snapshot['binding']==rt.binding(snapshot) and 'read' not in snapshot['next_actions']
             assert rt.binding(rt.find('sessions',kind='dataset'))==rt.binding(snapshot)
             meta=rt.inspect(snapshot,checks=('provenance',));assert meta['provenance']==provenance and meta['verification']['independent']
             assert len(meta['identity']['files'])>0
