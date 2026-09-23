@@ -32,11 +32,15 @@ another caller verify the saved evidence and ask a new question?**
 6. Export a portable report/result branch, delete the **demo's own** original CSV,
    and import into a separate process/workspace. Ask one explicit new question.
    Import verifies/copies payloads; it does not execute the saved SQL.
+7. Explicitly run the supplied JSON recipe on the included eligible-order result:
+   recheck uniqueness and reproduce the delivered totals. The original filtering
+   step cannot be recomputed without its missing raw input; that limit is stated.
 
 `report.md` explains the workflow, `handoff/report.md` is the portable report,
 `agent-cards.json` contains bounded model-facing evidence, and the two transcript
 files contain all shared-workflow requests/responses. `receiver.json` retains the
 recipient's answer and verification scope. `result.json` contains the summary.
+`analysis-recipe.json` and `receiver-run/run.json` retain the explicit rerun.
 The workspaces remain available for follow-up; normal idle shutdown still applies.
 
 ## What actually saves context

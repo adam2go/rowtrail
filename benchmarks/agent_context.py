@@ -15,6 +15,7 @@ from agent_demo import fixture, SELECTED, TOTALS, FOLLOWUP
 
 
 def text(value):return json.dumps(value,ensure_ascii=False,separators=(',',':'))
+def literal(value):return "'"+str(value).replace("'","''")+"'"
 def digest(path):
     with pathlib.Path(path).open('rb') as stream:return hashlib.file_digest(stream,'sha256').hexdigest()
 
@@ -79,7 +80,7 @@ def duckdb_trial(path,source,expected,persist):
         transcript.append({'request':text({'sql':sql,'parameters':parameters or []}),'response':text(response)})
         return rows
     try:
-        call('CREATE VIEW source AS SELECT * FROM read_parquet(?)',[str(source)],{'table':'source'})
+        call('CREATE VIEW source AS SELECT * FROM read_parquet('+literal(source)+')',metadata={'table':'source'})
         fields=call("SELECT column_name,data_type FROM information_schema.columns WHERE table_name='source' AND lower(column_name) LIKE '%revenue%' ORDER BY ordinal_position")
         assert [r[0] for r in fields]==['revenue_cents']
         call("SELECT column_name,data_type FROM information_schema.columns WHERE table_name='source' AND column_name IN ('order_id','channel','status','is_bot','revenue_cents') ORDER BY ordinal_position")
@@ -115,7 +116,7 @@ def main():
         base=pathlib.Path(td);csv=base/'orders.csv';source=base/'orders.parquet'
         expected=fixture(csv,args.rows)
         with duckdb.connect() as con:
-            con.execute('COPY (SELECT * FROM read_csv_auto(?)) TO ? (FORMAT PARQUET)',[str(csv),str(source)])
+            con.execute('COPY (SELECT * FROM read_csv_auto('+literal(csv)+')) TO '+literal(source)+' (FORMAT PARQUET)')
         fixture_hash=digest(source);fixture_bytes=source.stat().st_size
         for repeat in range(args.repeats):
             order=variants[repeat%len(variants):]+variants[:repeat%len(variants)]

@@ -117,6 +117,8 @@ try:
             check('CLI, printed MCP configuration and request schemas expose the same compact preference')
         demo=json.loads(subprocess.check_output([str(bins/'rowtrail'),'demo','--directory',str(base/'demo'),'--rows','128']))
         assert demo['status']=='passed' and demo['checks']['separate_recipient_process'] and demo['checks']['original_csv_removed']
+        assert demo['checks']['included_aggregate_explicitly_recomputed'] and demo['checks']['recipient_unique_ids']
+        assert not demo['checks']['raw_filter_recomputed']
         assert demo['transcripts']['compact']['response_bytes']<demo['transcripts']['full']['response_bytes']
         assert pathlib.Path(demo['report']).is_file() and pathlib.Path(demo['package_report']).is_file()
         marker=base/'demo/keep';marker.write_text('retained')

@@ -130,6 +130,11 @@ def run(binary, base, rows):
                       'binding':checked['binding'], 'quality':checked['quality']})
     verified = RowTrail.verify_package(base/'handoff')
     assert verified['missing_inputs'] and not verified['sql_recomputed']
+    recipe = {'format':'rowtrail.recipe.v1','inputs':['eligible_orders'],'steps':[
+        {'id':'unique_ids','kind':'check','bindings':{'t':'input:eligible_orders'},
+         'sql':'SELECT order_id,COUNT(*) n FROM t GROUP BY order_id HAVING COUNT(*)<>1'},
+        {'id':'totals','bindings':{'t':'input:eligible_orders'},'sql':TOTALS}]}
+    (base/'analysis-recipe.json').write_text(json.dumps(recipe,indent=2)+'\n')
     source.unlink()  # Only the fixture generated in this new private directory.
     # Import in a genuinely separate process, without the original CSV or SQL
     # execution. The receiver subsequently asks one explicit new question.
@@ -139,14 +144,28 @@ from rowtrail_client import RowTrail
 base=pathlib.Path(sys.argv[1])
 with RowTrail(sys.argv[2],str(base/'receiver'),response_mode='compact') as rt:
     imported=rt.import_package(base/'handoff')
+    # Explicit execution of the demo-authored recipe, after inert import. Only
+    # the aggregate/check can be recomputed; the absent raw filtering input cannot.
+    manifest=imported['provenance']
+    root=next(n for n in manifest['nodes'] if n['id']==manifest['root'])
+    eligible=imported['mapping'][root['dependencies']['t']]
+    recipe=json.loads((base/'analysis-recipe.json').read_text())
+    run=rt.run_recipe(recipe,{'eligible_orders':eligible},run_dir=base/'receiver-run')
+    assert run['status']=='completed' and run['steps'][0]['passed']
+    recomputed=rt.query('SELECT * FROM t ORDER BY channel',{'t':run['steps'][-1]['binding']})
+    delivered=rt.query('SELECT * FROM t ORDER BY channel',{'t':imported})
+    assert rt.rows(recomputed)==rt.rows(delivered)
     answer=rt.query('SELECT SUM(orders) orders,SUM(revenue_cents) revenue_cents FROM t',{'t':imported})
     result={'answer':rt.typed_rows(answer),'binding':rt.binding(answer),
-            'verification':imported['verification'],'observation':rt.observe(answer)}
+            'verification':imported['verification'],'observation':rt.observe(answer),
+            'explicit_recipe_status':run['status'],'included_aggregate_recomputed':True,
+            'raw_filter_recomputed':False,'recipient_unique_ids':run['steps'][0]['passed']}
 (base/'receiver.json').write_text(json.dumps(result,indent=2)+'\\n')
 '''
     subprocess.run([sys.executable,'-c',receiver,str(base),binary],check=True)
     received = json.loads((base/'receiver.json').read_text())
     assert received['answer'] == [[sum(int(r[1]) for r in expected), sum(int(r[2]) for r in expected)]]
+    assert received['included_aggregate_recomputed'] and received['recipient_unique_ids']
     cards.append({'step':'recipient follow-up without originals', **received['observation']})
     (base/'enhancement-transcript.json').write_text(json.dumps(enhancements,ensure_ascii=False,indent=2)+'\n')
     (base/'agent-cards.json').write_text(json.dumps(cards,ensure_ascii=False,indent=2)+'\n')
@@ -160,10 +179,12 @@ with RowTrail(sys.argv[2],str(base/'receiver'),response_mode='compact') as rt:
     result = {'status':'passed','format':'rowtrail.agent-demo.v1', 'directory':str(base),
         'input_rows':rows,'input_columns':64,'qualifying_rows':sum(int(r[1]) for r in expected),
         'answer':{'columns':['channel','orders','revenue_cents'],'rows':expected},
-        'transcripts':comparison,'enhancement_calls':len(enhancements),
+        'transcripts':comparison,'producer_enhancement_calls':len(enhancements),
         'checks':{'independent_integer_oracle':True,'intermediate_rows_shown':0,
                   'schema_search':True,'reconnect_context':True,'unique_ids':checked['passed'],
                   'separate_recipient_process':True,'original_csv_removed':True,
+                  'recipient_unique_ids':True,'included_aggregate_explicitly_recomputed':True,
+                  'raw_filter_recomputed':False,
                   'package_verified':'bytes only; not authorship or SQL reproduction',
                   'sql_recomputed_on_import':False},
         'report':str(base/'report.md'),'package_report':str(base/'handoff/report.md'),
@@ -197,6 +218,10 @@ suggested model-facing output of code composition; raw events can stay on disk.
 - [The portable report](handoff/report.md) includes SQL, quality and bounded previews.
 - A separate process imports checked result files and answers without the original
   CSV. Imported SQL is inert. Missing original inputs are declared explicitly.
+- The recipient explicitly runs `analysis-recipe.json` on the included eligible
+  orders, verifies uniqueness again, and reproduces the four delivered totals.
+  `receiver-run/run.json` retains this execution. The initial filter cannot be
+  recomputed without the original input; the report does not claim otherwise.
 
 ## Continue using the actual workspace
 
