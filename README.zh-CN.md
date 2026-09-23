@@ -23,7 +23,7 @@ Agent 探索一张大表，不应该先把整张表塞进上下文。RowTrail �
 [完整使用流程](docs/analysis.md)。
 
 不新增外部依赖。压缩包 / CLI / runtime 上限仍为 **30 MB / 4.5 MB / 125 MB**。
-beta.2 的发布门槛包括 **129 项集成场景和 14 项 Rust 测试**、原生安装，以及公开 alpha.8/beta.1 的真实升级。
+两端原生构建均通过 **129 项集成场景和 14 项 Rust 测试**、安装检查，以及公开 alpha.8/beta.1 的真实升级。
 
 **内部零模型调用，无需 API Key，没有表格界面。** 问什么、证据够不够，由你的 Agent 判断。
 
@@ -62,7 +62,7 @@ rowtrail --version
 [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.2) 下载并解压。
 请将 `rowtrail` 和 `rowtrail-runtime` 放在同一个目录。
 
-各平台实际下载大小与校验和见发布报告。
+实际下载为 **macOS 19.42 MB / Linux 22.82 MB**。
 预算保持 **下载 30 MB / CLI 4.5 MB / 运行时 125 MB**。同一个 Linux 包在 Ubuntu
 22.04 和 24.04 上验证；包内附带 Agent 指南与可选演示。实际大小与哈希见
 [原生产物记录](docs/verification.md#native-distribution)。

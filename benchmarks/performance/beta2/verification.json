@@ -1,0 +1,41 @@
+{
+  "status": "passed",
+  "version": "0.1.0-beta.2",
+  "ci_run": "https://github.com/adam2go/rowtrail/actions/runs/35823132374",
+  "verified_source_commit": "1128826fae357cb7f9776b4606ba4194dd58ec3b",
+  "per_native_platform": {
+    "integration_scenarios": 129,
+    "rust_tests_including_subprocess_harness": 14,
+    "subprocess_crash_scenarios": 12,
+    "deterministic_broken_ack_regression": true,
+    "format_clippy_dependency_boundaries": true,
+    "mcp_session_sdk": true,
+    "benchmark_profile_guard": true,
+    "archive_install_and_checksum_rejection": true
+  },
+  "extra_downloaded_macos_archive_checks": {
+    "beta2_scenarios": 16,
+    "published_beta1_upgrade": "8 -> 9",
+    "real_archive_install_and_both_demos": true
+  },
+  "local_benchmark_binaries": {
+    "beta1": {
+      "rowtrail": "d1791d1ff583c2b297da5d6cd19e45f748c0071ad99122dd0218593ba3cd54f5",
+      "rowtrail-runtime": "03fc8d44948d7de2593ab45c81b9261fcb8d878a3c65ab16b06c2f4bbb80e68a"
+    },
+    "beta2": {
+      "rowtrail": "7dd5f0a85b13a850e545ae18a8e0776196c70a1de00406eca0c255c02b53b5c5",
+      "rowtrail-runtime": "49958f5da4cd93dca86d504946a6eadb04cbb4785b67022dcfec5fea3a33c1ee"
+    }
+  },
+  "local_checks": [
+    "format",
+    "clippy all targets",
+    "14 Rust workspace tests",
+    "native dependency boundaries",
+    "MCP query/snapshot to CLI",
+    "NDJSON session",
+    "independent benchmark profiling guard"
+  ],
+  "note": "Local benchmark binaries and native CI artifacts have separate hashes. Only verified native CI archives are published."
+}

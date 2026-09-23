@@ -1,6 +1,6 @@
 # 010 — Portable analysis with explicit execution boundaries
 
-Status: implementing for 0.1.0-beta.2.
+Status: accepted and verified for 0.1.0-beta.2.
 
 The beta.1 external review asks for incremental adoption in existing Python
 projects, shareable branches, reusable recipes, revision comparison and executable

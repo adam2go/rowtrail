@@ -25,8 +25,8 @@ adds recipes and portable Markdown + Parquet packages; native snapshot is shared
 by CLI, NDJSON and MCP. [A complete workflow](docs/analysis.md).
 
 No new external dependency. Native archive/CLI/runtime budgets remain
-**30 MB / 4.5 MB / 125 MB**. Beta.2 release gates cover **129 integration scenarios
-and 14 Rust tests**, native installation and upgrades from published alpha.8/beta.1.
+**30 MB / 4.5 MB / 125 MB**. Both native build platforms pass **129 integration
+scenarios and 14 Rust tests**, installation and upgrades from published alpha.8/beta.1.
 
 **Zero internal model calls. No API key. No spreadsheet UI.** Your agent chooses
 the questions and decides when the evidence is sufficient.
@@ -67,7 +67,7 @@ Set `ROWTRAIL_INSTALL_DIR` to choose another directory, or extract an archive
 from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.2).
 Keep `rowtrail` and `rowtrail-runtime` together.
 
-Native archive sizes are recorded with their checksums in the release report.
+Downloads are **19.42 MB (macOS) / 22.82 MB (Linux)**.
 Budgets remain **30 MB download / 4.5 MB CLI / 125 MB runtime**.
 The same Linux archive is tested on Ubuntu 22.04 and 24.04. Archives include
 agent guides and the optional runnable demo. Actual sizes and hashes appear in

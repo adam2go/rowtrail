@@ -2,8 +2,8 @@
 
 [Home](../README.md) · [Verification and measurements](verification.md)
 
-Updated 2026-09-23 for **0.1.0-beta.2**. Release verification is in progress;
-public native artifacts are gated on both platform builds and archive checks.
+Updated 2026-09-23 for **0.1.0-beta.2**. Native macOS/Linux verification and
+independent release artifact checks pass, including Ubuntu 24.04 installation.
 
 ## Beta.2
 
@@ -30,6 +30,14 @@ public native artifacts are gated on both platform builds and archive checks.
 - Metadata schema 9 upgrades 3..8 and excludes old runtimes. Public alpha.8 and
   beta.1 upgrades, exact old revisions, crash recovery and native size ceilings
   remain release gates.
+
+- Both native platforms pass 129 integration scenarios and 14 Rust tests. The
+  downloaded macOS package passes the new suite, real beta.1 upgrade and both
+  installed demos again. [Native CI](https://github.com/adam2go/rowtrail/actions/runs/35823132374).
+- Downloads are 19.42 / 22.82 MB; all 557 notices and hashes match. The 2 KiB
+  scalar saves one call and 31% of response bytes. Existing large workflows
+  remain broadly stable, with all samples and regressions disclosed. The full
+  131,072-row handoff workflow takes 864 ms median across five local trials.
 
 [Analysis guide](analysis.md) · [Runnable complete example](../examples/analysis_quickstart.py) ·
 [Decision](decisions/010-portable-analysis.md) · [Verification](verification.md).
@@ -277,8 +285,9 @@ size budgets remain mandatory. [Alpha.2 history](releases/alpha2-progress.md).
 
 - Alpha.8 provides exact label filtering, row counts, bounded field hints and
   resource-aware query partition targets. Remaining handoff work includes query
-  purpose, branch/SQL context, richer bounded discovery and representative paired
-  agent tasks. Whole-workspace catalog counts still grow with retained history;
+  catalog context, richer bounded discovery and representative paired agent
+  tasks. Beta.2 stores caller purpose/provenance and exports SQL branch context;
+  full SQL remains outside the default compact catalog. Whole-workspace catalog counts still grow with retained history;
   broader above-memory parallel workloads need further verification.
 
 - Integer/Decimal SQL SUM and Decimal publication boundaries are checked in beta.1.

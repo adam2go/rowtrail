@@ -4,8 +4,11 @@
 
 Beta.2 adds native independent snapshots and optional stdlib analysis composition:
 assertions, keyed diffs, durable SQL recipes and portable result branches. It adds
-no external dependency. This page is being finalized during native release CI;
-artifacts are published only after both native platforms and archive checks pass.
+no external dependency. Both native platforms and independent archive verification pass for source
+`1128826fae357cb7f9776b4606ba4194dd58ec3b`.
+[Passing native CI](https://github.com/adam2go/rowtrail/actions/runs/35823132374) ·
+[Machine-readable artifact provenance](release-verification.json).
+The same Linux archive also passes installation on Ubuntu 24.04.
 
 ## Correctness gates
 
@@ -104,7 +107,20 @@ Unchanged budgets: 30,000,000 compressed bytes, 4,500,000 CLI bytes and 125,000,
 runtime bytes. Only passing native macOS arm64 / Ubuntu 22.04 x86_64 CI artifacts
 are published; the same Linux archive is installed and tested on Ubuntu 24.04.
 Archive hashes, bundled files, installed printed client/demos and all 557 dependency
-notices must match independently before publication. Native CI remains pending.
+notices must match independently before publication. The actual downloaded macOS archive also passes the 16 new scenarios, real
+published-beta.1 upgrade, private installation and both demos on the maintainer's
+Mac. [Extra acceptance records](../benchmarks/performance/beta2/verification.json).
+
+| Native archive | Download bytes | CLI bytes | Runtime bytes |
+|---|---:|---:|---:|
+| macOS arm64 | 19,415,656 | 3,948,704 | 100,978,704 |
+| Linux x86_64 | 22,820,480 | 4,445,080 | 115,949,576 |
+
+That is **19.42 / 22.82 MB** downloaded; both are below the unchanged 30 MB ceiling.
+All 557 notices and archived guide/client/demo files match. Published executables
+come from that passing CI source; later report/README commits do not change their
+bytes. Archives retain the documents from their build source; this live report
+records the final acceptance and measured provenance.
 
 ## Limits
 
