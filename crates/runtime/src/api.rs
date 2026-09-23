@@ -92,7 +92,7 @@ fn remember(c: &rusqlite::Connection, req: &Request, v: &Value) -> Result<()> {
     Ok(())
 }
 pub fn capabilities() -> Value {
-    json!({"api_version":"1","metadata_schema":"8; one-way upgrade from 3/4/5/6/7","numeric":crate::numeric::policy(),"progressive_aggregation":{"fragment_unit":"parquet_row_group","fragment_units":["parquet_row_group","manifest_file"],"checkpoint_interval_ms":50,"aggregate_limit":16,"numeric_inputs":"Int64, UInt64, Decimal128 scale 0..6","sum":"Decimal128(38,input_scale)","avg":"Decimal128(38,6), truncation toward zero","group_by":false,"sampling":false},"formats":["csv","tsv","parquet"],"source":"local","sql":"DataFusion 55.0.0 read-only SELECT; explicit bindings","analysis":["inspect:null_count","inspect:min_max","inspect:top_k","analyze:count","analyze:sum","analyze:avg"],"entries":["cli","ndjson_session","mcp_stdio","rust_sdk"],"workspace_summary":"bounded metadata catalog with exact label filter, fixed bindings, row counts and bounded field hints; store-scoped cursor; no source scan","query_parallelism":{"auto_max":4,"serial_below_input_bytes":16777216,"pool_bytes_per_parallel_partition":67108864,"explicit_target_partitions":"1..8; requires 64 MiB per partition when greater than one","target_not_thread_limit":true},"prepare":"explicit streaming CSV/TSV to managed Parquet; atomic dataset visibility","workspace_quota":"managed data plus conservative result/spill reservations; excludes SQLite/WAL overhead, logs and external exports","saved_result_scan":"whole IPC parts; separate files remain parallel; each new job verifies again","verified_part_cache_bytes":8388608,"result_part_target_bytes":6291456,"result_part_target_basis":"encoded IPC plus next batch array memory; prepared Parquet keeps input-memory target","inline_result_part_max_bytes":131072,"result_part_max_bytes":8388608,"native_tasks":false,"automatic_resume":false,"source_consistency":"best_effort","result_storage":"immutable Arrow IPC; parts up to 128 KiB in SQLite, larger parts in files","max_frame_bytes":FRAME_LIMIT,"minimum_error_budget_bytes":512,"max_output_bytes":FRAME_LIMIT-512,"max_output_rows":10000,"max_manifest_files":128,"max_directory_entries":4096,"default_parallel_jobs":1,"cancellation":"cooperative signal with forced worker termination after 300ms","engine_memory_limit":"MemoryPool; not RSS hard limit","scan_limit":"byte reservation before local reads","result_retention":"retained by default; explicit pin/release and dependency-safe workspace gc","event_retention":"until workspace removal; no event pruning yet","unsupported":["Windows","remote","sampling","native_tasks","automatic_resume","union_by_name","binary_inline","RSS_hard_limit"]})
+    json!({"api_version":"1","metadata_schema":"9; one-way upgrade from 3/4/5/6/7/8","numeric":crate::numeric::policy(),"progressive_aggregation":{"fragment_unit":"parquet_row_group","fragment_units":["parquet_row_group","manifest_file"],"checkpoint_interval_ms":50,"aggregate_limit":16,"numeric_inputs":"Int64, UInt64, Decimal128 scale 0..6","sum":"Decimal128(38,input_scale)","avg":"Decimal128(38,6), truncation toward zero","group_by":false,"sampling":false},"formats":["csv","tsv","parquet"],"source":"local","sql":"DataFusion 55.0.0 read-only SELECT; explicit bindings","analysis":["inspect:null_count","inspect:min_max","inspect:top_k","analyze:count","analyze:sum","analyze:avg"],"entries":["cli","ndjson_session","mcp_stdio","rust_sdk"],"workspace_summary":"bounded metadata catalog with exact label filter, fixed bindings, row counts and bounded field hints; store-scoped cursor; no source scan","query_parallelism":{"auto_max":4,"serial_below_input_bytes":16777216,"pool_bytes_per_parallel_partition":67108864,"explicit_target_partitions":"1..8; requires 64 MiB per partition when greater than one","target_not_thread_limit":true},"prepare":"explicit streaming CSV/TSV to managed Parquet; atomic dataset visibility","snapshot":"explicit independent managed Parquet copy of a dataset or final exact complete result; caller provenance stored, never executed","workspace_quota":"managed data plus conservative result/spill reservations; excludes SQLite/WAL overhead, logs and external exports","saved_result_scan":"whole IPC parts; separate files remain parallel; each new job verifies again","verified_part_cache_bytes":8388608,"result_part_target_bytes":6291456,"result_part_target_basis":"encoded IPC plus next batch array memory; prepared Parquet keeps input-memory target","inline_result_part_max_bytes":131072,"result_part_max_bytes":8388608,"native_tasks":false,"automatic_resume":false,"source_consistency":"best_effort","result_storage":"immutable Arrow IPC; parts up to 128 KiB in SQLite, larger parts in files","max_frame_bytes":FRAME_LIMIT,"minimum_error_budget_bytes":512,"max_output_bytes":FRAME_LIMIT-512,"max_output_rows":10000,"max_manifest_files":128,"max_directory_entries":4096,"default_parallel_jobs":1,"cancellation":"cooperative signal with forced worker termination after 300ms","engine_memory_limit":"MemoryPool; not RSS hard limit","scan_limit":"byte reservation before local reads","result_retention":"retained by default; explicit pin/release and dependency-safe workspace gc","event_retention":"until workspace removal; no event pruning yet","unsupported":["Windows","remote","sampling","native_tasks","automatic_resume","union_by_name","binary_inline","RSS_hard_limit"]})
 }
 fn validate_execution(e: &Execution) -> Result<()> {
     if let Some(n) = e.target_partitions {
@@ -117,6 +117,16 @@ fn validate_execution(e: &Execution) -> Result<()> {
         e.output.max_rows <= 10000 && (1024..=FRAME_LIMIT - 512).contains(&e.output.max_bytes),
         "INVALID_ARGUMENT: output budget"
     );
+    Ok(())
+}
+
+fn validate_provenance(p: Option<&Provenance>) -> Result<()> {
+    if let Some(p) = p {
+        ensure!(
+            p.description.len() <= 4096 && p.origin.len() <= 4096 && p.code.len() <= 16384,
+            "INVALID_ARGUMENT: provenance description/origin limit 4096 UTF-8 bytes, code 16384 bytes"
+        );
+    }
     Ok(())
 }
 
@@ -213,12 +223,17 @@ async fn dispatch_inner(db: Arc<Db>, req: Request) -> Response {
                 serde_json::to_vec(&Response::success(&req, value.clone()))
                     .is_ok_and(|b| b.len() <= limit)
             };
+            if !fits(&v) && v.get("job").is_some() {
+                v["job"]["metrics"] = Value::Null;
+            }
             if !fits(&v) && v.get("observation").is_some() {
                 v["observation"] = Value::Null;
                 v["observation_omitted"] = json!("output_budget");
-            }
-            if !fits(&v) && v.get("job").is_some() {
-                v["job"]["metrics"] = Value::Null;
+                if let Some(actions) = v["next_actions"].as_array_mut()
+                    && !actions.contains(&json!("read"))
+                {
+                    actions.insert(0, json!("read"));
+                }
             }
             if !fits(&v) {
                 let mut error = ApiError::new(
@@ -288,6 +303,7 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
         "query" => {
             let p: QueryParams = decode(&req.params)?;
             crate::catalog::validate_label(p.label.as_deref())?;
+            validate_provenance(p.provenance.as_ref())?;
             validate_execution(&p.execution)?;
             ensure!(
                 p.execution.goal == "exact"
@@ -330,6 +346,7 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
                 let projection = crate::aggregate::projection(input, &p)?;
                 quality["aggregation"] = json!({"aggregates":p.aggregates,"fragment_unit":p.fragment_unit,"average":"Decimal128(38,6); truncated toward zero at six fractional digits; exact sum and count retained in computation"});
                 let query = QueryParams {
+                    provenance: None,
                     label: None,
                     bindings,
                     sql: format!("SELECT {projection} FROM source"),
@@ -355,6 +372,7 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
                 let mut execution = p.execution.clone();
                 execution.preview = "none".into();
                 let query = QueryParams {
+                    provenance: None,
                     label: None,
                     bindings: BTreeMap::from([("source".into(), Binding::Dataset(p.source))]),
                     sql: "SELECT * FROM source".into(),
@@ -373,13 +391,56 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
             };
             wait_response(&db, refs, p.execution.wait_ms, None).await
         }
+        "snapshot" => {
+            let p: SnapshotParams = decode(&req.params)?;
+            crate::catalog::validate_label(p.label.as_deref())?;
+            validate_provenance(p.provenance.as_ref())?;
+            validate_execution(&p.execution)?;
+            ensure!(
+                p.execution.goal == "exact",
+                "UNSUPPORTED_OPERATION: snapshot requires exact execution"
+            );
+            let prior = { existing(&db.conn.lock().unwrap(), req)? };
+            let refs = if let Some(v) = prior {
+                v
+            } else {
+                if let Binding::Result(b) = &p.source {
+                    let s = results::snapshot(&db, &b.result_ref, Some(b.revision))?;
+                    ensure!(
+                        s.job_state == "completed" && s.quality["final_for_request"] == true,
+                        "RESULT_NOT_FINAL: snapshot requires a completed final revision"
+                    );
+                }
+                let mut execution = p.execution.clone();
+                execution.preview = "none".into();
+                let query = QueryParams {
+                    label: p.label,
+                    provenance: p.provenance,
+                    bindings: BTreeMap::from([("source".into(), p.source)]),
+                    sql: "SELECT * FROM source".into(),
+                    parameters: vec![],
+                    execution,
+                    notify: Notify::default(),
+                };
+                let (inputs, sources, quality) = resolve(&db, &query.bindings)?;
+                ensure!(
+                    quality["accuracy"] == "exact" && quality["coverage"]["kind"] == "complete",
+                    "RESULT_NOT_FINAL: snapshot requires exact complete coverage"
+                );
+                submit(&db, req, Some(query), None, inputs, sources, quality)?
+            };
+            wait_response(&db, refs, p.execution.wait_ms, None).await
+        }
         "read" => {
             let p: ReadParams = decode(&req.params)?;
             tokio::task::spawn_blocking(move || results::read(&db, &p)).await?
         }
         "inspect" => {
             let p: InspectParams = decode(&req.params)?;
-            if p.checks.iter().all(|c| c == "schema") {
+            if p.checks
+                .iter()
+                .all(|c| matches!(c.as_str(), "schema" | "provenance"))
+            {
                 return inspect(&db, p);
             }
             let (query, inspection) = crate::profile::query(&db, &p)?;
@@ -407,6 +468,28 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
         "control" => {
             let p: ControlParams = decode(&req.params)?;
             match p.action.as_str() {
+                "lookup" => {
+                    let raw: Option<String> = db
+                        .conn
+                        .lock()
+                        .unwrap()
+                        .query_row(
+                            "SELECT response FROM idempotency WHERE key=?",
+                            [&p.object_ref],
+                            |r| r.get(0),
+                        )
+                        .optional()?;
+                    let refs: Value =
+                        serde_json::from_str(&raw.ok_or_else(|| {
+                            anyhow::anyhow!("OBJECT_NOT_FOUND: idempotency key")
+                        })?)?;
+                    let job = refs
+                        .get("job_id")
+                        .and_then(Value::as_str)
+                        .map(|id| db.job(id))
+                        .transpose()?;
+                    Ok(json!({"accepted":true,"references":refs,"job":job}))
+                }
                 "pin" | "release" => crate::storage::retain(&db, &p.object_ref, p.action == "pin"),
                 "status" => Ok(json!({"job":db.job(&p.object_ref)?})),
                 "refresh" => {
@@ -577,12 +660,19 @@ fn open_response(db: &Db, manifest: &str, budget: &OutputBudget) -> Result<Value
 }
 fn inspect(db: &Db, p: InspectParams) -> Result<Value> {
     ensure!(
-        p.checks.iter().all(|s| s == "schema"),
+        p.checks
+            .iter()
+            .all(|s| matches!(s.as_str(), "schema" | "provenance")),
         "UNSUPPORTED_OPERATION: inspect currently supports schema; use bounded SQL for rows/statistics"
     );
     let (schema, mut out) = if p.object_ref.starts_with("res_") {
         let snapshot = results::snapshot(db, &p.object_ref, p.revision)?;
-        let out = json!({"ref":p.object_ref,"revision":snapshot.revision,"schema_origin":"materialized_result","quality":snapshot.quality,"validity":snapshot.validity,"row_count":snapshot.rows.to_string()});
+        let scope: String = db.conn.lock().unwrap().query_row(
+            "SELECT j.scope_ref FROM results r JOIN jobs j ON j.id=r.job_id WHERE r.id=?",
+            [&p.object_ref],
+            |r| r.get(0),
+        )?;
+        let out = json!({"ref":p.object_ref,"revision":snapshot.revision,"scope_ref":scope,"schema_origin":"materialized_result","quality":snapshot.quality,"validity":snapshot.validity,"row_count":snapshot.rows.to_string(),"verification":{"validity":"stored","original_sources":"not_rechecked","parts":"checked_when_read_or_used"}});
         (snapshot.schema, out)
     } else {
         let mut v = db.object(&p.object_ref)?;
@@ -596,8 +686,22 @@ fn inspect(db: &Db, p: InspectParams) -> Result<Value> {
             );
             return Ok(v);
         }
+        let validity = v["validity"].clone();
         let m: Manifest = serde_json::from_value(v)?;
-        let out = json!({"ref":p.object_ref,"manifest_ref":m.id,"schema_origin":m.schema_origin});
+        let mut out = json!({"ref":p.object_ref,"manifest_ref":m.id,"schema_origin":m.schema_origin,"validity":validity});
+        if p.checks.iter().any(|c| c == "provenance") {
+            let dataset = db.object(&m.dataset_ref)?;
+            out["scope_ref"] = dataset["scope_ref"].clone();
+            out["identity"] = json!({"dataset_ref":m.dataset_ref,"manifest_ref":m.id,"source":m.source,"format":m.format,"files":m.files,"header":m.header,"delimiter":m.delimiter});
+            out["provenance"] = m
+                .schema
+                .metadata()
+                .get("rowtrail.provenance")
+                .map(|s| serde_json::from_str::<Value>(s))
+                .transpose()?
+                .unwrap_or(Value::Null);
+            out["verification"] = json!({"validity":"stored","files":"not_rechecked","independent":m.schema_origin=="prepared"});
+        }
         (m.schema, out)
     };
     let fields=schema.fields().iter().enumerate().filter(|(i,f)|*i>=p.offset&&(p.columns.is_empty()||p.columns.contains(f.name()))).map(|(i,f)|(i,json!({"name":f.name(),"type":f.data_type().to_string(),"nullable":f.is_nullable()}))).collect::<Vec<_>>();
@@ -745,7 +849,7 @@ fn submit(
         } else {
             None
         },
-        prepared: (req.method == "prepare").then(|| DatasetBinding {
+        prepared: matches!(req.method.as_str(), "prepare" | "snapshot").then(|| DatasetBinding {
             dataset_ref: id("ds"),
             manifest_ref: id("mf"),
         }),
@@ -796,7 +900,7 @@ fn submit(
             json!({"view_ref":view,"request":req.params}).to_string()
         ],
     )?;
-    tx.execute("INSERT INTO objects(id,kind,data) VALUES(?,'scope',?)",params![scope,json!({"scope_ref":scope,"label":spec.query.as_ref().and_then(|q|q.label.as_ref()),"inputs":spec.query.as_ref().map(|q|&q.bindings),"sql":spec.query.as_ref().map(|q|&q.sql),"parameters":spec.query.as_ref().map(|q|&q.parameters),"coverage_semantics":if spec.analysis.is_some(){"one cumulative aggregate checkpoint over complete fragments in frozen manifest order"}else{"committed output prefix until final; input scan coverage unknown"},"quality":quality}).to_string()])?;
+    tx.execute("INSERT INTO objects(id,kind,data) VALUES(?,'scope',?)",params![scope,json!({"scope_ref":scope,"provenance":spec.query.as_ref().and_then(|q|q.provenance.as_ref()),"label":spec.query.as_ref().and_then(|q|q.label.as_ref()),"inputs":spec.query.as_ref().map(|q|&q.bindings),"sql":spec.query.as_ref().map(|q|&q.sql),"parameters":spec.query.as_ref().map(|q|&q.parameters),"coverage_semantics":if spec.analysis.is_some(){"one cumulative aggregate checkpoint over complete fragments in frozen manifest order"}else{"committed output prefix until final; input scan coverage unknown"},"quality":quality}).to_string()])?;
     for input in spec.inputs.values() {
         tx.execute(
             "INSERT OR IGNORE INTO deps VALUES(?,?)",
@@ -840,16 +944,31 @@ async fn wait_response(
         Value::Null
     };
     if let (Some(budget), Some(revision)) = (output, state["readable_revision"].as_u64()) {
+        // read reserves its own response-envelope headroom. Reserve the actual
+        // surrounding job metadata too, so a large page fits without a second
+        // read. Tight budgets spend bytes on the answer before optional metrics.
+        if budget.max_bytes < 4096 {
+            refs["job"]["metrics"] = Value::Null;
+        }
+        let overhead = serde_json::to_vec(&refs)?.len() + 32;
         let p = ReadParams {
             result_ref: state["result_ref"].as_str().unwrap().into(),
             revision: Some(revision),
             cursor: None,
             columns: vec![],
             max_rows: budget.max_rows,
-            max_bytes: budget.max_bytes.saturating_sub(1024),
+            max_bytes: budget.max_bytes.saturating_sub(overhead),
         };
-        if let Ok(observation) = results::read(db, &p) {
-            refs["observation"] = observation;
+        match results::read(db, &p) {
+            Ok(observation) => refs["observation"] = observation,
+            Err(error) => {
+                let code = crate::errors::code(&error, "INTERNAL_ERROR");
+                if code == "OUTPUT_BUDGET_TOO_SMALL" {
+                    refs["observation_omitted"] = json!("output_budget");
+                } else {
+                    refs["observation_error"] = json!({"code":code,"message":error.to_string()});
+                }
+            }
         }
     }
     let mut actions = vec![];

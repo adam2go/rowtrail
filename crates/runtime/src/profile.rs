@@ -137,6 +137,7 @@ pub fn query(db: &Db, p: &InspectParams) -> Result<(QueryParams, Value)> {
     let info = json!({"columns":columns,"checks":p.checks,"outputs":fields,"top_k":if checks.contains("top_k"){Some(p.top_k)}else{None}});
     Ok((
         QueryParams {
+            provenance: None,
             label: None,
             bindings: BTreeMap::from([("source".into(), binding)]),
             sql,

@@ -14,7 +14,7 @@ import tarfile
 import tomllib
 
 ROOT=Path(__file__).resolve().parents[1]
-SUITES={'integration':30,'alpha3':13,'alpha4':10,'alpha5':12,'alpha6':8,'alpha7':15,'alpha8':11,'alpha9':14}
+SUITES={'integration':30,'alpha3':13,'alpha4':10,'alpha5':12,'alpha6':8,'alpha7':15,'alpha8':11,'alpha9':14,'beta2':16}
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--run',type=int,required=True)
 p.add_argument('--commit',required=True)
@@ -32,7 +32,7 @@ for name in ('verify (ubuntu-22.04)','verify (macos-14)','linux-compatibility'):
     assert by_name[name]['conclusion']=='success'
 for name in ('verify (ubuntu-22.04)','verify (macos-14)'):
     steps={step['name']:step['conclusion'] for step in by_name[name]['steps']}
-    for command in ('cargo test --release --locked --workspace','python3 tests/integration/alpha9.py','python3 scripts/previous_release_probe.py','python3 scripts/install_probe.py'):
+    for command in ('cargo test --release --locked --workspace','python3 tests/integration/alpha9.py','python3 tests/integration/beta2.py','python3 scripts/previous_release_probe.py','python3 scripts/install_probe.py'):
         assert steps['Run '+command]=='success'
 budgets=json.loads((ROOT/'benchmarks/budgets.json').read_text())['distribution']
 artifacts,inventory,resources,installs,upgrades=[],{},{},{},{}
@@ -55,7 +55,7 @@ for platform in ('linux','macos'):
             assert '..' not in Path(member.name).parts and (member.isfile() or member.isdir())
         assert b'Apache License' in tar.extractfile(prefix+'/LICENSE').read()
         assert b'RowTrail' in tar.extractfile(prefix+'/NOTICE').read()
-        expected=['docs/agent-guide.md','docs/agent-quickstart.md','docs/usage.md','docs/numeric-contract.md','examples/session_client.py','examples/quickstart.py']
+        expected=['docs/agent-guide.md','docs/agent-quickstart.md','docs/usage.md','docs/numeric-contract.md','examples/session_client.py','examples/quickstart.py','examples/analysis_quickstart.py','docs/analysis.md']
         notices=json.loads(tar.extractfile(prefix+'/third-party/inventory.json').read())
         expected += [path for entry in notices for path in entry['notice_files']]
         for path in expected:
@@ -80,10 +80,13 @@ for platform in ('linux','macos'):
         inventory[platform][name]={k:result[k] for k in ('status','checks','binary_sha256') if k in result}
     upgrade=json.loads((reports/'upgrade-alpha8.json').read_text())
     numeric_upgrade=json.loads((reports/'numeric-upgrade-alpha8.json').read_text())
-    assert upgrade['status']=='passed' and upgrade['old_schema']=='7' and upgrade['new_schema']=='8'
+    assert upgrade['status']=='passed' and upgrade['old_schema']=='7' and upgrade['new_schema']=='9'
     assert upgrade['old_runtime_rejects_upgraded_store'] and upgrade['old_partial_checkpoint_preserved']
     assert numeric_upgrade['status']=='passed' and numeric_upgrade['binary_sha256']['new']==hashes
-    upgrades[platform]={'metadata':upgrade,'numeric':numeric_upgrade}
+    beta_upgrade=json.loads((reports/'upgrade-beta1.json').read_text())
+    assert beta_upgrade['status']=='passed' and beta_upgrade['old_schema']=='8' and beta_upgrade['new_schema']=='9'
+    assert beta_upgrade['old_fixed_revision_preserved'] and beta_upgrade['old_partial_checkpoint_preserved']
+    upgrades[platform]={'metadata':upgrade,'numeric':numeric_upgrade,'beta1':beta_upgrade}
     resource=json.loads((reports/'resources.json').read_text())
     assert resource['status']=='passed' and resource['binary_sha256']==hashes
     assert resource['all_exported_ids_match_independent_sort'] and resource['largest_part_bytes']<=8388608

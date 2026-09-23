@@ -202,3 +202,15 @@ The JSON shape and supported numeric types are in the [agent guide](agent-guide.
 The stop threshold is a caller policy; cancellation can race with another completed
 file, so inspect the returned job state and actual coverage. A partial checkpoint
 is a reusable exact answer over that file prefix, not an estimate over unseen data.
+
+## Independent snapshots, checks and analysis handoff
+
+For existing Parquet work in DuckDB/Polars/Pandas, `snapshot` creates a managed
+copy with a label and caller-written provenance. CLI `snapshot --request FILE`,
+NDJSON method `snapshot` and MCP `data_snapshot` use the same contract. Discover
+it with `rowtrail schema snapshot`. `prepare` remains CSV/TSV-only.
+
+The optional stdlib client builds executable checks, keyed comparisons, reusable
+SQL recipes and portable result branches on these native primitives. Start with
+`python3 examples/analysis_quickstart.py`; see the [complete guide](analysis.md)
+for import/export, explicit budgets, partial failure and verification boundaries.

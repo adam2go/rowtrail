@@ -2,8 +2,37 @@
 
 [Home](../README.md) · [Verification and measurements](verification.md)
 
-Updated 2026-09-23 for **0.1.0-beta.1**. Native macOS/Linux acceptance and
-independent release artifact verification pass.
+Updated 2026-09-23 for **0.1.0-beta.2**. Release verification is in progress;
+public native artifacts are gated on both platform builds and archive checks.
+
+## Beta.2
+
+- Native independent snapshots accept Parquet/CSV/TSV datasets and completed exact
+  result revisions. Existing prepare publication, checksum, quota, cancellation
+  and fsync guarantees are reused. Labels and bounded provenance survive copies.
+- Provenance inspection distinguishes stored validity, actual part checks and
+  source independence. Existing source invalidation semantics remain explicit.
+- Small responses prioritize answers over optional metrics. A 2 KiB scalar can
+  be consumed in one call with complete quality and fixed references intact.
+- The stdlib client adds lossless scalar/named records, exact SQL assertions and
+  schema leakage checks, keyed diffs, versioned recipes with durable run records,
+  and portable branches with Markdown, SQL, identity, quality and Parquet payloads.
+- Packages are checksum-verified directories; import never runs SQL or reads
+  recorded original paths. Fresh copies support follow-ups without originals;
+  full recomputation is an explicit recipe run with complete input mappings.
+- Per-step idempotency keys are written before recipe submission. Read-only
+  `control/lookup` recovers committed acceptance without replay. Earlier successes
+  and unknown transport outcomes remain inspectable.
+- Higher-level analysis helpers are optional Python composition, not native MCP
+  tools. Diff scans more than once; packages/recipes are not whole-operation
+  transactions. Metadata/payload/step budgets fail explicitly. No scheduler,
+  dataframe library or external dependency is added.
+- Metadata schema 9 upgrades 3..8 and excludes old runtimes. Public alpha.8 and
+  beta.1 upgrades, exact old revisions, crash recovery and native size ceilings
+  remain release gates.
+
+[Analysis guide](analysis.md) · [Runnable complete example](../examples/analysis_quickstart.py) ·
+[Decision](decisions/010-portable-analysis.md) · [Verification](verification.md).
 
 ## Beta.1
 
@@ -301,6 +330,7 @@ python3 tests/integration/alpha6.py
 python3 tests/integration/alpha7.py
 python3 tests/integration/alpha8.py
 python3 tests/integration/alpha9.py
+python3 tests/integration/beta2.py
 python3 scripts/previous_release_probe.py
 python3 scripts/check_boundaries.py
 python3 scripts/mcp_probe.py target/release/rowtrail

@@ -90,6 +90,11 @@ enum Command {
         #[arg(long, default_value_t = 200)]
         wait_ms: u64,
     },
+    /// Copy a dataset or final result into an independent managed snapshot.
+    Snapshot {
+        #[arg(long, default_value = "-")]
+        request: PathBuf,
+    },
     /// Inspect usage, configure a managed-data quota, or collect released data.
     Workspace {
         #[arg(long)]
@@ -329,6 +334,7 @@ impl ServerHandler for Mcp {
                 "open",
                 "inspect",
                 "prepare",
+                "snapshot",
                 "analyze",
                 "query",
                 "read",
@@ -523,6 +529,7 @@ async fn run(args: Args) -> Result<i32> {
             json!({"ref":reference,"revision":revision,"top_k":top_k,"columns":columns,"checks":checks,"offset":offset,"budget":{"max_rows":max_rows,"max_bytes":max_bytes}}),
         ),
         Command::Analyze { request } => request_from("analyze", load(&request)?)?,
+        Command::Snapshot { request } => request_from("snapshot", load(&request)?)?,
         Command::Prepare {
             dataset,
             manifest,
@@ -563,6 +570,7 @@ async fn run(args: Args) -> Result<i32> {
                 request_from("query", load(&path)?)?
             } else {
                 let p = QueryParams {
+                    provenance: None,
                     label: None,
                     bindings: parse_bindings(bind)?,
                     sql: sql.ok_or_else(|| anyhow::anyhow!("--sql or --request required"))?,

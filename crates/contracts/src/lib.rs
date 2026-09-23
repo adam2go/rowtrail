@@ -225,6 +225,8 @@ pub struct QueryParams {
     pub sql: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub label: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub provenance: Option<Provenance>,
     #[serde(default)]
     pub parameters: Vec<Parameter>,
     #[serde(default)]
@@ -259,6 +261,28 @@ fn top_k() -> usize {
 #[serde(deny_unknown_fields)]
 pub struct PrepareParams {
     pub source: DatasetBinding,
+    #[serde(default)]
+    pub execution: Execution,
+}
+/// Caller-authored context. Text is stored, never executed or certified.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct Provenance {
+    #[serde(default)]
+    pub description: String,
+    #[serde(default)]
+    pub origin: String,
+    #[serde(default)]
+    pub code: String,
+}
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct SnapshotParams {
+    pub source: Binding,
+    #[serde(default)]
+    pub label: Option<String>,
+    #[serde(default)]
+    pub provenance: Option<Provenance>,
     #[serde(default)]
     pub execution: Execution,
 }
@@ -380,6 +404,7 @@ pub fn schema(method: &str) -> Option<Value> {
         "open" => serde_json::to_value(schemars::schema_for!(OpenParams)).ok()?,
         "inspect" => serde_json::to_value(schemars::schema_for!(InspectParams)).ok()?,
         "prepare" => serde_json::to_value(schemars::schema_for!(PrepareParams)).ok()?,
+        "snapshot" => serde_json::to_value(schemars::schema_for!(SnapshotParams)).ok()?,
         "analyze" => serde_json::to_value(schemars::schema_for!(AnalyzeParams)).ok()?,
         "workspace" => serde_json::to_value(schemars::schema_for!(WorkspaceParams)).ok()?,
         "query" => serde_json::to_value(schemars::schema_for!(QueryParams)).ok()?,

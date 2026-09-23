@@ -73,7 +73,7 @@ impl Db {
             [id("store")],
         )?;
         c.execute(
-            "INSERT OR IGNORE INTO meta VALUES('schema_version','8')",
+            "INSERT OR IGNORE INTO meta VALUES('schema_version','9')",
             [],
         )?;
         let version: String = c.query_row(
@@ -82,15 +82,15 @@ impl Db {
             |r| r.get(0),
         )?;
         ensure!(
-            matches!(version.as_str(), "3" | "4" | "5" | "6" | "7" | "8"),
+            matches!(version.as_str(), "3" | "4" | "5" | "6" | "7" | "8" | "9"),
             "PROTOCOL_VERSION_MISMATCH: metadata schema"
         );
         // Upgrade atomically; older runtimes cannot interpret new persisted query options.
-        if version != "8" {
+        if version != "9" {
             c.execute_batch("BEGIN IMMEDIATE;
                 UPDATE jobs SET spec=json_set(spec,'$.analysis.fragment_unit','manifest_file','$.analysis.checkpoint_interval_ms',0)
                   WHERE json_type(spec,'$.analysis')='object' AND json_type(spec,'$.analysis.fragment_unit') IS NULL;
-                UPDATE meta SET value='8' WHERE key='schema_version'; COMMIT;")?;
+                UPDATE meta SET value='9' WHERE key='schema_version'; COMMIT;")?;
         }
         let store_id = c.query_row("SELECT value FROM meta WHERE key='store_id'", [], |r| {
             r.get(0)

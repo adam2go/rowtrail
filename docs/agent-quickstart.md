@@ -58,3 +58,24 @@ Integer/Decimal SQL SUM now checks overflow; Decimal output precision is guarded
 Other SQL arithmetic retains engine semantics. `accuracy=exact` describes sampling,
 not arbitrary-precision arithmetic. Old results without numeric policy are unknown;
 [numeric policy v1](numeric-contract.md) explains the scope and legacy behavior.
+
+## Independent versions and reusable analysis (beta.2)
+
+Native `snapshot` accepts a dataset or final exact complete result binding and
+streams it into independent managed Parquet. `label` and bounded `provenance`
+(origin, description, code) remain discoverable; code is never executed. Get the
+contract with `rowtrail schema snapshot` or use MCP `data_snapshot`.
+`control` action `lookup`, `ref: idempotency_key`, reads committed acceptance
+without replaying a mutation. Missing is only a point-in-time observation.
+
+The printed stdlib client adds `from_parquet`, `snapshot`, `scalar`, `records`,
+`check`, `diff`, `run_recipe`, `pack`, `verify_package` and `import_package`.
+Higher-level composition is initially Python-only. Checks cannot pass on partial
+coverage. Diffs require unique non-null keys. Packages are checked directories,
+not signed attestations; SQL reruns only through an explicit recipe invocation.
+[Contracts, examples, budgets and verification boundaries](analysis.md).
+
+Stored validity is not a fresh original-source check: inspecting metadata does
+not scan files; saved-result use checks its parts. Original-source operations
+may discover changes and invalidate dependents. Take an independent snapshot
+before that point when retaining a standalone version is intended.

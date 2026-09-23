@@ -5,7 +5,7 @@
   <p>A small native data tool, built for agents.<br>Ask a question, keep a result, and continue from there.</p>
   <p>
     <a href="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml"><img src="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml/badge.svg" alt="Build and verify"></a>
-    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.1"><img src="https://img.shields.io/badge/release-v0.1.0--beta.1-147D70" alt="Release v0.1.0-beta.1"></a>
+    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.2"><img src="https://img.shields.io/badge/release-v0.1.0--beta.2-147D70" alt="Release v0.1.0-beta.2"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-147D70" alt="Apache-2.0 license"></a>
   </p>
   <p><a href="README.zh-CN.md">简体中文</a> · <a href="#install">Install</a> · <a href="docs/agent-guide.md">Agent guide</a> · <a href="docs/verification.md">Test results</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
@@ -18,11 +18,15 @@ in its context. RowTrail opens local CSV/TSV/Parquet, runs read-only SQL, and ke
 versioned results on disk. The agent gets a bounded, typed observation and can
 branch from a saved result when the next question arrives.
 
-**New in beta.1:** checked integer/Decimal SUM, stable reconnection across TMPDIR
-changes, a more complete stdlib client, and fewer repeated reads of saved results.
-No new external dependency; the archive budget remains **30 MB**.
+**New in beta.2:** bring cleaned Parquet from an existing Python project, keep an
+independent snapshot, save executable assumptions, compare versions and hand off
+a branch that someone else can inspect and continue. The optional stdlib client
+adds recipes and portable Markdown + Parquet packages; native snapshot is shared
+by CLI, NDJSON and MCP. [A complete workflow](docs/analysis.md).
 
-Native macOS/Linux builds pass **113 integration scenarios and 14 Rust tests**.
+No new external dependency. Native archive/CLI/runtime budgets remain
+**30 MB / 4.5 MB / 125 MB**. Beta.2 release gates cover **129 integration scenarios
+and 14 Rust tests**, native installation and upgrades from published alpha.8/beta.1.
 
 **Zero internal model calls. No API key. No spreadsheet UI.** Your agent chooses
 the questions and decides when the evidence is sufficient.
@@ -36,6 +40,7 @@ the questions and decides when the evidence is sufficient.
 | **Continue exploring** | Find labeled results, row counts and field hints with `workspace summary`; reuse fixed results through SQL. |
 | **Spend context carefully** | Row and byte budgets, paginated observations, exact integer and Decimal representation. |
 | **Work beyond one call** | Durable accepted jobs, explicit waiting, events and cancellation. |
+| **Reuse and hand off analysis** | Independent snapshots; optional Python checks, keyed diffs, recipes and portable branches. |
 | **Stay native and small** | Two executables; no Python, Node, Docker or external database required. |
 
 ```text
@@ -46,12 +51,12 @@ CSV / TSV / Parquet → SQL query → saved result → next question
 
 ## Install
 
-**v0.1.0-beta.1** is a beta preview, licensed under Apache-2.0.
+**v0.1.0-beta.2** is a beta preview, licensed under Apache-2.0.
 Native packages are available for **macOS arm64** and **Linux x86_64**
 (Ubuntu 22.04 / glibc 2.35 or newer).
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-beta.1/install.sh -o /tmp/rowtrail-install.sh
+curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-beta.2/install.sh -o /tmp/rowtrail-install.sh
 sh /tmp/rowtrail-install.sh
 export PATH="$HOME/.local/bin:$PATH"
 rowtrail --version
@@ -59,16 +64,16 @@ rowtrail --version
 
 The installer verifies SHA-256 and installs a versioned pair in `~/.local/bin`.
 Set `ROWTRAIL_INSTALL_DIR` to choose another directory, or extract an archive
-from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.1).
+from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.2).
 Keep `rowtrail` and `rowtrail-runtime` together.
 
-Downloads are **19.37 MB (macOS) / 22.71 MB (Linux)**.
+Native archive sizes are recorded with their checksums in the release report.
 Budgets remain **30 MB download / 4.5 MB CLI / 125 MB runtime**.
 The same Linux archive is tested on Ubuntu 22.04 and 24.04. Archives include
 agent guides and the optional runnable demo. Actual sizes and hashes appear in
 [artifact verification](docs/verification.md#native-distribution).
 
-**Workspace upgrade:** beta.1 upgrades metadata to schema 8. Close old sessions
+**Workspace upgrade:** beta.2 upgrades metadata to schema 9. Close old sessions
 and allow the old coordinator to exit before upgrading. Retain a stopped full
 pre-upgrade copy if you need rollback; older runtimes refuse upgraded stores.
 Old results keep their original numeric provenance. [Numeric contract](docs/numeric-contract.md).
@@ -133,43 +138,38 @@ no extra model turn. [Small bootstrap](docs/agent-quickstart.md).
 
 ## Measured, with the receipts
 
-Beta.1 targets a complete task: save a large subset, ask ten follow-up questions,
-reconnect and find the same fixed result. Seven alternating trials on one Apple
-arm64 Mac, with independent integer/Decimal answers:
+Beta.2 adds a full analysis workflow while keeping the native engine boundary.
+Local alternating beta.1 → beta.2 trials on one Apple arm64 Mac:
 
-| Median, alpha.8 → beta.1 | Result |
+| Workflow / median | beta.1 → beta.2 |
 |---|---:|
-| Complete task on a 2M-row source | **934 → 720 ms** (23% less time) |
-| Ten queries on the saved subset | **567 → 375 ms** (34% less time) |
-| Saved-data read per follow-up | **82.03 → 28.16 MB**; zero original-data bytes |
+| Scalar under a 2 KiB output budget | **2 calls → 1**, **2,094 → 1,447 response bytes** |
+| Same bounded scalar retrieval | **0.97 → 0.87 ms** |
+| Save a subset of 2M rows, ten follow-ups, reconnect | **704 → 707 ms** |
+| Five-query exploration on 1M rows | **145.1 → 145.5 ms** |
 
-First-save cost rises 4.3%; separate million-row exploration takes 4.0% longer.
-Warm query median is 0.89 ms, but p95 rises from 1.39 to 3.38 ms. Response bytes
-increase 9.2%. [Full report, controls and raw samples](docs/verification.md).
-
-![Beta.1 local comparisons, including the separate exploration regression.](benchmarks/performance/beta1/performance.svg)
+The small-answer path improves. Larger existing workflows are broadly unchanged,
+with small median regressions; no general speedup is claimed. Warm-query p95 is
+1.34 → 1.37 ms, with one 215 ms beta.2 outlier retained. Direct persistent engines
+remain faster at bare SQL. [Full measurements and limits](docs/verification.md).
 
 SQLite FULL commits, file/directory sync, SHA-256 and actual cancellation remain.
-The cache is still bounded to 8 MiB per job; every new job revalidates saved data.
-No external dependency was added.
-
-Both native build platforms pass **113 integration scenarios** and **14 Rust tests**,
-including 12 subprocess commit-crash cases. Published alpha.8 workspaces retain
-old fixed/partial revisions; invalid old Decimals fail explicitly on read/export.
-
-**Scope matters.** Integer/Decimal SUM is checked; other SQL arithmetic keeps
-engine semantics. `accuracy: exact` concerns sampling, not arbitrary precision.
-The [numeric contract](docs/numeric-contract.md) explains the guarantee. Beta is
-not a 1.0 metadata promise or support for Windows/remote sources.
+Every new job revalidates saved data, with the same bounded 8 MiB per-job cache.
+Checked integer/Decimal SUM and exact representation retain the
+[numeric contract](docs/numeric-contract.md); other SQL arithmetic keeps engine
+semantics. `accuracy: exact` concerns sampling, not arbitrary precision.
 
 The latest paired-agent pilot remains alpha.6: all 12 answers correct, but
 RowTrail used more time and cumulative input tokens than persistent DuckDB.
-Backend improvements do not establish a model-level latency/token advantage.
-
-[Current evidence](docs/verification.md) · [Beta.1 raw records](benchmarks/performance/beta1/) ·
-[Archived alpha.8 report](docs/releases/alpha8-verification.md).
+Backend timings do not establish a model-level latency/token advantage or adoption.
+[Beta.1 evidence](docs/releases/beta1-verification.md) remains archived.
 
 ## What comes next
+
+Try the [complete analysis demo](examples/analysis_quickstart.py) or bring a real
+DuckDB/Polars/Pandas workflow. The new composition helpers are Python-only; diffs
+scan more than once, and recipes/packages are not whole-operation transactions.
+No scheduler or automatic interrupted-run resume is included.
 
 Progressive aggregation supports whole files and row groups, with no GROUP BY or
 filters. Sampling/estimates, interrupted-run continuation,

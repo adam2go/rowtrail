@@ -22,6 +22,13 @@ pub fn commit(c: &Connection, spec: &JobSpec) -> Result<()> {
     quality["source_consistency"] = json!("immutable_materialized");
     let mut metadata = schema.metadata().clone();
     metadata.insert("rowtrail.quality".into(), quality.to_string());
+    let query = spec.query.as_ref().unwrap();
+    if let Some(provenance) = &query.provenance {
+        metadata.insert(
+            "rowtrail.provenance".into(),
+            serde_json::to_string(provenance)?,
+        );
+    }
     schema = schema.with_metadata(metadata);
     let files = c
         .prepare("SELECT identity,checksum,rows FROM parts WHERE result_id=? ORDER BY seq")?
@@ -47,7 +54,7 @@ pub fn commit(c: &Connection, spec: &JobSpec) -> Result<()> {
     );
     let source = spec.workspace.join("store").join(&spec.result_ref);
     let m = Manifest {
-        label: None,
+        label: query.label.clone(),
         id: prepared.manifest_ref.clone(),
         dataset_ref: prepared.dataset_ref.clone(),
         source,
@@ -65,7 +72,13 @@ pub fn commit(c: &Connection, spec: &JobSpec) -> Result<()> {
         encoded.len() <= rowtrail_contracts::FRAME_LIMIT / 2,
         "RESOURCE_EXHAUSTED: prepared manifest metadata limit"
     );
-    c.execute("INSERT INTO objects(id,kind,data) VALUES(?,'dataset',?)", params![m.dataset_ref,json!({"dataset_ref":m.dataset_ref,"manifest_ref":m.id,"storage_ref":spec.result_ref,"managed":true}).to_string()])?;
+    c.execute("INSERT INTO objects(id,kind,data) VALUES(?,'dataset',?)", params![m.dataset_ref,json!({"dataset_ref":m.dataset_ref,"manifest_ref":m.id,"storage_ref":spec.result_ref,"managed":true,"label":m.label,"scope_ref":spec.scope_ref}).to_string()])?;
+    if let Some(label) = &m.label {
+        c.execute(
+            "INSERT INTO catalog_labels VALUES(?,?)",
+            params![m.dataset_ref, label],
+        )?;
+    }
     c.execute(
         "INSERT INTO objects(id,kind,data) VALUES(?,'manifest',?)",
         params![m.id, encoded],

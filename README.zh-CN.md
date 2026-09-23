@@ -5,7 +5,7 @@
   <p>为 Agent 而生的小型原生数据工具。<br>提出问题，保存结果，沿着结果继续探索。</p>
   <p>
     <a href="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml"><img src="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml/badge.svg" alt="构建与验证"></a>
-    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.1"><img src="https://img.shields.io/badge/release-v0.1.0--beta.1-147D70" alt="v0.1.0-beta.1 版本"></a>
+    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.2"><img src="https://img.shields.io/badge/release-v0.1.0--beta.2-147D70" alt="v0.1.0-beta.2 版本"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-147D70" alt="Apache-2.0 许可证"></a>
   </p>
   <p><a href="README.md">English</a> · <a href="#安装">安装</a> · <a href="docs/agent-guide.md">Agent 接入</a> · <a href="docs/verification.md">测试报告</a> · <a href="CONTRIBUTING.md">参与贡献</a></p>
@@ -17,9 +17,13 @@ Agent 探索一张大表，不应该先把整张表塞进上下文。RowTrail �
 执行只读 SQL，把带固定版本的结果留在磁盘。Agent 按预算读取带类型的观察，下一次追问
 可以直接从保存的结果继续。
 
-**beta.1 补齐受检整数/Decimal SUM、跨 TMPDIR 稳定重连、轻量客户端，并减少保存结果的重复读取。**
-macOS/Linux 原生构建均通过 **113 项集成场景和 14 项 Rust 测试**。
-不新增外部依赖，压缩安装包预算继续保持 **30 MB**。
+**beta.2 让分析可以保存、复用和交接：** 从现有 Python 项目导入清洗好的 Parquet，
+建立独立快照，保存可执行检查，比较结果版本，再把带报告的分析分支交给另一个 Agent。
+可选标准库客户端提供配方和 Markdown + Parquet 交接包；原生快照共用 CLI、NDJSON、MCP 合约。
+[完整使用流程](docs/analysis.md)。
+
+不新增外部依赖。压缩包 / CLI / runtime 上限仍为 **30 MB / 4.5 MB / 125 MB**。
+beta.2 的发布门槛包括 **129 项集成场景和 14 项 Rust 测试**、原生安装，以及公开 alpha.8/beta.1 的真实升级。
 
 **内部零模型调用，无需 API Key，没有表格界面。** 问什么、证据够不够，由你的 Agent 判断。
 
@@ -32,6 +36,7 @@ macOS/Linux 原生构建均通过 **113 项集成场景和 14 项 Rust 测试**�
 | **探索可以接续** | 通过 `workspace summary` 按标签、行数和字段提示找回固定引用，再用 SQL 复用中间结果。 |
 | **节省上下文** | 行数与字节预算、分页观察、精确保留整数与 Decimal。 |
 | **任务跨调用存续** | 持久化受理任务，显式等待、事件和取消。 |
+| **复用并交接分析** | 独立快照；可选 Python 检查、按键比较、配方和分析包。 |
 | **保持原生与轻量** | 两个可执行文件，运行不需要 Python、Node、Docker 或外部数据库。 |
 
 ```text
@@ -42,11 +47,11 @@ CSV / TSV / Parquet → SQL 查询 → 保存结果 → 继续追问
 
 ## 安装
 
-当前版本 **v0.1.0-beta.1** 为 Beta 预览版，采用 Apache-2.0 许可证。
+当前版本 **v0.1.0-beta.2** 为 Beta 预览版，采用 Apache-2.0 许可证。
 原生包支持 **macOS arm64** 和 **Linux x86_64**（Ubuntu 22.04 / glibc 2.35 及以上）。
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-beta.1/install.sh -o /tmp/rowtrail-install.sh
+curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-beta.2/install.sh -o /tmp/rowtrail-install.sh
 sh /tmp/rowtrail-install.sh
 export PATH="$HOME/.local/bin:$PATH"
 rowtrail --version
@@ -54,15 +59,15 @@ rowtrail --version
 
 安装器校验 SHA-256，默认安装版本化的二进制组合到 `~/.local/bin`。
 可设置 `ROWTRAIL_INSTALL_DIR` 更换目录，也可以从
-[Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.1) 下载并解压。
+[Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.2) 下载并解压。
 请将 `rowtrail` 和 `rowtrail-runtime` 放在同一个目录。
 
-实际下载为 **macOS 19.37 MB / Linux 22.71 MB**。
+各平台实际下载大小与校验和见发布报告。
 预算保持 **下载 30 MB / CLI 4.5 MB / 运行时 125 MB**。同一个 Linux 包在 Ubuntu
 22.04 和 24.04 上验证；包内附带 Agent 指南与可选演示。实际大小与哈希见
 [原生产物记录](docs/verification.md#native-distribution)。
 
-**工作区升级：** beta.1 将元数据升级到 schema 8。先关闭旧会话并让旧协调器退出；
+**工作区升级：** beta.2 将元数据升级到 schema 9。先关闭旧会话并让旧协调器退出；
 如果需要回退，请保留完整、已停止的升级前副本。旧运行时不能打开升级后的工作区，
 旧结果也不会被重新认证为数值安全。[数值合同](docs/numeric-contract.md)。
 
@@ -118,39 +123,34 @@ python3 examples/quickstart.py
 
 ## 性能有数字，也有依据
 
-beta.1 测量完整任务：保存大子集、连续追问十次、重连并找回同一个固定结果。
-一台 Apple arm64 Mac 上进行 7 轮交替对照，答案由独立整数/Decimal 运算校验：
+beta.2 增加完整分析流程，同时保留轻量原生引擎边界。在同一台 Apple arm64 Mac 上，
+beta.1 / beta.2 交替运行，记录独立正确性检查和每个原始样本：
 
-| 中位数，alpha.8 → beta.1 | 结果 |
+| 任务 / 中位数 | beta.1 → beta.2 |
 |---|---:|
-| 2M 行来源上的完整任务 | **934 → 720 ms**，耗时减少 23% |
-| 保存子集上的十次追问 | **567 → 375 ms**，耗时减少 34% |
-| 每次追问读取的保存数据 | **82.03 → 28.16 MB**，原始数据读取为零 |
+| 2 KiB 输出预算下取回标量 | **2 次调用 → 1 次**，**2,094 → 1,447 响应字节** |
+| 同一标量完整取回耗时 | **0.97 → 0.87 ms** |
+| 2M 行保存大子集、追问十次、重连 | **704 → 707 ms** |
+| 1M 行五查询探索 | **145.1 → 145.5 ms** |
 
-也有成本：首次保存慢 4.3%，另一组百万行探索慢 4.0%。热查询中位数为 0.89 ms，
-但 p95 从 1.39 增至 3.38 ms；返回字节增加 9.2%。
-[完整报告、对照条件与原始样本](docs/verification.md)。
+小答案路径有改进；既有大任务基本持平，中位数有小幅回退，没有宣称普遍加速。
+热查询 p95 为 1.34 → 1.37 ms，并保留了 beta.2 一次 215 ms 的异常高延迟。
+直接使用持久 DuckDB/DataFusion 做纯 SQL 仍然更快。[完整测量与边界](docs/verification.md)。
 
-![beta.1 本地对照，同时展示独立探索任务的回退。](benchmarks/performance/beta1/performance.svg)
+SQLite FULL 提交、文件与目录同步、SHA-256 和真实取消继续保留。
+每个新任务重新验证保存的数据，任务内校验缓存仍有 8 MiB 上限。
+整数/Decimal SUM 和表示精度遵循[数值合约](docs/numeric-contract.md)，其他 SQL 算术保留引擎语义。
+`accuracy: exact` 描述抽样精度，不代表任意精度算术。
 
-SQLite FULL 提交、文件与目录同步、SHA-256 和真实取消继续保留。缓存仍限制为每任务
-8 MiB，每个新任务重新校验保存的数据。本轮没有新增外部依赖。
-
-两端原生构建通过 **113 项集成场景**和 **14 项 Rust 测试**，其中含 12 种子进程提交崩溃场景。
-alpha.8 工作区的固定结果与部分检查点继续保留；旧的无效 Decimal 会在读取/导出时报错。
-
-**能力有明确边界。** 整数/Decimal SUM 已检查溢出，其他 SQL 运算继续采用引擎语义。
-`accuracy: exact` 表示抽样层面的精确性，不代表任意精度数学保证。
-[数值合同](docs/numeric-contract.md) 说明详细范围。Beta 不等于 1.0 元数据兼容承诺，
-也不代表已经支持 Windows 或远程来源。
-
-最新真实 Agent 配对试验仍为 alpha.6：12 次全部答对，但 RowTrail 耗时更长、累计输入
-token 更多。本轮后端优化不能证明模型整体耗时或 token 优势。
-
-[当前证据](docs/verification.md) · [beta.1 原始记录](benchmarks/performance/beta1/) ·
-[alpha.8 历史报告](docs/releases/alpha8-verification.md)。
+最近一次真实 Agent 配对试验仍是 alpha.6：12 个答案全部正确，但耗时和累计输入 token
+高于持久 DuckDB。后端测量不能证明模型层面的延迟、token 优势或用户采用。
+[beta.1 历史证据](docs/releases/beta1-verification.md) 已归档。
 
 ## 接下来的方向
+
+欢迎用[完整分析演示](examples/analysis_quickstart.py)，或带一个真实 DuckDB/Polars/Pandas 项目来测试。
+新增高层组合接口目前需要 Python；比较会多次扫描，配方与分析包不提供整个流程的事务。
+调度和自动断点恢复仍未实现。
 
 渐进聚合支持完整文件和行组，不支持 GROUP BY 和过滤。抽样估计、任务中断后续算、
 SQL 预备计划缓存、原生 MCP Tasks、宿主自动接续/淘汰和远程来源仍未实现。[当前能力与限制](docs/progress.md) 会与规划分开记录。

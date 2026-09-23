@@ -40,7 +40,7 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-alpha9-') as td:
         rt=Logged(str(bins/'rowtrail'),str(ws))
         hello=rt.call('doctor',{});pid=hello['coordinator_pid'];pids.add(pid)
         assert 'numeric' in hello['capabilities']
-        assert sqlite3.connect(ws/'metadata.sqlite').execute("SELECT value FROM meta WHERE key='schema_version'").fetchone()[0]=='8'
+        assert sqlite3.connect(ws/'metadata.sqlite').execute("SELECT value FROM meta WHERE key='schema_version'").fetchone()[0]=='9'
         for target in (1,2):
             for typ,values in [('BIGINT', ['9223372036854775807','1']),('BIGINT',['-9223372036854775808','-1']),
                                ('BIGINT UNSIGNED',['18446744073709551615','1']),('DECIMAL(38,0)',['9'*38,'1'])]:
