@@ -4,8 +4,11 @@ All records are retained, including unfavorable results. One Apple arm64 Mac,
 macOS 26.6.2, 24 GiB RAM / 14 logical CPUs, Rust 1.94.0. Serial runs, no concurrent
 local build, OS caches not flushed. Binary hashes are in each benchmark file.
 These local binaries are separate from the verified native CI archives.
-The top-level reports repeat all four benchmarks after the final error-handling
-fixes and CLI size adjustment. Complete prior series remain in `earlier/` and
+The top-level reports repeat all four benchmarks after the error-handling
+fixes and CLI size adjustment (source d512eea). A subsequent fix only resolves
+the demo executable path through macOS installation links; query/response code
+and the runtime are unchanged. Its additional latency repeat is retained in
+`post-link-fix-latency.json`. Complete prior series remain in `earlier/` and
 `before-cli-size-fix/`; no trials were discarded.
 Generated references and timing fields affect token counts between series.
 
@@ -111,3 +114,18 @@ unchanged. The first Linux size experiment built only the CLI, which uses a
 different dependency feature graph; it is labeled separately and does not stand
 in for the complete workspace release build. The retained native CI verifies the
 actual shipped binaries and the unchanged size ceilings.
+
+The complete Linux workspace comparison selects 4,451,824 bytes with one
+codegen unit / opt-level=2. Eight units produced 5,704,120 bytes at opt-level=3
+and 5,648,008 at opt-level=2. All configurations and hashes remain in the size
+report. Native release validation, rather than this size-only experiment, gates
+publication.
+
+The first complete native CI candidate passed on its source checkout but its
+macOS installed-symlink demo failed on the development machine: a source fallback
+had hidden the wrong resource directory. That archive was not published.
+`rejected-install-candidate.json` retains the failure and disposition; the
+final native suite includes a distinguishable bundled-script regression.
+
+The post-link-fix repeat has 11 cold starts and 1,089 warm scalar samples per
+version; it is separate from the primary series above and retains all samples.

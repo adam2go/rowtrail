@@ -1,0 +1,12 @@
+{
+  "source_commit": "d512eea14004cbcead005fa32b4a9021c981dbde",
+  "ci_run": "https://github.com/adam2go/rowtrail/actions/runs/35895228633",
+  "macos_archive_sha256": "f7a06477640500f6ad82814775601ec4fc8456fa6dc537a17f72a6a7ebe51a96",
+  "native_ci": "passed",
+  "local_extracted_archive_demo": "passed, including 100000 rows",
+  "local_installed_symlink_demo": "failed twice",
+  "error_code": "CLI_ERROR",
+  "error_message": "demo script missing; install or extract the complete native archive",
+  "diagnosis": "macOS current_exe retained the install symlink. A source-tree fallback masked the wrong sibling-resource lookup on CI.",
+  "disposition": "Not published. Canonicalize the executable path and add a distinguishable bundled-script regression that cannot pass through the source fallback."
+}

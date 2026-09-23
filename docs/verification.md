@@ -7,9 +7,9 @@ compact responses, schema-name search, contextual inspection, bounded wait
 observations and an installed end-to-end demo. Metadata stays at schema 9; no
 engine/client dependency is added. Local verification passes. Native macOS/Linux
 CI and independent artifact verification are in progress for source
-`d512eea14004cbcead005fa32b4a9021c981dbde`.
+`3c7c6e2b8e6f9471f6addbc25fe8892889376878`.
 
-[Native CI](https://github.com/adam2go/rowtrail/actions/runs/35895228633) ·
+[Native CI](https://github.com/adam2go/rowtrail/actions/runs/35898544833) ·
 [Archived beta.2 evidence](releases/beta2-verification.md).
 
 ## Correctness gates
@@ -39,6 +39,10 @@ One Apple arm64 Mac, macOS 26.6.2, 24 GiB RAM / 14 logical CPUs, Rust 1.94.0.
 Seven serial trials for each variant, rotated/reversed order, fresh workspaces or
 databases, OS caches not flushed, no concurrent local builds or timed work.
 All 100,000-row, 64-column answers pass an independent integer oracle.
+The timing/token series uses local source d512eea; the subsequent installation-link
+fix changes only demo resource lookup. Query/response code and runtime are unchanged;
+[an additional latency repeat](../benchmarks/performance/beta3/post-link-fix-latency.json)
+checks the final local CLI. All reports carry their own binary hashes.
 
 | Shared workflow | Response tokens | Request tokens | Median ms |
 |---|---:|---:|---:|
@@ -148,3 +152,8 @@ The benchmark-only tokenizer/database dependencies are never shipped.
 
 [Beta.2 evidence](releases/beta2-verification.md) ·
 [Beta.1 evidence](releases/beta1-verification.md) · [Current limits](progress.md).
+
+The first complete native candidate was rejected after a local installed-symlink
+demo failed despite CI passing. The CI source directory had masked the missing
+resource lookup. Executable canonicalization and a regression using a distinct
+bundled script fix this. [Rejected candidate evidence](../benchmarks/performance/beta3/rejected-install-candidate.json).

@@ -60,7 +60,7 @@ The latest published release evidence remains beta.2 until the new CI gates pass
   131,072-row handoff workflow takes 864 ms median across five local trials.
 
 [Published beta.2](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.2) ·
-[Artifact provenance](release-verification.json) ·
+[Artifact provenance](releases/beta2-verification.json) ·
 [Verified public default installation](../benchmarks/performance/beta2/public-install.json).
 
 [Analysis guide](analysis.md) · [Runnable complete example](../examples/analysis_quickstart.py) ·
@@ -99,7 +99,7 @@ The latest published release evidence remains beta.2 until the new CI gates pass
 
 [Release](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.1) ·
 [Native CI](https://github.com/adam2go/rowtrail/actions/runs/35757844420) ·
-[Artifact provenance](release-verification.json) ·
+[Artifact provenance](releases/beta2-verification.json) ·
 [Public default install](../benchmarks/performance/beta1/public-install.json).
 The public beta.1 installer downloads the verified macOS pair; printed-client
 composition, cross-TMPDIR labeled handoff, overflow rejection and the demo pass.
