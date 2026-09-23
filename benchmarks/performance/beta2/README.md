@@ -14,6 +14,7 @@ No external model is called; no token or adoption advantage is inferred.
 | `analysis-workflow.json` | 5 full beta.2 workflows on 131,072 rows: independent snapshot, before/after, keyed diff, check, report/package with inputs, fresh import, explicit recipe rerun. Independent oracle. |
 | `resources.json` | 5 alternating million-row 32 MiB spill runs; independently verify every exported ID. |
 | `earlier/` | Two earlier local candidate runs, retained including a 215 ms warm-latency outlier. Candidate hashes and slightly different helper implementations remain explicit. |
+| `public-install.json` | Post-publication default installer, actual public download, verified executable hashes and both installed demos. |
 | `raw-sha256.json` | SHA-256 of raw JSON records, excluding itself. |
 
 Method: one Apple arm64 Mac, macOS 26.6.2, 24 GiB / 14 logical CPUs, Rust 1.94.0.

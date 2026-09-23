@@ -122,6 +122,15 @@ come from that passing CI source; later report/README commits do not change thei
 bytes. Archives retain the documents from their build source; this live report
 records the final acceptance and measured provenance.
 
+## Public installation
+
+After publication, the public tag's **default** installer downloads beta.2 from
+GitHub and matches the independently verified native macOS binary hashes. The
+printed client, cross-TMPDIR handoff, large integer/overflow checks, original
+exploration demo and new snapshot/check/diff/package/import/recipe demo all pass.
+[Actual network-install record](../benchmarks/performance/beta2/public-install.json).
+No user's existing installation or workspace is replaced by this probe.
+
 ## Limits
 
 - Diff checks keys and performs multiple scans; bounded examples do not bound scan

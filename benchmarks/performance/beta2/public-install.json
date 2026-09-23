@@ -1,0 +1,83 @@
+{
+  "status": "passed",
+  "installer_url": "https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-beta.2/install.sh",
+  "installer_sha256": "194cfc47fe6d227ec6ccc9bb0a76c5b5c3c4f50378341380d383ce6204460a6d",
+  "version": "rowtrail-cli 0.1.0-beta.2",
+  "default_version_matches_release": true,
+  "public_network_download_and_checksum_install": true,
+  "installed_binary_sha256": {
+    "rowtrail": "b55ff431824e5cc802a28bbd5896f29df86ee4bb004546d767b9f33ebf713b5b",
+    "rowtrail-runtime": "caba4fafa5113dbf48809346eb20df1c84f23864c079d2b7db905cc2e21b0510"
+  },
+  "binaries_match_verified_ci_archive": "c2620fd59aff6eac1628a71e32d87de56fd8791bcf787a3440633fc738c15e91",
+  "printed_client_matches_bundle": true,
+  "analysis_snapshot_check_diff_package_import_recipe": {
+    "status": "passed",
+    "total": 60,
+    "modified_rows": 1
+  },
+  "fresh_session_unique_label_handoff": true,
+  "changed_tmpdir_same_coordinator": true,
+  "lossless_large_integer": true,
+  "structured_sum_overflow": true,
+  "handoff_original_source_bytes": 0,
+  "bundled_demo": {
+    "status": "passed",
+    "input_rows": 20003,
+    "question": "Which region has the highest refunded value, and through which channels?",
+    "refunds_by_region_cents": [
+      [
+        "east",
+        "1930407"
+      ],
+      [
+        "north",
+        "1920667"
+      ],
+      [
+        "south",
+        "1925653"
+      ],
+      [
+        "west",
+        "1925537"
+      ]
+    ],
+    "chosen_region": "east",
+    "saved_label": "demo refunds: east",
+    "saved_rows": 385,
+    "channel_totals_cents": [
+      [
+        "app",
+        "630463"
+      ],
+      [
+        "store",
+        "643469"
+      ],
+      [
+        "web",
+        "656475"
+      ]
+    ],
+    "handoff_columns": [
+      "n",
+      "first_id",
+      "cents"
+    ],
+    "handoff_rows": [
+      [
+        "385",
+        "9007199254740993",
+        "1930407"
+      ]
+    ],
+    "handoff_calls": [
+      "workspace summary",
+      "query"
+    ],
+    "handoff_original_source_bytes": 0,
+    "checks": "Python integer oracle; exact/final/complete/untruncated guards; IDs above 2^53",
+    "continue": "Use this workspace and label to query the retained result. Labels are descriptive, not unique IDs."
+  }
+}

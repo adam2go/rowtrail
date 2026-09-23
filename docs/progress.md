@@ -39,6 +39,10 @@ independent release artifact checks pass, including Ubuntu 24.04 installation.
   remain broadly stable, with all samples and regressions disclosed. The full
   131,072-row handoff workflow takes 864 ms median across five local trials.
 
+[Published beta.2](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.2) ·
+[Artifact provenance](release-verification.json) ·
+[Verified public default installation](../benchmarks/performance/beta2/public-install.json).
+
 [Analysis guide](analysis.md) · [Runnable complete example](../examples/analysis_quickstart.py) ·
 [Decision](decisions/010-portable-analysis.md) · [Verification](verification.md).
 
