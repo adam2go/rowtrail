@@ -1,0 +1,116 @@
+{
+  "status": "passed",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "version": "0.1.0-beta.3",
+  "archive_sha256": "d68ab8b18a7f7894e6a474b7d32272d6aaf84e49d7aaf0ec7609baa983114241",
+  "checksum_verified_install": true,
+  "installed_symlink_query": true,
+  "corrupt_archive_rejected": true,
+  "installed_agent_demo": {
+    "status": "passed",
+    "independent_integer_oracle": true,
+    "intermediate_rows_shown": 0,
+    "schema_search": true,
+    "reconnect_context": true,
+    "unique_ids": true,
+    "separate_recipient_process": true,
+    "original_csv_removed": true,
+    "recipient_unique_ids": true,
+    "included_aggregate_explicitly_recomputed": true,
+    "raw_filter_recomputed": false,
+    "package_verified": "bytes only; not authorship or SQL reproduction",
+    "sql_recomputed_on_import": false
+  },
+  "bundled_docs_and_printed_client_match": true,
+  "installed_analysis_demo": {
+    "status": "passed",
+    "total": 60,
+    "modified_rows": 1
+  },
+  "installed_quickstart": {
+    "status": "passed",
+    "input_rows": 20003,
+    "question": "Which region has the highest refunded value, and through which channels?",
+    "refunds_by_region_cents": [
+      [
+        "east",
+        "1930407"
+      ],
+      [
+        "north",
+        "1920667"
+      ],
+      [
+        "south",
+        "1925653"
+      ],
+      [
+        "west",
+        "1925537"
+      ]
+    ],
+    "chosen_region": "east",
+    "saved_label": "demo refunds: east",
+    "saved_rows": 385,
+    "channel_totals_cents": [
+      [
+        "app",
+        "630463"
+      ],
+      [
+        "store",
+        "643469"
+      ],
+      [
+        "web",
+        "656475"
+      ]
+    ],
+    "handoff_columns": [
+      "n",
+      "first_id",
+      "cents"
+    ],
+    "handoff_rows": [
+      [
+        "385",
+        "9007199254740993",
+        "1930407"
+      ]
+    ],
+    "handoff_calls": [
+      "workspace summary",
+      "query"
+    ],
+    "handoff_original_source_bytes": 0,
+    "checks": "Python integer oracle; exact/final/complete/untruncated guards; IDs above 2^53",
+    "continue": "Use this workspace and label to query the retained result. Labels are descriptive, not unique IDs."
+  },
+  "incompatible_packages_rejected_before_symlink_changes": [
+    "cli",
+    "runtime",
+    "version"
+  ],
+  "linux_libc_preflight": [
+    {
+      "reported_libc": "glibc 2.34",
+      "download_allowed": false
+    },
+    {
+      "reported_libc": "glibc 2.35",
+      "download_allowed": true
+    },
+    {
+      "reported_libc": "glibc 2.39",
+      "download_allowed": true
+    },
+    {
+      "reported_libc": "musl 1.2.5",
+      "download_allowed": false
+    },
+    {
+      "reported_libc": "",
+      "download_allowed": false
+    }
+  ]
+}

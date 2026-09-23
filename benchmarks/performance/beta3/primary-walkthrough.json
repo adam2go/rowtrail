@@ -1,0 +1,209 @@
+{
+  "status": "passed",
+  "question": "Which saved channel has the highest revenue after the demo removed its CSV?",
+  "native_calls": 2,
+  "events": [
+    {
+      "request": {
+        "api_version": "1",
+        "request_id": "27ab2ba7b3cb40d4aaff4d0d32f64d74",
+        "method": "workspace",
+        "params": {
+          "action": "summary",
+          "kind": "result",
+          "label": "channel revenue",
+          "limit": 2,
+          "max_bytes": 8192
+        },
+        "response_mode": "compact"
+      },
+      "response": {
+        "api_version": "1",
+        "request_id": "27ab2ba7b3cb40d4aaff4d0d32f64d74",
+        "ok": true,
+        "result": {
+          "store_id": "store_64e60b65029a4fb98ebf4a51ab9931ba",
+          "counts": {
+            "datasets": 1,
+            "active_jobs": 0,
+            "readable_results": 4
+          },
+          "items": [
+            {
+              "kind": "result",
+              "ref": "res_25080b18554249df81904e5ab247377c",
+              "label": "channel revenue",
+              "schema_hint": {
+                "field_count": 3,
+                "omitted_fields": 0,
+                "fields": [
+                  {
+                    "name": "channel",
+                    "type": "Utf8",
+                    "nullable": true
+                  },
+                  {
+                    "name": "orders",
+                    "type": "Int64",
+                    "nullable": false
+                  },
+                  {
+                    "name": "revenue_cents",
+                    "type": "Int64",
+                    "nullable": true
+                  }
+                ]
+              },
+              "row_count": 4,
+              "binding": {
+                "result_ref": "res_25080b18554249df81904e5ab247377c",
+                "revision": 1
+              },
+              "stored_validity": "valid",
+              "scope_ref": "scope_ddd8f112eb2f47898e8588aa604cbce5",
+              "quality": {
+                "accuracy": "exact",
+                "coverage": {
+                  "kind": "complete",
+                  "scope_ref": "scope_ddd8f112eb2f47898e8588aa604cbce5"
+                },
+                "final_for_request": true,
+                "numeric": {
+                  "policy": "rowtrail-numeric-v1",
+                  "other_sql": "engine_semantics",
+                  "input_provenance": "unknown"
+                }
+              },
+              "next_actions": [
+                "read",
+                "query",
+                "export",
+                "release"
+              ]
+            }
+          ],
+          "next_cursor": null,
+          "membership": "fixed at first page; values observed per page",
+          "validity_check": "stored only; source identities checked when bindings are used"
+        }
+      }
+    },
+    {
+      "request": {
+        "api_version": "1",
+        "request_id": "0acd004ab6b24d728779d38b5046d561",
+        "method": "query",
+        "params": {
+          "sql": "SELECT channel,revenue_cents,orders FROM t ORDER BY revenue_cents DESC LIMIT 1",
+          "bindings": {
+            "t": {
+              "result_ref": "res_25080b18554249df81904e5ab247377c",
+              "revision": 1
+            }
+          },
+          "parameters": [],
+          "execution": {
+            "wait_ms": 1000,
+            "preview": "none",
+            "output": {
+              "max_rows": 1,
+              "max_bytes": 2048
+            }
+          }
+        },
+        "response_mode": "compact"
+      },
+      "response": {
+        "api_version": "1",
+        "request_id": "0acd004ab6b24d728779d38b5046d561",
+        "ok": true,
+        "result": {
+          "binding": {
+            "result_ref": "res_8bd2baa8e2cc48e98ee2a6fb5f796f1a",
+            "revision": 1
+          },
+          "observation": {
+            "result_ref": "res_8bd2baa8e2cc48e98ee2a6fb5f796f1a",
+            "revision": 1,
+            "row_count": "1",
+            "schema": [
+              {
+                "name": "channel",
+                "type": "Utf8",
+                "nullable": true
+              },
+              {
+                "name": "revenue_cents",
+                "type": "Int64",
+                "nullable": true
+              },
+              {
+                "name": "orders",
+                "type": "Int64",
+                "nullable": false
+              }
+            ],
+            "rows": [
+              [
+                "organic",
+                "158900110",
+                "31168"
+              ]
+            ],
+            "quality": {
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_a300963c8225476ca14beed635df74a8"
+              },
+              "final_for_request": true,
+              "source_consistency": "immutable_materialized",
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "unknown"
+              },
+              "lineage": [
+                {
+                  "binding": {
+                    "result_ref": "res_25080b18554249df81904e5ab247377c",
+                    "revision": 1
+                  },
+                  "accuracy": "exact",
+                  "coverage": {
+                    "kind": "complete",
+                    "scope_ref": "scope_ddd8f112eb2f47898e8588aa604cbce5"
+                  },
+                  "numeric": {
+                    "policy": "rowtrail-numeric-v1",
+                    "other_sql": "engine_semantics",
+                    "input_provenance": "unknown"
+                  }
+                }
+              ]
+            },
+            "validity": "valid",
+            "job_state": "completed",
+            "presentation": {
+              "returned_rows": 1,
+              "has_more": false
+            },
+            "next_cursor": null
+          },
+          "readable_revision": 1,
+          "job": {
+            "id": "job_01cfe3b1e4f04d6b81b68240d56275f4",
+            "state": "completed",
+            "result_ref": "res_8bd2baa8e2cc48e98ee2a6fb5f796f1a",
+            "scope_ref": "scope_a300963c8225476ca14beed635df74a8"
+          },
+          "details_omitted": true,
+          "next_actions": [
+            "query"
+          ]
+        }
+      }
+    }
+  ],
+  "note": "Primary agent used the retained demo workspace. This is a functional walkthrough, not a paired-agent token/latency experiment."
+}

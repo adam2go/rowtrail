@@ -143,43 +143,38 @@ no extra model turn. [Small bootstrap](docs/agent-quickstart.md).
 
 ## Measured, with the receipts
 
-Beta.2 adds a full analysis workflow while keeping the native engine boundary.
-Local alternating beta.1 → beta.2 trials on one Apple arm64 Mac:
+On one Mac, seven 100K-row trials of the same workflow:
 
-| Workflow / median | beta.1 → beta.2 |
+| Change | Measured effect |
 |---|---:|
-| Scalar under a 2 KiB output budget | **2 calls → 1**, **2,095 → 1,447 response bytes** |
-| Same bounded scalar retrieval | **0.95 → 0.87 ms** |
-| Save a subset of 2M rows, ten follow-ups, reconnect | **713 → 708 ms** |
-| Five-query exploration on 1M rows | **145.1 → 145.2 ms** |
+| Full → compact native responses | **4,706 → 3,461 response tokens (−26.5%)** |
+| Requests + responses, sum of medians | **−20.9%** |
+| Relevant field search instead of 64-field schema | **1,067 → 138 tokens** |
+| Save 2M-row subset + ten queries + reconnect | **683.78 → 689.54 ms** (beta.2 → beta.3) |
+| Five-query 1M-row exploration | **144.62 → 146.23 ms** |
 
-The small-answer path improves. Larger existing workflows are broadly unchanged,
-with small changes in either direction; no general speedup is claimed. Warm-query
-p95 is about 1.28 ms for both. Earlier candidate runs, including a 215 ms outlier,
-are retained. Direct persistent engines
-remain faster at bare SQL. [Full measurements and limits](docs/verification.md).
+Token counts use `o200k_base` on actual JSON messages. They exclude model prompts,
+reasoning, tool schemas, caching and chat framing; they are not model bills.
+Both tokenizer encodings and all raw messages are published. Existing large
+workloads remain broadly stable, including the small regressions above.
 
-The new full handoff workflow on 131,072 rows takes **864 ms median** over five
-local trials, including snapshot, diff/check, package, fresh import and explicit
-rerun. Independent integer/Decimal answers pass. Most of its cost is copying and
-verifying persisted data; this is not a speed comparison with a bare SQL query.
+![Beta.3 context savings with faster direct SQL controls shown.](benchmarks/performance/beta3/performance.svg)
 
-![Beta.2 local comparisons: fewer scalar response bytes, stable follow-up time, and faster direct SQL engines.](benchmarks/performance/beta2/performance.svg)
+Direct DuckDB remains faster and returns less metadata: **18.12 ms** with a live
+memory connection, **34.60 ms** with a reopened durable database, versus
+**72.14 ms** for compact RowTrail in the shared task. Both controls retain tables
+and return bounded answers. RowTrail adds quality, fixed references, purpose and
+handoff contracts; those guarantees cost time and context.
 
-SQLite FULL commits, file/directory sync, SHA-256 and actual cancellation remain.
-Every new job revalidates saved data, with the same bounded 8 MiB per-job cache.
-Checked integer/Decimal SUM and exact representation retain the
-[numeric contract](docs/numeric-contract.md); other SQL arithmetic keeps engine
-semantics. `accuracy: exact` concerns sampling, not arbitrary precision.
-
-The latest paired-agent pilot remains alpha.6: all 12 answers correct, but
-RowTrail used more time and cumulative input tokens than persistent DuckDB.
-Backend timings do not establish a model-level latency/token advantage or adoption.
-[Beta.1 evidence](docs/releases/beta1-verification.md) remains archived.
+SQLite FULL commits, fsync, SHA-256, checked numeric boundaries and real
+cancellation remain. The latest actual paired-agent pilot is still alpha.6:
+12 correct answers, but more time and cumulative input tokens than persistent
+DuckDB. This release's scripted tokenizer measurements do not replace that trial.
+[Measurements and limits](docs/verification.md) · [Raw records and reproduction](benchmarks/performance/beta3/).
 
 ## What comes next
 
-Try the [complete analysis demo](examples/analysis_quickstart.py) or bring a real
+Try `rowtrail demo` ([guide](docs/agent-demo.md)) or bring a real
 DuckDB/Polars/Pandas workflow. The new composition helpers are Python-only; diffs
 scan more than once, and recipes/packages are not whole-operation transactions.
 No scheduler or automatic interrupted-run resume is included.

@@ -1,0 +1,336 @@
+{
+  "format": "rowtrail.run.v1",
+  "run_id": "c61a913b70e544c081599c12f7b17ae2",
+  "status": "completed",
+  "recipe": {
+    "format": "rowtrail.recipe.v1",
+    "inputs": [
+      "eligible_orders"
+    ],
+    "steps": [
+      {
+        "id": "unique_ids",
+        "kind": "check",
+        "bindings": {
+          "t": "input:eligible_orders"
+        },
+        "sql": "SELECT order_id,COUNT(*) n FROM t GROUP BY order_id HAVING COUNT(*)<>1"
+      },
+      {
+        "id": "totals",
+        "bindings": {
+          "t": "input:eligible_orders"
+        },
+        "sql": "SELECT channel, COUNT(*) orders, SUM(revenue_cents) revenue_cents FROM t GROUP BY channel ORDER BY channel"
+      }
+    ]
+  },
+  "parameters": {},
+  "inputs": {
+    "eligible_orders": {
+      "dataset_ref": "ds_dad2a6dd58754a5788880c794d6b391b",
+      "manifest_ref": "mf_4770a0ca7e6544ddabf2983f78bc91f9"
+    }
+  },
+  "input_metadata": {
+    "eligible_orders": {
+      "ref": "mf_4770a0ca7e6544ddabf2983f78bc91f9",
+      "manifest_ref": "mf_4770a0ca7e6544ddabf2983f78bc91f9",
+      "schema_origin": "prepared",
+      "validity": "valid",
+      "scope_ref": "scope_af8902100cf7451eb37d44db9ae4160b",
+      "identity": {
+        "dataset_ref": "ds_dad2a6dd58754a5788880c794d6b391b",
+        "manifest_ref": "mf_4770a0ca7e6544ddabf2983f78bc91f9",
+        "source": "<demo>/receiver/store/res_1f8a9b5a4fc04b8584e773fa42c7157b",
+        "format": "parquet",
+        "files": [
+          {
+            "path": "<demo>/receiver/store/res_1f8a9b5a4fc04b8584e773fa42c7157b/000000000000.parquet",
+            "size": 788763,
+            "device": 16777230,
+            "inode": 52923274,
+            "mtime_sec": 1790182668,
+            "mtime_nsec": 176327004,
+            "rows": 77922,
+            "row_groups": null,
+            "checksum": "4fa74fd4103b4f8b968aac7ae970d6fd5c7f5aac2b79cc745cfa0798b7308bf9"
+          }
+        ],
+        "header": false,
+        "delimiter": 44
+      },
+      "provenance": {
+        "description": "Imported n001; source SQL is recorded, not recomputed.",
+        "origin": "rowtrail.package:a6ab9b1767784e9fb2d7bc38c6af1e4f",
+        "code": ""
+      },
+      "verification": {
+        "validity": "stored",
+        "files": "not_rechecked",
+        "independent": true
+      },
+      "field_count": 3,
+      "fields": [
+        {
+          "name": "order_id",
+          "type": "Int64",
+          "nullable": true
+        },
+        {
+          "name": "channel",
+          "type": "Utf8",
+          "nullable": true
+        },
+        {
+          "name": "revenue_cents",
+          "type": "Int64",
+          "nullable": true
+        }
+      ],
+      "next_field_offset": null
+    }
+  },
+  "steps": [
+    {
+      "id": "unique_ids",
+      "kind": "check",
+      "state": "completed",
+      "idempotency_key": "c61a913b70e544c081599c12f7b17ae2:unique_ids",
+      "response": {
+        "binding": {
+          "result_ref": "res_d64f24c84e9f4e03b923bdff9b389200",
+          "revision": 1
+        },
+        "job": {
+          "id": "job_5331b1be29714b71949a9d04161c4645",
+          "state": "completed",
+          "result_ref": "res_d64f24c84e9f4e03b923bdff9b389200",
+          "scope_ref": "scope_6b91b0d08ae4487b84f48f0e3aa95c65"
+        },
+        "readable_revision": 1,
+        "observation": null,
+        "details_omitted": true,
+        "next_actions": [
+          "read",
+          "query"
+        ]
+      },
+      "binding": {
+        "result_ref": "res_d64f24c84e9f4e03b923bdff9b389200",
+        "revision": 1
+      },
+      "metadata": {
+        "ref": "res_d64f24c84e9f4e03b923bdff9b389200",
+        "revision": 1,
+        "scope_ref": "scope_6b91b0d08ae4487b84f48f0e3aa95c65",
+        "schema_origin": "materialized_result",
+        "quality": {
+          "accuracy": "exact",
+          "coverage": {
+            "kind": "complete",
+            "scope_ref": "scope_6b91b0d08ae4487b84f48f0e3aa95c65"
+          },
+          "final_for_request": true,
+          "source_consistency": "best_effort",
+          "numeric": {
+            "policy": "rowtrail-numeric-v1",
+            "other_sql": "engine_semantics",
+            "input_provenance": "unknown"
+          },
+          "lineage": [
+            {
+              "binding": {
+                "dataset_ref": "ds_dad2a6dd58754a5788880c794d6b391b",
+                "manifest_ref": "mf_4770a0ca7e6544ddabf2983f78bc91f9"
+              },
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_af8902100cf7451eb37d44db9ae4160b"
+              },
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "unknown"
+              }
+            }
+          ]
+        },
+        "validity": "valid",
+        "row_count": "0",
+        "verification": {
+          "validity": "stored",
+          "original_sources": "not_rechecked",
+          "parts": "checked_when_read_or_used"
+        },
+        "field_count": 2,
+        "fields": [
+          {
+            "name": "order_id",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "n",
+            "type": "Int64",
+            "nullable": false
+          }
+        ],
+        "next_field_offset": null
+      },
+      "violations": 0,
+      "passed": true,
+      "examples": {
+        "result_ref": "res_d64f24c84e9f4e03b923bdff9b389200",
+        "revision": 1,
+        "row_count": "0",
+        "schema": [
+          {
+            "name": "order_id",
+            "type": "Int64",
+            "nullable": true
+          },
+          {
+            "name": "n",
+            "type": "Int64",
+            "nullable": false
+          }
+        ],
+        "rows": [],
+        "quality": {
+          "accuracy": "exact",
+          "coverage": {
+            "kind": "complete",
+            "scope_ref": "scope_6b91b0d08ae4487b84f48f0e3aa95c65"
+          },
+          "final_for_request": true,
+          "source_consistency": "best_effort",
+          "numeric": {
+            "policy": "rowtrail-numeric-v1",
+            "other_sql": "engine_semantics",
+            "input_provenance": "unknown"
+          },
+          "lineage": [
+            {
+              "binding": {
+                "dataset_ref": "ds_dad2a6dd58754a5788880c794d6b391b",
+                "manifest_ref": "mf_4770a0ca7e6544ddabf2983f78bc91f9"
+              },
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_af8902100cf7451eb37d44db9ae4160b"
+              },
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "unknown"
+              }
+            }
+          ]
+        },
+        "validity": "valid",
+        "job_state": "completed",
+        "presentation": {
+          "returned_rows": 0,
+          "has_more": false
+        },
+        "next_cursor": null
+      }
+    },
+    {
+      "id": "totals",
+      "kind": "query",
+      "state": "completed",
+      "idempotency_key": "c61a913b70e544c081599c12f7b17ae2:totals",
+      "response": {
+        "binding": {
+          "result_ref": "res_75beb01bf30d440596ea788b0b4c4744",
+          "revision": 1
+        },
+        "job": {
+          "id": "job_3fa04ed684aa4749bc9e81e42c3c64f4",
+          "state": "completed",
+          "result_ref": "res_75beb01bf30d440596ea788b0b4c4744",
+          "scope_ref": "scope_170f42d21f5f4991b5a4abad5daaa4a6"
+        },
+        "readable_revision": 1,
+        "observation": null,
+        "details_omitted": true,
+        "next_actions": [
+          "read",
+          "query"
+        ]
+      },
+      "binding": {
+        "result_ref": "res_75beb01bf30d440596ea788b0b4c4744",
+        "revision": 1
+      },
+      "metadata": {
+        "ref": "res_75beb01bf30d440596ea788b0b4c4744",
+        "revision": 1,
+        "scope_ref": "scope_170f42d21f5f4991b5a4abad5daaa4a6",
+        "schema_origin": "materialized_result",
+        "quality": {
+          "accuracy": "exact",
+          "coverage": {
+            "kind": "complete",
+            "scope_ref": "scope_170f42d21f5f4991b5a4abad5daaa4a6"
+          },
+          "final_for_request": true,
+          "source_consistency": "best_effort",
+          "numeric": {
+            "policy": "rowtrail-numeric-v1",
+            "other_sql": "engine_semantics",
+            "input_provenance": "unknown"
+          },
+          "lineage": [
+            {
+              "binding": {
+                "dataset_ref": "ds_dad2a6dd58754a5788880c794d6b391b",
+                "manifest_ref": "mf_4770a0ca7e6544ddabf2983f78bc91f9"
+              },
+              "accuracy": "exact",
+              "coverage": {
+                "kind": "complete",
+                "scope_ref": "scope_af8902100cf7451eb37d44db9ae4160b"
+              },
+              "numeric": {
+                "policy": "rowtrail-numeric-v1",
+                "other_sql": "engine_semantics",
+                "input_provenance": "unknown"
+              }
+            }
+          ]
+        },
+        "validity": "valid",
+        "row_count": "4",
+        "verification": {
+          "validity": "stored",
+          "original_sources": "not_rechecked",
+          "parts": "checked_when_read_or_used"
+        },
+        "field_count": 3,
+        "fields": [
+          {
+            "name": "channel",
+            "type": "Utf8",
+            "nullable": true
+          },
+          {
+            "name": "orders",
+            "type": "Int64",
+            "nullable": false
+          },
+          {
+            "name": "revenue_cents",
+            "type": "Int64",
+            "nullable": true
+          }
+        ],
+        "next_field_offset": null
+      }
+    }
+  ]
+}

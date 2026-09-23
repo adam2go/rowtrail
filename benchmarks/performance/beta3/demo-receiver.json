@@ -1,0 +1,101 @@
+{
+  "answer": [
+    [
+      77922,
+      397335849
+    ]
+  ],
+  "binding": {
+    "result_ref": "res_a54cdebc1a864612b2e9599fb93a0bbc",
+    "revision": 1
+  },
+  "verification": {
+    "status": "verified_bytes",
+    "verified_bytes": 1030565,
+    "original_sources_checked": false,
+    "sql_recomputed": false,
+    "authorship_verified": false,
+    "missing_inputs": [
+      "n002"
+    ]
+  },
+  "observation": {
+    "job_id": "job_cfa3d4df1b994ec194f449e7c1057c22",
+    "state": "completed",
+    "binding": {
+      "result_ref": "res_a54cdebc1a864612b2e9599fb93a0bbc",
+      "revision": 1
+    },
+    "observation": {
+      "result_ref": "res_a54cdebc1a864612b2e9599fb93a0bbc",
+      "revision": 1,
+      "row_count": "1",
+      "schema": [
+        {
+          "name": "orders",
+          "type": "Int64",
+          "nullable": true
+        },
+        {
+          "name": "revenue_cents",
+          "type": "Int64",
+          "nullable": true
+        }
+      ],
+      "rows": [
+        [
+          "77922",
+          "397335849"
+        ]
+      ],
+      "quality": {
+        "accuracy": "exact",
+        "coverage": {
+          "kind": "complete",
+          "scope_ref": "scope_217ab381e785479daad5b28a45ced858"
+        },
+        "final_for_request": true,
+        "source_consistency": "best_effort",
+        "numeric": {
+          "policy": "rowtrail-numeric-v1",
+          "other_sql": "engine_semantics",
+          "input_provenance": "unknown"
+        },
+        "lineage": [
+          {
+            "binding": {
+              "dataset_ref": "ds_641142eb0c564cc7a6ba81a6e32d519c",
+              "manifest_ref": "mf_bb4e6c7313264defbd536558bf7fcb37"
+            },
+            "accuracy": "exact",
+            "coverage": {
+              "kind": "complete",
+              "scope_ref": "scope_1da9ea78987548f6b9f9c9ad5dbf8724"
+            },
+            "numeric": {
+              "policy": "rowtrail-numeric-v1",
+              "other_sql": "engine_semantics",
+              "input_provenance": "unknown"
+            }
+          }
+        ]
+      },
+      "validity": "valid",
+      "job_state": "completed",
+      "presentation": {
+        "returned_rows": 1,
+        "has_more": false
+      },
+      "next_cursor": null
+    },
+    "observation_omitted": null,
+    "error": null,
+    "next_actions": [
+      "query"
+    ]
+  },
+  "explicit_recipe_status": "completed",
+  "included_aggregate_recomputed": true,
+  "raw_filter_recomputed": false,
+  "recipient_unique_ids": true
+}

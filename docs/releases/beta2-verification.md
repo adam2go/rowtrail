@@ -1,13 +1,13 @@
 # Verification: beta.2
 
-[Home](../README.md) · [Analysis contracts](analysis.md) · [Current limits](progress.md)
+[Home](../../README.md) · [Analysis contracts](../analysis.md) · [Current limits](../progress.md)
 
 Beta.2 adds native independent snapshots and optional stdlib analysis composition:
 assertions, keyed diffs, durable SQL recipes and portable result branches. It adds
 no external dependency. Both native platforms and independent archive verification pass for source
 `1128826fae357cb7f9776b4606ba4194dd58ec3b`.
 [Passing native CI](https://github.com/adam2go/rowtrail/actions/runs/35823132374) ·
-[Machine-readable artifact provenance](release-verification.json).
+[Machine-readable artifact provenance](beta2-verification.json).
 The same Linux archive also passes installation on Ubuntu 24.04.
 
 ## Correctness gates
@@ -31,7 +31,7 @@ Serial alternating beta.1 and beta.2 runs on one Apple arm64 Mac, macOS 26.6.2,
 no concurrent local builds or timed workloads. Raw repeats and binary hashes are
 retained. These are backend tests without external models, not adoption evidence.
 
-[Raw records, hashes and reproduction](../benchmarks/performance/beta2/).
+[Raw records, hashes and reproduction](../../benchmarks/performance/beta2/).
 
 | Metric (median unless specified) | beta.1 | beta.2 |
 |---|---:|---:|
@@ -60,7 +60,7 @@ Seven alternating exploration trials retain fair persistent-session controls:
 series. RowTrail pays for durable storage, checksums and process isolation;
 direct engines retain intermediates. Each setup is disclosed in the raw records.
 
-![Local comparisons](../benchmarks/performance/beta2/performance.svg)
+![Local comparisons](../../benchmarks/performance/beta2/performance.svg)
 
 ### Complete new analysis workflow
 
@@ -109,7 +109,7 @@ are published; the same Linux archive is installed and tested on Ubuntu 24.04.
 Archive hashes, bundled files, installed printed client/demos and all 557 dependency
 notices must match independently before publication. The actual downloaded macOS archive also passes the 16 new scenarios, real
 published-beta.1 upgrade, private installation and both demos on the maintainer's
-Mac. [Extra acceptance records](../benchmarks/performance/beta2/verification.json).
+Mac. [Extra acceptance records](../../benchmarks/performance/beta2/verification.json).
 
 | Native archive | Download bytes | CLI bytes | Runtime bytes |
 |---|---:|---:|---:|
@@ -128,7 +128,7 @@ After publication, the public tag's **default** installer downloads beta.2 from
 GitHub and matches the independently verified native macOS binary hashes. The
 printed client, cross-TMPDIR handoff, large integer/overflow checks, original
 exploration demo and new snapshot/check/diff/package/import/recipe demo all pass.
-[Actual network-install record](../benchmarks/performance/beta2/public-install.json).
+[Actual network-install record](../../benchmarks/performance/beta2/public-install.json).
 No user's existing installation or workspace is replaced by this probe.
 
 ## Limits
@@ -148,6 +148,6 @@ No user's existing installation or workspace is replaced by this probe.
 - The latest paired-agent trial remains alpha.6: correct answers, but more time
   and cumulative input tokens than persistent DuckDB. No model-level gain claimed.
 
-[Beta.1 report](releases/beta1-verification.md) ·
-[Beta.1 native provenance](releases/beta1-verification.json) ·
-[Design decision](decisions/010-portable-analysis.md).
+[Beta.1 report](../releases/beta1-verification.md) ·
+[Beta.1 native provenance](../releases/beta1-verification.json) ·
+[Design decision](../decisions/010-portable-analysis.md).
