@@ -39,6 +39,7 @@ jobs:
       - run: python3 tests/integration/alpha8.py
       - run: python3 tests/integration/alpha9.py
       - run: python3 tests/integration/beta2.py
+      - run: python3 tests/integration/beta3.py
       - run: python3 scripts/previous_release_probe.py
         env:
           GH_TOKEN: ${{ github.token }}

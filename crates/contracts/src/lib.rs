@@ -20,6 +20,9 @@ pub fn now_ms() -> u64 {
 pub struct Request {
     pub api_version: String,
     pub request_id: String,
+    /// Compact removes operational detail, never answer quality or truncation.
+    #[serde(default, skip_serializing_if = "ResponseMode::is_full")]
+    pub response_mode: ResponseMode,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub idempotency_key: Option<String>,
     pub method: String,
@@ -30,10 +33,23 @@ impl Request {
         Self {
             api_version: API_VERSION.into(),
             request_id: id("req"),
+            response_mode: ResponseMode::Full,
             idempotency_key: None,
             method: method.into(),
             params,
         }
+    }
+}
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum ResponseMode {
+    #[default]
+    Full,
+    Compact,
+}
+impl ResponseMode {
+    pub fn is_full(&self) -> bool {
+        *self == Self::Full
     }
 }
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
@@ -243,6 +259,9 @@ pub struct InspectParams {
     pub revision: Option<u64>,
     #[serde(default)]
     pub columns: Vec<String>,
+    /// Case-insensitive column-name substring; metadata checks only.
+    #[serde(default)]
+    pub search: Option<String>,
     #[serde(default)]
     pub checks: Vec<String>,
     #[serde(default)]
@@ -361,6 +380,9 @@ pub struct ControlParams {
     pub object_ref: String,
     #[serde(default)]
     pub wait_ms: u64,
+    /// Optional bounded observation on wait; does not change or replay the job.
+    #[serde(default)]
+    pub output: Option<OutputBudget>,
 }
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]

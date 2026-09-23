@@ -3,7 +3,7 @@ import json, subprocess, sys, time, tempfile, pathlib, os, signal
 
 temporary = tempfile.TemporaryDirectory(prefix="rowtrail-mcp-")
 workspace = pathlib.Path(temporary.name) / "workspace"
-p = subprocess.Popen([sys.argv[1], "--workspace", str(workspace), "mcp"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+p = subprocess.Popen([sys.argv[1], "--workspace", str(workspace), "--compact", "mcp"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
 def send(value):
     p.stdin.write(json.dumps(value) + "\n")
     p.stdin.flush()
@@ -28,6 +28,7 @@ try:
     computed = receive(3)["result"]["structuredContent"]
     assert computed['ok'],computed
     result = computed['result']
+    assert result['details_omitted'] and 'metrics' not in result['job']
     job = result['job']['id']
     for index in range(20):
         if result['job']['state']=='completed': break
@@ -49,7 +50,15 @@ try:
     answer=json.loads(subprocess.check_output([sys.argv[1],'--workspace',str(workspace),'call','query'],
         input=json.dumps({'sql':'SELECT id FROM t','bindings':{'t':snap['binding']},'execution':{'wait_ms':1000}}),text=True))
     assert answer['result']['observation']['rows']==[['9007199254740993']],answer
-    print(json.dumps({"protocol":initialized["result"]["protocolVersion"],"tools":[t["name"] for t in tools],"query_schema_valid":True,"mcp_query_cli_read":True,"mcp_snapshot_cli_query":True}))
+    send({"jsonrpc":"2.0","id":80,"method":"tools/call","params":{"name":"data_inspect","arguments":{
+        "ref":result['job']['result_ref'],"revision":result['readable_revision'],"search":"ID","checks":["context"]}}})
+    context=receive(80)['result']['structuredContent']['result']
+    assert context['matched_field_count']==1 and context['context']['sql'].endswith(' id')
+    send({"jsonrpc":"2.0","id":81,"method":"tools/call","params":{"name":"data_query","arguments":{
+        "bindings":{},"sql":"SELECT 42 answer","execution":{"wait_ms":1000},"_request":{"response_mode":"full"}}}})
+    detailed=receive(81)['result']['structuredContent']['result']
+    assert 'metrics' in detailed['job'] and not detailed.get('details_omitted')
+    print(json.dumps({"mcp_compact_context_and_explicit_full":True,"protocol":initialized["result"]["protocolVersion"],"tools":[t["name"] for t in tools],"query_schema_valid":True,"mcp_query_cli_read":True,"mcp_snapshot_cli_query":True}))
 finally:
     p.stdin.close()
     try: p.wait(timeout=5)

@@ -3,7 +3,7 @@ members = ["crates/contracts", "crates/client", "crates/cli", "crates/runtime"]
 resolver = "2"
 
 [workspace.package]
-version = "0.1.0-beta.2"
+version = "0.1.0-beta.3"
 edition = "2024"
 rust-version = "1.94.0"
 license = "Apache-2.0"
@@ -27,3 +27,8 @@ debug = 0
 strip = true
 lto = "thin"
 codegen-units = 8
+
+# One codegen unit gives the small CLI more cross-function optimization.
+# The engine keeps its existing release settings.
+[profile.release.package.rowtrail-cli]
+codegen-units = 1

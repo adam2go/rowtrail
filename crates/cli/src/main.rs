@@ -22,6 +22,9 @@ struct Args {
     json: bool,
     #[arg(long, global = true)]
     idempotency_key: Option<String>,
+    /// Omit operational details while retaining typed answers and full quality.
+    #[arg(long, global = true)]
+    compact: bool,
     #[command(subcommand)]
     command: Command,
 }
@@ -39,6 +42,14 @@ enum Command {
     Guide,
     /// Print the optional standard-library Python client; no runtime is started.
     PythonClient,
+    /// Run the bundled agent handoff demo (Python 3 standard library only).
+    Demo {
+        /// New directory for generated data, workspaces, transcripts and report.
+        #[arg(long)]
+        directory: Option<PathBuf>,
+        #[arg(long, default_value_t = 100000)]
+        rows: usize,
+    },
     /// Print a stdio MCP configuration; does not modify host configuration.
     McpConfig,
     /// Send a contract request from a JSON file or stdin (-).
@@ -64,6 +75,9 @@ enum Command {
         reference: String,
         #[arg(long)]
         revision: Option<u64>,
+        /// Case-insensitive column-name substring; metadata only.
+        #[arg(long)]
+        search: Option<String>,
         #[arg(long, default_value_t = 10)]
         top_k: usize,
         #[arg(long, value_delimiter = ',')]
@@ -286,11 +300,12 @@ fn exit_code(response: &Response, wait: bool) -> i32 {
 #[derive(Clone)]
 struct Mcp {
     workspace: PathBuf,
+    compact: bool,
 }
 fn tool(name: &str) -> Option<Tool> {
     let method = name.strip_prefix("data_")?;
     let mut schema = rowtrail_contracts::schema(method)?;
-    schema["properties"]["_request"] = json!({"type":"object","additionalProperties":false,"properties":{"request_id":{"type":"string"},"idempotency_key":{"type":"string"}}});
+    schema["properties"]["_request"] = json!({"type":"object","additionalProperties":false,"properties":{"request_id":{"type":"string"},"idempotency_key":{"type":"string"},"response_mode":{"enum":["full","compact"],"default":"full"}}});
     let description = match method {
         "workspace" => {
             "summary returns labeled datasets, fixed results, row counts and bounded field hints; an exact label filter and cursor find saved work without rescanning sources. Also usage, configure and explicit gc."
@@ -302,7 +317,10 @@ fn tool(name: &str) -> Option<Tool> {
             "Read a fixed result revision or continue its cursor under row/byte budgets. Preserve numeric strings and distinguish partial coverage from final_for_request."
         }
         "query" => {
-            "Read-only SQL with explicit dataset/manifest or result/revision bindings. Attach an optional descriptive label for later discovery. Reuse fixed intermediate results; consume included observations before making extra read calls."
+            "Read-only SQL on fixed bindings. Use _request.response_mode=compact for fewer response tokens; full quality stays visible. Set output.max_rows=0 to retain large intermediates without printing rows. Label useful branches; consume included answers directly."
+        }
+        "inspect" => {
+            "Metadata schema/context checks need no scan. search matches column-name substrings on wide tables; offset pages matching fields. context returns purpose, SQL and inputs when budget permits. Select explicit columns for scanning checks."
         }
         "control" => {
             "Wait, inspect status, cancel actual execution, refresh a source, or pin/release managed results. Disconnecting does not cancel jobs."
@@ -371,6 +389,11 @@ impl ServerHandler for Mcp {
                 req.request_id = id.into()
             }
             req.idempotency_key = options["idempotency_key"].as_str().map(str::to_owned);
+            if let Some(mode) = options.get("response_mode") {
+                req.response_mode = serde_json::from_value(mode.clone())?;
+            } else if self.compact {
+                req.response_mode = rowtrail_contracts::ResponseMode::Compact;
+            }
             Client::new(&self.workspace)?.call(&req).await
         }
         .await;
@@ -392,7 +415,7 @@ impl ServerHandler for Mcp {
         .into())
     }
 }
-async fn session(workspace: PathBuf) -> Result<i32> {
+async fn session(workspace: PathBuf, compact: bool) -> Result<i32> {
     use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt};
     let mut input = tokio::io::BufReader::new(tokio::io::stdin());
     let mut output = tokio::io::stdout();
@@ -413,7 +436,10 @@ async fn session(workspace: PathBuf) -> Result<i32> {
         );
         let request = serde_json::from_slice::<Request>(&line);
         let response = match request {
-            Ok(request) => {
+            Ok(mut request) => {
+                if compact {
+                    request.response_mode = rowtrail_contracts::ResponseMode::Compact;
+                }
                 let result = async {
                     if session.is_none() {
                         let client = client.as_ref().map_err(|e| anyhow::anyhow!("{e:#}"))?;
@@ -456,6 +482,36 @@ async fn run(args: Args) -> Result<i32> {
         .workspace
         .or_else(|| std::env::var_os("ROWTRAIL_WORKSPACE").map(PathBuf::from))
         .unwrap_or_else(|| PathBuf::from(".rowtrail"));
+    if let Command::Demo { directory, rows } = &args.command {
+        let executable = std::env::current_exe()?;
+        let bundled = executable.parent().unwrap().join("examples/agent_demo.py");
+        let source_tree =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/agent_demo.py");
+        let script = if bundled.is_file() {
+            bundled
+        } else {
+            source_tree
+        };
+        ensure!(
+            script.is_file(),
+            "demo script missing; install or extract the complete native archive"
+        );
+        let mut command = tokio::process::Command::new("python3");
+        command
+            .arg(script)
+            .arg("--rowtrail")
+            .arg(executable)
+            .arg("--rows")
+            .arg(rows.to_string());
+        if let Some(directory) = directory {
+            command.arg("--directory").arg(absolute(directory)?);
+        }
+        let status = command
+            .status()
+            .await
+            .map_err(|e| anyhow::anyhow!("demo requires Python 3 (standard library only): {e}"))?;
+        return Ok(status.code().unwrap_or(5));
+    }
     if matches!(args.command, Command::PythonClient) {
         print!("{}", include_str!("../../../examples/session_client.py"));
         return Ok(0);
@@ -466,10 +522,15 @@ async fn run(args: Args) -> Result<i32> {
     }
     if matches!(args.command, Command::McpConfig) {
         let executable = std::env::current_exe()?;
+        let mut command_args = vec![json!("--workspace"), json!(absolute(&workspace)?)];
+        if args.compact {
+            command_args.push(json!("--compact"));
+        }
+        command_args.push(json!("mcp"));
         println!(
             "{}",
             serde_json::to_string_pretty(
-                &json!({"mcpServers":{"rowtrail":{"command":executable,"args":["--workspace",absolute(&workspace)?,"mcp"]}}})
+                &json!({"mcpServers":{"rowtrail":{"command":executable,"args":command_args}}})
             )?
         );
         return Ok(0);
@@ -485,15 +546,18 @@ async fn run(args: Args) -> Result<i32> {
         return Ok(0);
     }
     if matches!(args.command, Command::Mcp) {
-        Mcp { workspace }
-            .serve(rmcp::transport::stdio())
-            .await?
-            .waiting()
-            .await?;
+        Mcp {
+            workspace,
+            compact: args.compact,
+        }
+        .serve(rmcp::transport::stdio())
+        .await?
+        .waiting()
+        .await?;
         return Ok(0);
     }
     if matches!(args.command, Command::Session) {
-        return session(workspace).await;
+        return session(workspace, args.compact).await;
     }
     let client = Client::new(workspace)?;
     let mut wait = false;
@@ -518,6 +582,7 @@ async fn run(args: Args) -> Result<i32> {
         Command::Inspect {
             reference,
             revision,
+            search,
             top_k,
             columns,
             checks,
@@ -526,7 +591,7 @@ async fn run(args: Args) -> Result<i32> {
             max_bytes,
         } => Request::new(
             "inspect",
-            json!({"ref":reference,"revision":revision,"top_k":top_k,"columns":columns,"checks":checks,"offset":offset,"budget":{"max_rows":max_rows,"max_bytes":max_bytes}}),
+            json!({"ref":reference,"revision":revision,"search":search,"top_k":top_k,"columns":columns,"checks":checks,"offset":offset,"budget":{"max_rows":max_rows,"max_bytes":max_bytes}}),
         ),
         Command::Analyze { request } => request_from("analyze", load(&request)?)?,
         Command::Snapshot { request } => request_from("snapshot", load(&request)?)?,
@@ -662,10 +727,14 @@ async fn run(args: Args) -> Result<i32> {
         | Command::Session
         | Command::Guide
         | Command::PythonClient
+        | Command::Demo { .. }
         | Command::McpConfig => unreachable!(),
     };
     if args.idempotency_key.is_some() {
         req.idempotency_key = args.idempotency_key;
+    }
+    if args.compact {
+        req.response_mode = rowtrail_contracts::ResponseMode::Compact;
     }
     let response = client.call(&req).await?;
     println!("{}", serde_json::to_string(&response)?);

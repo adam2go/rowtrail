@@ -7,6 +7,10 @@ use std::collections::{BTreeMap, HashSet};
 
 pub fn query(db: &Db, p: &InspectParams) -> Result<(QueryParams, Value)> {
     ensure!(
+        p.search.is_none(),
+        "INVALID_ARGUMENT: search is for metadata inspection only; choose explicit columns for scanning checks"
+    );
+    ensure!(
         p.offset == 0,
         "INVALID_ARGUMENT: offset is only for schema inspection"
     );

@@ -28,19 +28,23 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-published-upgrade-') as td:
         '--report',str(ROOT/'benchmarks/local/numeric-upgrade-alpha8.json')],check=True)
     print(json.dumps({'published_alpha8_archive_sha256':digest,'target':target,'status':'passed'}))
 
-# Also test the immediately preceding public beta with its independently pinned hash.
-beta_hash={('Darwin','arm64'):'6dcdb07b5b505724669eb8b7a10dac0db2747e6f9a8fa2c708c1d6e55cad28b5',
-           ('Linux','x86_64'):'34f759a17a8d28165afbc8dfeeb5bfa7a1d858bb4704fd11f4e5905872faf351'}[platform.system(),platform.machine()]
-name=f'rowtrail-0.1.0-beta.1-{target}'
-with tempfile.TemporaryDirectory(prefix='rowtrail-beta-upgrade-') as td:
-    directory=pathlib.Path(td)
-    subprocess.run(['gh','release','download','v0.1.0-beta.1','--repo','adam2go/rowtrail','--pattern',name+'.tar.xz','--dir',str(directory)],check=True)
-    archive=directory/(name+'.tar.xz')
-    assert hashlib.file_digest(archive.open('rb'),'sha256').hexdigest()==beta_hash
-    with tarfile.open(archive) as tar:
-        for member in tar.getmembers():
-            assert member.name==name or member.name.startswith(name+'/')
-            assert '..' not in pathlib.Path(member.name).parts and (member.isfile() or member.isdir())
-        tar.extractall(directory,filter='data')
-    subprocess.run([sys.executable,str(ROOT/'scripts/upgrade_probe.py'),str(directory/name),str(ROOT/'target/release'),
-        '--old-schema','8','--new-schema','9','--report',str(ROOT/'benchmarks/local/upgrade-beta1.json')],check=True)
+# Retain the schema-8 upgrade and verify schema-9 beta.2 interoperability too.
+for previous,schema,hashes in [
+    ('beta.1','8',{('Darwin','arm64'):'6dcdb07b5b505724669eb8b7a10dac0db2747e6f9a8fa2c708c1d6e55cad28b5',
+                   ('Linux','x86_64'):'34f759a17a8d28165afbc8dfeeb5bfa7a1d858bb4704fd11f4e5905872faf351'}),
+    ('beta.2','9',{('Darwin','arm64'):'c2620fd59aff6eac1628a71e32d87de56fd8791bcf787a3440633fc738c15e91',
+                   ('Linux','x86_64'):'41c8d8e98a956d2ae209ade339a7de04ee4f08b2e19eaac5dae1f1dd6e65a266'})]:
+    beta_hash=hashes[platform.system(),platform.machine()]
+    name=f'rowtrail-0.1.0-{previous}-{target}'
+    with tempfile.TemporaryDirectory(prefix='rowtrail-beta-upgrade-') as td:
+        directory=pathlib.Path(td)
+        subprocess.run(['gh','release','download',f'v0.1.0-{previous}','--repo','adam2go/rowtrail','--pattern',name+'.tar.xz','--dir',str(directory)],check=True)
+        archive=directory/(name+'.tar.xz')
+        assert hashlib.file_digest(archive.open('rb'),'sha256').hexdigest()==beta_hash
+        with tarfile.open(archive) as tar:
+            for member in tar.getmembers():
+                assert member.name==name or member.name.startswith(name+'/')
+                assert '..' not in pathlib.Path(member.name).parts and (member.isfile() or member.isdir())
+            tar.extractall(directory,filter='data')
+        subprocess.run([sys.executable,str(ROOT/'scripts/upgrade_probe.py'),str(directory/name),str(ROOT/'target/release'),
+            '--old-schema',schema,'--new-schema','9','--report',str(ROOT/'benchmarks/local'/('upgrade-'+previous.replace('.','')+'.json'))],check=True)

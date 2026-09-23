@@ -3,6 +3,7 @@
   "purpose": "Explore local structured data through bounded observations and reusable fixed results. The caller chooses the questions and judges the evidence.",
   "start": [
     "rowtrail guide",
+    "rowtrail demo --directory ./rowtrail-demo (optional offline stdlib Python demo)",
     "rowtrail open PATH",
     "rowtrail schema METHOD (only for an unfamiliar operation)"
   ],
@@ -10,12 +11,12 @@
     "one_call": "rowtrail call METHOD --request request.json",
     "persistent": "rowtrail session",
     "mcp": "rowtrail mcp",
-    "mcp_configuration": "rowtrail --workspace /absolute/path mcp-config",
+    "mcp_configuration": "rowtrail --compact --workspace /absolute/path mcp-config",
     "python_client": "rowtrail python-client > rowtrail_client.py"
   },
   "workflow": [
     "Open CSV/TSV/Parquet; keep the response binding and fields. Open does not perform a full profile.",
-    "Request only needed inspect columns/checks. Query with explicit bindings and typed parameters.",
+    "Search wide schema names with inspect.search; context inspection recovers purpose, SQL and fixed inputs without scanning data. Choose explicit columns for scanning checks.",
     "Check ok, then job.state. Read an included observation directly; do not fetch it again.",
     "For follow-up SQL, bind result_ref plus a fixed revision. Keep large tables outside model context.",
     "For progressive Parquet count/sum/avg, use analyze. Its observations cover only the reported prefix; ordinary SQL is preferable for final-only answers.",
@@ -28,6 +29,7 @@
   "budgets": "Waiting, computation, memory, scanning, stored results and output have separate limits. Engine memory is not a process RSS hard cap.",
   "retry": "After ambiguous transport failure, control lookup with ref=idempotency_key reads committed acceptance without replay. Missing is a point-in-time observation, not proof an in-flight request cannot commit. Never silently replay mutations.",
   "capabilities": "Use doctor for actual capabilities. Client and coordinator versions must match; close old sessions and allow idle exit before upgrading. Stable workspace endpoints do not depend on TMPDIR. No internal model calls or automatic host resume.",
-  "composition": "The optional stdlib Python client offers open(source), query(sql, bindings), binding(response), observe(response), and guarded rows(response). Compose known steps in code; query waits mechanically without replay and preserves full observations. Raw call(method, params) remains available.",
-  "analysis": "Native snapshot creates an independent managed copy with bounded caller provenance. Optional stdlib helpers provide checks, keyed diff, recipes and portable branch packages; see docs/analysis.md. Higher-level composition is Python-only in beta.2."
+  "composition": "Use the optional stdlib client with response_mode=\"compact\". query(fetch=False) retains an intermediate without displaying rows; context(binding) retrieves saved meaning. Compose known steps and print only bounded evidence. query consumes final wait observations and never replays a request.",
+  "analysis": "Native snapshot creates an independent managed copy with bounded caller provenance. Optional stdlib helpers provide checks, keyed diff, recipes and portable branch packages; see docs/analysis.md. Higher-level composition is Python-only .",
+  "compact": "Request response_mode=compact (CLI --compact; MCP _request.response_mode) omits operational detail, preserving full quality, types, errors, fixed bindings and truncation. control/status retains metrics; control/wait.output can return a bounded answer directly. row_count is the committed revision count, not original-source coverage."
 }

@@ -14,7 +14,7 @@ import tarfile
 import tomllib
 
 ROOT=Path(__file__).resolve().parents[1]
-SUITES={'integration':30,'alpha3':13,'alpha4':10,'alpha5':12,'alpha6':8,'alpha7':15,'alpha8':11,'alpha9':14,'beta2':16}
+SUITES={'integration':30,'alpha3':13,'alpha4':10,'alpha5':12,'alpha6':8,'alpha7':15,'alpha8':11,'alpha9':14,'beta2':16,'beta3':14}
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--run',type=int,required=True)
 p.add_argument('--commit',required=True)
@@ -32,7 +32,7 @@ for name in ('verify (ubuntu-22.04)','verify (macos-14)','linux-compatibility'):
     assert by_name[name]['conclusion']=='success'
 for name in ('verify (ubuntu-22.04)','verify (macos-14)'):
     steps={step['name']:step['conclusion'] for step in by_name[name]['steps']}
-    for command in ('cargo test --release --locked --workspace','python3 tests/integration/alpha9.py','python3 tests/integration/beta2.py','python3 scripts/previous_release_probe.py','python3 scripts/install_probe.py'):
+    for command in ('cargo test --release --locked --workspace','python3 tests/integration/alpha9.py','python3 tests/integration/beta2.py','python3 tests/integration/beta3.py','python3 scripts/previous_release_probe.py','python3 scripts/install_probe.py'):
         assert steps['Run '+command]=='success'
 budgets=json.loads((ROOT/'benchmarks/budgets.json').read_text())['distribution']
 artifacts,inventory,resources,installs,upgrades=[],{},{},{},{}
@@ -55,7 +55,7 @@ for platform in ('linux','macos'):
             assert '..' not in Path(member.name).parts and (member.isfile() or member.isdir())
         assert b'Apache License' in tar.extractfile(prefix+'/LICENSE').read()
         assert b'RowTrail' in tar.extractfile(prefix+'/NOTICE').read()
-        expected=['docs/agent-guide.md','docs/agent-quickstart.md','docs/usage.md','docs/numeric-contract.md','examples/session_client.py','examples/quickstart.py','examples/analysis_quickstart.py','docs/analysis.md']
+        expected=['docs/agent-guide.md','docs/agent-quickstart.md','docs/usage.md','docs/numeric-contract.md','examples/session_client.py','examples/quickstart.py','examples/analysis_quickstart.py','docs/analysis.md','examples/agent_demo.py','docs/agent-demo.md']
         notices=json.loads(tar.extractfile(prefix+'/third-party/inventory.json').read())
         expected += [path for entry in notices for path in entry['notice_files']]
         for path in expected:
@@ -86,7 +86,10 @@ for platform in ('linux','macos'):
     beta_upgrade=json.loads((reports/'upgrade-beta1.json').read_text())
     assert beta_upgrade['status']=='passed' and beta_upgrade['old_schema']=='8' and beta_upgrade['new_schema']=='9'
     assert beta_upgrade['old_fixed_revision_preserved'] and beta_upgrade['old_partial_checkpoint_preserved']
-    upgrades[platform]={'metadata':upgrade,'numeric':numeric_upgrade,'beta1':beta_upgrade}
+    beta2_upgrade=json.loads((reports/'upgrade-beta2.json').read_text())
+    assert beta2_upgrade['status']=='passed' and beta2_upgrade['old_schema']==beta2_upgrade['new_schema']=='9'
+    assert beta2_upgrade['same_schema_old_reader_preserved']
+    upgrades[platform]={'metadata':upgrade,'numeric':numeric_upgrade,'beta1':beta_upgrade,'beta2':beta2_upgrade}
     resource=json.loads((reports/'resources.json').read_text())
     assert resource['status']=='passed' and resource['binary_sha256']==hashes
     assert resource['all_exported_ids_match_independent_sort'] and resource['largest_part_bytes']<=8388608
@@ -94,6 +97,7 @@ for platform in ('linux','macos'):
     install=json.loads((reports/'install.json').read_text())
     assert install['status']=='passed' and install['archive_sha256']==digest and install['version']==version
     assert install['installed_quickstart']['status']=='passed' and install['installed_quickstart']['handoff_original_source_bytes']==0
+    assert install['installed_agent_demo']['status']=='passed' and install['installed_agent_demo']['separate_recipient_process']
     installs[platform]=install
     artifacts.append(metadata)
 compatibility=json.loads((a.reports/'compatibility/install.json').read_text())

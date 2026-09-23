@@ -235,7 +235,7 @@ pub fn read(db: &Db, p: &ReadParams) -> Result<Value> {
             json!({"name":f.name(),"type":f.data_type().to_string(),"nullable":f.is_nullable()})
         })
         .collect::<Vec<_>>();
-    let mut response = json!({"result_ref":p.result_ref,"revision":snap.revision,"schema":schema,"rows":[],"quality":snap.quality,"validity":snap.validity,"job_state":snap.job_state,"presentation":{"returned_rows":0,"has_more":start<snap.rows},"next_cursor":null});
+    let mut response = json!({"result_ref":p.result_ref,"revision":snap.revision,"row_count":snap.rows.to_string(),"schema":schema,"rows":[],"quality":snap.quality,"validity":snap.validity,"job_state":snap.job_state,"presentation":{"returned_rows":0,"has_more":start<snap.rows},"next_cursor":null});
     let cursor_for = |offset: u64| -> Result<Value> {
         if offset >= snap.rows {
             Ok(Value::Null)

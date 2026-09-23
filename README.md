@@ -5,7 +5,7 @@
   <p>A small native data tool, built for agents.<br>Ask a question, keep a result, and continue from there.</p>
   <p>
     <a href="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml"><img src="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml/badge.svg" alt="Build and verify"></a>
-    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.2"><img src="https://img.shields.io/badge/release-v0.1.0--beta.2-147D70" alt="Release v0.1.0-beta.2"></a>
+    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.3"><img src="https://img.shields.io/badge/release-v0.1.0--beta.3-147D70" alt="Release v0.1.0-beta.3"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-147D70" alt="Apache-2.0 license"></a>
   </p>
   <p><a href="README.zh-CN.md">简体中文</a> · <a href="#install">Install</a> · <a href="docs/agent-guide.md">Agent guide</a> · <a href="docs/verification.md">Test results</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
@@ -18,15 +18,16 @@ in its context. RowTrail opens local CSV/TSV/Parquet, runs read-only SQL, and ke
 versioned results on disk. The agent gets a bounded, typed observation and can
 branch from a saved result when the next question arrives.
 
-**New in beta.2:** bring cleaned Parquet from an existing Python project, keep an
-independent snapshot, save executable assumptions, compare versions and hand off
-a branch that someone else can inspect and continue. The optional stdlib client
-adds recipes and portable Markdown + Parquet packages; native snapshot is shared
-by CLI, NDJSON and MCP. [A complete workflow](docs/analysis.md).
+**New in beta.3:** spend context on evidence. Compact responses keep full quality,
+wide-schema search finds relevant columns, and one contextual inspection recovers
+why a saved result exists. `rowtrail demo` shows discovery → saved analysis →
+checks → handoff to a separate process, with no data download or model API.
+[Run the demo](docs/agent-demo.md) · [Save, compare and reuse analysis](docs/analysis.md).
 
 No new external dependency. Native archive/CLI/runtime budgets remain
-**30 MB / 4.5 MB / 125 MB**. Both native build platforms pass **129 integration
-scenarios and 14 Rust tests**, installation and upgrades from published alpha.8/beta.1.
+**30 MB / 4.5 MB / 125 MB**. Beta.3 native release verification is pending; the
+new gates cover **143 integration scenarios and 14 Rust tests**, installation and
+published alpha.8/beta.1 upgrades plus beta.2 schema compatibility.
 
 **Zero internal model calls. No API key. No spreadsheet UI.** Your agent chooses
 the questions and decides when the evidence is sufficient.
@@ -51,12 +52,12 @@ CSV / TSV / Parquet → SQL query → saved result → next question
 
 ## Install
 
-**v0.1.0-beta.2** is a beta preview, licensed under Apache-2.0.
+**v0.1.0-beta.3** is a beta preview, licensed under Apache-2.0.
 Native packages are available for **macOS arm64** and **Linux x86_64**
 (Ubuntu 22.04 / glibc 2.35 or newer).
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-beta.2/install.sh -o /tmp/rowtrail-install.sh
+curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-beta.3/install.sh -o /tmp/rowtrail-install.sh
 sh /tmp/rowtrail-install.sh
 export PATH="$HOME/.local/bin:$PATH"
 rowtrail --version
@@ -64,18 +65,20 @@ rowtrail --version
 
 The installer verifies SHA-256 and installs a versioned pair in `~/.local/bin`.
 Set `ROWTRAIL_INSTALL_DIR` to choose another directory, or extract an archive
-from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.2).
+from [Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.3).
 Keep `rowtrail` and `rowtrail-runtime` together.
 
-Downloads are **19.42 MB (macOS) / 22.82 MB (Linux)**.
+The previous beta.2 downloads were **19.42 MB (macOS) / 22.82 MB (Linux)**;
+beta.3 artifact measurements are pending native verification.
 Budgets remain **30 MB download / 4.5 MB CLI / 125 MB runtime**.
 The same Linux archive is tested on Ubuntu 22.04 and 24.04. Archives include
 agent guides and the optional runnable demo. Actual sizes and hashes appear in
 [artifact verification](docs/verification.md#native-distribution).
 
-**Workspace upgrade:** beta.2 upgrades metadata to schema 9. Close old sessions
-and allow the old coordinator to exit before upgrading. Retain a stopped full
-pre-upgrade copy if you need rollback; older runtimes refuse upgraded stores.
+**Workspace compatibility:** beta.3 keeps beta.2 metadata schema 9. Close old
+sessions and allow the old coordinator to exit before switching versions.
+Upgrading from beta.1 or earlier is one-way; preserve a stopped workspace copy
+if you need to roll back that schema migration.
 Old results keep their original numeric provenance. [Numeric contract](docs/numeric-contract.md).
 
 ## Give it a question
@@ -104,20 +107,22 @@ explicitly stop once it has enough fragment or file coverage.
 
 ## A complete demo, with no data download
 
-With RowTrail on your PATH, run from this repository or an extracted archive:
-
 ```sh
-python3 examples/quickstart.py
+rowtrail demo --directory ./rowtrail-demo
 ```
 
-For an archive without installation, add `--rowtrail "$PWD/rowtrail"`.
+The optional stdlib Python demo generates **100,000 orders with 64 columns**,
+searches relevant fields, saves qualifying orders without printing them, verifies
+four exact totals and a reusable assertion, then reconnects by label and purpose.
+A separate process imports the portable branch and asks a new question after the
+original CSV is removed. Reports, raw full/compact transcripts, bounded decision
+cards and reusable workspaces remain in the directory. Existing paths are never
+overwritten. [Walkthrough and continuation](docs/agent-demo.md).
 
-This optional stdlib-only example generates **20,003 CSV rows**, discovers fields,
-chooses a region from bounded aggregates, saves its refunds without returning
-all those rows, then reconnects. One label-filtered catalog call finds the exact
-saved binding; the next query reads **zero original-source bytes**. Python integer
-checks verify the answer, including IDs above 2^53. Results remain in the printed
-workspace for further exploration. [Demo source](examples/quickstart.py).
+Native queries need no Python; this optional demo does. DuckDB can also retain
+connections/tables and return small answers. RowTrail adds common contracts for
+quality, fixed versions, context and handoff; it does not claim that a database
+cannot do these things with additional application code.
 
 ## Connect your agent
 

@@ -5,7 +5,7 @@
   <p>为 Agent 而生的小型原生数据工具。<br>提出问题，保存结果，沿着结果继续探索。</p>
   <p>
     <a href="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml"><img src="https://github.com/adam2go/rowtrail/actions/workflows/ci.yml/badge.svg" alt="构建与验证"></a>
-    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.2"><img src="https://img.shields.io/badge/release-v0.1.0--beta.2-147D70" alt="v0.1.0-beta.2 版本"></a>
+    <a href="https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.3"><img src="https://img.shields.io/badge/release-v0.1.0--beta.3-147D70" alt="v0.1.0-beta.3 版本"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-147D70" alt="Apache-2.0 许可证"></a>
   </p>
   <p><a href="README.md">English</a> · <a href="#安装">安装</a> · <a href="docs/agent-guide.md">Agent 接入</a> · <a href="docs/verification.md">测试报告</a> · <a href="CONTRIBUTING.md">参与贡献</a></p>
@@ -17,13 +17,14 @@ Agent 探索一张大表，不应该先把整张表塞进上下文。RowTrail �
 执行只读 SQL，把带固定版本的结果留在磁盘。Agent 按预算读取带类型的观察，下一次追问
 可以直接从保存的结果继续。
 
-**beta.2 让分析可以保存、复用和交接：** 从现有 Python 项目导入清洗好的 Parquet，
-建立独立快照，保存可执行检查，比较结果版本，再把带报告的分析分支交给另一个 Agent。
-可选标准库客户端提供配方和 Markdown + Parquet 交接包；原生快照共用 CLI、NDJSON、MCP 合约。
-[完整使用流程](docs/analysis.md)。
+**beta.3 把上下文留给证据：** 精简响应保留完整质量信息，按列名搜索宽表，
+一次元数据调用找回结果的用途、SQL 和固定输入。`rowtrail demo` 展示从发现字段、保存分析、
+执行检查到跨进程交接的完整流程，不下载数据、不调用模型。
+[运行 demo](docs/agent-demo.md) · [保存、比较、复用分析](docs/analysis.md)。
 
 不新增外部依赖。压缩包 / CLI / runtime 上限仍为 **30 MB / 4.5 MB / 125 MB**。
-两端原生构建均通过 **129 项集成场景和 14 项 Rust 测试**、安装检查，以及公开 alpha.8/beta.1 的真实升级。
+beta.3 原生发布验证进行中；验收覆盖 **143 项集成场景、14 项 Rust 测试**、安装检查、
+公开 alpha.8/beta.1 升级及 beta.2 工作区兼容性。
 
 **内部零模型调用，无需 API Key，没有表格界面。** 问什么、证据够不够，由你的 Agent 判断。
 
@@ -47,11 +48,11 @@ CSV / TSV / Parquet → SQL 查询 → 保存结果 → 继续追问
 
 ## 安装
 
-当前版本 **v0.1.0-beta.2** 为 Beta 预览版，采用 Apache-2.0 许可证。
+当前版本 **v0.1.0-beta.3** 为 Beta 预览版，采用 Apache-2.0 许可证。
 原生包支持 **macOS arm64** 和 **Linux x86_64**（Ubuntu 22.04 / glibc 2.35 及以上）。
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-beta.2/install.sh -o /tmp/rowtrail-install.sh
+curl -fsSL https://raw.githubusercontent.com/adam2go/rowtrail/v0.1.0-beta.3/install.sh -o /tmp/rowtrail-install.sh
 sh /tmp/rowtrail-install.sh
 export PATH="$HOME/.local/bin:$PATH"
 rowtrail --version
@@ -59,17 +60,31 @@ rowtrail --version
 
 安装器校验 SHA-256，默认安装版本化的二进制组合到 `~/.local/bin`。
 可设置 `ROWTRAIL_INSTALL_DIR` 更换目录，也可以从
-[Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.2) 下载并解压。
+[Releases](https://github.com/adam2go/rowtrail/releases/tag/v0.1.0-beta.3) 下载并解压。
 请将 `rowtrail` 和 `rowtrail-runtime` 放在同一个目录。
 
-实际下载为 **macOS 19.42 MB / Linux 22.82 MB**。
+上一版 beta.2 下载为 **macOS 19.42 MB / Linux 22.82 MB**；beta.3 产物体积待原生验证。
 预算保持 **下载 30 MB / CLI 4.5 MB / 运行时 125 MB**。同一个 Linux 包在 Ubuntu
 22.04 和 24.04 上验证；包内附带 Agent 指南与可选演示。实际大小与哈希见
 [原生产物记录](docs/verification.md#native-distribution)。
 
-**工作区升级：** beta.2 将元数据升级到 schema 9。先关闭旧会话并让旧协调器退出；
-如果需要回退，请保留完整、已停止的升级前副本。旧运行时不能打开升级后的工作区，
+**工作区兼容：** beta.3 沿用 beta.2 的 schema 9。切换版本前先关闭旧会话并让旧协调器退出。
+从 beta.1 或更早版本升级仍是单向迁移；需要回退时应保留完整、已停止的升级前副本。
 旧结果也不会被重新认证为数值安全。[数值合同](docs/numeric-contract.md)。
+
+## 一条命令跑通 Agent 分析与交接
+
+```sh
+rowtrail demo --directory ./rowtrail-demo
+```
+
+可选 demo 只需要 Python 3 标准库，会自行生成 **10 万行、64 列**订单。按需发现字段，
+把大中间结果留在工具里，只返回四行汇总；执行唯一性检查后，按标签找回用途与 SQL。
+另一进程导入分析包，在原始 CSV 已删除后继续追问。目录中保留报告、完整调用记录、
+有界证据和可继续使用的工作区；拒绝覆盖已有目录。[演示及后续用法](docs/agent-demo.md)。
+
+直接 DuckDB 同样能保留连接和中间表、只返回小答案。RowTrail 增加的是统一的质量、
+固定版本、上下文和交接合约；不把“数据库做不到”当作卖点。
 
 ## 先问一个问题
 

@@ -2,6 +2,7 @@
 
 [Home](../README.md) · [Manual workflow](usage.md) · [Verification](verification.md)
 
+For an offline end-to-end task, run `rowtrail demo`; see [the agent demo](agent-demo.md).
 For a small initial context, start with the [minimal bootstrap](agent-quickstart.md)
 and discover individual schemas on demand.
 
@@ -272,3 +273,29 @@ Stored validity is not a fresh original-source check: inspecting metadata does
 not scan files; saved-result use checks its parts. Original-source operations
 may discover changes and invalidate dependents. Take an independent snapshot
 before that point when retaining a standalone version is intended.
+
+## Compact responses and contextual inspection (beta.3)
+
+`response_mode: "compact"` on a request envelope omits operational job detail
+and duplicate references. Full remains the default. CLI `--compact`, the stdlib
+client's `response_mode` constructor option, and MCP `_request.response_mode`
+share that native projection. `rowtrail --compact mcp-config` selects the server
+preference; explicit per-call MCP `full` overrides it. Types, complete quality
+(including numeric policy), validity, errors, fixed binding and pagination are
+unchanged. `control/status` is always full; details stay in durable storage.
+
+A read's `row_count` counts its fixed revision, not its source population. A
+partial revision may have a known row count while input coverage remains unknown.
+`control/wait` optionally accepts `output` with row/byte limits and returns an
+observation when available. State/finality still determine whether it is final.
+The Python `query` helper consumes this observation rather than rereading it.
+`query(fetch=False)` sets zero observed rows and does not trigger a fallback read.
+
+Metadata `inspect` supports `checks:["context"]` and optional `search` on column
+names. Context adds a fixed binding, stored purpose/SQL/parameters/inputs, row
+count when known and verification limits to the paged schema. It does not inspect
+original files or certify caller-written text. `context_omitted` explicitly marks
+an oversized definition, with full `scope_ref` inspection available. Search is a
+Unicode-lowercased substring; a filtered schema keeps original offsets. Use the
+same search/column filters with `next_field_offset`. Scanning checks reject search
+and require explicit column choice. These additions do not migrate schema 9.

@@ -79,3 +79,18 @@ Stored validity is not a fresh original-source check: inspecting metadata does
 not scan files; saved-result use checks its parts. Original-source operations
 may discover changes and invalidate dependents. Take an independent snapshot
 before that point when retaining a standalone version is intended.
+
+## Spend context on evidence (beta.3)
+
+Use `rowtrail --compact` for one-off queries, or `response_mode="compact"`
+in the stdlib client. The native request envelope accepts the same preference;
+MCP uses `_request.response_mode`. Full diagnostics remain at `control/status`.
+
+Search wide schema names with `inspect.search`; `context()` retrieves purpose,
+SQL and fixed inputs without scanning data. Save intermediates with
+`query(..., fetch=False)`, then print only a small `observe(answer)`. Quality and
+truncation are never suppressed. Let the client wait in code; no model polling
+is needed. A wait can carry `output` and return an answer in the same response.
+
+`rowtrail demo --directory ./rowtrail-demo` needs only optional Python 3 and
+generates its own data. [Run and continue the demo](agent-demo.md).

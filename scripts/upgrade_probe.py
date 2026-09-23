@@ -43,9 +43,13 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-upgrade-') as td:
   assert fresh['job']['state']=='completed'
   assert call(new,'read',{'result_ref':fresh['job']['result_ref'],'revision':fresh['readable_revision']})['rows']==[['9007199254740994']]
   new_pid=call(new,'doctor',{})['coordinator_pid'];pids.append(new_pid);stop(new_pid);pids.remove(new_pid)
-  refused=subprocess.run([str(old/'rowtrail-runtime'),'serve','--workspace',str(ws)],capture_output=True,text=True,timeout=10)
-  assert refused.returncode!=0 and 'PROTOCOL_VERSION_MISMATCH' in refused.stderr,refused
-  report={'status':'passed','old_version':subprocess.check_output([str(old/'rowtrail'),'--version'],text=True).strip(),'new_version':subprocess.check_output([str(new/'rowtrail'),'--version'],text=True).strip(),'old_schema':a.old_schema,'new_schema':a.new_schema,'old_partial_checkpoint_preserved':partial is not None,'old_fixed_revision_preserved':True,'new_query_on_old_result':True,'old_runtime_rejects_upgraded_store':True}
+  if a.old_schema==a.new_schema:
+   assert call(old,'read',{'result_ref':fresh['job']['result_ref'],'revision':fresh['readable_revision']})['rows']==[['9007199254740994']]
+   old_pid=call(old,'doctor',{})['coordinator_pid'];pids.append(old_pid);stop(old_pid);pids.remove(old_pid)
+  else:
+   refused=subprocess.run([str(old/'rowtrail-runtime'),'serve','--workspace',str(ws)],capture_output=True,text=True,timeout=10)
+   assert refused.returncode!=0 and 'PROTOCOL_VERSION_MISMATCH' in refused.stderr,refused
+  report={'status':'passed','old_version':subprocess.check_output([str(old/'rowtrail'),'--version'],text=True).strip(),'new_version':subprocess.check_output([str(new/'rowtrail'),'--version'],text=True).strip(),'old_schema':a.old_schema,'new_schema':a.new_schema,'old_partial_checkpoint_preserved':partial is not None,'old_fixed_revision_preserved':True,'new_query_on_old_result':True,'old_runtime_rejects_upgraded_store':a.old_schema!=a.new_schema,'same_schema_old_reader_preserved':a.old_schema==a.new_schema}
   path=pathlib.Path(a.report);path.parent.mkdir(parents=True,exist_ok=True);path.write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))
  finally:
   for pid in pids:

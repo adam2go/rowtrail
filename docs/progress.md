@@ -2,8 +2,28 @@
 
 [Home](../README.md) · [Verification and measurements](verification.md)
 
-Updated 2026-09-23 for **0.1.0-beta.2**. Native macOS/Linux verification and
-independent release artifact checks pass, including Ubuntu 24.04 installation.
+Updated 2026-09-24 for **0.1.0-beta.3**. Native release verification is pending.
+The latest published release evidence remains beta.2 until the new CI gates pass.
+
+## Beta.3
+
+- Optional compact native responses preserve typed answers, full quality/numeric
+  policy, job failures, fixed bindings and truncation. Operational details remain
+  at control/status; no persisted job semantics or dependency is added.
+- Bounded wait observations remove the separate post-wait read. Included fixed
+  revision row counts remove a redundant metadata call from SQL assertions.
+- Metadata schema-name search and contextual inspection recover relevant fields,
+  purpose, SQL and input bindings. Long definitions are explicitly omitted whole.
+- Python query(fetch=False) saves intermediates with zero observed rows. The
+  bundled `rowtrail demo` generates its own wide data, retains full transcripts,
+  verifies answers and hands a portable branch to a separate recipient process.
+- Same schema 9 as beta.2. No model calls; no new engine or CLI dependency. CLI
+  alone uses one codegen unit; engine optimization stays unchanged.
+- Fourteen new integration scenarios cover budgets, search, context, numeric
+  evidence, errors, partial coverage, waiting, checks and the offline handoff.
+  Release status and measured effects will be recorded after native verification.
+
+[Agent demo](agent-demo.md) · [Decision](decisions/011-agent-context-and-demo.md).
 
 ## Beta.2
 
@@ -344,6 +364,7 @@ python3 tests/integration/alpha7.py
 python3 tests/integration/alpha8.py
 python3 tests/integration/alpha9.py
 python3 tests/integration/beta2.py
+python3 tests/integration/beta3.py
 python3 scripts/previous_release_probe.py
 python3 scripts/check_boundaries.py
 python3 scripts/mcp_probe.py target/release/rowtrail

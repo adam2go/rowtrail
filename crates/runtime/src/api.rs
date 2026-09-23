@@ -92,8 +92,17 @@ fn remember(c: &rusqlite::Connection, req: &Request, v: &Value) -> Result<()> {
     Ok(())
 }
 pub fn capabilities() -> Value {
-    json!({"api_version":"1","metadata_schema":"9; one-way upgrade from 3/4/5/6/7/8","numeric":crate::numeric::policy(),"progressive_aggregation":{"fragment_unit":"parquet_row_group","fragment_units":["parquet_row_group","manifest_file"],"checkpoint_interval_ms":50,"aggregate_limit":16,"numeric_inputs":"Int64, UInt64, Decimal128 scale 0..6","sum":"Decimal128(38,input_scale)","avg":"Decimal128(38,6), truncation toward zero","group_by":false,"sampling":false},"formats":["csv","tsv","parquet"],"source":"local","sql":"DataFusion 55.0.0 read-only SELECT; explicit bindings","analysis":["inspect:null_count","inspect:min_max","inspect:top_k","analyze:count","analyze:sum","analyze:avg"],"entries":["cli","ndjson_session","mcp_stdio","rust_sdk"],"workspace_summary":"bounded metadata catalog with exact label filter, fixed bindings, row counts and bounded field hints; store-scoped cursor; no source scan","query_parallelism":{"auto_max":4,"serial_below_input_bytes":16777216,"pool_bytes_per_parallel_partition":67108864,"explicit_target_partitions":"1..8; requires 64 MiB per partition when greater than one","target_not_thread_limit":true},"prepare":"explicit streaming CSV/TSV to managed Parquet; atomic dataset visibility","snapshot":"explicit independent managed Parquet copy of a dataset or final exact complete result; caller provenance stored, never executed","workspace_quota":"managed data plus conservative result/spill reservations; excludes SQLite/WAL overhead, logs and external exports","saved_result_scan":"whole IPC parts; separate files remain parallel; each new job verifies again","verified_part_cache_bytes":8388608,"result_part_target_bytes":6291456,"result_part_target_basis":"encoded IPC plus next batch array memory; prepared Parquet keeps input-memory target","inline_result_part_max_bytes":131072,"result_part_max_bytes":8388608,"native_tasks":false,"automatic_resume":false,"source_consistency":"best_effort","result_storage":"immutable Arrow IPC; parts up to 128 KiB in SQLite, larger parts in files","max_frame_bytes":FRAME_LIMIT,"minimum_error_budget_bytes":512,"max_output_bytes":FRAME_LIMIT-512,"max_output_rows":10000,"max_manifest_files":128,"max_directory_entries":4096,"default_parallel_jobs":1,"cancellation":"cooperative signal with forced worker termination after 300ms","engine_memory_limit":"MemoryPool; not RSS hard limit","scan_limit":"byte reservation before local reads","result_retention":"retained by default; explicit pin/release and dependency-safe workspace gc","event_retention":"until workspace removal; no event pruning yet","unsupported":["Windows","remote","sampling","native_tasks","automatic_resume","union_by_name","binary_inline","RSS_hard_limit"]})
+    let mut value = json!({"api_version":"1","metadata_schema":"9; one-way upgrade from 3/4/5/6/7/8","numeric":crate::numeric::policy(),"progressive_aggregation":{"fragment_unit":"parquet_row_group","fragment_units":["parquet_row_group","manifest_file"],"checkpoint_interval_ms":50,"aggregate_limit":16,"numeric_inputs":"Int64, UInt64, Decimal128 scale 0..6","sum":"Decimal128(38,input_scale)","avg":"Decimal128(38,6), truncation toward zero","group_by":false,"sampling":false},"formats":["csv","tsv","parquet"],"source":"local","sql":"DataFusion 55.0.0 read-only SELECT; explicit bindings","analysis":["inspect:null_count","inspect:min_max","inspect:top_k","analyze:count","analyze:sum","analyze:avg"],"entries":["cli","ndjson_session","mcp_stdio","rust_sdk"],"workspace_summary":"bounded metadata catalog with exact label filter, fixed bindings, row counts and bounded field hints; store-scoped cursor; no source scan","query_parallelism":{"auto_max":4,"serial_below_input_bytes":16777216,"pool_bytes_per_parallel_partition":67108864,"explicit_target_partitions":"1..8; requires 64 MiB per partition when greater than one","target_not_thread_limit":true},"prepare":"explicit streaming CSV/TSV to managed Parquet; atomic dataset visibility","snapshot":"explicit independent managed Parquet copy of a dataset or final exact complete result; caller provenance stored, never executed","workspace_quota":"managed data plus conservative result/spill reservations; excludes SQLite/WAL overhead, logs and external exports","saved_result_scan":"whole IPC parts; separate files remain parallel; each new job verifies again","verified_part_cache_bytes":8388608,"result_part_target_bytes":6291456,"result_part_target_basis":"encoded IPC plus next batch array memory; prepared Parquet keeps input-memory target","inline_result_part_max_bytes":131072,"result_part_max_bytes":8388608,"native_tasks":false,"automatic_resume":false,"source_consistency":"best_effort","result_storage":"immutable Arrow IPC; parts up to 128 KiB in SQLite, larger parts in files","max_frame_bytes":FRAME_LIMIT,"minimum_error_budget_bytes":512,"max_output_bytes":FRAME_LIMIT-512,"max_output_rows":10000,"max_manifest_files":128,"max_directory_entries":4096,"default_parallel_jobs":1,"cancellation":"cooperative signal with forced worker termination after 300ms","engine_memory_limit":"MemoryPool; not RSS hard limit","scan_limit":"byte reservation before local reads","result_retention":"retained by default; explicit pin/release and dependency-safe workspace gc","event_retention":"until workspace removal; no event pruning yet","unsupported":["Windows","remote","sampling","native_tasks","automatic_resume","union_by_name","binary_inline","RSS_hard_limit"]});
+    value["response_modes"] = json!(["full", "compact"]);
+    value["inspect_context"] = json!(
+        "bounded schema, caller purpose, SQL and inputs; metadata only; long context is explicitly omitted"
+    );
+    value["schema_search"] =
+        json!("case-insensitive substring on field names; original schema offsets; no data scan");
+    value["wait_observation"] = json!(true);
+    value
 }
+
 fn validate_execution(e: &Execution) -> Result<()> {
     if let Some(n) = e.target_partitions {
         ensure!(
@@ -152,6 +161,11 @@ fn output_limit(req: &Request) -> usize {
             .pointer("/budget/max_bytes")
             .and_then(Value::as_u64)
             .unwrap_or(8192),
+        "control" => req
+            .params
+            .pointer("/output/max_bytes")
+            .and_then(Value::as_u64)
+            .unwrap_or(65536),
         "events" | "workspace" => req
             .params
             .get("max_bytes")
@@ -218,6 +232,11 @@ async fn dispatch_inner(db: Arc<Db>, req: Request) -> Response {
     let outcome = handle(db, &req).await;
     match outcome {
         Ok(mut v) => {
+            if req.response_mode == ResponseMode::Compact
+                && (req.method != "control" || req.params["action"] == "wait")
+            {
+                crate::presentation::compact(&mut v);
+            }
             let limit = output_limit(&req);
             let fits = |value: &Value| {
                 serde_json::to_vec(&Response::success(&req, value.clone()))
@@ -240,7 +259,7 @@ async fn dispatch_inner(db: Arc<Db>, req: Request) -> Response {
                     "OUTPUT_BUDGET_TOO_SMALL",
                     "response metadata does not fit output budget",
                 );
-                error.details = json!({"job_id":v.get("job_id"),"result_ref":v.get("result_ref"),"accepted":v.get("job").is_some()});
+                error.details = json!({"job_id":v.pointer("/job/id").or_else(||v.get("job_id")),"binding":v.get("binding"),"result_ref":v.get("result_ref"),"accepted":v.get("job").is_some()});
                 return Response::failure(&req, error);
             }
             Response::success(&req, v)
@@ -317,7 +336,14 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
                 let (inputs, sources, quality) = resolve(&db, &p.bindings)?;
                 submit(&db, req, Some(p.clone()), None, inputs, sources, quality)?
             };
-            wait_response(&db, refs, p.execution.wait_ms, Some(p.execution.output)).await
+            wait_response(
+                &db,
+                refs,
+                p.execution.wait_ms,
+                Some(p.execution.output),
+                req.response_mode,
+            )
+            .await
         }
         "analyze" => {
             let p: AnalyzeParams = decode(&req.params)?;
@@ -356,7 +382,14 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
                 };
                 submit(&db, req, Some(query), None, inputs, sources, quality)?
             };
-            wait_response(&db, refs, p.execution.wait_ms, Some(p.execution.output)).await
+            wait_response(
+                &db,
+                refs,
+                p.execution.wait_ms,
+                Some(p.execution.output),
+                req.response_mode,
+            )
+            .await
         }
         "prepare" => {
             let p: PrepareParams = decode(&req.params)?;
@@ -389,7 +422,7 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
                 );
                 submit(&db, req, Some(query), None, inputs, sources, quality)?
             };
-            wait_response(&db, refs, p.execution.wait_ms, None).await
+            wait_response(&db, refs, p.execution.wait_ms, None, req.response_mode).await
         }
         "snapshot" => {
             let p: SnapshotParams = decode(&req.params)?;
@@ -429,7 +462,7 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
                 );
                 submit(&db, req, Some(query), None, inputs, sources, quality)?
             };
-            wait_response(&db, refs, p.execution.wait_ms, None).await
+            wait_response(&db, refs, p.execution.wait_ms, None, req.response_mode).await
         }
         "read" => {
             let p: ReadParams = decode(&req.params)?;
@@ -439,7 +472,7 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
             let p: InspectParams = decode(&req.params)?;
             if p.checks
                 .iter()
-                .all(|c| matches!(c.as_str(), "schema" | "provenance"))
+                .all(|c| matches!(c.as_str(), "schema" | "provenance" | "context"))
             {
                 return inspect(&db, p);
             }
@@ -459,7 +492,7 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
                 quality["inspection"] = inspection;
                 submit(&db, req, Some(query), None, inputs, sources, quality)?
             };
-            wait_response(&db, refs, wait, Some(p.budget)).await
+            wait_response(&db, refs, wait, Some(p.budget), req.response_mode).await
         }
         "workspace" => {
             let p: WorkspaceParams = decode(&req.params)?;
@@ -467,6 +500,14 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
         }
         "control" => {
             let p: ControlParams = decode(&req.params)?;
+            if let Some(output) = &p.output {
+                ensure!(
+                    p.action == "wait"
+                        && output.max_rows <= 10000
+                        && (1024..=FRAME_LIMIT - 512).contains(&output.max_bytes),
+                    "INVALID_ARGUMENT: output applies to wait only and must have valid row/byte bounds"
+                );
+            }
             match p.action.as_str() {
                 "lookup" => {
                     let raw: Option<String> = db
@@ -551,7 +592,14 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
                         p.wait_ms <= 30000,
                         "INVALID_ARGUMENT: wait_ms exceeds 30000"
                     );
-                    wait_response(&db, json!({"job_id":p.object_ref}), p.wait_ms, None).await
+                    wait_response(
+                        &db,
+                        json!({"job_id":p.object_ref}),
+                        p.wait_ms,
+                        p.output,
+                        req.response_mode,
+                    )
+                    .await
                 }
                 "cancel" => {
                     let before = db.job(&p.object_ref)?;
@@ -623,7 +671,7 @@ async fn handle(db: Arc<Db>, req: &Request) -> Result<Value> {
                     snap.quality,
                 )?
             };
-            wait_response(&db, refs, p.execution.wait_ms, None).await
+            wait_response(&db, refs, p.execution.wait_ms, None, req.response_mode).await
         }
         "events" => events(&db, decode(&req.params)?).await,
         _ => bail!("UNSUPPORTED_OPERATION: method {}", req.method),
@@ -660,9 +708,20 @@ fn open_response(db: &Db, manifest: &str, budget: &OutputBudget) -> Result<Value
 }
 fn inspect(db: &Db, p: InspectParams) -> Result<Value> {
     ensure!(
+        p.budget.max_rows <= 10000 && (1024..=FRAME_LIMIT - 512).contains(&p.budget.max_bytes),
+        "INVALID_ARGUMENT: inspection output budget"
+    );
+    if let Some(search) = &p.search {
+        ensure!(
+            !search.trim().is_empty() && search.len() <= 256,
+            "INVALID_ARGUMENT: search must be a nonblank column-name substring of at most 256 UTF-8 bytes"
+        );
+    }
+    let context_requested = p.checks.iter().any(|c| c == "context");
+    ensure!(
         p.checks
             .iter()
-            .all(|s| matches!(s.as_str(), "schema" | "provenance")),
+            .all(|s| matches!(s.as_str(), "schema" | "provenance" | "context")),
         "UNSUPPORTED_OPERATION: inspect currently supports schema; use bounded SQL for rows/statistics"
     );
     let (schema, mut out) = if p.object_ref.starts_with("res_") {
@@ -672,7 +731,18 @@ fn inspect(db: &Db, p: InspectParams) -> Result<Value> {
             [&p.object_ref],
             |r| r.get(0),
         )?;
-        let out = json!({"ref":p.object_ref,"revision":snapshot.revision,"scope_ref":scope,"schema_origin":"materialized_result","quality":snapshot.quality,"validity":snapshot.validity,"row_count":snapshot.rows.to_string(),"verification":{"validity":"stored","original_sources":"not_rechecked","parts":"checked_when_read_or_used"}});
+        let mut out = json!({"ref":p.object_ref,"revision":snapshot.revision,"scope_ref":scope,"schema_origin":"materialized_result","quality":snapshot.quality,"validity":snapshot.validity,"row_count":snapshot.rows.to_string(),"verification":{"validity":"stored","original_sources":"not_rechecked","parts":"checked_when_read_or_used"}});
+        if context_requested {
+            out["binding"] = json!({"result_ref":p.object_ref,"revision":snapshot.revision});
+            let mut definition = db.object(&scope)?;
+            definition.as_object_mut().unwrap().retain(|key, _| {
+                matches!(
+                    key.as_str(),
+                    "label" | "provenance" | "sql" | "parameters" | "inputs"
+                )
+            });
+            out["context"] = definition;
+        }
         (snapshot.schema, out)
     } else {
         let mut v = db.object(&p.object_ref)?;
@@ -680,6 +750,10 @@ fn inspect(db: &Db, p: InspectParams) -> Result<Value> {
             v = db.object(manifest)?;
         }
         if p.object_ref.starts_with("scope_") || p.object_ref.starts_with("vw_") {
+            ensure!(
+                p.search.is_none(),
+                "INVALID_ARGUMENT: search requires a dataset or fixed result schema"
+            );
             ensure!(
                 serde_json::to_vec(&v)?.len() + 256 <= p.budget.max_bytes,
                 "OUTPUT_BUDGET_TOO_SMALL"
@@ -689,6 +763,27 @@ fn inspect(db: &Db, p: InspectParams) -> Result<Value> {
         let validity = v["validity"].clone();
         let m: Manifest = serde_json::from_value(v)?;
         let mut out = json!({"ref":p.object_ref,"manifest_ref":m.id,"schema_origin":m.schema_origin,"validity":validity});
+        if context_requested {
+            let dataset = db.object(&m.dataset_ref)?;
+            out["binding"] = json!({"dataset_ref":m.dataset_ref,"manifest_ref":m.id});
+            out["row_count"] = json!(
+                m.files
+                    .iter()
+                    .map(|f| f.rows)
+                    .sum::<Option<u64>>()
+                    .map(|n| n.to_string())
+            );
+            out["scope_ref"] = dataset["scope_ref"].clone();
+            out["context"] = json!({"label":m.label,"provenance":m.schema.metadata().get("rowtrail.provenance").map(|s|serde_json::from_str::<Value>(s)).transpose()?,"source":m.source,"format":m.format});
+            out["verification"] = json!({"validity":"stored","files":"not_rechecked","independent":m.schema_origin=="prepared"});
+            out["quality"] = m
+                .schema
+                .metadata()
+                .get("rowtrail.quality")
+                .map(|s| serde_json::from_str::<Value>(s))
+                .transpose()?
+                .unwrap_or(Value::Null);
+        }
         if p.checks.iter().any(|c| c == "provenance") {
             let dataset = db.object(&m.dataset_ref)?;
             out["scope_ref"] = dataset["scope_ref"].clone();
@@ -704,7 +799,27 @@ fn inspect(db: &Db, p: InspectParams) -> Result<Value> {
         }
         (m.schema, out)
     };
-    let fields=schema.fields().iter().enumerate().filter(|(i,f)|*i>=p.offset&&(p.columns.is_empty()||p.columns.contains(f.name()))).map(|(i,f)|(i,json!({"name":f.name(),"type":f.data_type().to_string(),"nullable":f.is_nullable()}))).collect::<Vec<_>>();
+    let search = p.search.as_ref().map(|s| s.to_lowercase());
+    let matches = |name: &String| {
+        (p.columns.is_empty() || p.columns.contains(name))
+            && search
+                .as_ref()
+                .is_none_or(|s| name.to_lowercase().contains(s))
+    };
+    let fields=schema.fields().iter().enumerate().filter(|(i,f)|*i>=p.offset&&matches(f.name())).map(|(i,f)|(i,json!({"name":f.name(),"type":f.data_type().to_string(),"nullable":f.is_nullable()}))).collect::<Vec<_>>();
+    if p.search.is_some() {
+        out["search"] = json!(p.search);
+        out["matched_field_count"] =
+            json!(schema.fields().iter().filter(|f| matches(f.name())).count());
+    }
+    // Keep schema discovery usable even when caller-authored SQL/provenance is
+    // large. Omit the whole definition explicitly; never show truncated SQL as
+    // executable. Full scope inspection remains available by scope_ref.
+    if context_requested && (serde_json::to_vec(&out["context"])?.len() > p.budget.max_bytes / 2) {
+        out["context"] = Value::Null;
+        out["context_omitted"] =
+            json!("output_budget; inspect scope_ref or provenance with a larger budget");
+    }
     out["field_count"] = json!(schema.fields().len());
     out["fields"] = json!([]);
     out["next_field_offset"] = Value::Null;
@@ -924,6 +1039,7 @@ async fn wait_response(
     mut refs: Value,
     wait: u64,
     output: Option<OutputBudget>,
+    mode: ResponseMode,
 ) -> Result<Value> {
     let job = refs["job_id"].as_str().unwrap().to_owned();
     let until = tokio::time::Instant::now() + std::time::Duration::from_millis(wait);
@@ -950,11 +1066,14 @@ async fn wait_response(
     } else {
         Value::Null
     };
+    if mode == ResponseMode::Compact {
+        crate::presentation::compact(&mut refs);
+    }
     if let (Some(budget), Some(revision)) = (output, state["readable_revision"].as_u64()) {
         // read reserves its own response-envelope headroom. Reserve the actual
         // surrounding job metadata too, so a large page fits without a second
         // read. Tight budgets spend bytes on the answer before optional metrics.
-        if budget.max_bytes < 4096 {
+        if budget.max_bytes < 4096 && mode == ResponseMode::Full {
             refs["job"]["metrics"] = Value::Null;
         }
         let overhead = serde_json::to_vec(&refs)?.len() + 32;
@@ -967,7 +1086,12 @@ async fn wait_response(
             max_bytes: budget.max_bytes.saturating_sub(overhead),
         };
         match results::read(db, &p) {
-            Ok(observation) => refs["observation"] = observation,
+            Ok(mut observation) => {
+                if mode == ResponseMode::Compact {
+                    crate::presentation::compact(&mut observation);
+                }
+                refs["observation"] = observation;
+            }
             Err(error) => {
                 let code = crate::errors::code(&error, "INTERNAL_ERROR");
                 if code == "OUTPUT_BUDGET_TOO_SMALL" {

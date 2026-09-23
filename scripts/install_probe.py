@@ -19,7 +19,7 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-install-test-') as directory:
     finally:
         if coordinator:os.kill(coordinator,signal.SIGTERM)
     package=binary.resolve().parent
-    for name in ('docs/agent-guide.md','docs/agent-quickstart.md','docs/usage.md','docs/numeric-contract.md','examples/session_client.py','examples/quickstart.py','examples/analysis_quickstart.py','docs/analysis.md'):
+    for name in ('docs/agent-guide.md','docs/agent-quickstart.md','docs/usage.md','docs/numeric-contract.md','examples/session_client.py','examples/quickstart.py','examples/analysis_quickstart.py','docs/analysis.md','examples/agent_demo.py','docs/agent-demo.md'):
         assert (package/name).is_file(), name
     assert subprocess.check_output([str(binary),'python-client'],text=True)==(package/'examples/session_client.py').read_text()
     demo=json.loads(subprocess.check_output(['python3',str(package/'examples/quickstart.py'),'--rowtrail',str(binary),'--directory',str(base/'demo')],text=True))
@@ -30,6 +30,12 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-install-test-') as directory:
     assert analysis['status']=='passed' and analysis['total']==60 and analysis['modified_rows']==1
     for field in ('workspace','receiver'):
         pid=json.loads(subprocess.check_output([str(binary),'--workspace',analysis[field],'doctor']))['result']['coordinator_pid']
+        os.kill(pid,signal.SIGTERM)
+    agent=json.loads(subprocess.check_output([str(binary),'demo','--directory',str(base/'agent-demo'),'--rows','128'],text=True))
+    assert agent['status']=='passed' and agent['checks']['separate_recipient_process']
+    assert agent['checks']['original_csv_removed'] and agent['checks']['unique_ids']
+    for name in ('full','compact','receiver'):
+        pid=json.loads(subprocess.check_output([str(binary),'--workspace',str(base/'agent-demo'/name),'doctor']))['result']['coordinator_pid']
         os.kill(pid,signal.SIGTERM)
     bad=base/archive.name
     bad.write_bytes(b'corrupt archive')
@@ -72,7 +78,7 @@ with tempfile.TemporaryDirectory(prefix='rowtrail-install-test-') as directory:
     report={'status':'passed','platform':platform.platform(),'version':version,
             'archive_sha256':hashlib.file_digest(archive.open('rb'),'sha256').hexdigest(),
             'checksum_verified_install':True,'installed_symlink_query':True,'corrupt_archive_rejected':True,
-            'bundled_docs_and_printed_client_match':True,'installed_analysis_demo':{'status':analysis['status'],'total':analysis['total'],'modified_rows':analysis['modified_rows']},'installed_quickstart':{k:v for k,v in demo.items() if k not in ('workspace','saved_binding')},
+            'installed_agent_demo':{'status':agent['status'],**agent['checks']},'bundled_docs_and_printed_client_match':True,'installed_analysis_demo':{'status':analysis['status'],'total':analysis['total'],'modified_rows':analysis['modified_rows']},'installed_quickstart':{k:v for k,v in demo.items() if k not in ('workspace','saved_binding')},
             'incompatible_packages_rejected_before_symlink_changes':native_rejections,
             'linux_libc_preflight':preflights}
     out=root/'benchmarks/local/install.json';out.parent.mkdir(parents=True,exist_ok=True);out.write_text(json.dumps(report,indent=2)+'\n')

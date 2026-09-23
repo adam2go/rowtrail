@@ -8,6 +8,7 @@ mod errors;
 mod model;
 mod numeric;
 mod prepare;
+mod presentation;
 mod probe;
 mod profile;
 #[cfg(test)]
