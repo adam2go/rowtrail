@@ -143,15 +143,23 @@ Local alternating beta.1 → beta.2 trials on one Apple arm64 Mac:
 
 | Workflow / median | beta.1 → beta.2 |
 |---|---:|
-| Scalar under a 2 KiB output budget | **2 calls → 1**, **2,094 → 1,447 response bytes** |
-| Same bounded scalar retrieval | **0.97 → 0.87 ms** |
-| Save a subset of 2M rows, ten follow-ups, reconnect | **704 → 707 ms** |
-| Five-query exploration on 1M rows | **145.1 → 145.5 ms** |
+| Scalar under a 2 KiB output budget | **2 calls → 1**, **2,095 → 1,447 response bytes** |
+| Same bounded scalar retrieval | **0.95 → 0.87 ms** |
+| Save a subset of 2M rows, ten follow-ups, reconnect | **713 → 708 ms** |
+| Five-query exploration on 1M rows | **145.1 → 145.2 ms** |
 
 The small-answer path improves. Larger existing workflows are broadly unchanged,
-with small median regressions; no general speedup is claimed. Warm-query p95 is
-1.34 → 1.37 ms, with one 215 ms beta.2 outlier retained. Direct persistent engines
+with small changes in either direction; no general speedup is claimed. Warm-query
+p95 is about 1.28 ms for both. Earlier candidate runs, including a 215 ms outlier,
+are retained. Direct persistent engines
 remain faster at bare SQL. [Full measurements and limits](docs/verification.md).
+
+The new full handoff workflow on 131,072 rows takes **864 ms median** over five
+local trials, including snapshot, diff/check, package, fresh import and explicit
+rerun. Independent integer/Decimal answers pass. Most of its cost is copying and
+verifying persisted data; this is not a speed comparison with a bare SQL query.
+
+![Beta.2 local comparisons: fewer scalar response bytes, stable follow-up time, and faster direct SQL engines.](benchmarks/performance/beta2/performance.svg)
 
 SQLite FULL commits, file/directory sync, SHA-256 and actual cancellation remain.
 Every new job revalidates saved data, with the same bounded 8 MiB per-job cache.

@@ -81,6 +81,14 @@ try:
             str(binary), '--workspace', demo['workspace'], 'doctor'], text=True))['result']['coordinator_pid']
         pids.add(demo_pid)
         assert demo['status'] == 'passed' and demo['handoff_original_source_bytes'] == 0
+        analysis=json.loads(subprocess.check_output([
+            sys.executable,str(package/'examples/analysis_quickstart.py'),'--rowtrail',str(binary),
+            '--directory',str(base/'analysis')],text=True))
+        assert analysis['status']=='passed' and analysis['total']==60 and analysis['modified_rows']==1
+        for field in ('workspace','receiver'):
+            analysis_pid=json.loads(subprocess.check_output([
+                str(binary),'--workspace',analysis[field],'doctor'],text=True))['result']['coordinator_pid']
+            pids.add(analysis_pid)
         report = {'status': 'passed', 'installer_url': url,
                   'installer_sha256': hashlib.file_digest(installer.open('rb'), 'sha256').hexdigest(),
                   'version': installed_version, 'default_version_matches_release': True,
@@ -88,6 +96,7 @@ try:
                   'installed_binary_sha256': hashes,
                   'binaries_match_verified_ci_archive': artifact['sha256'],
                   'printed_client_matches_bundle': True,
+                  'analysis_snapshot_check_diff_package_import_recipe':{'status':analysis['status'],'total':analysis['total'],'modified_rows':analysis['modified_rows']},
                   'fresh_session_unique_label_handoff': True,
                   'changed_tmpdir_same_coordinator': True,
                   'lossless_large_integer': True, 'structured_sum_overflow': True,

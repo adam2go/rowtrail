@@ -1,0 +1,1377 @@
+{
+  "status": "passed",
+  "kind": "Beta.2 complete analysis handoff; independent Python integer/Decimal oracle.\n\nNo model calls, dataframe dependencies or full-table Python fetch. Measures the\nnew workflow, not a performance comparison with unsupported beta.1 features.\n",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "rows": 131072,
+  "repeats": 5,
+  "binary_sha256": {
+    "rowtrail": "7dd5f0a85b13a850e545ae18a8e0776196c70a1de00406eca0c255c02b53b5c5",
+    "rowtrail-runtime": "49958f5da4cd93dca86d504946a6eadb04cbb4785b67022dcfec5fea3a33c1ee"
+  },
+  "fixture_sha256": "ea6313e03895bf96f58a979837ebe970dc1678ee68031ba8d2f9702f47b16625",
+  "oracle": {
+    "after_rows": 120990,
+    "after_sum_cents": -324584,
+    "changed_amounts": 113872
+  },
+  "records": [
+    {
+      "repeat": 0,
+      "total_ms": 863.7579577043653,
+      "snapshot_ms": 182.16704111546278,
+      "before_ms": 31.99433395639062,
+      "after_ms": 31.897292006760836,
+      "diff_ms": 35.798332653939724,
+      "check_ms": 4.707165993750095,
+      "summary_ms": 2.8086253441870213,
+      "pack_ms": 159.06408289447427,
+      "offline_verify_ms": 12.475917115807533,
+      "import_ms": 313.60712507739663,
+      "followup_ms": 2.5231661275029182,
+      "rerun_ms": 44.71420822665095,
+      "calls": [
+        {
+          "method": "doctor",
+          "ms": 17.45437504723668,
+          "response_bytes": 3443
+        },
+        {
+          "method": "open",
+          "ms": 0.5327081307768822,
+          "response_bytes": 906
+        },
+        {
+          "method": "snapshot",
+          "ms": 181.58887512981892,
+          "response_bytes": 1552
+        },
+        {
+          "method": "query",
+          "ms": 31.97704115882516,
+          "response_bytes": 2717
+        },
+        {
+          "method": "query",
+          "ms": 31.88229212537408,
+          "response_bytes": 2726
+        },
+        {
+          "method": "inspect",
+          "ms": 0.23570796474814415,
+          "response_bytes": 1207
+        },
+        {
+          "method": "inspect",
+          "ms": 0.19087502732872963,
+          "response_bytes": 1208
+        },
+        {
+          "method": "query",
+          "ms": 6.85962475836277,
+          "response_bytes": 2351
+        },
+        {
+          "method": "query",
+          "ms": 5.787624977529049,
+          "response_bytes": 2392
+        },
+        {
+          "method": "query",
+          "ms": 12.055625207722187,
+          "response_bytes": 2811
+        },
+        {
+          "method": "query",
+          "ms": 10.524583049118519,
+          "response_bytes": 3340
+        },
+        {
+          "method": "query",
+          "ms": 4.566750023514032,
+          "response_bytes": 2265
+        },
+        {
+          "method": "inspect",
+          "ms": 0.1155417412519455,
+          "response_bytes": 1064
+        },
+        {
+          "method": "query",
+          "ms": 2.804500050842762,
+          "response_bytes": 2361
+        },
+        {
+          "method": "inspect",
+          "ms": 0.12008287012577057,
+          "response_bytes": 1123
+        },
+        {
+          "method": "read",
+          "ms": 0.11920882388949394,
+          "response_bytes": 1093
+        },
+        {
+          "method": "inspect",
+          "ms": 0.08345814421772957,
+          "response_bytes": 1015
+        },
+        {
+          "method": "inspect",
+          "ms": 0.1338338479399681,
+          "response_bytes": 1208
+        },
+        {
+          "method": "read",
+          "ms": 0.6454582326114178,
+          "response_bytes": 1634
+        },
+        {
+          "method": "inspect",
+          "ms": 0.08183298632502556,
+          "response_bytes": 1177
+        },
+        {
+          "method": "inspect",
+          "ms": 0.18741702660918236,
+          "response_bytes": 5271
+        },
+        {
+          "method": "inspect",
+          "ms": 0.07066689431667328,
+          "response_bytes": 1001
+        },
+        {
+          "method": "query",
+          "ms": 43.92916616052389,
+          "response_bytes": 2819
+        },
+        {
+          "method": "inspect",
+          "ms": 0.1760842278599739,
+          "response_bytes": 1307
+        },
+        {
+          "method": "export",
+          "ms": 58.56462474912405,
+          "response_bytes": 1394
+        },
+        {
+          "method": "export",
+          "ms": 26.138334069401026,
+          "response_bytes": 1391
+        },
+        {
+          "method": "export",
+          "ms": 15.897625125944614,
+          "response_bytes": 1378
+        },
+        {
+          "method": "doctor",
+          "ms": 17.299375031143427,
+          "response_bytes": 3443
+        },
+        {
+          "method": "open",
+          "ms": 0.6071249954402447,
+          "response_bytes": 750
+        },
+        {
+          "method": "snapshot",
+          "ms": 22.740874905139208,
+          "response_bytes": 1530
+        },
+        {
+          "method": "inspect",
+          "ms": 0.14120806008577347,
+          "response_bytes": 1386
+        },
+        {
+          "method": "query",
+          "ms": 2.463374752551317,
+          "response_bytes": 2313
+        },
+        {
+          "method": "open",
+          "ms": 0.41462481021881104,
+          "response_bytes": 806
+        },
+        {
+          "method": "snapshot",
+          "ms": 34.35291722416878,
+          "response_bytes": 1534
+        },
+        {
+          "method": "inspect",
+          "ms": 0.14345813542604446,
+          "response_bytes": 1822
+        },
+        {
+          "method": "query",
+          "ms": 2.5882497429847717,
+          "response_bytes": 2326
+        },
+        {
+          "method": "open",
+          "ms": 0.5467906594276428,
+          "response_bytes": 905
+        },
+        {
+          "method": "snapshot",
+          "ms": 211.89216570928693,
+          "response_bytes": 1568
+        },
+        {
+          "method": "inspect",
+          "ms": 0.48562511801719666,
+          "response_bytes": 7997
+        },
+        {
+          "method": "query",
+          "ms": 9.436707943677902,
+          "response_bytes": 2344
+        },
+        {
+          "method": "query",
+          "ms": 2.5168335996568203,
+          "response_bytes": 2397
+        },
+        {
+          "method": "inspect",
+          "ms": 0.3665830008685589,
+          "response_bytes": 7997
+        },
+        {
+          "method": "query",
+          "ms": 0.8617080748081207,
+          "response_bytes": 728
+        },
+        {
+          "method": "control",
+          "ms": 34.448124933987856,
+          "response_bytes": 1238
+        },
+        {
+          "method": "inspect",
+          "ms": 0.18587475642561913,
+          "response_bytes": 1208
+        },
+        {
+          "method": "query",
+          "ms": 0.5425000563263893,
+          "response_bytes": 728
+        },
+        {
+          "method": "control",
+          "ms": 2.6575829833745956,
+          "response_bytes": 1246
+        },
+        {
+          "method": "inspect",
+          "ms": 0.14674989506602287,
+          "response_bytes": 1123
+        },
+        {
+          "method": "query",
+          "ms": 2.048792317509651,
+          "response_bytes": 2354
+        }
+      ],
+      "call_count": 49,
+      "response_bytes": 99897,
+      "package_bytes": 30705227,
+      "package_nodes": 3,
+      "independent_oracle_passed": true
+    },
+    {
+      "repeat": 1,
+      "total_ms": 826.452333945781,
+      "snapshot_ms": 150.90150013566017,
+      "before_ms": 31.124459113925695,
+      "after_ms": 31.82479226961732,
+      "diff_ms": 35.13125004246831,
+      "check_ms": 4.727374762296677,
+      "summary_ms": 2.742334268987179,
+      "pack_ms": 156.60162502899766,
+      "offline_verify_ms": 12.184792198240757,
+      "import_ms": 309.09891705960035,
+      "followup_ms": 2.4204999208450317,
+      "rerun_ms": 45.57375004515052,
+      "calls": [
+        {
+          "method": "doctor",
+          "ms": 18.33670772612095,
+          "response_bytes": 3443
+        },
+        {
+          "method": "open",
+          "ms": 0.5357088521122932,
+          "response_bytes": 906
+        },
+        {
+          "method": "snapshot",
+          "ms": 150.33958293497562,
+          "response_bytes": 1552
+        },
+        {
+          "method": "query",
+          "ms": 31.10920824110508,
+          "response_bytes": 2725
+        },
+        {
+          "method": "query",
+          "ms": 31.812125351279974,
+          "response_bytes": 2734
+        },
+        {
+          "method": "inspect",
+          "ms": 0.21495763212442398,
+          "response_bytes": 1207
+        },
+        {
+          "method": "inspect",
+          "ms": 0.1900000497698784,
+          "response_bytes": 1208
+        },
+        {
+          "method": "query",
+          "ms": 6.981208920478821,
+          "response_bytes": 2379
+        },
+        {
+          "method": "query",
+          "ms": 5.582249723374844,
+          "response_bytes": 2355
+        },
+        {
+          "method": "query",
+          "ms": 11.692041996866465,
+          "response_bytes": 2810
+        },
+        {
+          "method": "query",
+          "ms": 10.323917027562857,
+          "response_bytes": 3340
+        },
+        {
+          "method": "query",
+          "ms": 4.599582869559526,
+          "response_bytes": 2279
+        },
+        {
+          "method": "inspect",
+          "ms": 0.10733306407928467,
+          "response_bytes": 1064
+        },
+        {
+          "method": "query",
+          "ms": 2.7383752167224884,
+          "response_bytes": 2386
+        },
+        {
+          "method": "inspect",
+          "ms": 0.10941736400127411,
+          "response_bytes": 1123
+        },
+        {
+          "method": "read",
+          "ms": 0.12341607362031937,
+          "response_bytes": 1093
+        },
+        {
+          "method": "inspect",
+          "ms": 0.07400009781122208,
+          "response_bytes": 1015
+        },
+        {
+          "method": "inspect",
+          "ms": 0.10066619142889977,
+          "response_bytes": 1208
+        },
+        {
+          "method": "read",
+          "ms": 0.6483327597379684,
+          "response_bytes": 1634
+        },
+        {
+          "method": "inspect",
+          "ms": 0.07899990305304527,
+          "response_bytes": 1177
+        },
+        {
+          "method": "inspect",
+          "ms": 0.19016722217202187,
+          "response_bytes": 5271
+        },
+        {
+          "method": "inspect",
+          "ms": 0.06791623309254646,
+          "response_bytes": 1001
+        },
+        {
+          "method": "query",
+          "ms": 42.5507090985775,
+          "response_bytes": 2828
+        },
+        {
+          "method": "inspect",
+          "ms": 0.1689172349870205,
+          "response_bytes": 1307
+        },
+        {
+          "method": "export",
+          "ms": 58.25000023469329,
+          "response_bytes": 1394
+        },
+        {
+          "method": "export",
+          "ms": 26.434124913066626,
+          "response_bytes": 1391
+        },
+        {
+          "method": "export",
+          "ms": 15.12737525627017,
+          "response_bytes": 1378
+        },
+        {
+          "method": "doctor",
+          "ms": 17.103249672800303,
+          "response_bytes": 3443
+        },
+        {
+          "method": "open",
+          "ms": 0.6512501277029514,
+          "response_bytes": 750
+        },
+        {
+          "method": "snapshot",
+          "ms": 20.62620921060443,
+          "response_bytes": 1520
+        },
+        {
+          "method": "inspect",
+          "ms": 0.19804155454039574,
+          "response_bytes": 1386
+        },
+        {
+          "method": "query",
+          "ms": 2.8864583000540733,
+          "response_bytes": 2325
+        },
+        {
+          "method": "open",
+          "ms": 0.4952079616487026,
+          "response_bytes": 806
+        },
+        {
+          "method": "snapshot",
+          "ms": 34.452459309250116,
+          "response_bytes": 1533
+        },
+        {
+          "method": "inspect",
+          "ms": 0.17004180699586868,
+          "response_bytes": 1824
+        },
+        {
+          "method": "query",
+          "ms": 2.6633748784661293,
+          "response_bytes": 2338
+        },
+        {
+          "method": "open",
+          "ms": 0.5786251276731491,
+          "response_bytes": 905
+        },
+        {
+          "method": "snapshot",
+          "ms": 208.8617910631001,
+          "response_bytes": 1550
+        },
+        {
+          "method": "inspect",
+          "ms": 0.4526250995695591,
+          "response_bytes": 7990
+        },
+        {
+          "method": "query",
+          "ms": 9.272667113691568,
+          "response_bytes": 2355
+        },
+        {
+          "method": "query",
+          "ms": 2.4140840396285057,
+          "response_bytes": 2394
+        },
+        {
+          "method": "inspect",
+          "ms": 0.3261249512434006,
+          "response_bytes": 7990
+        },
+        {
+          "method": "query",
+          "ms": 0.8799578063189983,
+          "response_bytes": 728
+        },
+        {
+          "method": "control",
+          "ms": 35.98883282393217,
+          "response_bytes": 1235
+        },
+        {
+          "method": "inspect",
+          "ms": 0.17954222857952118,
+          "response_bytes": 1208
+        },
+        {
+          "method": "query",
+          "ms": 0.547957606613636,
+          "response_bytes": 728
+        },
+        {
+          "method": "control",
+          "ms": 2.685875166207552,
+          "response_bytes": 1224
+        },
+        {
+          "method": "inspect",
+          "ms": 0.1444583758711815,
+          "response_bytes": 1123
+        },
+        {
+          "method": "query",
+          "ms": 2.0163748413324356,
+          "response_bytes": 2366
+        }
+      ],
+      "call_count": 49,
+      "response_bytes": 99929,
+      "package_bytes": 30705227,
+      "package_nodes": 3,
+      "independent_oracle_passed": true
+    },
+    {
+      "repeat": 2,
+      "total_ms": 858.3762501366436,
+      "snapshot_ms": 152.66133286058903,
+      "before_ms": 32.06516709178686,
+      "after_ms": 32.988874707371,
+      "diff_ms": 35.62679188326001,
+      "check_ms": 4.731332883238792,
+      "summary_ms": 2.8160829097032547,
+      "pack_ms": 154.6988752670586,
+      "offline_verify_ms": 12.193083297461271,
+      "import_ms": 335.4859999381006,
+      "followup_ms": 2.743249759078026,
+      "rerun_ms": 48.300666734576225,
+      "calls": [
+        {
+          "method": "doctor",
+          "ms": 18.152625299990177,
+          "response_bytes": 3443
+        },
+        {
+          "method": "open",
+          "ms": 0.5483338609337807,
+          "response_bytes": 906
+        },
+        {
+          "method": "snapshot",
+          "ms": 152.0851249806583,
+          "response_bytes": 1560
+        },
+        {
+          "method": "query",
+          "ms": 32.049791887402534,
+          "response_bytes": 2718
+        },
+        {
+          "method": "query",
+          "ms": 32.97887509688735,
+          "response_bytes": 2727
+        },
+        {
+          "method": "inspect",
+          "ms": 0.2189171500504017,
+          "response_bytes": 1207
+        },
+        {
+          "method": "inspect",
+          "ms": 0.1822090707719326,
+          "response_bytes": 1208
+        },
+        {
+          "method": "query",
+          "ms": 7.054666988551617,
+          "response_bytes": 2367
+        },
+        {
+          "method": "query",
+          "ms": 5.768375005573034,
+          "response_bytes": 2367
+        },
+        {
+          "method": "query",
+          "ms": 11.805708054453135,
+          "response_bytes": 2811
+        },
+        {
+          "method": "query",
+          "ms": 10.468041989952326,
+          "response_bytes": 3326
+        },
+        {
+          "method": "query",
+          "ms": 4.5916251838207245,
+          "response_bytes": 2259
+        },
+        {
+          "method": "inspect",
+          "ms": 0.11858297511935234,
+          "response_bytes": 1064
+        },
+        {
+          "method": "query",
+          "ms": 2.8122500516474247,
+          "response_bytes": 2362
+        },
+        {
+          "method": "inspect",
+          "ms": 0.13095885515213013,
+          "response_bytes": 1123
+        },
+        {
+          "method": "read",
+          "ms": 0.12487499043345451,
+          "response_bytes": 1093
+        },
+        {
+          "method": "inspect",
+          "ms": 0.07445784285664558,
+          "response_bytes": 1015
+        },
+        {
+          "method": "inspect",
+          "ms": 0.10624993592500687,
+          "response_bytes": 1208
+        },
+        {
+          "method": "read",
+          "ms": 0.6462088786065578,
+          "response_bytes": 1639
+        },
+        {
+          "method": "inspect",
+          "ms": 0.08704233914613724,
+          "response_bytes": 1177
+        },
+        {
+          "method": "inspect",
+          "ms": 0.19516609609127045,
+          "response_bytes": 5271
+        },
+        {
+          "method": "inspect",
+          "ms": 0.06954092532396317,
+          "response_bytes": 1001
+        },
+        {
+          "method": "query",
+          "ms": 42.689625173807144,
+          "response_bytes": 2825
+        },
+        {
+          "method": "inspect",
+          "ms": 0.165499746799469,
+          "response_bytes": 1307
+        },
+        {
+          "method": "export",
+          "ms": 57.60904215276241,
+          "response_bytes": 1392
+        },
+        {
+          "method": "export",
+          "ms": 25.046792346984148,
+          "response_bytes": 1391
+        },
+        {
+          "method": "export",
+          "ms": 14.993667136877775,
+          "response_bytes": 1378
+        },
+        {
+          "method": "doctor",
+          "ms": 17.270084004849195,
+          "response_bytes": 3443
+        },
+        {
+          "method": "open",
+          "ms": 0.6193332374095917,
+          "response_bytes": 750
+        },
+        {
+          "method": "snapshot",
+          "ms": 22.91725017130375,
+          "response_bytes": 1521
+        },
+        {
+          "method": "inspect",
+          "ms": 0.14133285731077194,
+          "response_bytes": 1386
+        },
+        {
+          "method": "query",
+          "ms": 2.3108338937163353,
+          "response_bytes": 2325
+        },
+        {
+          "method": "open",
+          "ms": 0.416541937738657,
+          "response_bytes": 806
+        },
+        {
+          "method": "snapshot",
+          "ms": 33.73370785266161,
+          "response_bytes": 1536
+        },
+        {
+          "method": "inspect",
+          "ms": 0.15195785090327263,
+          "response_bytes": 1824
+        },
+        {
+          "method": "query",
+          "ms": 2.6724161580204964,
+          "response_bytes": 2337
+        },
+        {
+          "method": "open",
+          "ms": 0.5532498471438885,
+          "response_bytes": 905
+        },
+        {
+          "method": "snapshot",
+          "ms": 233.10395795851946,
+          "response_bytes": 1541
+        },
+        {
+          "method": "inspect",
+          "ms": 0.5663330666720867,
+          "response_bytes": 8000
+        },
+        {
+          "method": "query",
+          "ms": 10.348458774387836,
+          "response_bytes": 2348
+        },
+        {
+          "method": "query",
+          "ms": 2.736915834248066,
+          "response_bytes": 2385
+        },
+        {
+          "method": "inspect",
+          "ms": 0.3844168968498707,
+          "response_bytes": 8000
+        },
+        {
+          "method": "query",
+          "ms": 0.8568749763071537,
+          "response_bytes": 728
+        },
+        {
+          "method": "control",
+          "ms": 38.406250067055225,
+          "response_bytes": 1232
+        },
+        {
+          "method": "inspect",
+          "ms": 0.20241597667336464,
+          "response_bytes": 1208
+        },
+        {
+          "method": "query",
+          "ms": 0.5269171670079231,
+          "response_bytes": 728
+        },
+        {
+          "method": "control",
+          "ms": 2.813332714140415,
+          "response_bytes": 1214
+        },
+        {
+          "method": "inspect",
+          "ms": 0.15358300879597664,
+          "response_bytes": 1123
+        },
+        {
+          "method": "query",
+          "ms": 2.0611248910427094,
+          "response_bytes": 2368
+        }
+      ],
+      "call_count": 49,
+      "response_bytes": 99853,
+      "package_bytes": 30705266,
+      "package_nodes": 3,
+      "independent_oracle_passed": true
+    },
+    {
+      "repeat": 3,
+      "total_ms": 881.0046250000596,
+      "snapshot_ms": 161.7116671986878,
+      "before_ms": 33.24095765128732,
+      "after_ms": 32.94641710817814,
+      "diff_ms": 36.44300019368529,
+      "check_ms": 4.848832730203867,
+      "summary_ms": 2.781500108540058,
+      "pack_ms": 163.652874995023,
+      "offline_verify_ms": 12.406290974467993,
+      "import_ms": 338.55429105460644,
+      "followup_ms": 2.448500134050846,
+      "rerun_ms": 47.82237485051155,
+      "calls": [
+        {
+          "method": "doctor",
+          "ms": 18.347250297665596,
+          "response_bytes": 3443
+        },
+        {
+          "method": "open",
+          "ms": 0.5676671862602234,
+          "response_bytes": 906
+        },
+        {
+          "method": "snapshot",
+          "ms": 161.11729107797146,
+          "response_bytes": 1534
+        },
+        {
+          "method": "query",
+          "ms": 33.221874851733446,
+          "response_bytes": 2728
+        },
+        {
+          "method": "query",
+          "ms": 32.9347918741405,
+          "response_bytes": 2725
+        },
+        {
+          "method": "inspect",
+          "ms": 0.2193329855799675,
+          "response_bytes": 1207
+        },
+        {
+          "method": "inspect",
+          "ms": 0.19120890647172928,
+          "response_bytes": 1208
+        },
+        {
+          "method": "query",
+          "ms": 7.194374687969685,
+          "response_bytes": 2378
+        },
+        {
+          "method": "query",
+          "ms": 5.750833079218864,
+          "response_bytes": 2378
+        },
+        {
+          "method": "query",
+          "ms": 12.214624788612127,
+          "response_bytes": 2809
+        },
+        {
+          "method": "query",
+          "ms": 10.733167175203562,
+          "response_bytes": 3326
+        },
+        {
+          "method": "query",
+          "ms": 4.7098747454583645,
+          "response_bytes": 2259
+        },
+        {
+          "method": "inspect",
+          "ms": 0.11637480929493904,
+          "response_bytes": 1064
+        },
+        {
+          "method": "query",
+          "ms": 2.776999957859516,
+          "response_bytes": 2372
+        },
+        {
+          "method": "inspect",
+          "ms": 0.10966695845127106,
+          "response_bytes": 1123
+        },
+        {
+          "method": "read",
+          "ms": 0.12970902025699615,
+          "response_bytes": 1093
+        },
+        {
+          "method": "inspect",
+          "ms": 0.08195778355002403,
+          "response_bytes": 1015
+        },
+        {
+          "method": "inspect",
+          "ms": 0.10424992069602013,
+          "response_bytes": 1208
+        },
+        {
+          "method": "read",
+          "ms": 0.6435001268982887,
+          "response_bytes": 1634
+        },
+        {
+          "method": "inspect",
+          "ms": 0.07791724056005478,
+          "response_bytes": 1177
+        },
+        {
+          "method": "inspect",
+          "ms": 0.19025010988116264,
+          "response_bytes": 5268
+        },
+        {
+          "method": "inspect",
+          "ms": 0.06808387115597725,
+          "response_bytes": 1001
+        },
+        {
+          "method": "query",
+          "ms": 47.812208998948336,
+          "response_bytes": 2839
+        },
+        {
+          "method": "inspect",
+          "ms": 0.14758296310901642,
+          "response_bytes": 1307
+        },
+        {
+          "method": "export",
+          "ms": 58.72437497600913,
+          "response_bytes": 1394
+        },
+        {
+          "method": "export",
+          "ms": 27.109624817967415,
+          "response_bytes": 1391
+        },
+        {
+          "method": "export",
+          "ms": 15.630417037755251,
+          "response_bytes": 1378
+        },
+        {
+          "method": "doctor",
+          "ms": 17.34149968251586,
+          "response_bytes": 3443
+        },
+        {
+          "method": "open",
+          "ms": 0.5847499705851078,
+          "response_bytes": 750
+        },
+        {
+          "method": "snapshot",
+          "ms": 24.01187503710389,
+          "response_bytes": 1520
+        },
+        {
+          "method": "inspect",
+          "ms": 0.18629105761647224,
+          "response_bytes": 1386
+        },
+        {
+          "method": "query",
+          "ms": 2.392292022705078,
+          "response_bytes": 2317
+        },
+        {
+          "method": "open",
+          "ms": 0.4032920114696026,
+          "response_bytes": 806
+        },
+        {
+          "method": "snapshot",
+          "ms": 35.783832892775536,
+          "response_bytes": 1543
+        },
+        {
+          "method": "inspect",
+          "ms": 0.13075023889541626,
+          "response_bytes": 1824
+        },
+        {
+          "method": "query",
+          "ms": 2.7396250516176224,
+          "response_bytes": 2322
+        },
+        {
+          "method": "open",
+          "ms": 0.5903751589357853,
+          "response_bytes": 905
+        },
+        {
+          "method": "snapshot",
+          "ms": 233.54083392769098,
+          "response_bytes": 1540
+        },
+        {
+          "method": "inspect",
+          "ms": 0.4199170507490635,
+          "response_bytes": 8000
+        },
+        {
+          "method": "query",
+          "ms": 9.50200017541647,
+          "response_bytes": 2363
+        },
+        {
+          "method": "query",
+          "ms": 2.44304072111845,
+          "response_bytes": 2395
+        },
+        {
+          "method": "inspect",
+          "ms": 0.3049168735742569,
+          "response_bytes": 8000
+        },
+        {
+          "method": "query",
+          "ms": 0.8348338305950165,
+          "response_bytes": 728
+        },
+        {
+          "method": "control",
+          "ms": 38.40720932930708,
+          "response_bytes": 1230
+        },
+        {
+          "method": "inspect",
+          "ms": 0.1787077635526657,
+          "response_bytes": 1208
+        },
+        {
+          "method": "query",
+          "ms": 0.5381661467254162,
+          "response_bytes": 728
+        },
+        {
+          "method": "control",
+          "ms": 2.678666729480028,
+          "response_bytes": 1212
+        },
+        {
+          "method": "inspect",
+          "ms": 0.15249988064169884,
+          "response_bytes": 1123
+        },
+        {
+          "method": "query",
+          "ms": 2.0059579983353615,
+          "response_bytes": 2368
+        }
+      ],
+      "call_count": 49,
+      "response_bytes": 99876,
+      "package_bytes": 30705224,
+      "package_nodes": 3,
+      "independent_oracle_passed": true
+    },
+    {
+      "repeat": 4,
+      "total_ms": 896.4652079157531,
+      "snapshot_ms": 157.03624999150634,
+      "before_ms": 30.26287490502,
+      "after_ms": 33.64058258011937,
+      "diff_ms": 35.373250022530556,
+      "check_ms": 4.7661662101745605,
+      "summary_ms": 2.883083187043667,
+      "pack_ms": 160.5812911875546,
+      "offline_verify_ms": 12.343249749392271,
+      "import_ms": 359.3541672453284,
+      "followup_ms": 2.9494171030819416,
+      "rerun_ms": 53.586834110319614,
+      "calls": [
+        {
+          "method": "doctor",
+          "ms": 17.661250196397305,
+          "response_bytes": 3443
+        },
+        {
+          "method": "open",
+          "ms": 0.5496670491993427,
+          "response_bytes": 906
+        },
+        {
+          "method": "snapshot",
+          "ms": 156.46166680380702,
+          "response_bytes": 1545
+        },
+        {
+          "method": "query",
+          "ms": 30.244624707847834,
+          "response_bytes": 2727
+        },
+        {
+          "method": "query",
+          "ms": 33.628042321652174,
+          "response_bytes": 2728
+        },
+        {
+          "method": "inspect",
+          "ms": 0.20741717889904976,
+          "response_bytes": 1207
+        },
+        {
+          "method": "inspect",
+          "ms": 0.15525007620453835,
+          "response_bytes": 1208
+        },
+        {
+          "method": "query",
+          "ms": 7.045541889965534,
+          "response_bytes": 2354
+        },
+        {
+          "method": "query",
+          "ms": 5.767500028014183,
+          "response_bytes": 2356
+        },
+        {
+          "method": "query",
+          "ms": 11.75841735675931,
+          "response_bytes": 2822
+        },
+        {
+          "method": "query",
+          "ms": 10.294750332832336,
+          "response_bytes": 3327
+        },
+        {
+          "method": "query",
+          "ms": 4.632249940186739,
+          "response_bytes": 2267
+        },
+        {
+          "method": "inspect",
+          "ms": 0.11458294466137886,
+          "response_bytes": 1064
+        },
+        {
+          "method": "query",
+          "ms": 2.878790721297264,
+          "response_bytes": 2384
+        },
+        {
+          "method": "inspect",
+          "ms": 0.12204190716147423,
+          "response_bytes": 1123
+        },
+        {
+          "method": "read",
+          "ms": 0.15787500888109207,
+          "response_bytes": 1093
+        },
+        {
+          "method": "inspect",
+          "ms": 0.08612498641014099,
+          "response_bytes": 1015
+        },
+        {
+          "method": "inspect",
+          "ms": 0.13470835983753204,
+          "response_bytes": 1208
+        },
+        {
+          "method": "read",
+          "ms": 0.6653331220149994,
+          "response_bytes": 1639
+        },
+        {
+          "method": "inspect",
+          "ms": 0.0966251827776432,
+          "response_bytes": 1177
+        },
+        {
+          "method": "inspect",
+          "ms": 0.22070808336138725,
+          "response_bytes": 5263
+        },
+        {
+          "method": "inspect",
+          "ms": 0.09537488222122192,
+          "response_bytes": 1001
+        },
+        {
+          "method": "query",
+          "ms": 42.76687512174249,
+          "response_bytes": 2827
+        },
+        {
+          "method": "inspect",
+          "ms": 0.16345782205462456,
+          "response_bytes": 1307
+        },
+        {
+          "method": "export",
+          "ms": 59.10795787349343,
+          "response_bytes": 1394
+        },
+        {
+          "method": "export",
+          "ms": 26.45670808851719,
+          "response_bytes": 1391
+        },
+        {
+          "method": "export",
+          "ms": 17.240041866898537,
+          "response_bytes": 1378
+        },
+        {
+          "method": "doctor",
+          "ms": 17.20816595479846,
+          "response_bytes": 3443
+        },
+        {
+          "method": "open",
+          "ms": 0.6647082045674324,
+          "response_bytes": 750
+        },
+        {
+          "method": "snapshot",
+          "ms": 26.589750312268734,
+          "response_bytes": 1533
+        },
+        {
+          "method": "inspect",
+          "ms": 0.17037475481629372,
+          "response_bytes": 1386
+        },
+        {
+          "method": "query",
+          "ms": 2.5032497942447662,
+          "response_bytes": 2316
+        },
+        {
+          "method": "open",
+          "ms": 0.41070906445384026,
+          "response_bytes": 806
+        },
+        {
+          "method": "snapshot",
+          "ms": 40.465416852384806,
+          "response_bytes": 1544
+        },
+        {
+          "method": "inspect",
+          "ms": 0.14854175969958305,
+          "response_bytes": 1824
+        },
+        {
+          "method": "query",
+          "ms": 2.9892083257436752,
+          "response_bytes": 2328
+        },
+        {
+          "method": "open",
+          "ms": 0.573666300624609,
+          "response_bytes": 905
+        },
+        {
+          "method": "snapshot",
+          "ms": 243.83391719311476,
+          "response_bytes": 1544
+        },
+        {
+          "method": "inspect",
+          "ms": 0.5718753673136234,
+          "response_bytes": 8000
+        },
+        {
+          "method": "query",
+          "ms": 11.840083170682192,
+          "response_bytes": 2340
+        },
+        {
+          "method": "query",
+          "ms": 2.9427087865769863,
+          "response_bytes": 2386
+        },
+        {
+          "method": "inspect",
+          "ms": 0.37620821967720985,
+          "response_bytes": 8000
+        },
+        {
+          "method": "query",
+          "ms": 1.0348749347031116,
+          "response_bytes": 728
+        },
+        {
+          "method": "control",
+          "ms": 42.70458314567804,
+          "response_bytes": 1239
+        },
+        {
+          "method": "inspect",
+          "ms": 0.18504122272133827,
+          "response_bytes": 1208
+        },
+        {
+          "method": "query",
+          "ms": 0.5671251565217972,
+          "response_bytes": 728
+        },
+        {
+          "method": "control",
+          "ms": 3.0140001326799393,
+          "response_bytes": 1222
+        },
+        {
+          "method": "inspect",
+          "ms": 0.1849583350121975,
+          "response_bytes": 1123
+        },
+        {
+          "method": "query",
+          "ms": 2.2830418311059475,
+          "response_bytes": 2355
+        }
+      ],
+      "call_count": 49,
+      "response_bytes": 99862,
+      "package_bytes": 30705231,
+      "package_nodes": 3,
+      "independent_oracle_passed": true
+    }
+  ],
+  "summary": {
+    "total_ms": 863.7579577043653,
+    "snapshot_ms": 157.03624999150634,
+    "before_ms": 31.99433395639062,
+    "after_ms": 32.94641710817814,
+    "diff_ms": 35.62679188326001,
+    "check_ms": 4.731332883238792,
+    "summary_ms": 2.8086253441870213,
+    "pack_ms": 159.06408289447427,
+    "offline_verify_ms": 12.343249749392271,
+    "import_ms": 335.4859999381006,
+    "followup_ms": 2.5231661275029182,
+    "rerun_ms": 47.82237485051155,
+    "call_count": 49,
+    "response_bytes": 99876,
+    "package_bytes": 30705227
+  },
+  "limitations": [
+    "Single machine; serial trials; OS cache not flushed; no external model or adoption evidence.",
+    "Diff performs repeated full native scans; samples bound output, not scan cost.",
+    "Package import includes checksum verification, a private streamed copy, native snapshot and schema/count validation.",
+    "Workspaces, complete failures/results and output packages pay for durability; no task-speed comparison with bare SQL is claimed."
+  ]
+}
