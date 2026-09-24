@@ -343,7 +343,7 @@ mod tests {
                 child,
                 input,
                 lines,
-                token: "worker_test".into(),
+                token: rowtrail_contracts::id("worker"),
                 uses: 0,
             });
             run_job_with_recovery(&db, &spec, &mut worker).await;
@@ -435,7 +435,7 @@ mod tests {
             child,
             input,
             lines,
-            token: "worker_test".into(),
+            token: rowtrail_contracts::id("worker"),
             uses: 0,
         });
         run_job_with_recovery(&db, &spec, &mut worker).await;
